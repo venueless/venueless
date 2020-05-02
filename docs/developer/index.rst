@@ -7,4 +7,5 @@ Welcome to our developer documentation! Here, we document everything around deve
    :maxdepth: 2
    :caption: Contents:
 
+   setup
    api/index
