@@ -5,8 +5,7 @@ import jwt
 from venueless.core.services.world import get_world
 
 
-async def decode_token(token, world_id):
-    world = await get_world(world_id)
+def _decode_token(token, world):
     for jwt_config in world.config["JWT_secrets"]:
         secret = jwt_config["secret"]
         audience = jwt_config["audience"]
@@ -15,3 +14,8 @@ async def decode_token(token, world_id):
             return jwt.decode(
                 token, secret, algorithms=["HS256"], audience=audience, issuer=issuer
             )
+
+
+async def decode_token(token, world_id):
+    world = await get_world(world_id)
+    return _decode_token(token, world)

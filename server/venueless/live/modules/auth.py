@@ -1,7 +1,5 @@
 import logging
 
-from channels.db import database_sync_to_async
-
 from venueless.core.serializers.auth import PublicUserSerializer
 from venueless.core.services.chat import ChatService
 from venueless.core.services.user import get_public_user, get_user, update_user
@@ -26,7 +24,6 @@ class AuthModule:
                 return
             user = await get_user(self.world, with_token=token, serialize=False)
         self.consumer.user = PublicUserSerializer().to_representation(user)
-        await database_sync_to_async(self.consumer.scope["session"].save)()
         await self.consumer.send_json(
             [
                 "authenticated",
