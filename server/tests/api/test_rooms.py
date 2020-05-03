@@ -1,5 +1,12 @@
+import uuid
+from contextlib import asynccontextmanager
+
 import pytest
+from asgiref.sync import sync_to_async
+from channels.testing import WebsocketCommunicator
 from tests.api.utils import get_token_header
+
+from venueless.routing import application
 
 
 @pytest.mark.django_db
@@ -107,3 +114,38 @@ def test_room_create(client, world):
     assert r.status_code == 201
     assert world.rooms.last().name == "Forum"
     assert str(world.rooms.last().id) == r.data["id"]
+
+
+@asynccontextmanager
+async def world_communicator(client_id=None, named=True):
+    communicator = WebsocketCommunicator(application, "/ws/world/sample/")
+    await communicator.connect()
+    await communicator.send_json_to(
+        ["authenticate", {"client_id": client_id or str(uuid.uuid4())}]
+    )
+    response = await communicator.receive_json_from()
+    assert response[0] == "authenticated", response
+    communicator.context = response[1]
+    assert "world.config" in response[1], response
+    try:
+        yield communicator
+    finally:
+        await communicator.disconnect()
+
+
+@pytest.mark.asyncio
+@pytest.mark.django_db
+@pytest.mark.parametrize("action", ("join", "subscribe"))
+async def test_push_world_update(client, action, world):
+    async with world_communicator() as c:
+        r = await sync_to_async(client.get)(
+            "/api/v1/worlds/sample/rooms/", HTTP_AUTHORIZATION=get_token_header(world),
+        )
+        rid = r.data["results"][0]["id"]
+        r = await sync_to_async(client.patch)(
+            "/api/v1/worlds/sample/rooms/{}/".format(str(rid)),
+            {"name": "Forum"},
+            HTTP_AUTHORIZATION=get_token_header(world),
+        )
+        w = await c.receive_json_from()
+        print(w)
