@@ -41,6 +41,9 @@ class AuthModule:
         await self.consumer.channel_layer.group_add(
             f"user.{self.consumer.user['id']}", self.consumer.channel_name
         )
+        await self.consumer.channel_layer.group_add(
+            f"world.{self.world}", self.consumer.channel_name
+        )
 
     async def update(self):
         new_data = await update_user(
@@ -77,4 +80,7 @@ class AuthModule:
         if self.consumer.user:
             await self.consumer.channel_layer.group_discard(
                 f"user.{self.consumer.user['id']}", self.consumer.channel_name
+            )
+            await self.consumer.channel_layer.group_discard(
+                f"world.{self.world}", self.consumer.channel_name
             )

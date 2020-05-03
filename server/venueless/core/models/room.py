@@ -18,4 +18,4 @@ class Room(models.Model):
     import_id = models.CharField(max_length=100, null=True, blank=True)
 
     class Meta:
-        ordering = ("import_id", "name")
+        ordering = ("sorting_priority", "name")
