@@ -82,13 +82,15 @@ def test_room_update(client, world):
 
     r = client.patch(
         "/api/v1/worlds/sample/rooms/{}/".format(str(rid)),
-        {"name": "Forum"},
+        dataß={"name": "Forum"},
+        format="json",
         HTTP_AUTHORIZATION=get_token_header(world),
     )
     assert r.status_code == 403
     r = client.patch(
         "/api/v1/worlds/sample/rooms/{}/".format(str(rid)),
-        {"name": "Forum",},
+        data={"name": "Forum",},
+        format="json",
         HTTP_AUTHORIZATION=get_token_header(world, ["admin", "api", "foobartrait"]),
     )
     assert r.status_code == 200
@@ -102,18 +104,39 @@ def test_room_create(client, world):
 
     r = client.post(
         "/api/v1/worlds/sample/rooms/",
-        {"name": "Forum", "sorting_priority": 100,},
+        data={"name": "Forum", "sorting_priority": 100,},
+        format="json",
         HTTP_AUTHORIZATION=get_token_header(world),
     )
     assert r.status_code == 403
     r = client.post(
         "/api/v1/worlds/sample/rooms/",
-        {"name": "Forum", "sorting_priority": 100,},
+        data={
+            "name": "Forum",
+            "sorting_priority": 100,
+            "module_config": [{"type": "unknown"}],
+        },
+        format="json",
         HTTP_AUTHORIZATION=get_token_header(world, ["admin", "api", "foobartrait"]),
     )
     assert r.status_code == 201
     assert world.rooms.last().name == "Forum"
     assert str(world.rooms.last().id) == r.data["id"]
+
+    r = client.post(
+        "/api/v1/worlds/sample/rooms/",
+        format="json",
+        data={
+            "name": "Forum",
+            "sorting_priority": 102,
+            "module_config": [{"type": "chat.native"}],
+        },
+        HTTP_AUTHORIZATION=get_token_header(world, ["admin", "api", "foobartrait"]),
+    )
+    assert r.status_code == 201
+    assert world.rooms.last().name == "Forum"
+    assert str(world.rooms.last().id) == r.data["id"]
+    assert world.rooms.last().channel
 
 
 @asynccontextmanager
@@ -142,10 +165,11 @@ async def test_push_world_update(client, action, world):
             "/api/v1/worlds/sample/rooms/", HTTP_AUTHORIZATION=get_token_header(world),
         )
         rid = r.data["results"][0]["id"]
-        r = await sync_to_async(client.patch)(
+        await sync_to_async(client.patch)(
             "/api/v1/worlds/sample/rooms/{}/".format(str(rid)),
-            {"name": "Forum"},
+            format="json",
+            data={"name": "Forum"},
             HTTP_AUTHORIZATION=get_token_header(world),
         )
         w = await c.receive_json_from()
-        print(w)
+        assert w[0] == "world.updated"

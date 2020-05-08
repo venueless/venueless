@@ -4,7 +4,6 @@ from rest_framework.authentication import get_authorization_header
 
 from venueless.core.models import Room, World
 from venueless.core.services.world import has_permission
-from venueless.core.utils.jwt import _decode_token
 
 
 class WorldTokenAuthentication(authentication.BaseAuthentication):
@@ -41,7 +40,7 @@ class WorldTokenAuthentication(authentication.BaseAuthentication):
 
     def authenticate_credentials(self, key, world):
         try:
-            token = _decode_token(key, world)
+            token = world.decode_token(key)
             if not token:
                 raise exceptions.AuthenticationFailed("Invalid token.")
         except:

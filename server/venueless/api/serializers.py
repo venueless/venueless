@@ -6,6 +6,11 @@ from ..core.models import Room
 
 
 class RoomSerializer(serializers.ModelSerializer):
+    module_config = serializers.ListField(
+        child=serializers.DictField(), required=False, default=[]
+    )
+    permission_config = serializers.DictField(required=False, default={})
+
     class Meta:
         model = Room
         fields = [
@@ -20,6 +25,9 @@ class RoomSerializer(serializers.ModelSerializer):
 
 
 class WorldSerializer(serializers.ModelSerializer):
+    config = serializers.DictField()
+    permission_config = serializers.DictField()
+
     class Meta:
         model = World
         fields = [
