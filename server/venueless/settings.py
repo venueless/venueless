@@ -135,20 +135,12 @@ else:
     ALLOWED_HOSTS = [urlparse(SITE_URL).netloc]
 
 if os.getenv("VENUELESS_COOKIE_DOMAIN", ""):
-    # SESSION_COOKIE_DOMAIN = os.getenv("VENUELESS_COOKIE_DOMAIN", "")
     CSRF_COOKIE_DOMAIN = os.getenv("VENUELESS_COOKIE_DOMAIN", "")
 
-# SESSION_COOKIE_SECURE = (
-#     os.getenv("VENUELESS_HTTPS", "True" if SITE_URL.startswith("https:") else "False")
-#     == "True"
-# )
-
 CACHES = {"default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}}
-# SESSION_ENGINE = "django.contrib.sessions.backends.db"
 
 INSTALLED_APPS = [
     "django.contrib.contenttypes",
-    # "django.contrib.sessions",
     "channels",
     "rest_framework",
     "venueless.core.CoreConfig",
@@ -166,7 +158,6 @@ except ImportError:
 MIDDLEWARE = [
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.security.SecurityMiddleware",
-    # "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -226,9 +217,7 @@ LANGUAGES = [
 
 LOCALE_PATHS = (os.path.join(os.path.dirname(__file__), "locale"),)
 
-# SESSION_COOKIE_NAME = "venueless_session"
 CSRF_COOKIE_NAME = "venueless_csrftoken"
-SESSION_COOKIE_HTTPONLY = True
 
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
 
