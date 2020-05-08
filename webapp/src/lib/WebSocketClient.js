@@ -23,6 +23,7 @@ class WebSocketClient extends EventEmitter {
 		}
 		this._config = Object.assign(defaultConfig, config)
 		this._url = url
+		this._reconnect = true
 	}
 
 	connect () {
@@ -78,7 +79,7 @@ class WebSocketClient extends EventEmitter {
 		this._socket.addEventListener('close', (event) => {
 			this.socketState = 'closed'
 			this.emit('closed')
-			if (!this._normalClose) {
+			if (!this._normalClose && this._reconnect) {
 				setTimeout(() => {
 					this.emit('reconnecting')
 					this._createSocket()
@@ -139,6 +140,7 @@ class WebSocketClient extends EventEmitter {
 			error: this._handleError.bind(this),
 			success: this._handleCallSuccess.bind(this),
 			pong: this._handlePong.bind(this),
+			'connection.reload': this._handleReload.bind(this),
 			authenticated: this._handleJoined.bind(this)
 		}
 		if (actionHandlers[message[0]] === undefined) {
@@ -186,6 +188,11 @@ class WebSocketClient extends EventEmitter {
 				req.deferred.resolve(message[2])
 			}
 		}
+	}
+
+	_handleReload (message) {
+		this._reconnect = false;
+		location.reload()
 	}
 
 	_handlePong (message) {
