@@ -30,7 +30,6 @@
     "world.announce": ["admin"],
     "room.create": ["admin"],
     "room.announce": ["admin"],
-    "room.inspect": ["admin"],
     "room.update": ["admin"],
     "room.delete": ["admin"],
     "chat.moderate": ["admin"]
