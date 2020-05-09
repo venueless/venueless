@@ -88,6 +88,9 @@ class MainConsumer(AsyncJsonWebsocketConsumer):
         namespace = content[0].split(".")[0]
         component = self.components.get(namespace)
         if component:
+            if component.interactive and self.user["moderation_state"] == "silenced":
+                await self.send_error("auth.silenced")
+                return
             try:
                 await component.dispatch_command(self, content)
             except ConsumerException as e:

@@ -4,6 +4,8 @@ from venueless.live.exceptions import ConsumerException
 
 
 class BBBModule:
+    interactive = True
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.actions = {

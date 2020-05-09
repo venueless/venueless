@@ -23,6 +23,9 @@ class AuthModule:
                 await self.consumer.send_error(code="auth.invalid_token")
                 return
             user = await get_user(self.world, with_token=token, serialize=False)
+        if user.is_banned:
+            await self.consumer.send_error(code="auth.user_banned")
+            return
         self.consumer.user = user.serialize_public()
         await self.consumer.send_json(
             [
@@ -78,7 +81,7 @@ class AuthModule:
 
     async def fetch(self, id):
         user = await get_public_user(self.world, id,)
-        if user:
+        if user and not user.is_banned:
             await self.consumer.send_success(user)
         else:
             await self.consumer.send_error(code="user.not_found")

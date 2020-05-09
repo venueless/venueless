@@ -11,6 +11,8 @@ logger = logging.getLogger(__name__)
 
 
 class ChatModule:
+    interactive = True
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.channel_id = None

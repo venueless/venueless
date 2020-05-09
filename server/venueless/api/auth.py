@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import authentication, exceptions, permissions
 from rest_framework.authentication import get_authorization_header
 
-from venueless.core.models import Room, World
+from venueless.core.models import Room, User, World
 
 
 class WorldTokenAuthentication(authentication.BaseAuthentication):
@@ -35,6 +35,12 @@ class WorldTokenAuthentication(authentication.BaseAuthentication):
 
         world_id = request.resolver_match.kwargs["world_id"]
         request.world = get_object_or_404(World, id=world_id)
+        if "uid" in token and User.objects.filter(
+            world_id=world_id,
+            token_id=token["uid"],
+            moderation_state=User.ModerationState.BANNED,
+        ):
+            raise exceptions.AuthenticationFailed("User is banned.")
         return self.authenticate_credentials(token, request.world)
 
     def authenticate_credentials(self, key, world):
