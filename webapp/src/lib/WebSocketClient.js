@@ -23,7 +23,6 @@ class WebSocketClient extends EventEmitter {
 		}
 		this._config = Object.assign(defaultConfig, config)
 		this._url = url
-		this._reconnect = true
 	}
 
 	connect () {
@@ -79,7 +78,7 @@ class WebSocketClient extends EventEmitter {
 		this._socket.addEventListener('close', (event) => {
 			this.socketState = 'closed'
 			this.emit('closed')
-			if (!this._normalClose && this._reconnect) {
+			if (!this._normalClose) {
 				setTimeout(() => {
 					this.emit('reconnecting')
 					this._createSocket()
@@ -191,7 +190,7 @@ class WebSocketClient extends EventEmitter {
 	}
 
 	_handleReload (message) {
-		this._reconnect = false;
+		this.close()
 		location.reload()
 	}
 

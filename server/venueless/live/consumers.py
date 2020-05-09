@@ -99,7 +99,7 @@ class MainConsumer(AsyncJsonWebsocketConsumer):
         if message["type"] == "connection.drop":
             await self.close()
         elif message["type"] == "connection.reload":
-            await self.send_json(["connection.reload", {}], close=True)
+            await self.send_json(["connection.reload", {}])
         elif message["type"] == "user.broadcast":
             if self.socket_id != message["socket"]:
                 await self.send_json([message["event_type"], message["data"]])
