@@ -18,9 +18,9 @@ class Command(BaseCommand):
 
         subparsers.add_parser("list")
         c_drop = subparsers.add_parser("drop")
-        c_drop.add_argument("label", nargs="+", type=str)
+        c_drop.add_argument("label", nargs="*", type=str)
         c_reload = subparsers.add_parser("force_reload")
-        c_reload.add_argument("label", nargs="+", type=str)
+        c_reload.add_argument("label", nargs="*", type=str)
 
     def handle(self, *args, **options):
         if options["subcommand"] == "list":
@@ -38,10 +38,11 @@ class Command(BaseCommand):
 
     def _drop(self, *args, **options):
         rc = async_to_sync(get_connections)()
+        filters = options["label"] or ("*",)
 
         conns = []
         for k in rc.keys():
-            for l in options["label"]:
+            for l in filters:
                 if fnmatch.fnmatch(k, l):
                     conns.append(k)
 
@@ -52,10 +53,11 @@ class Command(BaseCommand):
 
     def _force_reload(self, *args, **options):
         rc = async_to_sync(get_connections)()
+        filters = options["label"] or ("*",)
 
         conns = []
         for k in rc.keys():
-            for l in options["label"]:
+            for l in filters:
                 if fnmatch.fnmatch(k, l):
                     conns.append(k)
 
