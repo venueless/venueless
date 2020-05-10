@@ -25,7 +25,9 @@ The body of the room is structured like this:
 The content of ``modules`` can be any list of objects just like in the :ref:`world-config`,
 though only the presence of ``{"type": "chat.native"}`` will currently be processed by the server.
 
-All users will receive a complete ``world.updated`` message. The requesting user will receive a success response in the form
+All users will receive a complete ``room.create`` message. The payload is the same as a room object in the world config.
+
+Additionally, the requesting user will receive a success response in the form
 
 .. code-block:: json
 

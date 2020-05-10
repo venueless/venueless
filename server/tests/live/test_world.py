@@ -56,10 +56,7 @@ async def test_create_rooms(world, can_create_rooms, with_channel):
             assert response[-1]["room"]
             assert bool(response[-1]["channel"]) is with_channel
             second_response = await c.receive_json_from()
-            assert second_response[0] == "world.updated"
-            assert any(
-                room["id"] == response[-1]["room"]
-                for room in second_response[-1]["rooms"]
-            )
+            assert second_response[0] == "room.create"
+            assert response[-1]["room"] == second_response[-1]["id"]
         else:
             assert response[-1] == {"code": "unauthorized"}
