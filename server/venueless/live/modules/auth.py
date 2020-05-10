@@ -23,6 +23,9 @@ class AuthModule:
                 await self.consumer.send_error(code="auth.invalid_token")
                 return
             user = await get_user(self.world, with_token=token, serialize=False)
+        if user.is_banned:
+            await self.consumer.send_error(code="auth.user_banned")
+            return
         self.consumer.user = user
         await self.consumer.send_json(
             [

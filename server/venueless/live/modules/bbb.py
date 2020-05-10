@@ -4,6 +4,8 @@ from venueless.live.exceptions import ConsumerException
 
 
 class BBBModule:
+    interactive = True
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.actions = {
@@ -20,11 +22,16 @@ class BBBModule:
 
     async def url(self):
         room = await self.get_room()
-        # TODO: Check permissions, assign moderator permission
         if not self.consumer.user.profile.get("display_name"):
             raise ConsumerException("bbb.join.missing_profile")
         url = await self.service.get_join_url(
-            room, self.consumer.user.profile.get("display_name"), moderator=False,
+            room,
+            self.consumer.user.profile.get("display_name"),
+            moderator=room.world.has_permission(
+                "bbb.moderate",
+                set(self.consumer.user.traits),
+                extra_config=room.permission_config,
+            ),
         )
         if not url:
             raise ConsumerException("bbb.failed")

@@ -33,7 +33,7 @@ class ChatEvent(models.Model):
     )
     content = JSONField()
 
-    def serialize_public(self):
+    def serialize_public(self, update=False):
         return {
             "event_id": self.id,
             "channel": str(self.channel_id),
