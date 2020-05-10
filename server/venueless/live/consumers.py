@@ -15,6 +15,7 @@ from venueless.live.exceptions import ConsumerException
 from .modules.auth import AuthModule
 from .modules.bbb import BBBModule
 from .modules.chat import ChatModule
+from .modules.world import WorldModule
 
 
 class MainConsumer(AsyncJsonWebsocketConsumer):
@@ -24,6 +25,7 @@ class MainConsumer(AsyncJsonWebsocketConsumer):
             "chat": ChatModule(),
             "user": AuthModule(),
             "bbb": BBBModule(),
+            "room": WorldModule(),
         }
         self.user = None
         self.socket_id = str(uuid.uuid4())
@@ -61,7 +63,7 @@ class MainConsumer(AsyncJsonWebsocketConsumer):
         Broadcast a message to other clients of the same user.
         """
         await self.channel_layer.group_send(
-            GROUP_USER.format(id=self.user["id"]),
+            GROUP_USER.format(id=self.user.id),
             {
                 "type": "user.broadcast",
                 "event_type": event_type,
@@ -88,7 +90,7 @@ class MainConsumer(AsyncJsonWebsocketConsumer):
         namespace = content[0].split(".")[0]
         component = self.components.get(namespace)
         if component:
-            if component.interactive and self.user["moderation_state"] == "silenced":
+            if getattr(component, "interactive", False) and self.user.is_silenced:
                 await self.send_error("auth.silenced")
                 return
             try:

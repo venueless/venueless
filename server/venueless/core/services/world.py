@@ -5,7 +5,7 @@ from channels.db import database_sync_to_async
 from channels.layers import get_channel_layer
 from django.core.exceptions import ValidationError
 
-from venueless.core.models import Room, World
+from venueless.core.models import Channel, Room, World
 
 
 @database_sync_to_async
@@ -102,3 +102,29 @@ async def get_world_config_for_user(user):
             room_config["modules"].append(module_config)
         result["rooms"].append(room_config)
     return result
+
+
+@database_sync_to_async
+def _create_room(data, with_channel=False):
+    room = Room.objects.create(**data)
+    channel = None
+    if with_channel:
+        channel = Channel.objects.create(world_id=room.world_id, room=room)
+    return room, channel
+
+
+async def create_room(world, data):
+    # TODO input validation
+    room, channel = await _create_room(
+        {
+            "world_id": world.id,
+            "name": data["name"],
+            "module_config": data.get("modules", []),
+            # TODO sorting_priority
+        },
+        with_channel=any(
+            d.get("type") == "chat.native" for d in data.get("modules", [])
+        ),
+    )
+    await get_channel_layer().group_send(f"world.{world.id}", {"type": "world.update",})
+    return {"room": str(room.id), "channel": str(channel.id) if channel else None}
