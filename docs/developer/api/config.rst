@@ -1,3 +1,5 @@
+.. _world-config:
+
 World configuration
 ===================
 
@@ -74,6 +76,8 @@ The body of the configuration is structured like this, filtered to user visibili
         ]
     }
 
+
+.. _permissions:
 
 Permissions
 -----------
