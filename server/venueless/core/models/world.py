@@ -19,6 +19,7 @@ def default_permissions():
         "room.update": ["admin"],
         "room.delete": ["admin"],
         "chat.moderate": ["admin"],
+        "bbb.moderate": ["admin"],
     }
 
 
