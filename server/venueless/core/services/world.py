@@ -10,7 +10,7 @@ from venueless.core.models import Room, World
 
 @database_sync_to_async
 def _get_world(world_id):
-    return World.objects.filter(id=world_id).first()
+    return World.objects.filter(id=world_id).prefetch_related("announcements").first()
 
 
 async def get_world(world_id):
@@ -68,6 +68,11 @@ async def get_world_config_for_user(user):
             "pretalx": world.config.get("pretalx", {}),
         },
         "rooms": [],
+        "announcements": [
+            announcement.serialize()
+            for announcement in world.announcements.all()
+            if announcement.still_visible
+        ],
     }
 
     rules = world.permission_config or {}

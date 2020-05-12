@@ -4,6 +4,7 @@ from contextlib import suppress
 import jwt
 from django.contrib.postgres.fields import JSONField
 from django.db import models
+from django.utils.timezone import now
 
 
 def default_permissions():
@@ -51,3 +52,25 @@ class World(models.Model):
         return permission in permission_config and all(
             trait in traits for trait in permission_config[permission]
         )
+
+
+class Announcement(models.Model):
+    world = models.ForeignKey(to=World, related_name="announcements")
+    timestamp = models.DateTimeField(auto_now_add=True)
+    content = JSONField()
+
+    show_until = models.DateTimeField(null=True, blank=True)
+    limit_rooms = models.ManyToManyField(to="Room", related_name="announcements")
+
+    @property
+    def still_visible(self):
+        return not self.show_until or now() < show_until
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "timestamp": self.timestamp.isoformat(),
+            "content": self.content,
+            "show_until": self.show_until.isoformat() if self.show_until else None,
+            "limit_rooms": [str(room.id) for room in self.limit_rooms.all()],
+        }

@@ -71,6 +71,15 @@ The body of the configuration is structured like this, filtered to user visibili
                     }
                 ]
             }
+        ],
+        "announcements": [
+            {
+                "id": 1,
+                "timestamp": "2020-05-12T12:00:00Z",
+                "content": {"body": "text"},
+                "show_until": null,
+                "limit_rooms": ["a-room-id"]
+            }
         ]
     }
 
@@ -103,3 +112,14 @@ a token needs to have, like this:
             "room.update": ["trait2"],
         }
     }
+
+
+Announcements
+-------------
+
+Announcements can be sent by all users with ``world.announce`` permissions. They are included in the initial ``world`` configuration.
+If a new announcement is made, it is sent in a ``world.announce`` message, of the form:
+
+    <= ["world.announce", { "action": "create", "announcement": { ... } }]
+
+``action`` can be "create" or "update" or "delete". In case of announcement deletion, only the ID is included in the announcement object.
