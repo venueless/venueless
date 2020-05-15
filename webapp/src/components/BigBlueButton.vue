@@ -23,21 +23,30 @@ export default {
 		}
 	},
 	computed: {},
-	async created () {
-		try {
-			const {url} = await api.call('bbb.url', {room: this.room.id})
-			this.url = url
-		} catch (error) {
-			// TODO handle bbb.join.missing_profile
-			this.error = error
-			console.log(error)
+	watch: {
+		async room () {
+			await this.start()
 		}
+	},
+	async created () {
+		await this.start()
 	},
 	mounted () {
 		this.$nextTick(() => {
 		})
 	},
-	methods: {}
+	methods: {
+		async start () {
+			try {
+				const {url} = await api.call('bbb.url', {room: this.room.id})
+				this.url = url
+			} catch (error) {
+				// TODO handle bbb.join.missing_profile
+				this.error = error
+				console.log(error)
+			}
+		}
+	}
 }
 </script>
 <style lang="stylus">
