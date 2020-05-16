@@ -47,7 +47,7 @@
       "world:view",
       "room:view",
       "room:chat.read",
-      "room:bbb.join",
+      "room:chat.join",
       "room:chat.send",
       "room:bbb.join",
       "room:update",
@@ -58,7 +58,7 @@
       "world:view",
       "room:view",
       "room:chat.read",
-      "room:bbb.join",
+      "room:chat.join",
       "room:chat.send",
       "room:bbb.join",
       "room:bbb.moderate"
@@ -67,7 +67,7 @@
       "world:view",
       "room:view",
       "room:chat.read",
-      "room:bbb.join",
+      "room:chat.join",
       "room:chat.send",
       "room:bbb.join",
       "room:bbb.moderate",
@@ -79,12 +79,13 @@
       "world:view",
       "room:view",
       "room:chat.read",
-      "room:bbb.join",
+      "room:chat.join",
       "room:chat.send",
       "room:bbb.join",
       "room:bbb.moderate",
       "room:chat.moderate",
       "room:announce",
+      "world:rooms.create",
       "world:announce",
       "world:update",
       "room:delete",
@@ -94,12 +95,13 @@
       "world:view",
       "room:view",
       "room:chat.read",
-      "room:bbb.join",
+      "room:chat.join",
       "room:chat.send",
       "room:bbb.join",
       "room:bbb.moderate",
       "room:chat.moderate",
       "room:announce",
+      "world:rooms.create",
       "world:announce",
       "world:update",
       "room:delete",
@@ -132,7 +134,7 @@
       "admin"
     ],
     "apiuser": [
-      "apiuser"
+      "api"
     ]
   },
   "rooms": [

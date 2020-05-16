@@ -72,7 +72,7 @@ class WorldPermissions(permissions.BasePermission):
             return False
         if request.method in ("PATCH", "PUT"):
             return request.world.has_permission_implicit(
-                traits=traits, permissions=Permission.WORLD_UPDATE
+                traits=traits, permission=Permission.WORLD_UPDATE
             )
         elif request.method in ("HEAD", "GET", "OPTIONS"):
             return True
@@ -84,7 +84,7 @@ class RoomPermissions(permissions.BasePermission):
         if request.method == "POST":
             traits = request.auth.get("traits")
             return request.world.has_permission_implicit(
-                traits=traits, permissions=Permission.WORLD_ROOMS_CREATE
+                traits=traits, permission=Permission.WORLD_ROOMS_CREATE
             )
         else:
             return True

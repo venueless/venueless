@@ -30,11 +30,11 @@ def default_roles():
         Permission.ROOM_ANNOUNCE,
         Permission.WORLD_ANNOUNCE,
     ]
-    admin = moderator + [
-        Permission.WORLD_UPDATE,
-        Permission.ROOM_DELETE,
-        Permission.ROOM_UPDATE,
-    ]
+    admin = (
+        moderator
+        + room_creator
+        + [Permission.WORLD_UPDATE, Permission.ROOM_DELETE, Permission.ROOM_UPDATE,]
+    )
     apiuser = admin + [Permission.WORLD_API, Permission.WORLD_SECRETS]
     return {
         "attendee": attendee,

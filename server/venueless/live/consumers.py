@@ -107,7 +107,7 @@ class MainConsumer(AsyncJsonWebsocketConsumer):
             await self.send_json(["connection.reload", {}])
         elif message["type"] == "user.broadcast":
             if self.socket_id != message["socket"]:
-                await self.components["auth"].reload_user()
+                await self.components["user"].reload_user()
                 await self.send_json([message["event_type"], message["data"]])
         elif message["type"] in ("world.update", "room.create"):  # broadcast types
             await self.components["world"].dispatch_event(self, message)

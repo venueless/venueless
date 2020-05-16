@@ -120,7 +120,6 @@ class ChatModule:
 
     @room_action(module_required="chat.native")
     async def leave(self):
-        await self.get_room()
         await self._unsubscribe(clean_volatile_membership=False)
         await self._leave()
         await self.consumer.send_success()

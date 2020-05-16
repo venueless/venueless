@@ -62,7 +62,7 @@ async def test_wrong_room(chat_room):
         await c.send_json_to(["bbb.url", 123, {"room": str(chat_room.pk)}])
         response = await c.receive_json_from()
         assert response[0] == "error"
-        assert response[2]["code"] == "bbb.unknown"
+        assert response[2]["code"] == "room.unknown"
 
 
 @pytest.mark.asyncio

@@ -37,7 +37,9 @@ class WorldModule:
 
     async def push_world_update(self):
         world_config = await get_world_config_for_user(
-            await get_user(self.world, with_id=self.consumer.user.id, serialize=False)
+            await get_user(
+                self.world_id, with_id=self.consumer.user.id, serialize=False
+            )
         )
         await self.consumer.send_json(["world.updated", world_config])
 

@@ -69,7 +69,7 @@ def get_room_config(room, permissions):
         "name": room.name,
         "picture": room.picture.url if room.picture else None,
         "import_id": room.import_id,
-        "permissions": permissions,
+        "permissions": [p for p in permissions if not p.startswith("world:")],
         "modules": [],
     }
     for module in room.module_config:
@@ -91,8 +91,8 @@ async def get_world_config_for_user(user):
             "title": world.title,
             "about": world.about,
             "pretalx": world.config.get("pretalx", {}),
-            "permissions": permissions[world],
         },
+        "permissions": permissions[world],
         "rooms": [],
     }
 

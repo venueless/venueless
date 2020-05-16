@@ -26,6 +26,8 @@ def room_action(permission_required: Permission = None, module_required=None):
                 self.room = await get_room(
                     world=self.world, channel__id=self.channel_id
                 )
+            if not self.room:
+                raise ConsumerException("room.unknown", "Unknown room ID")
 
             if module_required is not None:
                 module_config = [
