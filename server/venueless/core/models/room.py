@@ -8,12 +8,18 @@ def empty_module_config():
     return []
 
 
+def default_grants():
+    return {
+        "viewer": [],
+    }
+
+
 class Room(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     world = models.ForeignKey(
         to="core.World", related_name="rooms", on_delete=models.PROTECT
     )
-    permission_config = JSONField(null=True, blank=True)
+    trait_grants = JSONField(null=True, blank=True, default=default_grants)
     module_config = JSONField(null=True, default=empty_module_config)
     name = models.CharField(max_length=300)
     description = models.TextField(null=True, blank=True)

@@ -6,6 +6,7 @@ from channels.layers import get_channel_layer
 from django.core.exceptions import ValidationError
 
 from venueless.core.models import Channel, Room, World
+from venueless.core.permissions import Permission
 
 
 @database_sync_to_async
@@ -62,26 +63,17 @@ async def notify_world_change(world_id):
     await get_channel_layer().group_send(f"world.{world_id}", {"type": "world.update",})
 
 
-def get_room_config(room, world, traits):
-    rules = world.permission_config or {}
-    room_rules = {**rules, **(room.permission_config or {})}
+def get_room_config(room, permissions):
     room_config = {
         "id": str(room.id),
         "name": room.name,
         "picture": room.picture.url if room.picture else None,
         "import_id": room.import_id,
-        "permissions": get_permissions_for_traits(
-            room_rules, traits, prefixes=["room"]
-        ),
+        "permissions": permissions,
         "modules": [],
     }
     for module in room.module_config:
         module_config = copy.deepcopy(module)
-        module_config["permissions"] = get_permissions_for_traits(
-            {**room_rules, **module_config.pop("permissions", {})},
-            traits,
-            prefixes=[module["type"], module["type"].split(".")[0]],
-        )
         if module["type"] == "call.bigbluebutton":
             module_config["config"] = {}
         elif module["type"] == "chat.native" and getattr(room, "channel", None):
@@ -91,26 +83,25 @@ def get_room_config(room, world, traits):
 
 
 async def get_world_config_for_user(user):
-    # TODO: Remove any rooms the user should not see
     world = await get_world_for_user(user)
+    permissions = await database_sync_to_async(world.get_all_permissions)(user)
     result = {
         "world": {
             "id": str(world.id),
             "title": world.title,
             "about": world.about,
             "pretalx": world.config.get("pretalx", {}),
+            "permissions": permissions[world],
         },
         "rooms": [],
     }
 
-    traits = set(user.traits)
-    rules = world.permission_config or {}
-    result["permissions"] = get_permissions_for_traits(
-        rules, traits, prefixes=["world", "room.create"]
-    )
     rooms = await get_rooms(world)
     for room in rooms:
-        result["rooms"].append(get_room_config(room, world, traits))
+        if Permission.ROOM_VIEW.value in (permissions[room] | permissions[world]):
+            result["rooms"].append(
+                get_room_config(room, permissions[world] | permissions[room])
+            )
     return result
 
 
@@ -149,6 +140,7 @@ async def create_room(world, data):
     return {"room": str(room.id), "channel": str(channel.id) if channel else None}
 
 
-async def get_room_config_for_user(room: str, world: str, user):
-    room = await get_room(id=room, world_id=world)
-    return get_room_config(room, room.world, traits=set(user.traits))
+async def get_room_config_for_user(room: str, world_id: str, user):
+    room = await get_room(id=room, world_id=world_id)
+    permissions = await database_sync_to_async(room.world.get_all_permissions)(user)
+    return get_room_config(room, permissions[room] | permissions[room.world])
