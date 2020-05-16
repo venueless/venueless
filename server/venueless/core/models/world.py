@@ -21,7 +21,7 @@ def default_roles():
     room_creator = [Permission.WORLD_ROOMS_CREATE]
     room_owner = participant + [
         Permission.ROOM_UPDATE,
-        Permission.ROOM_CHAT_INVITE,
+        Permission.ROOM_INVITE,
         Permission.ROOM_DELETE,
     ]
     speaker = participant + [Permission.ROOM_BBB_MODERATE]
@@ -132,9 +132,8 @@ class World(models.Model):
             ):
                 result[self].update(self.roles[role])
 
-        result[self].update(
-            [self.roles[r] for r in user.world_grants.values_list("role", flat=True)]
-        )
+        for grant in user.world_grants.all():
+            result[self].update(self.roles[grant.role])
 
         for room in self.rooms.all():
             for role, required_traits in room.trait_grants.items():

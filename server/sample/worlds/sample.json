@@ -51,7 +51,7 @@
       "room:chat.send",
       "room:bbb.join",
       "room:update",
-      "room:chat.invite",
+      "room:invite",
       "room:delete"
     ],
     "speaker": [

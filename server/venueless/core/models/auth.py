@@ -21,9 +21,9 @@ class User(models.Model):
         return {"id": str(self.id), "profile": self.profile}
 
     def get_role_grants(self, room=None):
-        roles = list(self.world_grants.values_list("role", flat=True))
+        roles = set(self.world_grants.values_list("role", flat=True))
         if room:
-            roles += list(
+            roles |= set(
                 self.room_grants.filter(room=room).values_list("role", flat=True)
             )
         return roles

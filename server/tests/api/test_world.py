@@ -28,6 +28,13 @@ def test_world_config_protect_secrets(client, world):
         HTTP_AUTHORIZATION=get_token_header(world, ["api", "foobartrait", "admin"]),
     )
     assert r.status_code == 200
+    world.roles["apiuser"] = ["world:api"]
+    world.save()
+    r = client.get(
+        "/api/v1/worlds/sample/",
+        HTTP_AUTHORIZATION=get_token_header(world, ["api", "admin", "foobartrait"]),
+    )
+    assert r.status_code == 403
 
 
 @pytest.mark.django_db
