@@ -4,7 +4,7 @@ from contextlib import suppress
 from venueless.core.permissions import Permission
 from venueless.core.services.chat import ChatService
 from venueless.core.services.user import get_public_user
-from venueless.core.services.world import get_world
+from venueless.core.services.world import get_room, get_world
 from venueless.live.channels import GROUP_CHAT
 from venueless.live.decorators import room_action
 from venueless.live.exceptions import ConsumerException
@@ -69,12 +69,21 @@ class ChatModule:
         if not self.consumer.user.profile.get("display_name"):
             raise ConsumerException("channel.join.missing_profile")
         reply = await self._subscribe()
+
+        volatile_config = self.module_config.get("volatile", False)
+        volatile_client = self.content[2].get("volatile", volatile_config)
+        if (
+            volatile_client != volatile_config
+            and await self.world.has_permission_async(
+                user=self.consumer.user,
+                room=self.room,
+                permission=Permission.ROOM_CHAT_MODERATE,
+            )
+        ):
+            volatile_config = volatile_client
+
         joined = await self.service.add_channel_user(
-            self.channel_id,
-            self.consumer.user.id,
-            volatile=self.content[2].get(
-                "volatile", self.module_config.get("volatile", False)
-            ),  # TODO: check if client is to override
+            self.channel_id, self.consumer.user.id, volatile=volatile_config
         )
         if joined:
             event = await self.service.create_event(
@@ -84,7 +93,7 @@ class ChatModule:
                     "membership": "join",
                     "user": await get_public_user(self.world_id, self.consumer.user.id),
                 },
-                sender=self.consumer.user.id,
+                sender=self.consumer.user,
             )
             await self.consumer.channel_layer.group_send(
                 GROUP_CHAT.format(channel=self.channel_id), event,
@@ -101,9 +110,9 @@ class ChatModule:
                 event_type="channel.member",
                 content={
                     "membership": "leave",
-                    "user": await get_public_user(self.world_id, self.consumer.user.id),
+                    "user": self.consumer.user.serialize_public(),
                 },
-                sender=self.consumer.user.id,
+                sender=self.consumer.user,
             ),
         )
         await self._broadcast_channel_list()
@@ -138,7 +147,6 @@ class ChatModule:
         events = await self.service.get_events(
             self.channel_id, before_id=before_id, count=count
         )
-        # TODO: Filter if user is allowed to see
         await self.consumer.send_success({"results": events})
 
     @room_action(
@@ -147,14 +155,20 @@ class ChatModule:
     async def send(self):
         content = self.content[2]["content"]
         event_type = self.content[2]["event_type"]
-        # TODO: Filter if user is allowed to send this type of message
-        # TODO: Check if user is acutlaly a member
-        event = await self.service.create_event(
-            channel=self.channel_id,
-            event_type=event_type,
-            content=content,
-            sender=self.consumer.user.id,
-        )
+        if event_type != "channel.message":
+            raise ConsumerException("chat.unsupported_event_type")
+        if content.get("type") != "text":
+            raise ConsumerException("chat.unsupported_content_type")
+
+        try:
+            event = await self.service.create_event(
+                channel=self.channel_id,
+                event_type=event_type,
+                content=content,
+                sender=self.consumer.user,
+            )
+        except ChatService.NotAChannelMember:
+            raise ConsumerException("chat.denied")
         await self.consumer.channel_layer.group_send(
             GROUP_CHAT.format(channel=self.channel_id), event
         )
@@ -163,7 +177,13 @@ class ChatModule:
         )
 
     async def publish_event(self):
-        # TODO: Filter if user is allowed to see
+        world = await get_world(self.world_id)
+        room = await get_room(world=world, channel__id=self.content["channel"])
+        if not await world.has_permission_async(
+            user=self.consumer.user, permission=Permission.ROOM_CHAT_READ, room=room
+        ):
+            print("no perm")
+            return
         await self.consumer.send_json(
             ["chat.event", {k: v for k, v in self.content.items() if k != "type"}]
         )

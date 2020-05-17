@@ -4,6 +4,7 @@ from contextlib import suppress
 from channels.db import database_sync_to_async
 from channels.layers import get_channel_layer
 from django.core.exceptions import ValidationError
+from django.db.models import Max
 
 from venueless.core.models import Channel, Room, World
 
@@ -23,7 +24,6 @@ def _get_rooms(world, user):
     qs = world.rooms.all().prefetch_related("channel")
     if user:
         qs = qs.with_permission(world=world, user=user)
-    print(qs.query)
     return list(qs)
 
 
@@ -108,15 +108,32 @@ async def get_world_config_for_user(user):
 
 
 @database_sync_to_async
-def _create_room(data, with_channel=False):
+def _create_room(data, with_channel=False, permission_preset="public", creator=None):
+    if "sorting_priority" not in data:
+        data["sorting_priority"] = (
+            Room.objects.filter(world_id=data["world_id"]).aggregate(
+                m=Max("sorting_priority")
+            )["m"]
+            or 0
+        ) + 1
+    if permission_preset == "public":
+        data["trait_grants"] = {
+            "viewer": [],
+            "participant": [],
+        }
+    else:
+        data["trait_grants"] = {}
+
     room = Room.objects.create(**data)
+    if creator:
+        room.role_grants.create(world=room.world, user=creator, role="room_owner")
     channel = None
     if with_channel:
         channel = Channel.objects.create(world_id=room.world_id, room=room)
     return room, channel
 
 
-async def create_room(world, data):
+async def create_room(world, data, creator):
     for m in data.get("modules", []):
         if m.get("type") != "chat.native":
             raise ValidationError(
@@ -130,8 +147,9 @@ async def create_room(world, data):
             "world_id": world.id,
             "name": data["name"],
             "module_config": data.get("modules", []),
-            # TODO sorting_priority
         },
+        permission_preset=data.get("permission_preset", "public"),
+        creator=creator,
         with_channel=any(
             d.get("type") == "chat.native" for d in data.get("modules", [])
         ),

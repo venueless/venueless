@@ -18,10 +18,13 @@ def default_grants():
 
 
 class RoomQuerySet(models.QuerySet):
-    def with_permission(self, *, user, world, permission=Permission.ROOM_VIEW):
+    def with_permission(
+        self, *, user=None, traits=None, world, permission=Permission.ROOM_VIEW
+    ):
         from .auth import RoomGrant, WorldGrant
 
-        if world.has_permission_implicit(traits=user.traits, permission=permission):
+        traits = traits or user.traits
+        if world.has_permission_implicit(traits=traits, permission=permission):
             # User has the permission globally, nothing to do
             return self.all()
 
@@ -36,20 +39,23 @@ class RoomQuerySet(models.QuerySet):
             # No role grants access, impossible
             return self.none()
 
-        sq_user_has_room_grant = RoomGrant.objects.filter(
-            user=user, world=world, room_id=OuterRef("pk"), role__in=roles
-        )
-        sq_user_has_world_grant = WorldGrant.objects.filter(
-            user=user, world=world, role__in=roles
-        )
-
-        qs = self.annotate(
-            user_has_room_grant=Exists(sq_user_has_room_grant),
-            user_has_world_grant=Exists(sq_user_has_world_grant),
-        )
+        if user:
+            sq_user_has_room_grant = RoomGrant.objects.filter(
+                user=user, world=world, room_id=OuterRef("pk"), role__in=roles
+            )
+            sq_user_has_world_grant = WorldGrant.objects.filter(
+                user=user, world=world, role__in=roles
+            )
+            qs = self.annotate(
+                user_has_room_grant=Exists(sq_user_has_room_grant),
+                user_has_world_grant=Exists(sq_user_has_world_grant),
+            )
+            requirements = Q(user_has_room_grant=True) | Q(user_has_world_grant=True)
+        else:
+            qs = self
+            requirements = Q()
 
         # Implicit role grants
-        requirements = Q(user_has_room_grant=True) | Q(user_has_world_grant=True)
         for role in roles:
             requirements |= Q(
                 Q(

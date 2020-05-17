@@ -28,11 +28,10 @@ class WorldModule:
     @require_world_permission(Permission.WORLD_ROOMS_CREATE)
     async def create_room(self):
         try:
-            room = await create_room(self.world, self.content[-1])
+            room = await create_room(self.world, self.content[-1], self.consumer.user)
         except ValidationError as e:
             await self.consumer.send_error(code="room.invalid", message=str(e))
         else:
-            # TODO room private? auto join, auto-assign roles?
             await self.consumer.send_success(room)
 
     async def push_world_update(self):
@@ -44,7 +43,11 @@ class WorldModule:
         await self.consumer.send_json(["world.updated", world_config])
 
     async def push_room_info(self):
-        # TODO: Filter if user can see room
+        world = await get_world(self.world_id)
+        if not await world.has_permission_async(
+            user=self.consumer.user, permission=Permission.ROOM_VIEW
+        ):
+            return
         await self.consumer.send_json(
             [
                 self.content["type"],
