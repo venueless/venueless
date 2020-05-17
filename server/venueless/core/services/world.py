@@ -6,7 +6,6 @@ from channels.layers import get_channel_layer
 from django.core.exceptions import ValidationError
 
 from venueless.core.models import Channel, Room, World
-from venueless.core.permissions import Permission
 
 
 @database_sync_to_async
@@ -20,12 +19,16 @@ async def get_world(world_id):
 
 
 @database_sync_to_async
-def _get_rooms(world):
-    return list(world.rooms.all().prefetch_related("channel"))
+def _get_rooms(world, user):
+    qs = world.rooms.all().prefetch_related("channel")
+    if user:
+        qs = qs.with_permission(world=world, user=user)
+    print(qs.query)
+    return list(qs)
 
 
-async def get_rooms(world):
-    rooms = await _get_rooms(world)
+async def get_rooms(world, user=None):
+    rooms = await _get_rooms(world, user)
     return rooms
 
 
@@ -96,12 +99,11 @@ async def get_world_config_for_user(user):
         "rooms": [],
     }
 
-    rooms = await get_rooms(world)
+    rooms = await get_rooms(world, user)
     for room in rooms:
-        if Permission.ROOM_VIEW.value in (permissions[room] | permissions[world]):
-            result["rooms"].append(
-                get_room_config(room, permissions[world] | permissions[room])
-            )
+        result["rooms"].append(
+            get_room_config(room, permissions[world] | permissions[room])
+        )
     return result
 
 
