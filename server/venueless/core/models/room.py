@@ -60,7 +60,7 @@ class RoomQuerySet(models.QuerySet):
             requirements |= Q(
                 Q(
                     **{
-                        f"trait_grants__has_key": role,
+                        "trait_grants__has_key": role,
                         f"trait_grants__{role}__contained_by": user.traits,
                     }
                 )
