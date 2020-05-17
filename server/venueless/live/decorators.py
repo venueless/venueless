@@ -43,16 +43,17 @@ def room_action(permission_required: Permission = None, module_required=None):
                     )
 
             if permission_required is not None:
-                if not getattr(self.consumer, "user", None):
+                if not getattr(self.consumer, "user", None):  # pragma: no cover
+                    # Just a precaution, should never be called since MainConsumer.receive_json already checks this
                     raise ConsumerException(
-                        "auth.unauthenticated", "No authentication provided."
+                        "protocol.unauthenticated", "No authentication provided."
                     )
                 if not await self.world.has_permission_async(
                     user=self.consumer.user,
                     permission=permission_required,
                     room=self.room,
                 ):
-                    raise ConsumerException("auth.denied", "Permission denied.")
+                    raise ConsumerException("protocol.denied", "Permission denied.")
             try:
                 return await func(self, *args)
             finally:

@@ -17,14 +17,15 @@ class BBBModule:
         module_required="call.bigbluebutton",
     )
     async def url(self):
-        # TODO: Check permissions, assign moderator permission
         if not self.consumer.user.profile.get("display_name"):
             raise ConsumerException("bbb.join.missing_profile")
         url = await self.service.get_join_url(
             self.room,
             self.consumer.user.profile.get("display_name"),
             moderator=await self.world.has_permission_async(
-                user=self.consumer.user, permission=Permission.ROOM_BBB_MODERATE
+                user=self.consumer.user,
+                permission=Permission.ROOM_BBB_MODERATE,
+                room=self.room,
             ),
         )
         if not url:

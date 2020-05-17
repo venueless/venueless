@@ -28,7 +28,7 @@ class AuthModule:
                 return
             user = await get_user(self.world_id, with_token=token, serialize=False)
 
-        if not user or not self.world.has_permission(
+        if not user or not await self.world.has_permission_async(
             user=user, permission=Permission.WORLD_VIEW
         ):
             await self.consumer.send_json(["authentication.failed", {}])

@@ -3,6 +3,7 @@ import uuid
 from contextlib import asynccontextmanager
 
 import pytest
+from channels.db import database_sync_to_async
 from channels.testing import WebsocketCommunicator
 
 from venueless.core.services.chat import ChatService
@@ -191,6 +192,23 @@ async def test_subscribe_without_name(chat_room):
 
 @pytest.mark.asyncio
 @pytest.mark.django_db
+async def test_subscribe_permission_denied(chat_room):
+    chat_room.trait_grants = {}
+    await database_sync_to_async(chat_room.save)()
+    async with world_communicator(named=True) as c:
+        await c.send_json_to(
+            ["chat.subscribe", 123, {"channel": str(chat_room.channel.id)}]
+        )
+        response = await c.receive_json_from()
+        assert response == [
+            "error",
+            123,
+            {"code": "protocol.denied", "message": "Permission denied."},
+        ]
+
+
+@pytest.mark.asyncio
+@pytest.mark.django_db
 async def test_subscribe_join_leave(chat_room):
     async with world_communicator() as c:
         await c.send_json_to(
@@ -280,6 +298,62 @@ async def test_autofix_numbers(chat_room):
         await c1.receive_json_from()
         response = await c1.receive_json_from()
         assert response[1]["event_id"] == 3
+
+
+@pytest.mark.asyncio
+@pytest.mark.django_db
+async def test_private_room_protection(chat_room):
+    chat_room.trait_grants = {}
+    await database_sync_to_async(chat_room.save)()
+    async with world_communicator() as c1:
+        await c1.send_json_to(
+            [
+                "chat.fetch",
+                123,
+                {"channel": str(chat_room.channel.id), "count": 20, "before_id": 0,},
+            ]
+        )
+        response = await c1.receive_json_from()
+        assert response == [
+            "error",
+            123,
+            {"code": "protocol.denied", "message": "Permission denied."},
+        ]
+
+
+@pytest.mark.asyncio
+@pytest.mark.django_db
+async def test_read_only_room_protection(chat_room):
+    chat_room.trait_grants = {"viewer": []}
+    await database_sync_to_async(chat_room.save)()
+    async with world_communicator() as c1:
+        await c1.send_json_to(
+            ["chat.join", 123, {"channel": str(chat_room.channel.id)}]
+        )
+        response = await c1.receive_json_from()
+        assert response == [
+            "error",
+            123,
+            {"code": "protocol.denied", "message": "Permission denied."},
+        ]
+
+        await c1.send_json_to(
+            [
+                "chat.send",
+                123,
+                {
+                    "channel": str(chat_room.channel.id),
+                    "event_type": "message",
+                    "content": {"type": "text", "body": "Hello world"},
+                },
+            ]
+        )
+        response = await c1.receive_json_from()
+        assert response == [
+            "error",
+            123,
+            {"code": "protocol.denied", "message": "Permission denied."},
+        ]
 
 
 @pytest.mark.asyncio
