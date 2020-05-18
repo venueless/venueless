@@ -85,7 +85,7 @@ class World(models.Model):
             if isinstance(required_traits, list) and all(
                 r in traits for r in required_traits
             ):
-                if permission.value in self.roles[role]:
+                if permission.value in self.roles.get(role, []):
                     return True
 
         if room:
@@ -93,7 +93,7 @@ class World(models.Model):
                 if isinstance(required_traits, list) and all(
                     r in traits for r in required_traits
                 ):
-                    if permission.value in self.roles[role]:
+                    if permission.value in self.roles.get(role, []):
                         return True
 
     def has_permission(self, *, user, permission: Permission, room=None):
@@ -107,7 +107,7 @@ class World(models.Model):
 
         roles = user.get_role_grants(room)
         for r in roles:
-            if permission.value in self.roles[r]:
+            if permission.value in self.roles.get(r, []):
                 return True
 
     async def has_permission_async(self, *, user, permission: Permission, room=None):
@@ -121,7 +121,7 @@ class World(models.Model):
 
         roles = await database_sync_to_async(user.get_role_grants)(room)
         for r in roles:
-            if permission.value in self.roles[r]:
+            if permission.value in self.roles.get(r, []):
                 return True
 
     def get_all_permissions(self, user):
@@ -130,18 +130,18 @@ class World(models.Model):
             if isinstance(required_traits, list) and all(
                 r in user.traits for r in required_traits
             ):
-                result[self].update(self.roles[role])
+                result[self].update(self.roles.get(role, []))
 
         for grant in user.world_grants.all():
-            result[self].update(self.roles[grant.role])
+            result[self].update(self.roles.get(grant.role, []))
 
         for room in self.rooms.all():
             for role, required_traits in room.trait_grants.items():
                 if isinstance(required_traits, list) and all(
                     r in user.traits for r in required_traits
                 ):
-                    result[room].update(self.roles[role])
+                    result[room].update(self.roles.get(role, []))
 
         for grant in user.room_grants.select_related("room"):
-            result[grant.room].update(self.roles[grant.role])
+            result[grant.room].update(self.roles.get(grant.role, []))
         return result
