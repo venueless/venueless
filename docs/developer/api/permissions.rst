@@ -58,6 +58,8 @@ of the roles that are defined by default in a new world::
     ],
   }
 
+Roles are not exposed to the frontend currently.
+
 Explicit grants
 ---------------
 
