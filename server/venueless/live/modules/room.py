@@ -50,7 +50,7 @@ class RoomModule:
                 code="room.unknown_reaction", message="Unknown reaction"
             )
 
-        redis_key = f"reactions:{self.world_id}:{self.room_id}:{reaction}"
+        redis_key = f"reactions:{self.world_id}:{self.room_id}"
         redis_debounce_key = f"reactions:{self.world_id}:{self.room_id}:{reaction}:{self.consumer.user.id}"
 
         # We want to send reactions out to anyone, but we want to aggregate them over short time frames ("ticks") to
@@ -65,28 +65,34 @@ class RoomModule:
                 return
 
             # First, increase the number of reactions
-            newval = await redis.incr(redis_key)
+            tr = redis.multi_exec()
+            tr.exists(redis_key)
+            tr.hincrby(redis_key, reaction, 1)
+            tick_running, _ = await tr.execute()
+
             await self.consumer.send_success({})
 
-            if newval == 1:
+            if not tick_running:
                 # We're the first one to react since the last tick! It's our job to wait for the length of a tick, then
                 # distribute the value to everyone.
                 await asyncio.sleep(1)
 
                 tr = redis.multi_exec()
-                tr.get(redis_key)
+                tr.hgetall(redis_key)
                 tr.delete(redis_key)
                 val, _ = await tr.execute()
                 await self.consumer.channel_layer.group_send(
                     GROUP_ROOM.format(id=self.room.pk),
                     {
                         "type": "room.reaction",
-                        "reaction": reaction,
+                        "reactions": {
+                            k.decode(): int(v.decode()) for k, v in val.items()
+                        },
                         "room": str(self.room_id),
-                        "number": int(val.decode()),
                     },
                 )
-                await store_reaction(self.room_id, reaction, int(val.decode()))
+                for k, v in val.items():
+                    await store_reaction(self.room_id, k.decode(), int(v.decode()))
             # else: We're just contributing to the reaction counter that someone else started.
 
     @require_world_permission(Permission.WORLD_ROOMS_CREATE)

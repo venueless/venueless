@@ -31,7 +31,7 @@ You will get a success message even if the reaction is ignored due to rate limit
 
 If you or someone else reacts, you receive aggregated reaction events, approximately one per second::
 
-    <= ["room.reaction", {"room": "room_1", "reaction": "clap", "amount": 42}]
+    <= ["room.reaction", {"room": "room_1", "reactions": {"clap": 42, "+1": 12}}]
 
 Allowed reactions currently are:
 
