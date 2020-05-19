@@ -8,7 +8,8 @@ from venueless.core.services.world import (
     get_room_config_for_user,
     get_world,
 )
-from venueless.live.decorators import require_world_permission
+from venueless.live.channels import GROUP_ROOM
+from venueless.live.decorators import require_world_permission, room_action
 from venueless.live.exceptions import ConsumerException
 
 logger = logging.getLogger(__name__)
@@ -19,7 +20,23 @@ class RoomModule:
         super().__init__(*args, **kwargs)
         self.actions = {
             "room.create": self.create_room,
+            "room.enter": self.enter_room,
+            "room.leave": self.leave_room,
         }
+
+    @room_action(permission_required=Permission.ROOM_VIEW)
+    async def enter_room(self):
+        await self.consumer.channel_layer.group_add(
+            GROUP_ROOM.format(id=self.room.pk), self.consumer.channel_name
+        )
+        await self.consumer.send_success({})
+
+    @room_action()
+    async def leave_room(self):
+        await self.consumer.channel_layer.group_discard(
+            GROUP_ROOM.format(id=self.room.pk), self.consumer.channel_name
+        )
+        await self.consumer.send_success({})
 
     @require_world_permission(Permission.WORLD_ROOMS_CREATE)
     async def create_room(self):
@@ -62,6 +79,7 @@ class RoomModule:
         self.world = await get_world(
             self.consumer.scope["url_route"]["kwargs"]["world"]
         )
+        self.room_id = self.content[2].get("room")
         action = content[0]
         if action not in self.actions:
             raise ConsumerException("room.unsupported_command")
