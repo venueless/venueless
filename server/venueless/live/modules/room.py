@@ -4,6 +4,7 @@ import logging
 from django.core.exceptions import ValidationError
 
 from venueless.core.permissions import Permission
+from venueless.core.services.reactions import store_reaction
 from venueless.core.services.world import (
     create_room,
     get_room_config_for_user,
@@ -85,6 +86,7 @@ class RoomModule:
                         "number": int(val.decode()),
                     },
                 )
+                await store_reaction(self.room_id, reaction, int(val.decode()))
             # else: We're just contributing to the reaction counter that someone else started.
 
     @require_world_permission(Permission.WORLD_ROOMS_CREATE)
