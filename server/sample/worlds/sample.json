@@ -10,6 +10,11 @@
         "130": "room_1"
       }
     },
+    "bbb_defaults": {
+      "url": "https://video1.pretix.eu/bigbluebutton/",
+      "record": false,
+      "secret": "bogussecret"
+    },
     "JWT_secrets": [
       {
         "secret": "FaZaa4KeeZoo2ahgoh2uenahd3Uta4Ei",

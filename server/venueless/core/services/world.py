@@ -127,9 +127,13 @@ async def create_room(world, data, creator):
     if types == {'chat.native'}:
         if not await world.has_permission_async(user=creator, permission=Permission.WORLD_ROOMS_CREATE_CHAT):
             raise ValidationError("This user is not allowed to create a room of this type.")
+        data.get('modules', [])[0]['config'] = {}
     elif types == {'call.bigbluebutton'}:
         if not await world.has_permission_async(user=creator, permission=Permission.WORLD_ROOMS_CREATE_BBB):
             raise ValidationError("This user is not allowed to create a room of this type.")
+        if 'bbb_defaults' not in world.config:
+            raise ValidationError("No default BBB settings configured.")
+        data.get('modules', [])[0]['config'] = world.config['bbb_defaults']
     elif 'livestream.native' in types:
         if not await world.has_permission_async(user=creator, permission=Permission.WORLD_ROOMS_CREATE_STAGE):
             raise ValidationError("This user is not allowed to create a room of this type.")
