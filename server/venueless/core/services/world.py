@@ -4,6 +4,7 @@ from contextlib import suppress
 from channels.db import database_sync_to_async
 from channels.layers import get_channel_layer
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.db.models import Max
 
 from venueless.core.models import Channel, Room, World
@@ -97,6 +98,7 @@ def get_world_config_for_user(world, user):
 
 
 @database_sync_to_async
+@transaction.atomic()
 def _create_room(data, with_channel=False, permission_preset="public", creator=None):
     if "sorting_priority" not in data:
         data["sorting_priority"] = (
@@ -113,6 +115,8 @@ def _create_room(data, with_channel=False, permission_preset="public", creator=N
     else:
         data["trait_grants"] = {}
 
+    if Room.objects.filter(name=data.get('name')).exists():
+        raise ValidationError('This room name is already taken.')
     room = Room.objects.create(**data)
     if creator:
         room.role_grants.create(world=room.world, user=creator, role="room_owner")
