@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import Max
 
 from venueless.core.models import Channel, Room, World
+from venueless.core.permissions import Permission
 
 
 @database_sync_to_async
@@ -122,12 +123,20 @@ def _create_room(data, with_channel=False, permission_preset="public", creator=N
 
 
 async def create_room(world, data, creator):
-    for m in data.get("modules", []):
-        if m.get("type") != "chat.native":
-            raise ValidationError(
-                f"The dynamic creation of rooms with the module '"
-                f"{m['type']}' is currently not allowed."
-            )
+    types = {m['type'] for m in data.get("modules", [])}
+    if types == {'chat.native'}:
+        if not await world.has_permission_async(user=creator, permission=Permission.WORLD_ROOMS_CREATE_CHAT):
+            raise ValidationError("This user is not allowed to create a room of this type.")
+    elif types == {'call.bigbluebutton'}:
+        if not await world.has_permission_async(user=creator, permission=Permission.WORLD_ROOMS_CREATE_BBB):
+            raise ValidationError("This user is not allowed to create a room of this type.")
+    elif 'livestream.native' in types:
+        if not await world.has_permission_async(user=creator, permission=Permission.WORLD_ROOMS_CREATE_STAGE):
+            raise ValidationError("This user is not allowed to create a room of this type.")
+    else:
+        raise ValidationError(
+            f"The dynamic creation of rooms with the modules {types} is currently not allowed."
+        )
 
     # TODO input validation
     room, channel = await _create_room(

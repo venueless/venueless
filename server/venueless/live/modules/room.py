@@ -94,8 +94,9 @@ class RoomModule(BaseModule):
             # else: We're just contributing to the reaction counter that someone else started.
 
     @command("create")
-    @require_world_permission(Permission.WORLD_ROOMS_CREATE)
-    async def create_room(self, body):
+    @require_world_permission([Permission.WORLD_ROOMS_CREATE_STAGE, Permission.WORLD_ROOMS_CREATE_BBB,
+                               Permission.WORLD_ROOMS_CREATE_CHAT])
+    async def create_room(self):
         try:
             room = await create_room(self.consumer.world, body, self.consumer.user)
         except ValidationError as e:

@@ -41,7 +41,7 @@
       "room:chat.join"
     ],
     "room_creator": [
-      "world:rooms.create"
+      "world:rooms.create.chat"
     ],
     "room_owner": [
       "world:view",
@@ -85,7 +85,9 @@
       "room:bbb.moderate",
       "room:chat.moderate",
       "room:announce",
-      "world:rooms.create",
+      "world:rooms.create.stage",
+      "world:rooms.create.chat",
+      "world:rooms.create.bbb",
       "world:announce",
       "world:update",
       "room:delete",
@@ -101,7 +103,9 @@
       "room:bbb.moderate",
       "room:chat.moderate",
       "room:announce",
-      "world:rooms.create",
+      "world:rooms.create.stage",
+      "world:rooms.create.chat",
+      "world:rooms.create.bbb",
       "world:announce",
       "world:update",
       "room:delete",
