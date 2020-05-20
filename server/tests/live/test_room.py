@@ -9,11 +9,6 @@ from channels.testing import WebsocketCommunicator
 from venueless.routing import application
 
 
-@database_sync_to_async
-def get_rooms(world):
-    return list(world.rooms.all().prefetch_related("channel"))
-
-
 @asynccontextmanager
 async def world_communicator():
     communicator = WebsocketCommunicator(application, "/ws/world/sample/")
@@ -39,6 +34,21 @@ async def test_enter_leave_room(world, stream_room):
         await c.send_json_to(["room.leave", 123, {"room": str(stream_room.pk)}])
         response = await c.receive_json_from()
         assert response[0] == "success"
+
+
+@pytest.mark.asyncio
+@pytest.mark.django_db
+async def test_reactions_invalid(world, stream_room):
+    async with world_communicator() as c1:
+        await c1.send_json_to(["room.enter", 123, {"room": str(stream_room.pk)}])
+        response = await c1.receive_json_from()
+        assert response[0] == "success"
+
+        await c1.send_json_to(
+            ["room.react", 123, {"room": str(stream_room.pk), "reaction": "hate"}]
+        )
+        response = await c1.receive_json_from()
+        assert response[0] == "error"
 
 
 @pytest.mark.asyncio
