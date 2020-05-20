@@ -3,8 +3,10 @@ import uuid
 from django.contrib.postgres.fields import ArrayField, JSONField
 from django.db import models
 
+from venueless.core.models.cache import VersionedModel
 
-class User(models.Model):
+
+class User(VersionedModel, models.Model):
     id = models.UUIDField(default=uuid.uuid4, primary_key=True)
     client_id = models.CharField(max_length=200, db_index=True, null=True, blank=True)
     token_id = models.CharField(max_length=200, db_index=True, null=True, blank=True)
@@ -41,6 +43,16 @@ class RoomGrant(models.Model):
     )
     role = models.CharField(max_length=200)
 
+    def save(self, *args, **kwargs):
+        r = super().save(*args, **kwargs)
+        self.user.touch()
+        return r
+
+    def delete(self, *args, **kwargs):
+        r = super().delete(*args, **kwargs)
+        self.user.touch()
+        return r
+
 
 class WorldGrant(models.Model):
     world = models.ForeignKey(
@@ -50,3 +62,13 @@ class WorldGrant(models.Model):
         "User", related_name="world_grants", on_delete=models.CASCADE
     )
     role = models.CharField(max_length=200)
+
+    def save(self, *args, **kwargs):
+        r = super().save(*args, **kwargs)
+        self.user.touch()
+        return r
+
+    def delete(self, *args, **kwargs):
+        r = super().delete(*args, **kwargs)
+        self.user.touch()
+        return r

@@ -264,7 +264,7 @@ LOGGING = {
         },
         "django.db.backends": {
             "handlers": ["file", "console"],
-            "level": "INFO",  # Do not output all the queries
+            "level": "DEBUG",  # Do not output all the queries
             "propagate": True,
         },
     },

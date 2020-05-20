@@ -14,6 +14,16 @@ class Channel(models.Model):
         to="World", related_name="channels", on_delete=models.CASCADE,
     )
 
+    def save(self, *args, **kwargs):
+        r = super().save(*args, **kwargs)
+        self.room.touch()
+        return r
+
+    def delete(self, *args, **kwargs):
+        r = super().delete(*args, **kwargs)
+        self.room.touch()
+        return r
+
 
 class ChatEvent(models.Model):
     id = models.BigIntegerField(
