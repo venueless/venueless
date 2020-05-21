@@ -1,3 +1,5 @@
+import logging
+
 from asgiref.sync import async_to_sync
 from channels.db import database_sync_to_async
 from django.core.cache import caches
@@ -17,6 +19,8 @@ else
     redis.call('set', KEYS[1], ARGV[1]);
     return tonumber(ARGV[1])
 end"""
+
+logger = logging.getLogger(__name__)
 
 
 class VersionedModel(models.Model):

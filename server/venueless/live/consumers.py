@@ -101,6 +101,7 @@ class MainConsumer(AsyncJsonWebsocketConsumer):
         if component:
             try:
                 await self.world.refresh_from_db_if_outdated()
+                await self.user.refresh_from_db_if_outdated()
                 await component.dispatch_command(self, content)
             except ConsumerException as e:
                 await self.send_error(e.code, e.message)

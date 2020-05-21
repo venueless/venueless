@@ -46,10 +46,6 @@ class ChatService:
             return await redis.scard(f"chat:subscriptions:{uid}:{channel}")
 
     @database_sync_to_async
-    def membership_exists(self, channel, uid):
-        return Membership.objects.filter(channel=channel, user_id=uid).exists()
-
-    @database_sync_to_async
     def membership_is_volatile(self, channel, uid):
         try:
             m = Membership.objects.get(channel=channel, user_id=uid)
@@ -88,7 +84,7 @@ class ChatService:
     def _store_event(self, channel_id, id, event_type, content, sender):
         ce = ChatEvent.objects.create(
             id=id,
-            channel=Channel.objects.get(id=channel_id),
+            channel_id=channel_id,
             event_type=event_type,
             content=content,
             sender=sender,
@@ -106,16 +102,16 @@ class ChatService:
                 return int(rval)
             return 0
 
-    async def create_event(self, channel, event_type, content, sender, _retry=False):
+    async def create_event(self, channel_id, event_type, content, sender, _retry=False):
         async with aioredis() as redis:
             event_id = await redis.incr("chat.event_id")
-        if event_type not in ("channel.member",) and not await self.membership_exists(
-            channel, sender
-        ):
+        if event_type not in (
+            "channel.member",
+        ) and not await sender.is_member_of_channel(channel_id):
             raise self.NotAChannelMember()
         try:
             return await self._store_event(
-                channel_id=channel,
+                channel_id=channel_id,
                 id=event_id,
                 event_type=event_type,
                 content=content,
@@ -128,7 +124,7 @@ class ChatService:
                     current_max = await self._get_highest_id()
                     await redis.set("chat.event_id", current_max + 1)
                 res = await self.create_event(
-                    channel, event_type, content, sender, _retry=True
+                    channel_id, event_type, content, sender, _retry=True
                 )
                 return res
             raise e  # pragma: no cover

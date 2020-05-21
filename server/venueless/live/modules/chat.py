@@ -87,7 +87,7 @@ class ChatModule:
         )
         if joined:
             event = await self.service.create_event(
-                channel=str(self.channel_id),
+                channel_id=str(self.channel_id),
                 event_type="channel.member",
                 content={
                     "membership": "join",
@@ -108,7 +108,7 @@ class ChatModule:
         await self.consumer.channel_layer.group_send(
             GROUP_CHAT.format(channel=self.channel_id),
             await self.service.create_event(
-                channel=self.channel_id,
+                channel_id=self.channel_id,
                 event_type="channel.member",
                 content={
                     "membership": "leave",
@@ -164,7 +164,7 @@ class ChatModule:
 
         try:
             event = await self.service.create_event(
-                channel=self.channel_id,
+                channel_id=self.channel_id,
                 event_type=event_type,
                 content=content,
                 sender=self.consumer.user,
@@ -180,6 +180,7 @@ class ChatModule:
 
     async def publish_event(self):
         await self.consumer.world.refresh_from_db_if_outdated()
+        await self.consumer.user.refresh_from_db_if_outdated()
 
         room = self.consumer.room_cache.get(("channel", self.content["channel"]))
         if room:

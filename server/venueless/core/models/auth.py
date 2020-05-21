@@ -1,12 +1,13 @@
 import uuid
 
+from channels.db import database_sync_to_async
 from django.contrib.postgres.fields import ArrayField, JSONField
 from django.db import models
 
 from venueless.core.models.cache import VersionedModel
 
 
-class User(VersionedModel, models.Model):
+class User(VersionedModel):
     id = models.UUIDField(default=uuid.uuid4, primary_key=True)
     client_id = models.CharField(max_length=200, db_index=True, null=True, blank=True)
     token_id = models.CharField(max_length=200, db_index=True, null=True, blank=True)
@@ -29,6 +30,25 @@ class User(VersionedModel, models.Model):
                 self.room_grants.filter(room=room).values_list("role", flat=True)
             )
         return roles
+
+    async def is_member_of_channel(self, channel_id):
+        @database_sync_to_async
+        def update(self):
+            self._membership_cache = set(
+                str(i) for i in self.chat_channels.values_list("channel_id", flat=True)
+            )
+
+        if self._membership_cache is None:
+            await update(self)
+        return str(channel_id) in self._membership_cache
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._membership_cache = None
+
+    def _refresh_from_cache(self, cached_instance):
+        super()._refresh_from_cache(cached_instance)
+        self._membership_cache = None
 
 
 class RoomGrant(models.Model):

@@ -74,3 +74,13 @@ class Membership(models.Model):
 
     class Meta:
         unique_together = (("user", "channel"),)
+
+    def save(self, *args, **kwargs):
+        r = super().save(*args, **kwargs)
+        self.user.touch()
+        return r
+
+    def delete(self, *args, **kwargs):
+        r = super().delete(*args, **kwargs)
+        self.user.touch()
+        return r
