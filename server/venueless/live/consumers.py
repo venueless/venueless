@@ -26,6 +26,7 @@ class MainConsumer(AsyncJsonWebsocketConsumer):
         self.user = None
         self.socket_id = str(uuid.uuid4())
         self.world = None
+        self.room_cache = {}
 
     async def connect(self):
         self.content = {}

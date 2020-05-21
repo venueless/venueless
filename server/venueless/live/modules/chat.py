@@ -180,13 +180,19 @@ class ChatModule:
 
     async def publish_event(self):
         await self.consumer.world.refresh_from_db_if_outdated()
-        room = await get_room(
-            world=self.consumer.world, channel__id=self.content["channel"]
-        )
+
+        room = self.consumer.room_cache.get(("channel", self.content["channel"]))
+        if room:
+            await room.refresh_from_db_if_outdated()
+        else:
+            room = await get_room(
+                world=self.consumer.world, channel__id=self.content["channel"]
+            )
+            self.consumer.room_cache["channel", self.content["channel"]] = room
+
         if not await self.consumer.world.has_permission_async(
             user=self.consumer.user, permission=Permission.ROOM_CHAT_READ, room=room
         ):
-            print("no perm")
             return
         await self.consumer.send_json(
             ["chat.event", {k: v for k, v in self.content.items() if k != "type"}]

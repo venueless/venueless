@@ -21,11 +21,23 @@ def room_action(permission_required: Permission = None, module_required=None):
         @functools.wraps(func)
         async def wrapped(self, *args):
             if hasattr(self, "room_id"):
-                self.room = await get_room(world=self.consumer.world, id=self.room_id)
+                self.room = self.consumer.room_cache.get(("room", self.room_id))
+                if self.room:
+                    await self.room.refresh_from_db_if_outdated()
+                else:
+                    self.room = await get_room(
+                        world=self.consumer.world, id=self.room_id
+                    )
+                    self.consumer.room_cache["room", self.room_id] = self.room
             elif hasattr(self, "channel_id"):
-                self.room = await get_room(
-                    world=self.consumer.world, channel__id=self.channel_id
-                )
+                self.room = self.consumer.room_cache.get(("channel", self.channel_id))
+                if self.room:
+                    await self.room.refresh_from_db_if_outdated()
+                else:
+                    self.room = await get_room(
+                        world=self.consumer.world, channel__id=self.channel_id
+                    )
+                    self.consumer.room_cache["channel", self.channel_id] = self.room
             if not self.room:
                 raise ConsumerException("room.unknown", "Unknown room ID")
 
