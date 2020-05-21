@@ -1,24 +1,26 @@
 from venueless.core.permissions import Permission
 from venueless.core.services.bbb import BBBService
-from venueless.live.decorators import room_action
+from venueless.live.decorators import command, room_action
 from venueless.live.exceptions import ConsumerException
+from venueless.live.modules.base import BaseModule
 
 
-class BBBModule:
+class BBBModule(BaseModule):
+    prefix = "bbb"
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.actions = {
-            "url": self.url,
-        }
 
+    @command("url")
     @room_action(
         permission_required=Permission.ROOM_BBB_JOIN,
         module_required="call.bigbluebutton",
     )
-    async def url(self):
+    async def url(self, body):
+        service = BBBService(self.consumer.world.id)
         if not self.consumer.user.profile.get("display_name"):
             raise ConsumerException("bbb.join.missing_profile")
-        url = await self.service.get_join_url(
+        url = await service.get_join_url(
             self.room,
             self.consumer.user.profile.get("display_name"),
             moderator=await self.consumer.world.has_permission_async(
@@ -30,13 +32,3 @@ class BBBModule:
         if not url:
             raise ConsumerException("bbb.failed")
         await self.consumer.send_success({"url": url})
-
-    async def dispatch_command(self, consumer, content):
-        self.consumer = consumer
-        self.content = content
-        self.room_id = self.content[2].get("room")
-        self.service = BBBService(self.consumer.world.id)
-        _, action = content[0].rsplit(".", maxsplit=1)
-        if action not in self.actions:
-            raise ConsumerException("bbb.unsupported_command")
-        await self.actions[action]()

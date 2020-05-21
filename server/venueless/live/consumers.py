@@ -27,17 +27,10 @@ class MainConsumer(AsyncJsonWebsocketConsumer):
         self.socket_id = str(uuid.uuid4())
         self.world = None
         self.room_cache = {}
+        self.components = {}
 
     async def connect(self):
-        self.content = {}
-        self.components = {
-            "chat": ChatModule(),
-            "user": AuthModule(),
-            "bbb": BBBModule(),
-            "room": RoomModule(),
-            "world": WorldModule(),
-        }
-
+        self.content = []
         await self.accept()
         await self.channel_layer.group_add(
             GROUP_VERSION.format(
@@ -52,10 +45,18 @@ class MainConsumer(AsyncJsonWebsocketConsumer):
             await self.send_error("world.unknown_world", close=True)
             return
 
+        self.components = {
+            "chat": ChatModule(self),
+            "user": AuthModule(self),
+            "bbb": BBBModule(self),
+            "room": RoomModule(self),
+            "world": WorldModule(self),
+        }
+
     async def disconnect(self, close_code):
         for c in self.components.values():
             if hasattr(c, "dispatch_disconnect"):
-                await c.dispatch_disconnect(self, close_code)
+                await c.dispatch_disconnect(close_code)
 
         await self.channel_layer.group_discard(
             GROUP_VERSION.format(
@@ -89,9 +90,9 @@ class MainConsumer(AsyncJsonWebsocketConsumer):
             return
 
         if not self.user:
-            if self.content[0] == "authenticate":
+            if content[0] == "authenticate":
                 await self.world.refresh_from_db_if_outdated()
-                await self.components["user"].dispatch_command(self, content)
+                await self.components["user"].login(content[-1])
             else:
                 await self.send_error("protocol.unauthenticated")
             return
@@ -102,7 +103,7 @@ class MainConsumer(AsyncJsonWebsocketConsumer):
             try:
                 await self.world.refresh_from_db_if_outdated()
                 await self.user.refresh_from_db_if_outdated()
-                await component.dispatch_command(self, content)
+                await component.dispatch_command(content)
             except ConsumerException as e:
                 await self.send_error(e.code, e.message)
         else:
@@ -120,10 +121,10 @@ class MainConsumer(AsyncJsonWebsocketConsumer):
             return
 
         namespace = message["type"].split(".")[0]
-        component = getattr(self, "components", {}).get(namespace)
+        component = self.components.get(namespace)
         if component:
             if hasattr(component, "dispatch_event"):
-                return await component.dispatch_event(self, message)
+                return await component.dispatch_event(message)
         else:
             return await super().dispatch(message)
 

@@ -174,7 +174,7 @@ async def test_wrong_user_command():
         assert response[0] == "authenticated"
         await c.send_json_to(["user.foobar", 123, {"display_name": "Cool User"}])
         response = await c.receive_json_from()
-        assert response == ["error", 123, {"code": "user.unknown_command"}]
+        assert response == ["error", 123, {"code": "user.unsupported_command"}]
 
 
 @pytest.mark.asyncio
