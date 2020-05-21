@@ -241,7 +241,7 @@ LOGGING = {
     "disable_existing_loggers": False,
     "formatters": {
         "default": {
-            "format": "%(levelname)s %(asctime)s %(name)s %(module)s %(message)s"
+            "format": "%(asctime)s %(levelname)s %(thread)d %(name)s %(module)s %(message)s"
         },
     },
     "handlers": {
