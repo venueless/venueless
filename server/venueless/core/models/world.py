@@ -119,7 +119,7 @@ class World(VersionedModel):
         ):
             return True
 
-        roles = await user.get_role_grants(room)
+        roles = await user.get_role_grants_async(room)
         for r in roles:
             if permission.value in self.roles.get(r, []):
                 return True

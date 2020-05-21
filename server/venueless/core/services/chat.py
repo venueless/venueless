@@ -4,7 +4,7 @@ from channels.db import database_sync_to_async
 from django.db import IntegrityError, transaction
 from django.db.models import Max
 
-from ..models import Channel, ChatEvent, Membership, User
+from ..models import ChatEvent, Membership, User
 from ..utils.redis import aioredis
 from .user import get_public_users
 
@@ -16,7 +16,6 @@ class ChatService:
     def __init__(self, world_id):
         self.world_id = world_id
 
-    @database_sync_to_async
     def get_channels_for_user(self, user_id, is_volatile=None):
         qs = Membership.objects.filter(
             channel__world_id=self.world_id, user_id=user_id,
@@ -54,15 +53,13 @@ class ChatService:
             return False
 
     @database_sync_to_async
-    def add_channel_user(self, channel_id, uid, volatile):
+    def add_channel_user(self, channel_id, user, volatile):
         # Currently, users are undeletable, so this should be a pretty impossible code path. Anyway, if it happens,
         # there is probably no harm in ignoring it.
         with suppress(User.DoesNotExist):
             with transaction.atomic():
                 m, created = Membership.objects.get_or_create(
-                    channel=Channel.objects.get(id=channel_id),
-                    user=User.objects.get(id=uid, world_id=self.world_id),
-                    defaults={"volatile": volatile},
+                    channel_id=channel_id, user=user, defaults={"volatile": volatile},
                 )
                 if not created and m.volatile and not volatile:
                     m.volatile = False
@@ -82,6 +79,10 @@ class ChatService:
 
     @database_sync_to_async
     def _store_event(self, channel_id, id, event_type, content, sender):
+        if event_type not in ("channel.member",) and not sender.is_member_of_channel(
+            channel_id
+        ):
+            raise self.NotAChannelMember()
         ce = ChatEvent.objects.create(
             id=id,
             channel_id=channel_id,
@@ -105,10 +106,6 @@ class ChatService:
     async def create_event(self, channel_id, event_type, content, sender, _retry=False):
         async with aioredis() as redis:
             event_id = await redis.incr("chat.event_id")
-        if event_type not in (
-            "channel.member",
-        ) and not await sender.is_member_of_channel(channel_id):
-            raise self.NotAChannelMember()
         try:
             return await self._store_event(
                 channel_id=channel_id,

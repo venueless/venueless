@@ -115,7 +115,7 @@ class MainConsumer(AsyncJsonWebsocketConsumer):
             return await self.send_json(["connection.reload", {}])
         elif message["type"] == "user.broadcast":
             if self.socket_id != message["socket"]:
-                await self.components["user"].reload_user()
+                await self.user.refresh_from_db_if_outdated()
                 await self.send_json([message["event_type"], message["data"]])
             return
 

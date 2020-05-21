@@ -1,9 +1,10 @@
 import logging
 from contextlib import suppress
 
+from channels.db import database_sync_to_async
+
 from venueless.core.permissions import Permission
 from venueless.core.services.chat import ChatService
-from venueless.core.services.user import get_public_user
 from venueless.core.services.world import get_room
 from venueless.live.channels import GROUP_CHAT
 from venueless.live.decorators import room_action
@@ -83,7 +84,7 @@ class ChatModule:
             volatile_config = volatile_client
 
         joined = await self.service.add_channel_user(
-            self.channel_id, self.consumer.user.id, volatile=volatile_config
+            self.channel_id, self.consumer.user, volatile=volatile_config
         )
         if joined:
             event = await self.service.create_event(
@@ -91,9 +92,7 @@ class ChatModule:
                 event_type="channel.member",
                 content={
                     "membership": "join",
-                    "user": await get_public_user(
-                        self.consumer.world.id, self.consumer.user.id
-                    ),
+                    "user": self.consumer.user.serialize_public(),
                 },
                 sender=self.consumer.user,
             )
@@ -120,12 +119,13 @@ class ChatModule:
         await self._broadcast_channel_list()
 
     async def _broadcast_channel_list(self):
+        await self.consumer.user.refresh_from_db_if_outdated()
         await self.consumer.user_broadcast(
             "chat.channels",
             {
-                "channels": await self.service.get_channels_for_user(
-                    self.consumer.user.id, is_volatile=False
-                )
+                "channels": await database_sync_to_async(
+                    self.service.get_channels_for_user
+                )(self.consumer.user.id, is_volatile=False)
             },
         )
 

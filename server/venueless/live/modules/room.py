@@ -112,6 +112,7 @@ class RoomModule:
 
     async def push_room_info(self):
         await self.consumer.world.refresh_from_db_if_outdated()
+        await self.consumer.user.refresh_from_db_if_outdated()
         if not await self.consumer.world.has_permission_async(
             user=self.consumer.user, permission=Permission.ROOM_VIEW
         ):

@@ -23,42 +23,43 @@ class User(VersionedModel):
         # For performance reasons, it does not use this method directly.
         return {"id": str(self.id), "profile": self.profile}
 
-    async def get_role_grants(self, room=None):
-        @database_sync_to_async
-        def update(self):
-            self._grant_cache = {
-                "world": set(self.world_grants.values_list("role", flat=True))
-            }
-            for v in self.room_grants.values("role", "room"):
-                self._grant_cache.setdefault(v["room"], set())
-                self._grant_cache[v["room"]].add("role")
+    def _update_grant_cache(self):
+        self._grant_cache = {
+            "world": set(self.world_grants.values_list("role", flat=True))
+        }
+        for v in self.room_grants.values("role", "room"):
+            self._grant_cache.setdefault(v["room"], set())
+            self._grant_cache[v["room"]].add(v["role"])
 
+    def get_role_grants(self, room=None):
         if self._grant_cache is None:
-            await update(self)
+            self._update_grant_cache()
 
         roles = self._grant_cache["world"]
         if room:
             roles |= self._grant_cache.get(room.id, set())
         return roles
 
-    async def is_member_of_channel(self, channel_id):
-        @database_sync_to_async
+    async def get_role_grants_async(self, room=None):
+        if self._grant_cache is None:
+            await database_sync_to_async(self._update_grant_cache)()
+
+        roles = self._grant_cache["world"]
+        if room:
+            roles |= self._grant_cache.get(room.id, set())
+        return roles
+
+    def is_member_of_channel(self, channel_id):
         def update(self):
             self._membership_cache = set(
                 str(i) for i in self.chat_channels.values_list("channel_id", flat=True)
             )
 
         if self._membership_cache is None:
-            await update(self)
+            update(self)
         return str(channel_id) in self._membership_cache
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._membership_cache = None
-        self._grant_cache = None
-
-    def _refresh_from_cache(self, cached_instance):
-        super()._refresh_from_cache(cached_instance)
+    def clear_caches(self):
         self._membership_cache = None
         self._grant_cache = None
 

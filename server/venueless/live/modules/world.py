@@ -1,6 +1,7 @@
 import logging
 
-from venueless.core.services.user import get_user
+from channels.db import database_sync_to_async
+
 from venueless.core.services.world import get_world_config_for_user
 from venueless.live.exceptions import ConsumerException
 
@@ -13,10 +14,10 @@ class WorldModule:
         self.actions = {}
 
     async def push_world_update(self):
-        world_config = await get_world_config_for_user(
-            await get_user(
-                self.consumer.world.id, with_id=self.consumer.user.id, serialize=False
-            )
+        await self.consumer.world.refresh_from_db_if_outdated()
+        await self.consumer.user.refresh_from_db_if_outdated()
+        world_config = await database_sync_to_async(get_world_config_for_user)(
+            self.consumer.world, self.consumer.user,
         )
         await self.consumer.send_json(["world.updated", world_config])
 

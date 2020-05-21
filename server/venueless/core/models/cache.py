@@ -69,6 +69,14 @@ class VersionedModel(models.Model):
         if latest_version < self.version:
             await self._set_cache_version()
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._membership_cache = None
+        self._grant_cache = None
+
+    def clear_caches(self):
+        pass
+
     @property
     def _cachekey(self):
         return f"modelcache:{self._meta.label}:{self.pk}"
@@ -89,6 +97,11 @@ class VersionedModel(models.Model):
         for field in self._meta.related_objects:
             if field.is_cached(self):
                 field.delete_cached_value(self)
+        self.clear_caches()
+
+    def refresh_from_db(self, *args, **kwargs):
+        super().refresh_from_db(*args, **kwargs)
+        self.clear_caches()
 
     async def _set_cache_version(self):
         async with aioredis() as redis:
@@ -99,7 +112,7 @@ class VersionedModel(models.Model):
         cache = caches["process"]
         cache.set(self._cachekey, self, timeout=600)
 
-    async def _bump_cache_deleted(self):
+    async def _set_cache_deleted(self):
         async with aioredis() as redis:
             await redis.set(
                 f"{self._cachekey}:version", "deleted",
