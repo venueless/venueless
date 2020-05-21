@@ -5,11 +5,7 @@ from django.core.exceptions import ValidationError
 
 from venueless.core.permissions import Permission
 from venueless.core.services.reactions import store_reaction
-from venueless.core.services.world import (
-    create_room,
-    get_room_config_for_user,
-    get_world,
-)
+from venueless.core.services.world import create_room, get_room_config_for_user
 from venueless.core.utils.redis import aioredis
 from venueless.live.channels import GROUP_ROOM
 from venueless.live.decorators import require_world_permission, room_action
@@ -50,8 +46,8 @@ class RoomModule:
                 code="room.unknown_reaction", message="Unknown reaction"
             )
 
-        redis_key = f"reactions:{self.world_id}:{self.room_id}"
-        redis_debounce_key = f"reactions:{self.world_id}:{self.room_id}:{reaction}:{self.consumer.user.id}"
+        redis_key = f"reactions:{self.consumer.world.id}:{self.room_id}"
+        redis_debounce_key = f"reactions:{self.consumer.world.id}:{self.room_id}:{reaction}:{self.consumer.user.id}"
 
         # We want to send reactions out to anyone, but we want to aggregate them over short time frames ("ticks") to
         # make sure we do not send 500 messages if 500 people react in the same second, but just one.
@@ -98,7 +94,9 @@ class RoomModule:
     @require_world_permission(Permission.WORLD_ROOMS_CREATE)
     async def create_room(self):
         try:
-            room = await create_room(self.world, self.content[-1], self.consumer.user)
+            room = await create_room(
+                self.consumer.world, self.content[-1], self.consumer.user
+            )
         except ValidationError as e:
             await self.consumer.send_error(code="room.invalid", message=str(e))
         else:
@@ -113,8 +111,8 @@ class RoomModule:
         )
 
     async def push_room_info(self):
-        world = await get_world(self.world_id)
-        if not await world.has_permission_async(
+        await self.consumer.world.refresh_from_db_if_outdated()
+        if not await self.consumer.world.has_permission_async(
             user=self.consumer.user, permission=Permission.ROOM_VIEW
         ):
             return
@@ -122,7 +120,7 @@ class RoomModule:
             [
                 self.content["type"],
                 await get_room_config_for_user(
-                    self.content["room"], self.world_id, self.consumer.user
+                    self.content["room"], self.consumer.world.id, self.consumer.user
                 ),
             ]
         )
@@ -130,7 +128,6 @@ class RoomModule:
     async def dispatch_event(self, consumer, content):
         self.consumer = consumer
         self.content = content
-        self.world_id = self.consumer.scope["url_route"]["kwargs"]["world"]
         if self.content["type"] == "room.create":
             await self.push_room_info()
         elif self.content["type"] == "room.reaction":
@@ -143,8 +140,6 @@ class RoomModule:
     async def dispatch_command(self, consumer, content):
         self.consumer = consumer
         self.content = content
-        self.world_id = self.consumer.scope["url_route"]["kwargs"]["world"]
-        self.world = await get_world(self.world_id)
         self.room_id = self.content[2].get("room")
         action = content[0]
         if action not in self.actions:

@@ -1,6 +1,5 @@
 from venueless.core.permissions import Permission
 from venueless.core.services.bbb import BBBService
-from venueless.core.services.world import get_world
 from venueless.live.decorators import room_action
 from venueless.live.exceptions import ConsumerException
 
@@ -22,7 +21,7 @@ class BBBModule:
         url = await self.service.get_join_url(
             self.room,
             self.consumer.user.profile.get("display_name"),
-            moderator=await self.world.has_permission_async(
+            moderator=await self.consumer.world.has_permission_async(
                 user=self.consumer.user,
                 permission=Permission.ROOM_BBB_MODERATE,
                 room=self.room,
@@ -36,9 +35,7 @@ class BBBModule:
         self.consumer = consumer
         self.content = content
         self.room_id = self.content[2].get("room")
-        self.world_id = self.consumer.scope["url_route"]["kwargs"]["world"]
-        self.world = await get_world(self.world_id)
-        self.service = BBBService(self.world_id)
+        self.service = BBBService(self.consumer.world.id)
         _, action = content[0].rsplit(".", maxsplit=1)
         if action not in self.actions:
             raise ConsumerException("bbb.unsupported_command")

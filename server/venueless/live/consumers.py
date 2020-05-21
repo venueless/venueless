@@ -21,6 +21,12 @@ from .modules.world import WorldModule
 
 
 class MainConsumer(AsyncJsonWebsocketConsumer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user = None
+        self.socket_id = str(uuid.uuid4())
+        self.world = None
+
     async def connect(self):
         self.content = {}
         self.components = {
@@ -30,11 +36,8 @@ class MainConsumer(AsyncJsonWebsocketConsumer):
             "room": RoomModule(),
             "world": WorldModule(),
         }
-        self.user = None
-        self.socket_id = str(uuid.uuid4())
 
         await self.accept()
-
         await self.channel_layer.group_add(
             GROUP_VERSION.format(
                 label=settings.VENUELESS_COMMIT + "." + settings.VENUELESS_ENVIRONMENT
@@ -86,14 +89,17 @@ class MainConsumer(AsyncJsonWebsocketConsumer):
 
         if not self.user:
             if self.content[0] == "authenticate":
+                await self.world.refresh_from_db_if_outdated()
                 await self.components["user"].dispatch_command(self, content)
             else:
                 await self.send_error("protocol.unauthenticated")
             return
+
         namespace = content[0].split(".")[0]
         component = self.components.get(namespace)
         if component:
             try:
+                await self.world.refresh_from_db_if_outdated()
                 await component.dispatch_command(self, content)
             except ConsumerException as e:
                 await self.send_error(e.code, e.message)

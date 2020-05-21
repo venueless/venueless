@@ -21,10 +21,10 @@ def room_action(permission_required: Permission = None, module_required=None):
         @functools.wraps(func)
         async def wrapped(self, *args):
             if hasattr(self, "room_id"):
-                self.room = await get_room(world=self.world, id=self.room_id)
+                self.room = await get_room(world=self.consumer.world, id=self.room_id)
             elif hasattr(self, "channel_id"):
                 self.room = await get_room(
-                    world=self.world, channel__id=self.channel_id
+                    world=self.consumer.world, channel__id=self.channel_id
                 )
             if not self.room:
                 raise ConsumerException("room.unknown", "Unknown room ID")
@@ -48,7 +48,7 @@ def room_action(permission_required: Permission = None, module_required=None):
                     raise ConsumerException(
                         "protocol.unauthenticated", "No authentication provided."
                     )
-                if not await self.world.has_permission_async(
+                if not await self.consumer.world.has_permission_async(
                     user=self.consumer.user,
                     permission=permission_required,
                     room=self.room,
@@ -72,7 +72,7 @@ def require_world_permission(permission: Permission):
                 raise ConsumerException(
                     "bbb.unknown", "Room does not contain a BBB room."
                 )
-            if not await self.world.has_permission_async(
+            if not await self.consumer.world.has_permission_async(
                 user=self.consumer.user, permission=permission
             ):
                 raise ConsumerException("auth.denied", "Permission denied.")

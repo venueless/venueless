@@ -4,7 +4,7 @@ from contextlib import suppress
 from venueless.core.permissions import Permission
 from venueless.core.services.chat import ChatService
 from venueless.core.services.user import get_public_user
-from venueless.core.services.world import get_room, get_world
+from venueless.core.services.world import get_room
 from venueless.live.channels import GROUP_CHAT
 from venueless.live.decorators import room_action
 from venueless.live.exceptions import ConsumerException
@@ -74,7 +74,7 @@ class ChatModule:
         volatile_client = self.content[2].get("volatile", volatile_config)
         if (
             volatile_client != volatile_config
-            and await self.world.has_permission_async(
+            and await self.consumer.world.has_permission_async(
                 user=self.consumer.user,
                 room=self.room,
                 permission=Permission.ROOM_CHAT_MODERATE,
@@ -91,7 +91,9 @@ class ChatModule:
                 event_type="channel.member",
                 content={
                     "membership": "join",
-                    "user": await get_public_user(self.world_id, self.consumer.user.id),
+                    "user": await get_public_user(
+                        self.consumer.world.id, self.consumer.user.id
+                    ),
                 },
                 sender=self.consumer.user,
             )
@@ -177,9 +179,11 @@ class ChatModule:
         )
 
     async def publish_event(self):
-        world = await get_world(self.world_id)
-        room = await get_room(world=world, channel__id=self.content["channel"])
-        if not await world.has_permission_async(
+        await self.consumer.world.refresh_from_db_if_outdated()
+        room = await get_room(
+            world=self.consumer.world, channel__id=self.content["channel"]
+        )
+        if not await self.consumer.world.has_permission_async(
             user=self.consumer.user, permission=Permission.ROOM_CHAT_READ, room=room
         ):
             print("no perm")
@@ -192,9 +196,7 @@ class ChatModule:
         self.consumer = consumer
         self.content = content
         self.channel_id = self.content[2].get("channel")
-        self.world_id = self.consumer.scope["url_route"]["kwargs"]["world"]
-        self.world = await get_world(self.world_id)
-        self.service = ChatService(self.world_id)
+        self.service = ChatService(self.consumer.world.id)
         _, action = content[0].rsplit(".", maxsplit=1)
         if action not in self.actions:
             raise ConsumerException("chat.unsupported_command")
@@ -203,8 +205,7 @@ class ChatModule:
     async def dispatch_event(self, consumer, content):
         self.consumer = consumer
         self.content = content
-        self.world_id = self.consumer.scope["url_route"]["kwargs"]["world"]
-        self.service = ChatService(self.world_id)
+        self.service = ChatService(self.consumer.world.id)
         if self.content["type"] == "chat.event":
             await self.publish_event()
         else:  # pragma: no cover
@@ -214,8 +215,7 @@ class ChatModule:
 
     async def dispatch_disconnect(self, consumer, close_code):
         self.consumer = consumer
-        self.world_id = self.consumer.scope["url_route"]["kwargs"]["world"]
-        self.service = ChatService(self.world_id)
+        self.service = ChatService(self.consumer.world.id)
 
         for channel_id in frozenset(self.channels_subscribed):
             self.channel_id = channel_id
