@@ -23,12 +23,22 @@ class User(VersionedModel):
         # For performance reasons, it does not use this method directly.
         return {"id": str(self.id), "profile": self.profile}
 
-    def get_role_grants(self, room=None):
-        roles = set(self.world_grants.values_list("role", flat=True))
+    async def get_role_grants(self, room=None):
+        @database_sync_to_async
+        def update(self):
+            self._grant_cache = {
+                "world": set(self.world_grants.values_list("role", flat=True))
+            }
+            for v in self.room_grants.values("role", "room"):
+                self._grant_cache.setdefault(v["room"], set())
+                self._grant_cache[v["room"]].add("role")
+
+        if self._grant_cache is None:
+            await update(self)
+
+        roles = self._grant_cache["world"]
         if room:
-            roles |= set(
-                self.room_grants.filter(room=room).values_list("role", flat=True)
-            )
+            roles |= self._grant_cache.get(room.id, set())
         return roles
 
     async def is_member_of_channel(self, channel_id):
@@ -45,10 +55,12 @@ class User(VersionedModel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._membership_cache = None
+        self._grant_cache = None
 
     def _refresh_from_cache(self, cached_instance):
         super()._refresh_from_cache(cached_instance)
         self._membership_cache = None
+        self._grant_cache = None
 
 
 class RoomGrant(models.Model):

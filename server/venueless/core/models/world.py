@@ -2,7 +2,6 @@ from collections import defaultdict
 from contextlib import suppress
 
 import jwt
-from channels.db import database_sync_to_async
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 
@@ -120,7 +119,7 @@ class World(VersionedModel):
         ):
             return True
 
-        roles = await database_sync_to_async(user.get_role_grants)(room)
+        roles = await user.get_role_grants(room)
         for r in roles:
             if permission.value in self.roles.get(r, []):
                 return True
