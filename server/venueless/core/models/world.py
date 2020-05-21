@@ -34,8 +34,13 @@ def default_roles():
     admin = (
         moderator
         + room_creator
-        + [Permission.WORLD_UPDATE, Permission.ROOM_DELETE, Permission.ROOM_UPDATE, Permission.WORLD_ROOMS_CREATE_BBB,
-           Permission.WORLD_ROOMS_CREATE_STAGE]
+        + [
+            Permission.WORLD_UPDATE,
+            Permission.ROOM_DELETE,
+            Permission.ROOM_UPDATE,
+            Permission.WORLD_ROOMS_CREATE_BBB,
+            Permission.WORLD_ROOMS_CREATE_STAGE,
+        ]
     )
     apiuser = admin + [Permission.WORLD_API, Permission.WORLD_SECRETS]
     return {
@@ -82,7 +87,9 @@ class World(VersionedModel):
                     issuer=issuer,
                 )
 
-    def has_permission_implicit(self, *, traits, permissions: List[Permission], room=None):
+    def has_permission_implicit(
+        self, *, traits, permissions: List[Permission], room=None
+    ):
         for role, required_traits in self.trait_grants.items():
             if isinstance(required_traits, list) and all(
                 r in traits for r in required_traits

@@ -84,8 +84,12 @@ class RoomPermissions(permissions.BasePermission):
         if request.method == "POST":
             traits = request.auth.get("traits")
             return request.world.has_permission_implicit(
-                traits=traits, permissions=[Permission.WORLD_ROOMS_CREATE_STAGE, Permission.WORLD_ROOMS_CREATE_BBB,
-                                            Permission.WORLD_ROOMS_CREATE_CHAT]
+                traits=traits,
+                permissions=[
+                    Permission.WORLD_ROOMS_CREATE_STAGE,
+                    Permission.WORLD_ROOMS_CREATE_BBB,
+                    Permission.WORLD_ROOMS_CREATE_CHAT,
+                ],
             )
         else:
             return True

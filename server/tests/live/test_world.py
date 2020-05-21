@@ -37,14 +37,22 @@ async def test_create_rooms_unique_names(world):
         await c.receive_json_from()
 
         await c.send_json_to(
-            ["room.create", 123, {"name": "New Room!!", "modules": [{"type": "chat.native"}]}]
+            [
+                "room.create",
+                123,
+                {"name": "New Room!!", "modules": [{"type": "chat.native"}]},
+            ]
         )
         response = await c.receive_json_from()
         assert response[0] == "success"
         await c.receive_json_from()
 
         await c.send_json_to(
-            ["room.create", 123, {"name": "New Room!!", "modules": [{"type": "chat.native"}]}]
+            [
+                "room.create",
+                123,
+                {"name": "New Room!!", "modules": [{"type": "chat.native"}]},
+            ]
         )
         response = await c.receive_json_from()
         assert response[0] == "error"

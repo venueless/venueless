@@ -9,7 +9,9 @@ from venueless.core.permissions import Permission
 def test_user_explicit_roles(world, chat_room, bbb_room):
     user = User.objects.create(world=world, profile={}, traits=[])
     assert user.get_role_grants() == set()
-    assert not world.has_permission(user=user, permission=Permission.WORLD_ROOMS_CREATE_CHAT)
+    assert not world.has_permission(
+        user=user, permission=Permission.WORLD_ROOMS_CREATE_CHAT
+    )
     assert world.get_all_permissions(user)[world] == {"world:view"}
     assert world.get_all_permissions(user)[chat_room] == {
         "room:bbb.join",
@@ -23,7 +25,9 @@ def test_user_explicit_roles(world, chat_room, bbb_room):
     user.world_grants.create(role="room_creator", world=world)
     user.refresh_from_db()
     assert user.get_role_grants() == {"room_creator"}
-    assert world.has_permission(user=user, permission=Permission.WORLD_ROOMS_CREATE_CHAT)
+    assert world.has_permission(
+        user=user, permission=Permission.WORLD_ROOMS_CREATE_CHAT
+    )
     assert not world.has_permission(user=user, permission=Permission.WORLD_UPDATE)
 
     user.refresh_from_db()
@@ -67,7 +71,9 @@ def test_user_explicit_roles(world, chat_room, bbb_room):
 def test_user_implicit_roles(world, chat_room, bbb_room):
     user = User.objects.create(world=world, profile={}, traits=["trait123", "trait456"])
     assert user.get_role_grants() == set()
-    assert not world.has_permission(user=user, permission=Permission.WORLD_ROOMS_CREATE_CHAT)
+    assert not world.has_permission(
+        user=user, permission=Permission.WORLD_ROOMS_CREATE_CHAT
+    )
     assert world.get_all_permissions(user)[world] == {"world:view"}
     assert world.get_all_permissions(user)[chat_room] == {
         "room:bbb.join",
@@ -80,11 +86,15 @@ def test_user_implicit_roles(world, chat_room, bbb_room):
 
     world.trait_grants["room_creator"] = ["trait123", "trait789"]
     world.save()
-    assert not world.has_permission(user=user, permission=Permission.WORLD_ROOMS_CREATE_CHAT)
+    assert not world.has_permission(
+        user=user, permission=Permission.WORLD_ROOMS_CREATE_CHAT
+    )
 
     world.trait_grants["room_creator"] = ["trait123"]
     world.save()
-    assert world.has_permission(user=user, permission=Permission.WORLD_ROOMS_CREATE_CHAT)
+    assert world.has_permission(
+        user=user, permission=Permission.WORLD_ROOMS_CREATE_CHAT
+    )
     assert not world.has_permission(user=user, permission=Permission.WORLD_UPDATE)
     assert world.get_all_permissions(user)[world] == {
         "world:view",
