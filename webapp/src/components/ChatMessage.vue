@@ -14,12 +14,12 @@
 		.actions
 			bunt-icon-button(v-if="$features.enabled('chat-moderation')", @click="showMenu") dots-vertical
 	template(v-else-if="message.event_type === 'channel.member'")
-		.system-content {{ user.profile ? user.profile.display_name : message.sender }} {{ message.content.membership === 'join' ? 'joined' : 'left' }}
+		.system-content {{ user.profile ? user.profile.display_name : message.sender }} {{ message.content.membership === 'join' ? $t('chat:joined') : $t('chat:left') }}
 	//- intercepts all events
 	.menu-blocker(v-if="selected || showingAvatarCard", @click="selected = false, showingAvatarCard = false")
 	.menu(v-if="selected", ref="menu")
-		.edit-message(@click="editMessage") edit message
-		.delete-message(@click="deleteMessage") delete message
+		.edit-message(@click="editMessage") {{ $t('chat:message-edit') }}
+		.delete-message(@click="deleteMessage") {{ $t('chat:message-delete') }}
 	.avatar-card(v-if="showingAvatarCard", ref="avatarCard")
 		avatar(:user="user", :size="128")
 		.name {{ user.profile ? user.profile.display_name : this.message.sender }}

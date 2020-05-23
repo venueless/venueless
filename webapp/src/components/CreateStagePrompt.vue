@@ -3,11 +3,10 @@
 	.prompt-wrapper(v-scrollbar.y="", @click.stop="")
 		.prompt-wrapper-inner
 			bunt-icon-button#btn-close(@click="$emit('close')") close
-			h1 Create a new stage
-			p Some explanation text
+			h1 {{ $t('createstage:headline') }}
 			form(@submit.prevent="create")
-				bunt-input(name="name", label="Name", icon="theater", placeholder="fancyawesomestage")
-				bunt-button(type="submit") create
+				bunt-input(name="name", :label="$t('createstage:name')", icon="theater", :placeholder="$t('createstage:placeholder')")
+				bunt-button(type="submit") {{ $t('createstage:submit') }}
 </template>
 <script>
 export default {
