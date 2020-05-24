@@ -3,10 +3,10 @@
 	.prompt-wrapper(v-scrollbar.y="", @click.stop="")
 		.prompt-wrapper-inner
 			bunt-icon-button#btn-close(@click="$emit('close')") close
-			h1 {{ $t('createstage:headline') }}
+			h1 {{ $t('CreateStagePrompt:headline:text') }}
 			form(@submit.prevent="create")
-				bunt-input(name="name", :label="$t('createstage:name')", icon="theater", :placeholder="$t('createstage:placeholder')")
-				bunt-button(type="submit") {{ $t('createstage:submit') }}
+				bunt-input(name="name", :label="$t('CreateStagePrompt:name:label')", icon="theater", :placeholder="$t('CreateStagePrompt:name:placeholder')")
+				bunt-button(type="submit") {{ $t('CreateStagePrompt:submit:label') }}
 </template>
 <script>
 export default {
