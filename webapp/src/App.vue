@@ -1,6 +1,22 @@
 <template lang="pug">
 #app(:style="[themeVariables, browserhackStyle]")
-	template(v-if="world")
+	.fatal-connection-error(v-if="fatalConnectionError")
+		template(v-if="fatalConnectionError.code === 'world.unknown_world'")
+			.mdi.mdi-help-circle
+			h1 {{ $t('App:fatal-connection-error:world.unknown_world:headline') }}
+		template(v-else-if="fatalConnectionError.code === 'connection.replaced'")
+			.mdi.mdi-alert-octagon
+			h1 {{ $t('App:fatal-connection-error:connection.replaced:headline') }}
+			bunt-
+		template(v-else-if="fatalConnectionError.code === 'auth.denied' || fatalConnectionError.code === 'auth.missing_id_or_token'")
+			.mdi.mdi-alert-octagon
+			h1 {{ $t('App:fatal-connection-error:auth.denied:headline') }}
+				br
+				| {{ $t('App:fatal-connection-error:auth.denied:text') }}
+		template(v-else)
+			h1 {{ $t('App:fatal-connection-error:else:headline') }}
+		p.code error code: {{ fatalConnectionError.code }}
+	template(v-else-if="world")
 		app-bar(v-if="$mq.below['s']", @toggleSidebar="toggleSidebar")
 		transition(name="backdrop")
 			.sidebar-backdrop(v-if="$mq.below['s'] && showSidebar", @pointerup="showSidebar = false")
@@ -12,18 +28,6 @@
 			create-stage-prompt(v-else-if="showStageCreationPrompt", @close="showStageCreationPrompt = false")
 			create-chat-prompt(v-else-if="showChatCreationPrompt", @close="showChatCreationPrompt = false")
 		.disconnected-warning(v-if="!connected") {{ $t('app:disconnected-warning:text') }}
-	.fatal-connection-error(v-else-if="fatalConnectionError")
-		template(v-if="fatalConnectionError.code === 'world.unknown_world'")
-			.mdi.mdi-help-circle
-			h1 Event not found.
-		template(v-else-if="fatalConnectionError.code === 'auth.denied' || fatalConnectionError.code === 'auth.missing_id_or_token'")
-			.mdi.mdi-alert-octagon
-			h1 This event requires a valid token.
-				br
-				| Please use the link provided by your event organizer.
-		template(v-else)
-			h1 Connection refused.
-		p.code error code: {{ fatalConnectionError.code }}
 	bunt-progress-circular(v-else-if="!fatalError", size="huge")
 	.fatal-error(v-if="fatalError") {{ fatalError.message }}
 </template>
