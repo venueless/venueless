@@ -3,6 +3,8 @@
 	.header
 		h2 Configuration
 	bunt-tabs.tabs-default
+		bunt-tab(id="main", header="Main")
+			main-config()
 		bunt-tab(id="theme", header="Theme")
 			theme-config()
 		bunt-tab(id="rooms", header="Rooms")
@@ -10,10 +12,11 @@
 </template>
 <script>
 import ThemeConfig from 'components/config/ThemeConfig'
+import MainConfig from 'components/config/MainConfig'
 
 export default {
 	name: 'AdminConfig',
-	components: { ThemeConfig },
+	components: { ThemeConfig, MainConfig },
 }
 </script>
 <style lang="stylus">

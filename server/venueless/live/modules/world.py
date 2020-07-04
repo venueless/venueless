@@ -1,6 +1,7 @@
 import logging
 
 from channels.db import database_sync_to_async
+from pytz import common_timezones
 from rest_framework import serializers
 
 from venueless.core.permissions import Permission
@@ -13,6 +14,10 @@ logger = logging.getLogger(__name__)
 
 class WorldConfigSerializer(serializers.Serializer):
     theme = serializers.DictField()
+    title = serializers.CharField()
+    locale = serializers.CharField()
+    timezone = serializers.ChoiceField(choices=[(a, a) for a in common_timezones])
+    connection_limit = serializers.IntegerField(allow_null=True)
 
 
 class WorldModule(BaseModule):
@@ -27,7 +32,15 @@ class WorldModule(BaseModule):
 
     def _config_serializer(self, *args, **kwargs):
         return WorldConfigSerializer(
-            instance={"theme": self.consumer.world.config.get("theme", {})},
+            instance={
+                "theme": self.consumer.world.config.get("theme", {}),
+                "title": self.consumer.world.title,
+                "locale": self.consumer.world.locale,
+                "timezone": self.consumer.world.timezone,
+                "connection_limit": self.consumer.world.config.get(
+                    "connection_limit", 0
+                ),
+            },
             *args,
             **kwargs
         )
@@ -42,9 +55,23 @@ class WorldModule(BaseModule):
     async def config_path(self, body):
         s = self._config_serializer(data=body, partial=True)
         if s.is_valid():
-            if "theme" in body:
-                self.consumer.world.config["theme"] = s.validated_data["theme"]
-            await database_sync_to_async(self.consumer.world.save)()
+            config_fields = ("theme", "connection_limit")
+            model_fields = ("title", "locale", "timezone")
+            update_fields = set()
+
+            for f in model_fields:
+                if f in body:
+                    setattr(self.consumer.world, f, s.validated_data[f])
+                    update_fields.add(f)
+
+            for f in config_fields:
+                if f in body:
+                    self.consumer.world.config[f] = s.validated_data[f]
+                    update_fields.add("config")
+
+            await database_sync_to_async(self.consumer.world.save)(
+                update_fields=list(update_fields)
+            )
             await self.consumer.send_success(self._config_serializer().data)
         else:
             await self.consumer.send_error(code="config.invalid")

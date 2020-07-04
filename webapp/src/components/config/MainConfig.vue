@@ -1,0 +1,61 @@
+<template lang="pug">
+.c-mainconfig
+	.main-form
+		bunt-input(v-model="config.title", label="Title", name="title")
+		bunt-select(v-model="config.locale", label="Language", name="locale", :options="locales")
+		bunt-input(v-model="config.timezone", label="Time zone", name="timezone")
+		bunt-input(v-model="config.connection_limit", label="Connection limit", name="connection_limit", hint="Set to 0 to allow unlimited connections per user")
+		bunt-button.btn-save(@click="save", :loading="saving") Save
+</template>
+<script>
+import api from 'lib/api'
+import i18n from '../../i18n'
+
+// TODO: validate color / id values
+
+export default {
+	data () {
+		return {
+			config: null,
+
+			saving: false,
+			error: null
+		}
+	},
+	computed: {
+		locales () {
+			return i18n.availableLocales
+		}
+	},
+	methods: {
+		async save () {
+			// TODO validate connection limit is a number
+			this.saving = true
+			await api.call('world.config.patch', {
+				title: this.config.title,
+				locale: this.config.locale,
+				timezone: this.config.timezone,
+				connection_limit: this.config.connection_limit,
+			})
+			this.saving = false
+			// TODO error handling
+		},
+	},
+	async created () {
+		// We don't use the global world object since it e.g. currently does not contain locale and timezone
+		// TODO: Force reloading if world.updated is received from the server
+		try {
+			this.config = await api.call('world.config.get')
+		} catch (error) {
+			this.error = error
+			console.log(error)
+		}
+	}
+}
+</script>
+<style lang="stylus">
+.c-mainconfig
+	.btn-save
+		margin-top: 16px
+		themed-button-primary(size: large)
+</style>
