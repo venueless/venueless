@@ -29,7 +29,8 @@ transition(name="sidebar")
 				.group-title
 					span {{ $t('RoomsSidebar:admin-headline:text') }}
 				.admin
-					router-link.room(:to="{name: 'admin:users'}", v-if="hasPermission('world:users.list')") Users
+					router-link.room(:to="{name: 'admin:users'}", v-if="hasPermission('world:users.list')") {{ $t('RoomsSidebar:admin-users:label') }}
+					router-link.room(:to="{name: 'admin:config'}", v-if="hasPermission('world:update')") {{ $t('RoomsSidebar:admin-config:label') }}
 		.profile(@click="$emit('editProfile')")
 			avatar(:user="user", :size="36")
 			.display-name {{ user.profile.display_name }}
