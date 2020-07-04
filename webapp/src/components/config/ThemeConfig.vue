@@ -5,9 +5,9 @@
 	.theme-form(v-if="config != null")
 		bunt-input(v-model="config.theme.colors.primary", label="Primary color", name="colors_primary")
 		bunt-input(v-model="config.theme.colors.sidebar", label="Sidebar color", name="colors_sidebar")
-		bunt-input(v-model="config.theme.logo.url", label="Logo", name="logo_url")
+		upload-url-input(v-model="config.theme.logo.url", label="Logo", name="logo_url")
 		bunt-checkbox(v-model="config.theme.logo.fitToWidth", label="Fit logo to width", name="logo_fit")
-		bunt-input(v-model="config.theme.logo.streamOfflineImage", label="Stream offline image", name="streamoffline_url")
+		upload-url-input(v-model="config.theme.logo.streamOfflineImage", label="Stream offline image", name="streamoffline_url")
 		table.text-overwrites
 			thead
 				tr
@@ -23,10 +23,12 @@
 import api from 'lib/api'
 import { DEFAULT_COLORS, DEFAULT_LOGO } from '../../theme'
 import i18n from '../../i18n'
+import UploadUrlInput from './UploadUrlInput'
 
 // TODO: validate color / id values
 
 export default {
+	components: { UploadUrlInput },
 	data () {
 		return {
 			// We do not use the global config object since we cannot rely on it being up to date (theme is only updated
@@ -56,7 +58,7 @@ export default {
 			this.saving = false
 			// TODO error handling
 
-			location.reload()  // Theme config is only activated after reload
+			location.reload() // Theme config is only activated after reload
 		},
 	},
 	async created () {
