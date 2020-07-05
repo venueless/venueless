@@ -19,7 +19,7 @@
 						:loading="room.updating === 'delete'",
 						:error-message="(room.error && room.error.action === 'delete') ? room.error.message : null",
 						tooltipPlacement="left",
-						@click="doAction(room, 'delete', 'deleted')", :key="`${room.id}-delete`")
+						@click="doAction(room, 'delete')", :key="`${room.id}-delete`")
 						| delete
 		bunt-progress-circular(v-else, size="huge", :page="true")
 </template>
@@ -45,21 +45,27 @@ export default {
 		}
 	},
 	async created () {
-		this.rooms = (await api.call('world.rooms.list')).map(room => {
-			return {
-				...room,
-				updating: null,
-				error: null
-			}
-		})
+		this.load()
 	},
 	methods: {
+		async load () {
+			this.rooms = []
+			this.rooms = (await api.call('room.adminlist')).map(room => {
+				return {
+					...room,
+					updating: null,
+					error: null
+				}
+			})
+		},
 		async doAction (room, action, postState) {
 			room.updating = action
 			room.error = null
 			try {
-				await api.call(`world.rooms.${action}`, {id: room.id})
-				room.moderation_state = postState
+				await api.call(`room.${action}`, {room: room.id})
+				if (action === 'delete') {
+					this.load()
+				}
 			} catch (error) {
 				room.error = {
 					action,

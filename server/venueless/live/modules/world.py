@@ -4,13 +4,8 @@ from channels.db import database_sync_to_async
 from pytz import common_timezones
 from rest_framework import serializers
 
-from venueless.core.models import Room
 from venueless.core.permissions import Permission
-from venueless.core.services.world import (
-    get_rooms,
-    get_world_config_for_user,
-    notify_world_change,
-)
+from venueless.core.services.world import get_world_config_for_user, notify_world_change
 from venueless.live.decorators import command, event, require_world_permission
 from venueless.live.modules.base import BaseModule
 
@@ -29,20 +24,6 @@ class WorldConfigSerializer(serializers.Serializer):
 
     def _available_permissions(self, *args):
         return [d.value for d in Permission]
-
-
-class RoomConfigSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Room
-        fields = (
-            "id",
-            "trait_grants",
-            "module_config",
-            "picture",
-            "name",
-            "description",
-            "sorting_priority",
-        )
 
 
 class WorldModule(BaseModule):
@@ -103,9 +84,3 @@ class WorldModule(BaseModule):
             await notify_world_change(self.consumer.world.id)
         else:
             await self.consumer.send_error(code="config.invalid")
-
-    @command("rooms.list")
-    @require_world_permission(Permission.WORLD_UPDATE)
-    async def rooms_list(self, body):
-        rooms = await database_sync_to_async(get_rooms)(self.consumer.world, user=None)
-        await self.consumer.send_success(RoomConfigSerializer(rooms, many=True).data)
