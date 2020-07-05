@@ -21,6 +21,11 @@
 						tooltipPlacement="left",
 						@click="doAction(room, 'delete')", :key="`${room.id}-delete`")
 						| delete
+					bunt-link-button.btn-edit(
+						tooltipPlacement="left",
+						:to="{name: 'admin:room', params: {editRoomId: room.id}}"
+						)
+						| edit
 		bunt-progress-circular(v-else, size="huge", :page="true")
 </template>
 <script>
@@ -50,7 +55,7 @@ export default {
 	methods: {
 		async load () {
 			this.rooms = []
-			this.rooms = (await api.call('room.adminlist')).map(room => {
+			this.rooms = (await api.call('room.config.list')).map(room => {
 				return {
 					...room,
 					updating: null,
@@ -116,12 +121,12 @@ export default {
 			.placeholder
 				flex: none
 				color: $clr-secondary-text-light
-			.btn-reactivate
-				button-style(style: clear, color: $clr-success, text-color: $clr-success)
+			.btn-edit
+				button-style(style: clear, color: $clr-primary, text-color: $clr-primary)
 			.btn-delete
 				button-style(style: clear, color: $clr-danger, text-color: $clr-danger)
 		.room:not(:hover):not(.error):not(.updating)
-			.actions .bunt-button
+			.actions .bunt-button, .actions .bunt-link-button
 				display: none
 		.room:hover, .room.error, .room.updating
 			.actions .placeholder

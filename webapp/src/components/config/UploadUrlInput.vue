@@ -32,7 +32,7 @@ export default {
 			} else if (this.$store.state.clientId) {
 				headers.append('Authorization', `Client ${this.$store.state.clientId}`)
 			}
-
+			this.uploading = true
 			fetch(config.api.upload, {
 				method: 'POST',
 				headers: headers,
@@ -40,10 +40,12 @@ export default {
 			}).then(response => response.json()).then(data => {
 				this.value = data.url
 				this.$emit('input', this.value)
+				this.uploading = false
 			}).catch(error => {
 				// TODO: better error handling
 				console.log(error)
 				alert(`error: ${error}`)
+				this.uploading = false
 			})
 		}
 	},

@@ -192,11 +192,35 @@ class RoomModule(BaseModule):
             ]
         )
 
-    @command("adminlist")
+    @command("config.list")
     @require_world_permission(Permission.ROOM_UPDATE)
     async def rooms_list(self, body):
         rooms = await database_sync_to_async(get_rooms)(self.consumer.world, user=None)
         await self.consumer.send_success(RoomConfigSerializer(rooms, many=True).data)
+
+    @command("config.get")
+    @room_action(permission_required=Permission.ROOM_UPDATE)
+    async def config_get(self, body):
+        await self.consumer.send_success(RoomConfigSerializer(self.room).data)
+
+    @command("config.patch")
+    @room_action(permission_required=Permission.ROOM_UPDATE)
+    async def config_patch(self, body):
+        s = RoomConfigSerializer(self.room, data=body, partial=True)
+        if s.is_valid():
+            update_fields = set()
+            for f in s.fields.keys():
+                if f in body:
+                    setattr(self.room, f, s.validated_data[f])
+                    update_fields.add(f)
+
+            await database_sync_to_async(self.room.save)(
+                update_fields=list(update_fields)
+            )
+            await self.consumer.send_success(RoomConfigSerializer(self.room).data)
+            # TODO: await notify_world_change(self.consumer.world.id)
+        else:
+            await self.consumer.send_error(code="config.invalid")
 
     @command("delete")
     @room_action(permission_required=Permission.ROOM_DELETE)

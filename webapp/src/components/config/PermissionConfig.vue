@@ -51,7 +51,7 @@ export default {
 			}
 		},
 		add_role () {
-			this.$set(this.config.roles, "", [])
+			this.$set(this.config.roles, '', [])
 		},
 		toggle_trait_grants (role, toggle) {
 			if (toggle) {
@@ -64,7 +64,7 @@ export default {
 			this.$set(this.config.roles, n, this.config.roles[old])
 			this.$delete(this.config.roles, old)
 			if (typeof this.config.trait_grants[old] !== 'undefined') {
-				this.$set(this.config.trait_grants, n, this.config.roles[old])
+				this.$set(this.config.trait_grants, n, this.config.trait_grants[old])
 				this.$delete(this.config.trait_grants, old)
 			}
 		},

@@ -60,7 +60,7 @@ class WorldModule(BaseModule):
 
     @command("config.patch")
     @require_world_permission(Permission.WORLD_UPDATE)
-    async def config_path(self, body):
+    async def config_patch(self, body):
         s = self._config_serializer(data=body, partial=True)
         if s.is_valid():
             config_fields = ("theme", "connection_limit")
