@@ -43,6 +43,7 @@ class RoomConfigSerializer(serializers.ModelSerializer):
             "name",
             "description",
             "sorting_priority",
+            "pretalx_id",
         )
 
 

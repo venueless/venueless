@@ -16,6 +16,8 @@ class WorldConfigSerializer(serializers.Serializer):
     theme = serializers.DictField()
     roles = serializers.DictField()
     trait_grants = serializers.DictField()
+    bbb_defaults = serializers.DictField()
+    pretalx = serializers.DictField()
     title = serializers.CharField()
     locale = serializers.CharField()
     timezone = serializers.ChoiceField(choices=[(a, a) for a in common_timezones])
@@ -37,12 +39,16 @@ class WorldModule(BaseModule):
         await self.consumer.send_json(["world.updated", world_config])
 
     def _config_serializer(self, *args, **kwargs):
+        bbb_defaults = self.consumer.world.config.get("bbb_defaults", {})
+        bbb_defaults.pop("secret", None)  # Protect secret legacy contents
         return WorldConfigSerializer(
             instance={
                 "theme": self.consumer.world.config.get("theme", {}),
                 "title": self.consumer.world.title,
                 "locale": self.consumer.world.locale,
                 "roles": self.consumer.world.roles,
+                "bbb_defaults": bbb_defaults,
+                "pretalx": self.consumer.world.config.get("pretalx", {}),
                 "timezone": self.consumer.world.timezone,
                 "trait_grants": self.consumer.world.trait_grants,
                 "connection_limit": self.consumer.world.config.get(
@@ -63,7 +69,7 @@ class WorldModule(BaseModule):
     async def config_patch(self, body):
         s = self._config_serializer(data=body, partial=True)
         if s.is_valid():
-            config_fields = ("theme", "connection_limit")
+            config_fields = ("theme", "connection_limit", "bbb_defaults", "pretalx")
             model_fields = ("title", "locale", "timezone", "roles", "trait_grants")
             update_fields = set()
 

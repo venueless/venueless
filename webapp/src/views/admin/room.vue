@@ -8,6 +8,7 @@
 		bunt-input(v-model="config.name", label="Name", name="name")
 		bunt-input(v-model="config.description", label="Description", name="description")
 		bunt-input(v-model="config.sorting_priority", label="Sorting priority", name="sorting_priority")
+		bunt-input(v-model="config.pretalx_id", label="pretalx ID", name="pretalx_id")
 		upload-url-input(v-model="config.picture", label="Picture", name="picture")
 		table.trait-grants
 			thead
@@ -42,8 +43,10 @@
 					bunt-input(v-model="val.config.url", label="URL", name="url")
 				div(v-else-if="val.type == 'livestream.native'")
 					bunt-input(v-model="val.config.hls_url", label="HLS URL", name="url")
+				div(v-else-if="val.type == 'call.bigbluebutton'")
+					bunt-checkbox(v-model="val.config.record", label="Allow recording (needs to be set before first join)", name="record")
 				div(v-else-if="val.type == 'chat.native'")
-					bunt-checkbox(v-model="val.config.volatile", label="Users only join temporarily (use for large rooms, e.g. stage chats)", hint="foo", name="volatile")
+					bunt-checkbox(v-model="val.config.volatile", label="Users only join temporarily (use for large rooms, e.g. stage chats)", name="volatile")
 			div.add-module
 				bunt-select(v-model="add_module_type", label="Type", name="type", :options="unusedTypes")
 				bunt-button.btn-add-module(@click="add_module") Add new module

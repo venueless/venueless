@@ -7,6 +7,8 @@
 		bunt-select(v-model="config.locale", label="Language", name="locale", :options="locales")
 		bunt-input(v-model="config.timezone", label="Time zone", name="timezone")
 		bunt-input(v-model="config.connection_limit", label="Connection limit", name="connection_limit", hint="Set to 0 to allow unlimited connections per user")
+		bunt-input(v-model="config.pretalx.base_url", label="pretalx base URL", name="pretalx_base_url")
+		bunt-checkbox(v-model="config.bbb_defaults.record", label="Allow recording in newly-created BBB rooms", name="bbb_defaults_record")
 		bunt-button.btn-save(@click="save", :loading="saving") Save
 </template>
 <script>
@@ -38,6 +40,8 @@ export default {
 				locale: this.config.locale,
 				timezone: this.config.timezone,
 				connection_limit: this.config.connection_limit,
+				bbb_defaults: this.config.bbb_defaults,
+				pretalx: this.config.pretalx,
 			})
 			this.saving = false
 			// TODO error handling
