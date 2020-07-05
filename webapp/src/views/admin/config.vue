@@ -7,16 +7,17 @@
 			main-config()
 		bunt-tab(id="theme", header="Theme")
 			theme-config()
-		bunt-tab(id="rooms", header="Rooms")
-			p Rooms
+		bunt-tab(id="permissions", header="Permissions")
+			permission-config()
 </template>
 <script>
 import ThemeConfig from 'components/config/ThemeConfig'
 import MainConfig from 'components/config/MainConfig'
+import PermissionConfig from 'components/config/PermissionConfig'
 
 export default {
 	name: 'AdminConfig',
-	components: { ThemeConfig, MainConfig },
+	components: { ThemeConfig, MainConfig, PermissionConfig },
 }
 </script>
 <style lang="stylus">

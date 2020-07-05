@@ -27,6 +27,10 @@ const routes = [{
 	name: 'admin:users',
 	component: () => import(/* webpackChunkName: "admin" */ 'views/admin/users'),
 }, {
+	path: '/admin/rooms',
+	name: 'admin:rooms',
+	component: () => import(/* webpackChunkName: "admin" */ 'views/admin/rooms'),
+}, {
 	path: '/admin/config',
 	name: 'admin:config',
 	component: () => import(/* webpackChunkName: "admin" */ 'views/admin/config'),

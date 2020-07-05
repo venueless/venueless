@@ -1,6 +1,8 @@
 <template lang="pug">
 .c-mainconfig
-	.main-form
+	bunt-progress-circular(size="huge", v-if="error == null && config == null")
+	.error(v-if="error") We could not fetch the current configuration.
+	.main-form(v-if="config != null")
 		bunt-input(v-model="config.title", label="Title", name="title")
 		bunt-select(v-model="config.locale", label="Language", name="locale", :options="locales")
 		bunt-input(v-model="config.timezone", label="Time zone", name="timezone")
