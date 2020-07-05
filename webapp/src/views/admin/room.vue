@@ -30,6 +30,23 @@
 						bunt-button.btn-add-role(@click="add_role") Add role
 					td
 					td
+		h3 Content
+		div.modules
+			div.module(v-for="(val, index) in config.module_config")
+				h4 {{ val.type }}
+					bunt-icon-button(@click="remove_module(val.type)") delete
+				div(v-if="val.type == 'page.markdown'")
+					bunt-input-outline-container(label="Content")
+						textarea(slot-scope="{focus, blur}", @focus="focus", @blur="blur", v-model="val.config.content")
+				div(v-else-if="val.type == 'page.iframe'")
+					bunt-input(v-model="val.config.url", label="URL", name="url")
+				div(v-else-if="val.type == 'livestream.native'")
+					bunt-input(v-model="val.config.hls_url", label="HLS URL", name="url")
+				div(v-else-if="val.type == 'chat.native'")
+					bunt-checkbox(v-model="val.config.volatile", label="Users only join temporarily (use for large rooms, e.g. stage chats)", hint="foo", name="volatile")
+			div.add-module
+				bunt-select(v-model="add_module_type", label="Type", name="type", :options="unusedTypes")
+				bunt-button.btn-add-module(@click="add_module") Add new module
 		bunt-button.btn-save(@click="save", :loading="saving") Save
 </template>
 <script>
@@ -38,6 +55,14 @@
 import api from 'lib/api'
 import i18n from '../../i18n'
 import UploadUrlInput from '../../components/config/UploadUrlInput'
+
+const KNOWN_TYPES = [
+	'page.markdown',
+	'page.iframe',
+	'livestream.native',
+	'chat.native',
+	'call.bigbluebutton'
+]
 
 export default {
 	name: 'AdminRoom',
@@ -48,6 +73,7 @@ export default {
 	data () {
 		return {
 			config: null,
+			add_module_type: null,
 
 			saving: false,
 			error: null
@@ -56,6 +82,10 @@ export default {
 	computed: {
 		locales () {
 			return i18n.availableLocales
+		},
+		unusedTypes () {
+			const usedTypes = this.config.module_config.map((m) => m.type)
+			return KNOWN_TYPES.filter((t) => !usedTypes.includes(t))
 		}
 	},
 	methods: {
@@ -81,6 +111,15 @@ export default {
 			this.$set(this.config.trait_grants, n, this.config.trait_grants[old])
 			this.$delete(this.config.trait_grants, old)
 		},
+		remove_module (type) {
+			this.config.module_config = this.config.module_config.filter((m) => m.type !== type)
+		},
+		add_module () {
+			if (this.add_module_type) {
+				this.config.module_config.push({type: this.add_module_type, config: {}})
+				this.add_module_type = null
+			}
+		},
 		async save () {
 			// TODO validate values
 			this.saving = true
@@ -91,6 +130,7 @@ export default {
 				sorting_priority: this.config.sorting_priority,
 				picture: this.config.picture,
 				trait_grants: this.config.trait_grants,
+				module_config: this.config.module_config,
 			})
 			this.saving = false
 			// TODO error handling
@@ -110,24 +150,47 @@ export default {
 </script>
 <style lang="stylus">
 .c-admin-room
-	padding: 16px
+	padding 16px
 	.trait-grants
-		width: 100%
+		width 100%
 		th
-			text-align: left
-			border-bottom: 1px solid #ccc
-			padding: 10px
+			text-align left
+			border-bottom 1px solid #ccc
+			padding 10px
 		td
-			vertical-align: center
+			vertical-align center
 		td.actions
-			text-align: right
+			text-align right
+	.module
+		border 1px solid #cccccc
+		border-radius 4px
+		padding 5px 15px
+		margin-bottom 15px
+		.bunt-input-outline-container
+			textarea
+				background-color: transparent
+				border: none
+				outline: none
+				resize: vertical
+				min-height: 250px
+				padding: 0 8px
+	.add-module
+		display flex
+		flex-direction row
+		align-items center
+		margin 0 -15px
+		.dropdown, button
+			margin: 0 15px
+			flex: 1
 	h2
-		margin-top: 0
-		margin-bottom: 16px
+		margin-top 0
+		margin-bottom 16px
 	.btn-save
-		margin-top: 16px
+		margin-top 16px
 		themed-button-primary(size: large)
+	.btn-add-module
+		themed-button-default()
 	.btn-add-role
-		margin-top: 16px
+		margin 8px 0
 		themed-button-default()
 </style>
