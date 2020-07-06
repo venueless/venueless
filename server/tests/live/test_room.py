@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 import pytest
 from channels.db import database_sync_to_async
 from channels.testing import WebsocketCommunicator
-from tenueless.routing import application
+from venueless.routing import application
 from tests.utils import get_token
 
 

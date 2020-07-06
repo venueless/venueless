@@ -33,10 +33,12 @@ export default {
 	},
 	validations: {
 		number: {
-			integer
+			integer,
+			required
 		},
 		days: {
-			integer
+			integer,
+			required
 		}
 	},
 	methods: {
