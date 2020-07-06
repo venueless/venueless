@@ -9,15 +9,18 @@
 			theme-config()
 		bunt-tab(id="permissions", header="Permissions")
 			permission-config()
+		bunt-tab(id="tokengen", header="Token generator")
+			token-generator()
 </template>
 <script>
 import ThemeConfig from 'components/config/ThemeConfig'
 import MainConfig from 'components/config/MainConfig'
 import PermissionConfig from 'components/config/PermissionConfig'
+import TokenGenerator from 'components/config/TokenGenerator'
 
 export default {
 	name: 'AdminConfig',
-	components: { ThemeConfig, MainConfig, PermissionConfig },
+	components: { ThemeConfig, MainConfig, PermissionConfig, TokenGenerator },
 }
 </script>
 <style lang="stylus">

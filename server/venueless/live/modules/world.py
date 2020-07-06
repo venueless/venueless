@@ -1,5 +1,8 @@
+import datetime
 import logging
+import uuid
 
+import jwt
 from channels.db import database_sync_to_async
 from pytz import common_timezones
 from rest_framework import serializers
@@ -90,3 +93,28 @@ class WorldModule(BaseModule):
             await notify_world_change(self.consumer.world.id)
         else:
             await self.consumer.send_error(code="config.invalid")
+
+    @command("tokens.generate")
+    @require_world_permission(Permission.WORLD_UPDATE)  # TODO: stricter permission?
+    async def tokens_generate(self, body):
+        jwt_config = self.consumer.world.config["JWT_secrets"][0]
+        secret = jwt_config["secret"]
+        audience = jwt_config["audience"]
+        issuer = jwt_config["issuer"]
+        iat = datetime.datetime.utcnow()
+        exp = iat + datetime.timedelta(days=body["days"])
+        result = []
+        for i in range(body["number"]):
+            payload = {
+                "iss": issuer,
+                "aud": audience,
+                "exp": exp,
+                "iat": iat,
+                "uid": str(uuid.uuid4()),
+                "traits": body["traits"]
+            }
+            token = jwt.encode(
+                payload, secret, algorithm="HS256"
+            ).decode("utf-8")
+            result.append(token)
+        await self.consumer.send_success({"results": result})
