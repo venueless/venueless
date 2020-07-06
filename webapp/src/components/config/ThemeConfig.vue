@@ -3,11 +3,11 @@
 	bunt-progress-circular(size="huge", v-if="error == null && config == null")
 	.error(v-if="error") We could not fetch the current configuration.
 	.theme-form(v-if="config != null")
-		bunt-input(v-model="config.theme.colors.primary", label="Primary color", name="colors_primary")
-		bunt-input(v-model="config.theme.colors.sidebar", label="Sidebar color", name="colors_sidebar")
-		upload-url-input(v-model="config.theme.logo.url", label="Logo", name="logo_url")
+		bunt-input(v-model="config.theme.colors.primary", label="Primary color", name="colors_primary", :validation="$v.config.theme.colors.primary")
+		bunt-input(v-model="config.theme.colors.sidebar", label="Sidebar color", name="colors_sidebar", :validation="$v.config.theme.colors.sidebar")
+		upload-url-input(v-model="config.theme.logo.url", label="Logo", name="logo_url", :validation="$v.config.theme.logo.url")
 		bunt-checkbox(v-model="config.theme.logo.fitToWidth", label="Fit logo to width", name="logo_fit")
-		upload-url-input(v-model="config.theme.logo.streamOfflineImage", label="Stream offline image", name="streamoffline_url")
+		upload-url-input(v-model="config.theme.streamOfflineImage", label="Stream offline image", name="streamoffline_url", :validation="$v.config.theme.streamOfflineImage")
 		table.text-overwrites
 			thead
 				tr
@@ -24,8 +24,11 @@ import api from 'lib/api'
 import { DEFAULT_COLORS, DEFAULT_LOGO } from '../../theme'
 import i18n from '../../i18n'
 import UploadUrlInput from './UploadUrlInput'
+import { required, helpers, url } from 'vuelidate/lib/validators'
 
-// TODO: validate color / id values
+const color = helpers.regex('color', /^#[a-zA-Z0-9]{3,6}$/)
+const relative = helpers.regex('relative', /^\/.*$/)
+const urlOrRelative = (value) => (!helpers.req(value) || url(value) || relative(value))
 
 export default {
 	components: { UploadUrlInput },
@@ -44,8 +47,35 @@ export default {
 			return i18n.messages[i18n.locale]
 		},
 	},
+	validations: {
+		config: {
+			theme: {
+				colors: {
+					primary: {
+						required,
+						color
+					},
+					sidebar: {
+						required,
+						color
+					}
+				},
+				logo: {
+					url: {
+						urlOrRelative
+					}
+				},
+				streamOfflineImage: {
+					url
+				}
+			},
+		}
+	},
 	methods: {
 		async save () {
+			this.$v.$touch()
+			if (this.$v.$invalid) return
+
 			// Cleanup empty strings in text overwrites
 			for (const key of Object.keys(this.config.theme.textOverwrites)) {
 				if (!this.config.theme.textOverwrites[key]) {

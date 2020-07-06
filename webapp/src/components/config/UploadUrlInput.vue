@@ -1,6 +1,6 @@
 <template lang="pug">
 .c-upload-url-input
-	bunt-input(v-model="value", :label="label", :name="name")
+	bunt-input(v-model="value", :label="label", :name="name", :validation="validation")
 	.file-selector
 		bunt-icon-button(:loading="uploading") upload
 		input(type="file", @change="upload", ref="fileInput")
@@ -14,6 +14,7 @@ export default {
 		value: String,
 		label: String,
 		name: String,
+		validation: Object,
 	},
 	data () {
 		return {

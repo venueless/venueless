@@ -5,10 +5,10 @@
 	bunt-progress-circular(size="huge", v-if="error == null && config == null")
 	.error(v-if="error") We could not fetch the current configuration.
 	.main-form(v-if="config != null")
-		bunt-input(v-model="config.name", label="Name", name="name")
+		bunt-input(v-model="config.name", label="Name", name="name", :validation="$v.config.name")
 		bunt-input(v-model="config.description", label="Description", name="description")
-		bunt-input(v-model="config.sorting_priority", label="Sorting priority", name="sorting_priority")
-		bunt-input(v-model="config.pretalx_id", label="pretalx ID", name="pretalx_id")
+		bunt-input(v-model="config.sorting_priority", label="Sorting priority", name="sorting_priority", :validation="$v.config.sorting_priority")
+		bunt-input(v-model="config.pretalx_id", label="pretalx ID", name="pretalx_id", :validation="$v.config.pretalx_id")
 		upload-url-input(v-model="config.picture", label="Picture", name="picture")
 		table.trait-grants
 			thead
@@ -58,6 +58,7 @@
 import api from 'lib/api'
 import i18n from '../../i18n'
 import UploadUrlInput from '../../components/config/UploadUrlInput'
+import { required, integer } from 'vuelidate/lib/validators'
 
 const KNOWN_TYPES = [
 	'page.markdown',
@@ -89,6 +90,20 @@ export default {
 		unusedTypes () {
 			const usedTypes = this.config.module_config.map((m) => m.type)
 			return KNOWN_TYPES.filter((t) => !usedTypes.includes(t))
+		}
+	},
+	validations: {
+		config: {
+			name: {
+				required
+			},
+			sorting_priority: {
+				required,
+				integer
+			},
+			pretalx_id: {
+				integer
+			},
 		}
 	},
 	methods: {
@@ -124,7 +139,8 @@ export default {
 			}
 		},
 		async save () {
-			// TODO validate values
+			this.$v.$touch()
+			if (this.$v.$invalid) return
 			this.saving = true
 			await api.call('room.config.patch', {
 				room: this.editRoomId,
@@ -153,6 +169,7 @@ export default {
 </script>
 <style lang="stylus">
 .c-admin-room
+	background white
 	padding 16px
 	.trait-grants
 		width 100%

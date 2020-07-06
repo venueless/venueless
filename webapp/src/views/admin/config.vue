@@ -22,6 +22,8 @@ export default {
 </script>
 <style lang="stylus">
 .c-admin-config
+	background white
+
 	h2
 		margin: 16px
 
