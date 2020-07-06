@@ -111,10 +111,8 @@ class WorldModule(BaseModule):
                 "exp": exp,
                 "iat": iat,
                 "uid": str(uuid.uuid4()),
-                "traits": body["traits"]
+                "traits": body["traits"],
             }
-            token = jwt.encode(
-                payload, secret, algorithm="HS256"
-            ).decode("utf-8")
+            token = jwt.encode(payload, secret, algorithm="HS256").decode("utf-8")
             result.append(token)
         await self.consumer.send_success({"results": result})
