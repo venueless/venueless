@@ -4,7 +4,16 @@ from channels.db import database_sync_to_async
 from channels.layers import get_channel_layer
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
-from django.db.models import Count, Exists, Max, OuterRef, Prefetch, Q, Subquery
+from django.db.models import (
+    Count,
+    Exists,
+    IntegerField,
+    Max,
+    OuterRef,
+    Prefetch,
+    Q,
+    Subquery,
+)
 from django.utils.timezone import now
 
 from ...live.channels import GROUP_CHAT
@@ -38,7 +47,17 @@ class ChatService:
     def get_channels_for_user(self, user_id, is_volatile=None, is_hidden=False):
         qs = (
             Membership.objects.filter(channel__world_id=self.world.pk, user_id=user_id,)
-            .annotate(max_id=Max("channel__chat_events__id"))
+            .annotate(
+                max_id=Subquery(
+                    ChatEvent.objects.filter(channel_id=OuterRef("channel_id"),)
+                    .exclude(event_type="channel.member")
+                    .order_by()
+                    .values("channel_id")
+                    .annotate(m=Max("id"))
+                    .values("m"),
+                    output_field=IntegerField(),
+                )
+            )
             .prefetch_related(
                 Prefetch(
                     "channel",
@@ -62,7 +81,7 @@ class ChatService:
         for m in qs:
             r = {
                 "id": str(m.channel_id),
-                "notification_pointer": m.max_id,
+                "notification_pointer": m.max_id or 0,
             }
             if not m.channel.room_id:
                 r["members"] = [
@@ -166,9 +185,11 @@ class ChatService:
         return ce.serialize_public()
 
     @database_sync_to_async
-    def get_highest_id_in_channel(self, channel_id):
+    def get_highest_nonmember_id_in_channel(self, channel_id):
         return (
-            ChatEvent.objects.filter(channel_id=channel_id).aggregate(m=Max("id"))["m"]
+            ChatEvent.objects.exclude(event_type="channel.member")
+            .filter(channel_id=channel_id)
+            .aggregate(m=Max("id"))["m"]
             or 0
         )
 

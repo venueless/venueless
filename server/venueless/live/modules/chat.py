@@ -119,7 +119,7 @@ class ChatModule(BaseModule):
         return {
             "state": None,
             "next_event_id": (last_id) + 1,
-            "notification_pointer": await self.service.get_highest_id_in_channel(
+            "notification_pointer": await self.service.get_highest_nonmember_id_in_channel(
                 self.channel_id
             ),
             "members": await self.service.get_channel_users(
