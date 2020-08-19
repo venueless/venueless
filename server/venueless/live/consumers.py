@@ -20,6 +20,7 @@ from venueless.core.services.world import get_world
 from venueless.live.channels import GROUP_USER, GROUP_VERSION
 from venueless.live.exceptions import ConsumerException
 
+from ..core.services.user import user_broadcast
 from .modules.auth import AuthModule
 from .modules.bbb import BBBModule
 from .modules.chat import ChatModule
@@ -81,20 +82,6 @@ class MainConsumer(AsyncJsonWebsocketConsumer):
             self.channel_name,
         )
         await unregister_connection()
-
-    async def user_broadcast(self, event_type, data, user_id=None):
-        """
-        Broadcast a message to other clients of the same user.
-        """
-        await self.channel_layer.group_send(
-            GROUP_USER.format(id=user_id or self.user.id),
-            {
-                "type": "user.broadcast",
-                "event_type": event_type,
-                "data": data,
-                "socket": self.socket_id,
-            },
-        )
 
     # Receive message from WebSocket
     async def receive_json(self, content, **kargs):
