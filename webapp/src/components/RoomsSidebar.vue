@@ -20,12 +20,12 @@ transition(name="sidebar")
 				span {{ $t('RoomsSidebar:channels-headline:text') }}
 				.buffer
 				bunt-icon-button(v-if="hasPermission('world:rooms.create.chat') || hasPermission('world:rooms.create.bbb')", @click="showChatCreationPrompt = true") plus
-				bunt-icon-button(@click="showChannelBrowser = true") compass-outline
 			.chats
 				router-link.video-chat(v-for="chat of roomsByType.videoChat", :to="chat === rooms[0] ? {name: 'home'} : {name: 'room', params: {roomId: chat.id}}")
 					.name {{ chat.name }}
 				router-link.text-chat(v-for="chat of roomsByType.textChat", :to="chat === rooms[0] ? {name: 'home'} : {name: 'room', params: {roomId: chat.id}}", :class="{unread: hasUnreadMessages(chat.modules[0].channel_id)}")
 					.name {{ chat.name }}
+				a(@click="showChannelBrowser = true").channel-browser {{ $t('RoomsSidebar:channels-explore:label') }}
 			//- TODO remove v-if when plus button is implemented
 			.group-title(v-if="directMessageChannels.length")
 				span {{ $t('RoomsSidebar:direct-messages-headline:text') }}
@@ -247,6 +247,10 @@ export default {
 		.text-chat
 			&::before
 				content: '\F0423'
+		.channel-browser
+			cursor: pointer
+			&::before
+				content: '\F018C'
 		.video-chat
 			&::before
 				content: '\F05A0'

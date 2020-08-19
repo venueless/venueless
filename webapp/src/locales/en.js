@@ -51,6 +51,7 @@ export default {
 	'RoomsSidebar:admin-headline:text': 'Administration',
 	'RoomsSidebar:stages-headline:text': 'Stages',
 	'RoomsSidebar:channels-headline:text': 'Channels',
+	'RoomsSidebar:channels-explore:label': 'Explore more channels',
 	'RoomsSidebar:direct-messages-headline:text': 'Direct messages',
 	'RoomsSidebar:admin-users:label': 'Users',
 	'RoomsSidebar:admin-config:label': 'Config',
