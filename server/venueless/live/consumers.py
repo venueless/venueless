@@ -17,10 +17,9 @@ from venueless.core.services.connections import (
     unregister_connection,
 )
 from venueless.core.services.world import get_world
-from venueless.live.channels import GROUP_USER, GROUP_VERSION
+from venueless.live.channels import GROUP_VERSION
 from venueless.live.exceptions import ConsumerException
 
-from ..core.services.user import user_broadcast
 from .modules.auth import AuthModule
 from .modules.bbb import BBBModule
 from .modules.chat import ChatModule
