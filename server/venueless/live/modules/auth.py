@@ -75,7 +75,6 @@ class AuthModule(BaseModule):
         )
 
         await self._enforce_connection_limit()
-        await ChatService(self.consumer.world).enforce_forced_joins(self.consumer.user)
 
         await self.consumer.channel_layer.group_add(
             GROUP_USER.format(id=self.consumer.user.id), self.consumer.channel_name
@@ -83,6 +82,8 @@ class AuthModule(BaseModule):
         await self.consumer.channel_layer.group_add(
             GROUP_WORLD.format(id=self.consumer.world.id), self.consumer.channel_name
         )
+
+        await ChatService(self.consumer.world).enforce_forced_joins(self.consumer.user)
 
     async def _enforce_connection_limit(self):
         connection_limit = self.consumer.world.config.get("connection_limit")
