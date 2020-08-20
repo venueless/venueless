@@ -135,7 +135,6 @@ async def test_join_volatile_based_on_room_config(volatile_chat_room, chat_room,
         assert response[0] == "success"
         response = await c.receive_json_from()
         assert response[0] == "chat.event"
-        event_id = response[1]["event_id"]
 
         assert not await ChatService(world).membership_is_volatile(
             str(chat_room.channel.id), c.context["user.config"]["id"]
@@ -146,7 +145,7 @@ async def test_join_volatile_based_on_room_config(volatile_chat_room, chat_room,
             "chat.channels",
             {
                 "channels": [
-                    {"id": str(chat_room.channel.id), "notification_pointer": event_id}
+                    {"id": str(chat_room.channel.id), "notification_pointer": 0}
                 ]
             },
         ]
