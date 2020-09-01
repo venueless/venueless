@@ -30,10 +30,14 @@
 // show controls based on mouse move time
 import { mapState } from 'vuex'
 import Hls from 'hls.js'
+import muxjs from 'mux.js'
+import shaka from 'shaka-player/dist/shaka-player.compiled.js'
 import config from 'config'
 import theme from 'theme'
 
 const RETRY_INTERVAL = 5000
+// TODO
+// look at capLevelToPlayerSize
 const HLS_DEFAULT_CONFIG = {
 	// never fall behind live edge
 	liveBackBufferLength: 0,
@@ -124,73 +128,117 @@ export default {
 	},
 	methods: {
 		initializePlayer () {
+			if (config.videoPlayer?.engine === 'shaka') {
+				this.initializeShakaPlayer()
+			} else {
+				this.initializeHlsJsPlayer()
+			}
+		},
+		async startPlaying () {
+			const video = this.$refs.video
+			this.offline = false
+			this.buffering = false
+			try {
+				if (!this.playing) return
+				await video.play()
+			} catch (e) {
+				video.muted = true
+				this.automuted = true
+				video.play()
+			}
+			this.onVolumechange()
+		},
+		initializeHlsJsPlayer () {
 			this.player?.destroy()
 			this.buffering = true
+			if (!Hls.isSupported()) return this.initializeNativePlayer()
 			const video = this.$refs.video
-			const start = async () => {
-				this.offline = false
-				this.buffering = false
-				try {
-					if (!this.playing) return
-					await video.play()
-				} catch (e) {
-					video.muted = true
-					this.automuted = true
-					video.play()
-				}
-				this.onVolumechange()
+			const hlsConfig = Object.assign({}, HLS_DEFAULT_CONFIG, config.videoPlayer?.['hls.js'])
+			const player = new Hls(hlsConfig)
+			let started = false
+			player.attachMedia(video)
+			this.player = player
+			const load = () => {
+				player.loadSource(this.module.config.hls_url)
 			}
-			if (Hls.isSupported()) {
-				const hlsConfig = Object.assign({}, HLS_DEFAULT_CONFIG, config.videoPlayer?.['hls.js'])
-				const player = new Hls(hlsConfig)
-				let started = false
-				player.attachMedia(video)
-				this.player = player
-				const load = () => {
-					player.loadSource(this.module.config.hls_url)
+			player.on(Hls.Events.MEDIA_ATTACHED, () => {
+				load()
+			})
+			player.on(Hls.Events.MANIFEST_PARSED, async (event, data) => {
+				this.startPlaying()
+				started = true
+			})
+
+			player.on(Hls.Events.LEVEL_LOADED, (event, data) => {
+				this.isLive = data.details.live
+				if (!data.details.live && this.onlyLive) {
+					this.player?.destroy()
+					this.offline = true
 				}
-				player.on(Hls.Events.MEDIA_ATTACHED, () => {
-					load()
-				})
-				player.on(Hls.Events.MANIFEST_PARSED, async (event, data) => {
-					start()
-					started = true
-				})
+			})
 
-				player.on(Hls.Events.LEVEL_LOADED, (event, data) => {
-					this.isLive = data.details.live
-					if (!data.details.live && this.onlyLive) {
-						this.player?.destroy()
+			player.on(Hls.Events.ERROR, (event, data) => {
+				console.error(event, data)
+				if (data.details === Hls.ErrorDetails.BUFFER_STALLED_ERROR) {
+					this.buffering = true
+				} else if ([Hls.ErrorDetails.MANIFEST_LOAD_ERROR, Hls.ErrorDetails.LEVEL_LOAD_ERROR].includes(data.details)) {
+					if (!started) {
 						this.offline = true
+						setTimeout(load, RETRY_INTERVAL)
+					} else if (data.response.code === 404) {
+						this.initializePlayer()
 					}
-				})
+				} else if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+					this.buffering = true
+					setTimeout(() => player.startLoad(), 250)
+				}
+			})
 
-				player.on(Hls.Events.ERROR, (event, data) => {
-					console.error(event, data)
-					if (data.details === Hls.ErrorDetails.BUFFER_STALLED_ERROR) {
-						this.buffering = true
-					} else if ([Hls.ErrorDetails.MANIFEST_LOAD_ERROR, Hls.ErrorDetails.LEVEL_LOAD_ERROR].includes(data.details)) {
-						if (!started) {
-							this.offline = true
-							setTimeout(load, RETRY_INTERVAL)
-						} else if (data.response.code === 404) {
-							this.initializePlayer()
-						}
-					} else if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
-						this.buffering = true
-						setTimeout(() => player.startLoad(), 250)
-					}
-				})
-
-				player.on(Hls.Events.FRAG_BUFFERED, () => {
-					this.buffering = false
-				})
-			} else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+			player.on(Hls.Events.FRAG_BUFFERED, () => {
+				this.buffering = false
+			})
+		},
+		async initializeShakaPlayer () {
+			this.player?.destroy()
+			this.buffering = true
+			shaka.polyfill.installAll()
+			console.log(shaka.util.Error.Code.BAD_HTTP_STATUS)
+			window.muxjs = muxjs
+			if (!shaka.Player.isBrowserSupported()) return this.initializeNativePlayer()
+			const video = this.$refs.video
+			const player = new shaka.Player(video)
+			this.player = player
+			player.addEventListener('error', error => {
+				/* BAD_HTTP_STATUS */
+				console.error(error)
+			})
+			player.addEventListener('buffering', ({buffering}) => {
+				this.buffering = buffering
+			})
+			player.addEventListener('streaming', () => {
+				this.isLive = player.isLive()
+				if (!this.isLive && this.onlyLive) {
+					this.player?.destroy()
+					this.offline = true
+				}
+			})
+			try {
+				await player.load(this.module.config.hls_url)
+				console.log('The video has now been loaded!')
+				this.startPlaying()
+			} catch (error) {
+				/* onError(e) */
+				console.error(error)
+			}
+		},
+		initializeNativePlayer () {
+			const video = this.$refs.video
+			if (video.canPlayType('application/vnd.apple.mpegurl')) {
 				video.src = this.module.config.hls_url
 				// TODO probably explodes on re-init
 				// TODO doesn't seem like the buffer ring gets hidden?
 				video.addEventListener('loadedmetadata', function () {
-					start()
+					this.startPlaying()
 				})
 			}
 		},
@@ -223,6 +271,7 @@ export default {
 			this.volume = event.target.value
 		},
 		onVolumechange () {
+			if (!this.$refs.video) return
 			if (this.$refs.video.muted) {
 				this.volume = 0
 				this.muted = true
@@ -232,9 +281,11 @@ export default {
 			}
 		},
 		onDurationchange () {
+			if (!this.$refs.video) return
 			this.duration = this.$refs.video.duration
 		},
 		onProgress () {
+			if (!this.$refs.video) return
 			this.bufferedRanges = []
 			for (let i = 0; i < this.$refs.video.buffered.length; i++) {
 				this.bufferedRanges.push({
@@ -244,6 +295,7 @@ export default {
 			}
 		},
 		onTimeupdate () {
+			if (!this.$refs.video) return
 			this.currentTime = this.$refs.video.currentTime
 		},
 		onSeeking () {
