@@ -18,6 +18,7 @@
 				bunt-icon-button(@click="toggleVideo") {{ playing ? 'pause' : 'play' }}
 				.live-indicator(v-if="isLive") live
 				.buffer
+				bunt-select.level(:value="level", name="level", :options="levels", option-label="name", v-if="levels.length > 1", @input="onSetQuality")
 				bunt-icon-button(@click="toggleVolume") {{ muted || volume === 0 ? 'volume_off' : 'volume_high' }}
 				input.volume-slider(type="range", step="any", min="0", max="1", aria-label="Volume", :value="volume", @input="onVolumeSlider", :style="{'--volume': volume}")
 				bunt-icon-button(@click="toggleFullscreen") {{ fullscreen ? 'fullscreen-exit' : 'fullscreen' }}
@@ -44,7 +45,7 @@ const HLS_DEFAULT_CONFIG = {
 	levelLoadingMaxRetry: Infinity,
 	levelLoadingMaxRetryTimeout: 5000,
 	manifestLoadingMaxRetry: Infinity,
-	manifestLoadingMaxRetryTimeout: 5000
+	manifestLoadingMaxRetryTimeout: 5000,
 }
 
 export default {
@@ -68,6 +69,10 @@ export default {
 		}
 	},
 	data () {
+		const autoLevel = {
+			id: 'auto',
+			name: this.$t('Livestream:level-auto:label'),
+		}
 		return {
 			theme,
 			isLive: null,
@@ -81,6 +86,9 @@ export default {
 			automuted: false,
 			currentTime: 0,
 			duration: 0,
+			level: autoLevel.id,
+			levels: [autoLevel],
+			autoLevel: autoLevel,
 			bufferedRanges: null,
 			hoveredProgress: null
 		}
@@ -103,7 +111,7 @@ export default {
 		},
 		hoveredTime () {
 			return this.hoveredProgress * this.duration
-		},
+		}
 	},
 	watch: {
 		'module.config.hls_url': 'initializePlayer'
@@ -155,6 +163,7 @@ export default {
 				})
 				player.on(Hls.Events.MANIFEST_PARSED, async (event, data) => {
 					start()
+					this.levels = [this.autoLevel].concat(player.levels.map((l, i) => ({id: i, name: l.height + 'p'})))
 					started = true
 				})
 
@@ -218,6 +227,13 @@ export default {
 		toggleVolume () {
 			this.automuted = false
 			this.$refs.video.muted = !this.muted
+		},
+		onSetQuality (value) {
+			if (value === 'auto') {
+				this.player.loadLevel = -1
+			} else {
+				this.player.loadLevel = value
+			}
 		},
 		onVolumeSlider (event) {
 			this.$refs.video.volume = event.target.value
@@ -468,6 +484,10 @@ export default {
 					height: 42px
 					font-size: 32px
 					line-height: @height
+			.level
+				select-style(style="dark")
+				ul li
+					background: black
 			.volume-slider
 				cursor: pointer
 				width: 100px

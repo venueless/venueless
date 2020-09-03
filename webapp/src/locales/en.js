@@ -38,6 +38,7 @@ export default {
 	'ChatInput:input:placeholder': 'Send a message',
 	'Livestream:offline-message:text': 'Stream offline',
 	'Livestream:automuted-unmute:text': 'Tap to unmute',
+	'Livestream:level-auto:label': 'Automatic quality',
 	'ProfilePrompt:headline:text': 'Hi there!',
 	'ProfilePrompt:intro:text': 'Please tell us your name. We will show it to other attendees when you interact with them. You do\'nt need to use your real name.',
 	'ProfilePrompt:displayname:label': 'Display name',
