@@ -14,11 +14,11 @@
 				tbody
 					tr(v-for="(field, index) in config.profile_fields")
 						td
-							bunt-input(v-model="field.label", label="Label", name="label")
+							bunt-input(v-model="field.label", label="Label", name="label", :validation="$v.config.profile_fields.$each[index].label")
 						td
-							bunt-select(v-model="field.type", label="Type", name="type", :options="['text', 'textarea', 'select']")
+							bunt-select(v-model="field.type", label="Type", name="type", :options="['text', 'textarea', 'select']", :validation="$v.config.profile_fields.$each[index].type")
 						td
-							bunt-input(v-if="field.type === 'select'", v-model="field.choices", label="Choices (comma seperated)", name="choices")
+							bunt-input(v-if="field.type === 'select'", v-model="field.choices", label="Choices (comma seperated)", name="choices", :validation="$v.config.profile_fields.$each[index].choices")
 						td.actions
 							bunt-icon-button(@click="removeField(index)") delete-outline
 				tfoot
@@ -33,6 +33,8 @@
 <script>
 import api from 'lib/api'
 import { v4 as uuid } from 'uuid'
+import { required, requiredIf } from 'vuelidate/lib/validators'
+
 export default {
 	data () {
 		return {
@@ -50,7 +52,23 @@ export default {
 			console.log(error)
 		}
 	},
-	validations: {},
+	validations () {
+		return {
+			config: {
+				profile_fields: {
+					$each: {
+						label: {
+							required
+						},
+						type: {
+							required
+						},
+						choices: { requiredIf: requiredIf((field) => field.type === 'select' ) }
+					}
+				}
+			}
+		}
+	},
 	methods: {
 		addField () {
 			this.config.profile_fields.push({id: uuid(), label: '', type: 'text'})
