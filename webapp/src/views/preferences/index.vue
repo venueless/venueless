@@ -1,5 +1,5 @@
 <template lang="pug">
-.v-preferences
+scrollbars.v-preferences(y)
 	h1 {{ $t('preferences/index:heading') }}
 	.inputs
 		.avatar-wrapper
@@ -76,6 +76,7 @@ export default {
 	display: flex
 	flex-direction: column
 	padding: 16px 32px
+	min-height 0
 	h1
 		margin: 0
 	.avatar-wrapper
