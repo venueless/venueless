@@ -58,7 +58,7 @@ export default {
 		set_trait_grants (role, traits) {
 			if (typeof this.config.trait_grants[role] !== 'undefined') {
 				this.$set(this.config.trait_grants, role, traits.split(',').map(
-					(i) => i.trim().split("|").filter((j) => j.length > 0)
+					(i) => i.trim().split('|').filter((j) => j.length > 0)
 				).filter((i) => i.length > 0))
 			}
 		},
