@@ -98,11 +98,11 @@ class RoomQuerySet(models.QuerySet):
                 qs = qs.annotate(
                     **{
                         f"has_role_{i}": RawSQL(
-                            f"""(
-                            trait_grants ? %s AND
-                            trait_grants->%s IS NOT NULL AND
-                            jsonb_array_length(trait_grants->%s) = 0
-                        )""",
+                            """(
+                                trait_grants ? %s AND
+                                trait_grants->%s IS NOT NULL AND
+                                jsonb_array_length(trait_grants->%s) = 0
+                            )""",
                             (
                                 role,  # ? check
                                 role,  # IS NOT NULL check
