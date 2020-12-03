@@ -1,17 +1,23 @@
 <template lang="pug">
 .c-roulette
-	bunt-progress-circular(size="huge", :page="true", v-if="loading")
+	bunt-progress-circular(v-if="loading", size="huge", :page="true")
+	.users
+		.me
+			video(v-show="ourVideoVisible", ref="ourVideo", autoplay, playsinline, muted="muted")
+		.peer(v-for="f in feeds", :key="f.rfid")
+			video(ref="peerVideo", autoplay, playsinline, muted="muted")
+
 </template>
 <script>
-import { Janus } from 'janus-gateway'
-import { mapState } from 'vuex'
+import {Janus} from 'janus-gateway'
+import {mapState} from 'vuex'
 
 export default {
 	props: {
 		module: {
 			type: Object,
-			required: true
-		}
+			required: true,
+		},
 	},
 	data () {
 		return {
@@ -23,15 +29,16 @@ export default {
 			pluginHandle: null,
 			ourId: null,
 			ourPrivateId: null,
+			ourVideoVisible: true,
 			feeds: [],
 		}
 	},
 	computed: {
 		...mapState(['user']),
 	},
-	async created () {
+	async mounted () {
 		// todo fetch from server
-		this.server = 'https://dev-janus.venueless.events/janus'
+		this.server = 'wss://dev-janus.venueless.events/ws'
 		this.roomId = 1234
 		this.initJanus()
 	},
@@ -40,15 +47,24 @@ export default {
 	},
 	methods: {
 		attachToRoom () {
+			// Roughly based on https://janus.conf.meetecho.com/videoroomtest.js
+			const comp = this
 			this.janus.attach(
 				{
 					plugin: 'janus.plugin.videoroom',
 					opaqueId: this.user.id,
 					success: function (pluginHandle) {
-						this.pluginHandle = pluginHandle
-						Janus.log('Plugin attached! (' + this.pluginHandle.getPlugin() + ', id=' + this.pluginHandle.getId() + ')')
-						Janus.log('  -- This is a publisher/manager')
-						this.loading = false
+						comp.pluginHandle = pluginHandle
+						Janus.log(
+							'Plugin attached! (' + comp.pluginHandle.getPlugin() + ', id=' + comp.pluginHandle.getId() + ')')
+
+						const register = {
+							request: 'join',
+							room: comp.roomId,
+							ptype: 'publisher',
+							display: comp.user.profile.display_name,
+						}
+						comp.pluginHandle.send({message: register})
 					},
 					error: function (error) {
 						Janus.error('  -- Error attaching plugin...', error)
@@ -76,10 +92,11 @@ export default {
 						if (event) {
 							if (event === 'joined') {
 								// Publisher/manager created, negotiate WebRTC and attach to existing feeds, if any
-								this.ourId = msg.id
-								this.ourPrivateId = msg.private_id
-								Janus.log('Successfully joined room ' + msg.room + ' with ID ' + this.ourId)
-								this.publishOwnFeed(true)
+								comp.ourId = msg.id
+								comp.ourPrivateId = msg.private_id
+								Janus.log('Successfully joined room ' + msg.room + ' with ID ' + comp.ourId)
+								comp.publishOwnFeed(true)
+								comp.loading = false
 								// Any new feed to attach to?
 								if (msg.publishers) {
 									var list = msg.publishers
@@ -90,13 +107,13 @@ export default {
 										const audio = f.audio_codec
 										const video = f.video_codec
 										Janus.debug('  >> [' + id + '] ' + display + ' (audio: ' + audio + ', video: ' + video + ')')
-										this.newRemoteFeed(id, display, audio, video)
+										comp.newRemoteFeed(id, display, audio, video)
 									}
 								}
 							} else if (event === 'destroyed') {
 								// The room has been destroyed
 								Janus.warn('The room has been destroyed!')
-								alert('The room has been destroyed')  // todo
+								alert('The room has been destroyed') // todo
 							} else if (event === 'event') {
 								// Any new feed to attach to?
 								if (msg.publishers) {
@@ -108,24 +125,17 @@ export default {
 										const audio = f.audio_codec
 										const video = f.video_codec
 										Janus.debug('  >> [' + id + '] ' + display + ' (audio: ' + audio + ', video: ' + video + ')')
-										this.newRemoteFeed(id, display, audio, video)
+										comp.newRemoteFeed(id, display, audio, video)
 									}
 								} else if (msg.leaving) {
 									// One of the publishers has gone away?
 									const leaving = msg.leaving
 									Janus.log('Publisher left: ' + leaving)
-									let remoteFeed = null
-									let remoteFeedIndex = null
-									for (const fi in this.feeds) {
-										if (this.feeds[fi] && this.feeds[fi].rfid === leaving) {
-											remoteFeed = this.feeds[fi]
-											remoteFeedIndex = fi
-											break
-										}
-									}
+									const remoteFeed = comp.feeds.find((rf) => rf.rfid === leaving)
 									if (remoteFeed != null) {
-										Janus.debug('Feed ' + remoteFeed.rfid + ' (' + remoteFeed.rfdisplay + ') has left the room, detaching')
-										this.feeds.splice(remoteFeedIndex, 1)
+										Janus.debug(
+											'Feed ' + remoteFeed.rfid + ' (' + remoteFeed.rfdisplay + ') has left the room, detaching')
+										comp.feeds = comp.feeds.filter((rf) => rf.rfid !== remoteFeed.rfid)
 										remoteFeed.detach()
 									}
 								} else if (msg.unpublished) {
@@ -134,21 +144,14 @@ export default {
 									Janus.log('Publisher left: ' + unpublished)
 									if (unpublished === 'ok') {
 										// That's us
-										this.pluginHandle.hangup()
+										comp.pluginHandle.hangup()
 										return
 									}
-									let remoteFeed = null
-									let remoteFeedIndex = null
-									for (const fi in this.feeds) {
-										if (this.feeds[fi] && this.feeds[fi].rfid === unpublished) {
-											remoteFeed = this.feeds[fi]
-											remoteFeedIndex = fi
-											break
-										}
-									}
+									const remoteFeed = comp.feeds.find((rf) => rf.rfid === unpublished)
 									if (remoteFeed != null) {
-										Janus.debug('Feed ' + remoteFeed.rfid + ' (' + remoteFeed.rfdisplay + ') has left the room, detaching')
-										this.feeds.splice(remoteFeedIndex, 1)
+										Janus.debug(
+											'Feed ' + remoteFeed.rfid + ' (' + remoteFeed.rfdisplay + ') has left the room, detaching')
+										comp.feeds = comp.feeds.filter((rf) => rf.rfid !== remoteFeed.rfid)
 										remoteFeed.detach()
 									}
 								} else if (msg.error) {
@@ -157,9 +160,10 @@ export default {
 										// todo
 										alert(
 											'<p>Apparently room <code>' + myroom + '</code> (the one this demo uses as a test room) ' +
-														'does not exist...</p><p>Do you have an updated <code>janus.plugin.videoroom.jcfg</code> ' +
-														'configuration file? If not, make sure you copy the details of room <code>' + myroom + '</code> ' +
-														'from that sample in your current configuration file, then restart Janus and try again.'
+											'does not exist...</p><p>Do you have an updated <code>janus.plugin.videoroom.jcfg</code> ' +
+											'configuration file? If not, make sure you copy the details of room <code>' + myroom +
+											'</code> ' +
+											'from that sample in your current configuration file, then restart Janus and try again.',
 										)
 									} else {
 										alert(msg.error) // todo
@@ -169,18 +173,21 @@ export default {
 						}
 						if (jsep) {
 							Janus.debug('Handling SDP as well...', jsep)
-							this.pluginHandle.handleRemoteJsep({ jsep: jsep })
+							comp.pluginHandle.handleRemoteJsep({jsep: jsep})
 							// Check if any of the media we wanted to publish has
 							// been rejected (e.g., wrong or unsupported codec)
 							var audio = msg.audio_codec
-							if (this.ourStream && this.ourStream.getAudioTracks() && this.ourStream.getAudioTracks().length > 0 && !audio) {
+							if (comp.ourStream && comp.ourStream.getAudioTracks() && comp.ourStream.getAudioTracks().length > 0 &&
+								!audio) {
 								// Audio has been rejected
-								console.warning("Our audio stream has been rejected, viewers won't hear us")
+								console.warning('Our audio stream has been rejected, viewers won\'t hear us')
 							}
 							var video = msg.video_codec
-							if (this.ourStream && this.ourStream.getVideoTracks() && this.ourStream.getVideoTracks().length > 0 && !video) {
+							if (comp.ourStream && comp.ourStream.getVideoTracks() && comp.ourStream.getVideoTracks().length > 0 &&
+								!video) {
 								// Video has been rejected
-								console.warning("Our video stream has been rejected, viewers won't see us")
+								console.warning('Our video stream has been rejected, viewers won\'t see us')
+								comp.ourVideoVisible = false
 								// todo: Hide the webcam video
 							}
 						}
@@ -191,16 +198,19 @@ export default {
 						// todo: show local stream
 						// Janus.attachMediaStream($('#myvideo').get(0), stream)
 						// $('#myvideo').get(0).muted = 'muted'
-						if (this.pluginHandle.webrtcStuff.pc.iceConnectionState !== 'completed' &&
-											this.pluginHandle.webrtcStuff.pc.iceConnectionState !== 'connected') {
+						if (comp.pluginHandle.webrtcStuff.pc.iceConnectionState !== 'completed' &&
+							comp.pluginHandle.webrtcStuff.pc.iceConnectionState !== 'connected') {
 							// todo show that we are still publishing…
 						}
 						const videoTracks = stream.getVideoTracks()
 						if (!videoTracks || videoTracks.length === 0) {
 							// No webcam
 							// todo: no webcam found
+							comp.ourVideoVisible = false
 						} else {
-							// show video
+							comp.ourVideoVisible = true
+							Janus.attachMediaStream(comp.$refs.ourVideo, stream)
+							comp.$refs.ourVideo.muted = 'muted'
 						}
 					},
 					onremotestream: function (stream) {
@@ -209,8 +219,169 @@ export default {
 					oncleanup: function () {
 						Janus.log(' ::: Got a cleanup notification: we are unpublished now :::')
 						this.ourStream = null
-					}
+					},
 				})
+		},
+		publishOwnFeed (useAudio) {
+			const comp = this
+			this.pluginHandle.createOffer(
+				{
+					media: {audioRecv: false, videoRecv: false, audioSend: useAudio, videoSend: true},	// Publishers are sendonly
+					// If you want to test simulcasting (Chrome and Firefox only), set to true
+					simulcast: false,
+					simulcast2: false,
+					success: function (jsep) {
+						Janus.debug('Got publisher SDP!', jsep)
+						var publish = {request: 'configure', audio: useAudio, video: true}
+						// You can force a specific codec to use when publishing by using the
+						// audiocodec and videocodec properties, for instance:
+						// 		publish["audiocodec"] = "opus"
+						// to force Opus as the audio codec to use, or:
+						// 		publish["videocodec"] = "vp9"
+						// to force VP9 as the videocodec to use. In both case, though, forcing
+						// a codec will only work if: (1) the codec is actually in the SDP (and
+						// so the browser supports it), and (2) the codec is in the list of
+						// allowed codecs in a room. With respect to the point (2) above,
+						// refer to the text in janus.plugin.videoroom.jcfg for more details
+						comp.pluginHandle.send({message: publish, jsep: jsep})
+					},
+					error: function (error) {
+						Janus.error('WebRTC error:', error)
+						if (useAudio) {
+							comp.publishOwnFeed(false)
+						} else {
+							alert('WebRTC error... ' + error.message)
+						}
+					},
+				})
+		},
+		newRemoteFeed (id, display, audio, video) {
+			// A new feed has been published, create a new plugin handle and attach to it as a subscriber
+			let remoteFeed = null
+			const comp = this
+			this.janus.attach({
+				plugin: 'janus.plugin.videoroom',
+				opaqueId: this.user.id,
+				success: function (pluginHandle) {
+					remoteFeed = pluginHandle
+					remoteFeed.simulcastStarted = false
+					Janus.log('Plugin attached! (' + remoteFeed.getPlugin() + ', id=' + remoteFeed.getId() + ')')
+					Janus.log('  -- This is a subscriber')
+					// We wait for the plugin to send us an offer
+					var subscribe = {
+						request: 'join',
+						room: comp.roomId,
+						ptype: 'subscriber',
+						feed: id,
+						private_id: comp.ourPrivateId,
+					}
+					// In case you don't want to receive audio, video or data, even if the
+					// publisher is sending them, set the 'offer_audio', 'offer_video' or
+					// 'offer_data' properties to false (they're true by default), e.g.:
+					// 		subscribe["offer_video"] = false
+					// For example, if the publisher is VP8 and this is Safari, let's avoid video
+					if (Janus.webRTCAdapter.browserDetails.browser === 'safari' &&
+						(video === 'vp9' || (video === 'vp8' && !Janus.safariVp8))) {
+						if (video)
+							video = video.toUpperCase()
+						toastr.warning('Publisher is using ' + video + ', but Safari doesn\'t support it: disabling video')
+						subscribe.offer_video = false
+					}
+					remoteFeed.videoCodec = video
+					remoteFeed.send({message: subscribe})
+				},
+				error: function (error) {
+					Janus.error('  -- Error attaching plugin...', error)
+					alert('Error attaching plugin... ' + error)
+				},
+				onmessage: function (msg, jsep) {
+					Janus.debug(' ::: Got a message (subscriber) :::', msg)
+					var event = msg.videoroom
+					Janus.debug('Event: ' + event)
+					if (msg.error) {
+						alert(msg.error)
+					} else if (event) {
+						if (event === 'attached') {
+							// Subscriber created and attached
+							comp.feeds.push(remoteFeed)
+							remoteFeed.rfattached = false
+							remoteFeed.rfid = msg.id
+							remoteFeed.rfdisplay = msg.display
+							// todo: show spinner?
+							Janus.log(
+								'Successfully attached to feed ' + remoteFeed.rfid + ' (' + remoteFeed.rfdisplay + ') in room ' +
+								msg.room)
+						} else if (event === 'event') {
+							// Check if we got a simulcast-related event from this publisher
+							var substream = msg.substream
+							var temporal = msg.temporal
+							if ((substream !== null && substream !== undefined) ||
+								(temporal !== null && temporal !== undefined)) {
+								if (!remoteFeed.simulcastStarted) {
+									remoteFeed.simulcastStarted = true
+									// Add some new buttons
+									// addSimulcastButtons(remoteFeed.rfindex,
+									//	remoteFeed.videoCodec === 'vp8' || remoteFeed.videoCodec === 'h264')
+								}
+								// We just received notice that there's been a switch, update the buttons
+								// updateSimulcastButtons(remoteFeed.rfindex, substream, temporal)
+							}
+						} else {
+							// What has just happened?
+						}
+					}
+					if (jsep) {
+						Janus.debug('Handling SDP as well...', jsep)
+						// Answer and attach
+						remoteFeed.createAnswer({
+							jsep: jsep,
+							// Add data:true here if you want to subscribe to datachannels as well
+							// (obviously only works if the publisher offered them in the first place)
+							media: {audioSend: false, videoSend: false},	// We want recvonly audio/video
+							success: function (jsep) {
+								Janus.debug('Got SDP!', jsep)
+								var body = {request: 'start', room: comp.roomId}
+								remoteFeed.send({message: body, jsep: jsep})
+							},
+							error: function (error) {
+								Janus.error('WebRTC error:', error)
+								alert('WebRTC error... ' + error.message)
+							},
+						})
+					}
+				},
+				iceState: function (state) {
+					Janus.log(
+						'ICE state of this WebRTC PeerConnection (feed #' + remoteFeed.rfid + ') changed to ' + state)
+				},
+				webrtcState: function (on) {
+					Janus.log(
+						'Janus says this WebRTC PeerConnection (feed #' + remoteFeed.rfid + ') is ' + (on ? 'up' : 'down') +
+						' now')
+				},
+				onlocalstream: function (stream) {
+					// The subscriber stream is recvonly, we don't expect anything here
+				},
+				onremotestream: function (stream) {
+					Janus.debug('Remote feed #' + remoteFeed.rfid + ', stream:', stream)
+					const rfindex = comp.feeds.findIndex((rf) => rf.rfid === remoteFeed.rfid)
+					if (!remoteFeed.rfattached) {
+						remoteFeed.rfattached = true
+					}
+					// todo: Show spinner until `playing` event on video
+					Janus.attachMediaStream(comp.$refs.peerVideo[rfindex], stream)
+					var videoTracks = stream.getVideoTracks()
+					if (!videoTracks || videoTracks.length === 0) {
+						// todo: indicate that no remote video
+					} else {
+						// todo: show remote video only now?
+					}
+				},
+				oncleanup: function () {
+					Janus.log(' ::: Got a cleanup notification (remote feed ' + id + ') :::')
+					// handled further above
+				},
+			})
 		},
 		connectToServer () {
 			this.janus = new Janus({
@@ -222,9 +393,8 @@ export default {
 					// todo: handle
 				},
 				destroyed () {
-					alert('destroyed')
-					// todo: handle
-				}
+					// todo: handle?
+				},
 			})
 		},
 		initJanus () {
@@ -233,23 +403,45 @@ export default {
 				callback: this.connectToServer,
 			})
 			this.loading = false
-		}
+		},
 	},
 }
 </script>
 <style lang="stylus">
-.c-roulette
-	flex: auto
-	height: auto  // 100% breaks safari
-	display: flex
-	flex-direction: column
-	position: relative
-	iframe
-		height: 100%
-		width: 100%
-		position: absolute
-		top: 0
-		left: 0
-		border: none
-		flex: auto // because safari
+	.c-roulette
+		flex: auto
+		height: auto // 100% breaks safari
+		display: flex
+		flex-direction: column
+		position: relative
+
+		.users
+			display: flex
+			height: auto // 100% breaks safari
+			flex: auto
+			flex-direction: row
+			max-height: 100%
+
+		.users > div
+			background: red
+			flex: auto
+			width: 100%
+			height: 100%
+			max-height: 100%
+			position: relative
+			overflow: hidden
+
+			video
+				// this positioning is basically background-size: cover
+				left: 50%
+				min-height: 100%
+				min-width: 100%
+				position: absolute
+				top: 50%
+				transform: translate(-50%, -50%)
+
+		.users > .me
+			background: green
+			video
+				transform: translate(-50%, -50%) rotateY(180deg)
 </style>
