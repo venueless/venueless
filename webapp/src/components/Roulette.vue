@@ -17,9 +17,14 @@
 <script>
 import {Janus} from 'janus-gateway'
 import {mapState} from 'vuex'
+import api from 'lib/api'
 
 export default {
 	props: {
+		room: {
+			type: Object,
+			required: true
+		},
 		module: {
 			type: Object,
 			required: true,
@@ -28,6 +33,7 @@ export default {
 	data () {
 		return {
 			server: null,
+			token: null,
 			roomId: null,
 			loading: false,
 			janus: null,
@@ -48,7 +54,7 @@ export default {
 		this.janus.destroy()
 	},
 	methods: {
-		startNewCall () {
+		async startNewCall () {
 			if (this.janus) {
 				this.janus.destroy()
 				this.janus = null
@@ -56,8 +62,10 @@ export default {
 				this.roomId = null
 			}
 			this.loading = true
-			this.server = 'wss://dev-janus.venueless.events/ws'
-			this.roomId = 1234
+			const {server, roomId, token} = await api.call('roulette.start', {room: this.room.id})
+			this.server = server
+			this.roomId = roomId
+			this.token = token
 			this.initJanus()
 		},
 		attachToRoom () {
@@ -76,6 +84,7 @@ export default {
 							request: 'join',
 							room: comp.roomId,
 							ptype: 'publisher',
+							token: comp.token,
 							display: comp.user.profile.display_name,
 						}
 						comp.pluginHandle.send({message: register})

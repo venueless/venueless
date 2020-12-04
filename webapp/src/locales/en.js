@@ -77,7 +77,7 @@ export default {
 	'RoomsSidebar:exhibitions-requests:label': 'Contact requests',
 	'RoomsSidebar:exhibitions-manage:label': 'Manage',
 	'Roulette:btn-start:label': 'Start a new call',
-	'Roulette:waiting-other:label': 'Waiting for partner to join …',
+	'Roulette:waiting-other:label': 'Waiting for a partner to join …',
 	'Roulette:waiting-own:label': 'Starting your video …',
 	'Exhibition:more:label': 'More',
 	'Exhibitors:headline:text': 'Your exhibitions',

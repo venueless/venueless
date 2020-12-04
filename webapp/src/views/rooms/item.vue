@@ -14,7 +14,7 @@
 				.stage-tool(v-if="$features.enabled('questions-answers')", :class="{active: activeStageTool === 'qa'}", @click="activeStageTool = 'qa'") Ask a question
 				reactions-bar(:expanded="true", @expand="activeStageTool = 'reaction'")
 				//- reactions-bar(:expanded="activeStageTool === 'reaction'", @expand="activeStageTool = 'reaction'")
-		roulette(v-else-if="modules['networking.roulette'] && $features.enabled('roulette')", :module="modules['networking.roulette']")
+		roulette(v-else-if="modules['networking.roulette'] && $features.enabled('roulette')", :module="modules['networking.roulette']", :room="room")
 		landing-page(v-else-if="modules['page.landing']", :module="modules['page.landing']")
 		markdown-page(v-else-if="modules['page.markdown']", :module="modules['page.markdown']")
 		UserListPage(v-else-if="modules['page.userlist']", :module="modules['page.userlist']")
