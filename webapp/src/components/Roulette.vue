@@ -5,7 +5,7 @@
 		.me
 			video(v-show="ourVideoVisible", ref="ourVideo", autoplay, playsinline, muted="muted")
 		.peer(v-for="f in feeds", :key="f.rfid")
-			video(ref="peerVideo", autoplay, playsinline, muted="muted")
+			video(ref="peerVideo", autoplay, playsinline)
 
 </template>
 <script>
