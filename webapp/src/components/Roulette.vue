@@ -1,11 +1,17 @@
 <template lang="pug">
 .c-roulette
-	bunt-progress-circular(v-if="loading", size="huge", :page="true")
-	.users
+	.users(v-show="roomId != null")
 		.me
+			bunt-progress-circular(size="large", :page="true")
+			p {{ $t('Roulette:waiting-own:label') }}
 			video(v-show="ourVideoVisible", ref="ourVideo", autoplay, playsinline, muted="muted")
 		.peer(v-for="f in feeds", :key="f.rfid")
 			video(ref="peerVideo", autoplay, playsinline)
+		.no-peer(v-if="!feeds.length")
+			bunt-progress-circular(size="large", :page="true")
+			p {{ $t('Roulette:waiting-other:label') }}
+	.next
+		bunt-button.btn-next(@click="startNewCall", :loading="loading") {{ $t('Roulette:btn-start:label') }}
 
 </template>
 <script>
@@ -21,10 +27,9 @@ export default {
 	},
 	data () {
 		return {
-			url: null,
 			server: null,
 			roomId: null,
-			loading: null,
+			loading: false,
 			janus: null,
 			pluginHandle: null,
 			ourId: null,
@@ -38,14 +43,23 @@ export default {
 	},
 	async mounted () {
 		// todo fetch from server
-		this.server = 'wss://dev-janus.venueless.events/ws'
-		this.roomId = 1234
-		this.initJanus()
 	},
 	destroyed () {
 		this.janus.destroy()
 	},
 	methods: {
+		startNewCall () {
+			if (this.janus) {
+				this.janus.destroy()
+				this.janus = null
+				this.server = null
+				this.roomId = null
+			}
+			this.loading = true
+			this.server = 'wss://dev-janus.venueless.events/ws'
+			this.roomId = 1234
+			this.initJanus()
+		},
 		attachToRoom () {
 			// Roughly based on https://janus.conf.meetecho.com/videoroomtest.js
 			const comp = this
@@ -145,7 +159,7 @@ export default {
 									if (unpublished === 'ok') {
 										// That's us
 										comp.pluginHandle.hangup()
-										return
+										returnon
 									}
 									const remoteFeed = comp.feeds.find((rf) => rf.rfid === unpublished)
 									if (remoteFeed != null) {
@@ -402,7 +416,6 @@ export default {
 				debug: 'all', // todo: conditional
 				callback: this.connectToServer,
 			})
-			this.loading = false
 		},
 	},
 }
@@ -423,7 +436,7 @@ export default {
 			max-height: 100%
 
 		.users > div
-			background: red
+			background: #000
 			flex: auto
 			width: 100%
 			height: 100%
@@ -440,8 +453,27 @@ export default {
 				top: 50%
 				transform: translate(-50%, -50%)
 
+		.users > .no-peer
+			background: white
+			display: flex
+			align-items: center
+			justify-content: center
+			flex-direction: column
+
 		.users > .me
-			background: green
+			background: white
+			display: flex
+			align-items: center
+			justify-content: center
+			flex-direction: column
 			video
 				transform: translate(-50%, -50%) rotateY(180deg)
+
+	.next
+		position: absolute
+		bottom: 10px
+		left: 50%
+		transform: translate(-50%, -50%)
+		.btn-next
+			themed-button-primary(size: large)
 </style>
