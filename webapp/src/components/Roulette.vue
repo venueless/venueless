@@ -60,6 +60,7 @@ export default {
 				this.janus = null
 				this.server = null
 				this.roomId = null
+				this.feeds = []
 			}
 			this.loading = true
 			const {server, roomId, token} = await api.call('roulette.start', {room: this.room.id})

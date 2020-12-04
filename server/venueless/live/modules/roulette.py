@@ -1,3 +1,8 @@
+import json
+
+import websockets
+from django.utils.crypto import get_random_string
+
 from venueless.core.permissions import Permission
 from venueless.live.decorators import command, room_action
 from venueless.live.exceptions import ConsumerException
@@ -16,26 +21,58 @@ class RouletteModule(BaseModule):
         module_required="networking.roulette",
     )
     async def start(self, body):
-        # service = BBBService(self.consumer.world)
         if not self.consumer.user.profile.get("display_name"):
             raise ConsumerException("roulette.start.missing_profile")
-        """
-        url = await service.get_join_url_for_room(
-            self.room,
-            self.consumer.user,
-            moderator=await self.consumer.world.has_permission_async(
-                user=self.consumer.user,
-                permission=Permission.ROOM_BBB_MODERATE,
-                room=self.room,
-            ),
+        server = (
+            "wss://dev-janus.venueless.events/ws"  # todo: choose from multiple servers
         )
-        if not url:
-            raise ConsumerException("bbb.failed")
-        """
+        token = get_random_string(16)
+
+        # todo: handle connection errors to janus, encapsulate room creation into service
+        async with websockets.connect(
+            server, subprotocols=["janus-protocol"]
+        ) as websocket:
+            await websocket.send(
+                json.dumps({"janus": "create", "transaction": get_random_string()})
+            )
+            resp = json.loads(await websocket.recv())
+            session_id = resp["data"]["id"]
+
+            await websocket.send(
+                json.dumps(
+                    {
+                        "janus": "attach",
+                        "plugin": "janus.plugin.videoroom",
+                        "transaction": get_random_string(),
+                        "session_id": session_id,
+                    }
+                )
+            )
+            resp = json.loads(await websocket.recv())
+            handle_id = resp["data"]["id"]
+
+            await websocket.send(
+                json.dumps(
+                    {
+                        # Docs: https://janus.conf.meetecho.com/docs/videoroom.html
+                        "janus": "message",
+                        # todo: add admin_key and configure server to require that key
+                        "body": {
+                            "request": "create",
+                            "permanent": False,
+                            # todo: set "secret": "…",
+                            "is_private": True,
+                            "allowed": [token],
+                        },
+                        "transaction": get_random_string(),
+                        "session_id": session_id,
+                        "handle_id": handle_id,
+                    }
+                )
+            )
+            resp = json.loads(await websocket.recv())
+            room_id = resp["plugindata"]["data"]["room"]
+
         await self.consumer.send_success(
-            {
-                "server": "wss://dev-janus.venueless.events/ws",
-                "roomId": 1234,
-                "token": "foobar",
-            }
+            {"server": server, "roomId": room_id, "token": token, "resp": resp}
         )
