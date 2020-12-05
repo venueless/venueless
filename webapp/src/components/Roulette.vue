@@ -7,19 +7,28 @@
 			video(v-show="ourVideoVisible", ref="ourVideo", autoplay, playsinline, muted="muted")
 		.peer(v-for="f in feeds", :key="f.rfid")
 			video(ref="peerVideo", autoplay, playsinline)
+			div {{f.venueless_user}}
+			.user(v-if="f.venueless_user !== null", @click="showUserCard($event, f.venueless_user)")
+				avatar(:user="f.venueless_user", :size="36")
+				span.display-name {{ f.venueless_user.profile.display_name }}
 		.no-peer(v-if="!feeds.length")
 			bunt-progress-circular(size="large", :page="true")
 			p {{ $t('Roulette:waiting-other:label') }}
 	.next
 		bunt-button.btn-next(@click="startNewCall", :loading="loading") {{ $t('Roulette:btn-start:label') }}
+	chat-user-card(v-if="selectedUser", ref="avatarCard", :sender="selectedUser", @close="selectedUser = null")
 
 </template>
 <script>
 import {Janus} from 'janus-gateway'
 import {mapState} from 'vuex'
 import api from 'lib/api'
+import ChatUserCard from 'components/ChatUserCard'
+import Avatar from 'components/Avatar'
+import {createPopper} from '@popperjs/core'
 
 export default {
+	components: {Avatar, ChatUserCard},
 	props: {
 		room: {
 			type: Object,
@@ -42,6 +51,7 @@ export default {
 			ourPrivateId: null,
 			ourVideoVisible: true,
 			feeds: [],
+			selectedUser: null,
 		}
 	},
 	computed: {
@@ -54,6 +64,20 @@ export default {
 		this.janus.destroy()
 	},
 	methods: {
+		async showUserCard (event, user) {
+			this.selectedUser = user
+			await this.$nextTick()
+			const target = event.target.closest('.user')
+			createPopper(target, this.$refs.avatarCard.$refs.card, {
+				placement: 'bottom',
+				modifiers: [{
+					name: 'flip',
+					options: {
+						flipVariations: false
+					}
+				}]
+			})
+		},
 		async startNewCall () {
 			if (this.janus) {
 				this.janus.destroy()
@@ -86,7 +110,7 @@ export default {
 							room: comp.roomId,
 							ptype: 'publisher',
 							token: comp.token,
-							display: comp.user.profile.display_name,
+							display: comp.user.id, // we abuse janus' display name field for the venueless user id
 						}
 						comp.pluginHandle.send({message: register})
 					},
@@ -327,13 +351,15 @@ export default {
 					} else if (event) {
 						if (event === 'attached') {
 							// Subscriber created and attached
-							comp.feeds.push(remoteFeed)
 							remoteFeed.rfattached = false
 							remoteFeed.rfid = msg.id
-							remoteFeed.rfdisplay = msg.display
+							remoteFeed.venueless_user_id = msg.display
+							remoteFeed.venueless_user = null
+							comp.feeds.push(remoteFeed)
+							comp.fetchUser(remoteFeed)
 							// todo: show spinner?
 							Janus.log(
-								'Successfully attached to feed ' + remoteFeed.rfid + ' (' + remoteFeed.rfdisplay + ') in room ' +
+								'Successfully attached to feed ' + remoteFeed.rfid + ' (' + remoteFeed.venueless_user_id + ') in room ' +
 								msg.room)
 						} else if (event === 'event') {
 							// Check if we got a simulcast-related event from this publisher
@@ -421,6 +447,9 @@ export default {
 				},
 			})
 		},
+		async fetchUser (feed) {
+			this.$set(feed, 'venueless_user', await api.call('user.fetch', {id: feed.venueless_user_id}))
+		},
 		initJanus () {
 			Janus.init({
 				debug: 'all', // todo: conditional
@@ -453,6 +482,27 @@ export default {
 			max-height: 100%
 			position: relative
 			overflow: hidden
+
+			.user
+				position: absolute
+				top: 10px
+				left: 50%
+				transform: translate(-50%)
+				display: flex
+				align-items: center
+				padding: 0 15px
+				min-height: 48px
+				cursor: pointer
+				opacity: 0
+				transition: opacity .5s
+				card()
+				.display-name
+					margin-left: 8px
+					flex: auto
+					ellipsis()
+			&:hover .user
+				transition: opacity .5s
+				opacity: 1
 
 			video
 				// this positioning is basically background-size: cover
