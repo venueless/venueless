@@ -5,6 +5,8 @@
 			bunt-progress-circular(size="large", :page="true")
 			p {{ $t('Roulette:waiting-own:label') }}
 			video(v-show="ourVideoVisible", ref="ourVideo", autoplay, playsinline, muted="muted")
+			.controls
+				bunt-icon-button(@click="toggleMute") {{ knownMuteState ? 'microphone' : 'microphone-off' }}
 		.peer(v-for="f in feeds", :key="f.rfid")
 			video(ref="peerVideo", autoplay, playsinline)
 			div {{f.venueless_user}}
@@ -50,6 +52,7 @@ export default {
 			ourId: null,
 			ourPrivateId: null,
 			ourVideoVisible: true,
+			knownMuteState: false,
 			feeds: [],
 			selectedUser: null,
 		}
@@ -93,6 +96,18 @@ export default {
 			this.token = token
 			this.initJanus()
 		},
+		toggleMute () {
+			if (this.pluginHandle == null) {
+				return
+			}
+			this.knownMuteState = this.pluginHandle.isAudioMuted()
+			if (this.knownMuteState) {
+				this.pluginHandle.unmuteAudio()
+			} else {
+				this.pluginHandle.muteAudio()
+			}
+			this.knownMuteState = this.pluginHandle.isAudioMuted()
+		},
 		attachToRoom () {
 			// Roughly based on https://janus.conf.meetecho.com/videoroomtest.js
 			const comp = this
@@ -113,6 +128,7 @@ export default {
 							display: comp.user.id, // we abuse janus' display name field for the venueless user id
 						}
 						comp.pluginHandle.send({message: register})
+						comp.knownMuteState = comp.pluginHandle.isAudioMuted()
 					},
 					error: function (error) {
 						Janus.error('  -- Error attaching plugin...', error)
@@ -193,7 +209,7 @@ export default {
 									if (unpublished === 'ok') {
 										// That's us
 										comp.pluginHandle.hangup()
-										returnon
+										return
 									}
 									const remoteFeed = comp.feeds.find((rf) => rf.rfid === unpublished)
 									if (remoteFeed != null) {
@@ -484,23 +500,26 @@ export default {
 			overflow: hidden
 
 			.user
-				position: absolute
-				top: 10px
-				left: 50%
-				transform: translate(-50%)
-				display: flex
-				align-items: center
-				padding: 0 15px
-				min-height: 48px
 				cursor: pointer
-				opacity: 0
-				transition: opacity .5s
-				card()
 				.display-name
 					margin-left: 8px
 					flex: auto
 					ellipsis()
-			&:hover .user
+
+			.user, .controls
+				display: flex
+				align-items: center
+				padding: 0 15px
+				min-height: 48px
+				position: absolute
+				top: 10px
+				left: 50%
+				transform: translate(-50%)
+				opacity: 0
+				transition: opacity .5s
+				card()
+
+			&:hover .user, &:hover .controls
 				transition: opacity .5s
 				opacity: 1
 
