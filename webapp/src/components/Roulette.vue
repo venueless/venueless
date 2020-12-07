@@ -7,6 +7,7 @@
 			video(v-show="ourVideoVisible", ref="ourVideo", autoplay, playsinline, muted="muted")
 			.controls(:class="knownMuteState ? 'always' : ''")
 				bunt-icon-button(@click="toggleMute") {{ knownMuteState ? 'microphone-off' : 'microphone' }}
+				bunt-icon-button(@click="showDevicePrompt = true") cog
 		.peer(v-for="f in feeds", :key="f.rfid")
 			video(ref="peerVideo", autoplay, playsinline)
 			div {{f.venueless_user}}
@@ -19,6 +20,8 @@
 	.next
 		bunt-button.btn-next(@click="startNewCall", :loading="loading") {{ $t('Roulette:btn-start:label') }}
 	chat-user-card(v-if="selectedUser", ref="avatarCard", :sender="selectedUser", @close="selectedUser = null")
+	transition(name="prompt")
+		a-v-device-prompt(v-if="showDevicePrompt", @close="showDevicePrompt = false")
 
 </template>
 <script>
@@ -27,10 +30,11 @@ import {mapState} from 'vuex'
 import api from 'lib/api'
 import ChatUserCard from 'components/ChatUserCard'
 import Avatar from 'components/Avatar'
+import AVDevicePrompt from 'components/AVDevicePrompt'
 import {createPopper} from '@popperjs/core'
 
 export default {
-	components: {Avatar, ChatUserCard},
+	components: {Avatar, AVDevicePrompt, ChatUserCard},
 	props: {
 		room: {
 			type: Object,
@@ -43,6 +47,7 @@ export default {
 	},
 	data () {
 		return {
+			showDevicePrompt: false,
 			server: null,
 			token: null,
 			roomId: null,
