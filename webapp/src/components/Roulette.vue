@@ -5,8 +5,8 @@
 			bunt-progress-circular(size="large", :page="true")
 			p {{ $t('Roulette:waiting-own:label') }}
 			video(v-show="ourVideoVisible", ref="ourVideo", autoplay, playsinline, muted="muted")
-			.controls
-				bunt-icon-button(@click="toggleMute") {{ knownMuteState ? 'microphone' : 'microphone-off' }}
+			.controls(:class="knownMuteState ? 'always' : ''")
+				bunt-icon-button(@click="toggleMute") {{ knownMuteState ? 'microphone-off' : 'microphone' }}
 		.peer(v-for="f in feeds", :key="f.rfid")
 			video(ref="peerVideo", autoplay, playsinline)
 			div {{f.venueless_user}}
@@ -128,7 +128,6 @@ export default {
 							display: comp.user.id, // we abuse janus' display name field for the venueless user id
 						}
 						comp.pluginHandle.send({message: register})
-						comp.knownMuteState = comp.pluginHandle.isAudioMuted()
 					},
 					error: function (error) {
 						Janus.error('  -- Error attaching plugin...', error)
@@ -275,6 +274,7 @@ export default {
 							comp.ourVideoVisible = true
 							Janus.attachMediaStream(comp.$refs.ourVideo, stream)
 							comp.$refs.ourVideo.muted = 'muted'
+							comp.knownMuteState = comp.pluginHandle.isAudioMuted()
 						}
 					},
 					onremotestream: function (stream) {
@@ -519,7 +519,7 @@ export default {
 				transition: opacity .5s
 				card()
 
-			&:hover .user, &:hover .controls
+			&:hover .user, &:hover .controls, .controls.always
 				transition: opacity .5s
 				opacity: 1
 
