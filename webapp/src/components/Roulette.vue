@@ -21,7 +21,7 @@
 		bunt-button.btn-next(@click="startNewCall", :loading="loading") {{ $t('Roulette:btn-start:label') }}
 	chat-user-card(v-if="selectedUser", ref="avatarCard", :sender="selectedUser", @close="selectedUser = null")
 	transition(name="prompt")
-		a-v-device-prompt(v-if="showDevicePrompt", @close="showDevicePrompt = false")
+		a-v-device-prompt(v-if="showDevicePrompt", @close="closeDevicePrompt")
 
 </template>
 <script>
@@ -60,6 +60,8 @@ export default {
 			knownMuteState: false,
 			feeds: [],
 			selectedUser: null,
+			videoInput: null,
+			audioInput: null,
 		}
 	},
 	computed: {
@@ -72,6 +74,10 @@ export default {
 		this.janus.destroy()
 	},
 	methods: {
+		closeDevicePrompt () {
+			this.showDevicePrompt = false
+			this.publishOwnFeed(true)
+		},
 		async showUserCard (event, user) {
 			this.selectedUser = user
 			await this.$nextTick()
@@ -293,9 +299,25 @@ export default {
 		},
 		publishOwnFeed (useAudio) {
 			const comp = this
+			const media = {audioRecv: false, videoRecv: false, audioSend: useAudio, videoSend: true}	// Publishers are sendonly
+			if (localStorage.audioInput) {
+				media.audio = {deviceId: localStorage.audioInput}
+			}
+			if (localStorage.audioInput !== this.audioInput) {
+				media.replaceAudio = true
+				this.audioInput = localStorage.audioInput
+			}
+			if (localStorage.videoInput) {
+				media.video = {deviceId: localStorage.videoInput}
+			}
+			if (localStorage.videoInput !== this.videoInput) {
+				media.replaceVideo = true
+				this.videoInput = localStorage.videoInput
+			}
+
 			this.pluginHandle.createOffer(
 				{
-					media: {audioRecv: false, videoRecv: false, audioSend: useAudio, videoSend: true},	// Publishers are sendonly
+					media: media,
 					// If you want to test simulcasting (Chrome and Firefox only), set to true
 					simulcast: false,
 					simulcast2: false,

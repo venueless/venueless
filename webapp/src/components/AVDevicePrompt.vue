@@ -18,9 +18,9 @@ export default {
 	props: {},
 	data () {
 		return {
-			videoInput: null,
-			audioInput: null,
-			audioOutput: null,
+			videoInput: localStorage.videoInput || '',
+			audioInput: localStorage.audioInput || '',
+			audioOutput: localStorage.audioOutput || '',
 			videoInputs: [],
 			audioInputs: [],
 			audioOutputs: [],
@@ -39,19 +39,19 @@ export default {
 		gotDevices (deviceInfos) {
 			this.videoInputs = [
 				{
-					value: null,
+					value: '',
 					label: this.$t('AVDevicePrompt:default:label')
 				}
 			]
 			this.audioInputs = [
 				{
-					value: null,
+					value: '',
 					label: this.$t('AVDevicePrompt:default:label')
 				}
 			]
 			this.audioOutputs = [
 				{
-					value: null,
+					value: '',
 					label: this.$t('AVDevicePrompt:default:label')
 				}
 			]
@@ -95,13 +95,15 @@ export default {
 				// Refresh button list in case labels have become available
 				return navigator.mediaDevices.enumerateDevices()
 			}).catch((e) => {
-				console.warn(e)
-				alert('Could not access camera or microphone, is another program on your machine using it right now?')
 				// todo
+				// possibly "overconstrained" (camera doesn't exist)
 			})
 		},
 		save () {
-
+			localStorage.videoInput = this.videoInput || ''
+			localStorage.audioInput = this.audioInput || ''
+			localStorage.audioOutput = this.audioOutput || ''
+			this.$emit('close')
 		},
 	},
 }
