@@ -77,6 +77,11 @@ export default {
 		closeDevicePrompt () {
 			this.showDevicePrompt = false
 			this.publishOwnFeed(true)
+			for (let i = 0; i < this.$refs.peerVideo.length; i++) {
+				if (this.$refs.peerVideo[i].setSinkId) {  // chrome only for now
+					this.$refs.peerVideo[i].setSinkId(localStorage.audioOutput || '')
+				}
+			}
 		},
 		async showUserCard (event, user) {
 			this.selectedUser = user
@@ -463,6 +468,11 @@ export default {
 					}
 					// todo: Show spinner until `playing` event on video
 					Janus.attachMediaStream(comp.$refs.peerVideo[rfindex], stream)
+					if (localStorage.audioOutput) {
+						if (comp.$refs.peerVideo[rfindex].setSinkId) {  // chrome only for now
+							comp.$refs.peerVideo[rfindex].setSinkId(localStorage.audioOutput)
+						}
+					}
 					var videoTracks = stream.getVideoTracks()
 					if (!videoTracks || videoTracks.length === 0) {
 						// todo: indicate that no remote video
