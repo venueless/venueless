@@ -1,9 +1,11 @@
 import json
 
 from channels.db import database_sync_to_async
+from django.conf import settings
+from sentry_sdk import capture_exception
 
 from venueless.core.permissions import Permission
-from venueless.core.services.janus import choose_server, create_room
+from venueless.core.services.janus import JanusError, choose_server, create_room
 from venueless.core.utils.redis import aioredis
 from venueless.live.decorators import command, room_action
 from venueless.live.exceptions import ConsumerException
@@ -61,7 +63,14 @@ class RouletteModule(BaseModule):
                     "roulette.no_server", "No server available"
                 )
                 return
-            room = await create_room(server)
+            try:
+                room = await create_room(server)
+            except JanusError as e:
+                if settings.SENTRY_DSN:
+                    capture_exception(e)
+                await self.consumer.send_error(
+                    "roulette.failed", "Could not create a video session"
+                )
             await redis.rpush(listkey, json.dumps(room))
 
         await self.consumer.send_success(room)

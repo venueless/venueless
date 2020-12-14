@@ -14,7 +14,7 @@ class JanusError(Exception):
     pass
 
 
-class JanusPluginError(Exception):
+class JanusPluginError(JanusError):
     pass
 
 
