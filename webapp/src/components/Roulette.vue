@@ -18,7 +18,7 @@
 			bunt-progress-circular(size="large", :page="true")
 			p {{ $t('Roulette:waiting-other:label') }}
 	.next
-		bunt-button.btn-next(@click="startNewCall", :loading="loading") {{ $t('Roulette:btn-start:label') }}
+		bunt-button.btn-next(@click="startNewCall", :error-message="joinError", :loading="loading") {{ $t('Roulette:btn-start:label') }}
 	chat-user-card(v-if="selectedUser", ref="avatarCard", :sender="selectedUser", @close="selectedUser = null")
 	transition(name="prompt")
 		a-v-device-prompt(v-if="showDevicePrompt", @close="closeDevicePrompt")
@@ -58,6 +58,7 @@ export default {
 			ourPrivateId: null,
 			ourVideoVisible: true,
 			knownMuteState: false,
+			joinError: null,
 			feeds: [],
 			selectedUser: null,
 			videoInput: null,
@@ -71,7 +72,9 @@ export default {
 		// todo fetch from server
 	},
 	destroyed () {
-		this.janus.destroy()
+		if (this.janus) {
+			this.janus.destroy()
+		}
 	},
 	methods: {
 		closeDevicePrompt () {
@@ -106,11 +109,17 @@ export default {
 				this.feeds = []
 			}
 			this.loading = true
-			const {server, roomId, token} = await api.call('roulette.start', {room: this.room.id})
-			this.server = server
-			this.roomId = roomId
-			this.token = token
-			this.initJanus()
+			this.joinError = null
+			try {
+				const {server, roomId, token} = await api.call('roulette.start', {room: this.room.id})
+				this.server = server
+				this.roomId = roomId
+				this.token = token
+				this.initJanus()
+			} catch (e) {
+				this.joinError = e.message
+				this.loading = false
+			}
 		},
 		toggleMute () {
 			if (this.pluginHandle == null) {

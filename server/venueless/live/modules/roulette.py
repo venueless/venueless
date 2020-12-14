@@ -18,7 +18,7 @@ class RouletteModule(BaseModule):
 
     @command("start")
     @room_action(
-        permission_required=Permission.ROOM_VIEW,
+        permission_required=Permission.ROOM_ROULETTE_JOIN,
         module_required="networking.roulette",
     )
     async def start(self, body):
