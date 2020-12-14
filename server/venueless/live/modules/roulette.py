@@ -15,8 +15,21 @@ from venueless.live.modules.base import BaseModule
 class RouletteModule(BaseModule):
     prefix = "roulette"
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    @database_sync_to_async
+    def _get_blocked_users(self):
+        return set(self.consumer.user.blocked_users.values_list("id", flat=True))
+
+    async def _is_recent_pair(self, other_id):
+        ids = ",".join(sorted([other_id, str(self.consumer.user.id)]))
+        async with aioredis() as redis:
+            redis.exists(f"roulette:pairing:{ids}")
+        return ids
+
+    async def _store_pairing(self, other_id):
+        ids = ",".join(sorted([other_id, str(self.consumer.user.id)]))
+        async with aioredis() as redis:
+            redis.setex(f"roulette:pairing:{ids}", 3600 * 24 * 2, "paired")
+        return ids
 
     @command("start")
     @room_action(
@@ -27,34 +40,44 @@ class RouletteModule(BaseModule):
         if not self.consumer.user.profile.get("display_name"):
             raise ConsumerException("roulette.start.missing_profile")
 
+        blocked_users = await self._get_blocked_users()
+
         listkey = f"roulette:waiting:{self.room.id}"
         seen = set()
+        janus_room_info = None
         async with aioredis() as redis:
             while True:
-                room = await redis.lpop(listkey)
-                if not room:
+                raw_janus_room_info = await redis.lpop(listkey)
+                if not raw_janus_room_info:  # no rooms available
                     break
-                if room in seen:  # we've looped through all requests
-                    await redis.rpush(listkey, room)  # put back on the queue
-                    break
-                we_talked_to_this_person_recently = False  # todo: implement
-                if we_talked_to_this_person_recently:
-                    await redis.rpush(listkey, room)  # put back on the queue
-                    seen.add(
-                        room
-                    )  # make sure we don't loop endless and break if we see this again
-                    room = None
+                janus_room_info = json.loads(raw_janus_room_info)
+
+                full_loop_detected = janus_room_info["roomId"] in seen
+                seen.add(janus_room_info["roomId"])
+
+                skip_this = (
+                    full_loop_detected
+                    or janus_room_info["creating_user"] in blocked_users
+                    or await self._is_recent_pair(janus_room_info["creating_user"])
+                )
+                if skip_this:
+                    await redis.rpush(
+                        listkey, raw_janus_room_info
+                    )  # put back on the queue
+                    janus_room_info = None
+                    if full_loop_detected:
+                        break
+                    else:
+                        continue
                 else:
-                    seen.add(room)
+                    # this is it!
                     break
 
         # todo: there's a race condition here, if a second person hits start while the first person's room is still
         # being created on the janus server, they will be in separate rooms, which is bad if no more people join.
         # can we fully solve this without some locking that would be bad for scalability?
 
-        if room:
-            room = json.loads(room)
-        else:
+        if not janus_room_info:  # no room found, create a new one
             server = await database_sync_to_async(choose_server)(
                 world=self.consumer.world
             )
@@ -64,13 +87,17 @@ class RouletteModule(BaseModule):
                 )
                 return
             try:
-                room = await create_room(server)
+                janus_room_info = await create_room(server)
             except JanusError as e:
                 if settings.SENTRY_DSN:
                     capture_exception(e)
                 await self.consumer.send_error(
                     "roulette.failed", "Could not create a video session"
                 )
-            await redis.rpush(listkey, json.dumps(room))
 
-        await self.consumer.send_success(room)
+            janus_room_info["creating_user"] = str(self.consumer.user.pk)
+            await redis.rpush(listkey, json.dumps(janus_room_info))
+        else:  # existing room, store pairing
+            self._store_pairing(janus_room_info["creating_user"])
+
+        await self.consumer.send_success(janus_room_info)
