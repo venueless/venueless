@@ -108,5 +108,4 @@ class RouletteModule(BaseModule):
             "server": server,
             "roomId": room_id,
             "token": token,
-            "creator": str(self.consumer.user.id),
         }
