@@ -63,12 +63,12 @@ export default {
 					})
 				} else if (deviceInfo.kind === 'audiooutput') {
 					this.audioOutputs.push({
-						label: deviceInfo.label || `speaker ${comp.audioOutputs.length + 1}`,
+						label: deviceInfo.label || `speaker ${this.audioOutputs.length + 1}`,
 						value: deviceInfo.deviceId,
 					})
 				} else if (deviceInfo.kind === 'videoinput') {
 					this.videoInputs.push({
-						label: deviceInfo.label || `camera ${comp.videoInputs.length + 1}`,
+						label: deviceInfo.label || `camera ${this.videoInputs.length + 1}`,
 						value: deviceInfo.deviceId,
 					})
 				} else {

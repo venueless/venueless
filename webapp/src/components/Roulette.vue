@@ -81,7 +81,7 @@ export default {
 			this.showDevicePrompt = false
 			this.publishOwnFeed(true)
 			for (let i = 0; i < this.$refs.peerVideo.length; i++) {
-				if (this.$refs.peerVideo[i].setSinkId) {  // chrome only for now
+				if (this.$refs.peerVideo[i].setSinkId) { // chrome only for now
 					this.$refs.peerVideo[i].setSinkId(localStorage.audioOutput || '')
 				}
 			}
@@ -170,8 +170,8 @@ export default {
 					},
 					webrtcState: function (on) {
 						Janus.log('Janus says our WebRTC PeerConnection is ' + (on ? 'up' : 'down') + ' now')
-						if (!on)
-							return
+						// if (!on)
+						//	return
 					},
 					onmessage: function (msg, jsep) {
 						Janus.debug(' ::: Got a message (publisher) :::', msg)
@@ -246,13 +246,7 @@ export default {
 									if (msg.error_code === 426) {
 										// This is a "no such room" error: give a more meaningful description
 										// todo
-										alert(
-											'<p>Apparently room <code>' + myroom + '</code> (the one this demo uses as a test room) ' +
-											'does not exist...</p><p>Do you have an updated <code>janus.plugin.videoroom.jcfg</code> ' +
-											'configuration file? If not, make sure you copy the details of room <code>' + myroom +
-											'</code> ' +
-											'from that sample in your current configuration file, then restart Janus and try again.',
-										)
+										alert('Room does not exist')
 									} else {
 										alert(msg.error) // todo
 									}
@@ -389,7 +383,7 @@ export default {
 						(video === 'vp9' || (video === 'vp8' && !Janus.safariVp8))) {
 						if (video)
 							video = video.toUpperCase()
-						toastr.warning('Publisher is using ' + video + ', but Safari doesn\'t support it: disabling video')
+						console.log('Publisher is using ' + video + ', but Safari doesn\'t support it: disabling video')
 						subscribe.offer_video = false
 					}
 					remoteFeed.videoCodec = video
@@ -478,7 +472,7 @@ export default {
 					// todo: Show spinner until `playing` event on video
 					Janus.attachMediaStream(comp.$refs.peerVideo[rfindex], stream)
 					if (localStorage.audioOutput) {
-						if (comp.$refs.peerVideo[rfindex].setSinkId) {  // chrome only for now
+						if (comp.$refs.peerVideo[rfindex].setSinkId) { // chrome only for now
 							comp.$refs.peerVideo[rfindex].setSinkId(localStorage.audioOutput)
 						}
 					}
