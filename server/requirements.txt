@@ -12,7 +12,7 @@ djangorestframework==3.12.*
 emoji~=0.6.0
 lxml~=4.6.0
 matplotlib~=3.3.0
-numpy~=1.19.0
+numpy~=1.19.4
 orjson~=3.4.0
 pdfrw==0.4
 pyjwt==2.0.*
