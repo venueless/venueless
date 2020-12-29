@@ -2,7 +2,7 @@
 aiofile~=3.3.0
 aiohttp~=3.7.0
 beautifulsoup4==4.9.*
-celery~=5.0.0
+celery~=5.0.5
 channels>=3.0.3,<3.1.0
 channels_redis==3.2.*
 Django==3.1.*
