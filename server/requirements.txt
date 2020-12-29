@@ -28,7 +28,7 @@ websockets~=8.1
 # deploy
 psycopg2-binary
 gunicorn
-uvicorn[standard]==0.12.*  # pinned due to https://github.com/getsentry/sentry-python/issues/947
+uvicorn[standard]==0.13.*  # pinned due to https://github.com/getsentry/sentry-python/issues/947
 
 # dev
 black
