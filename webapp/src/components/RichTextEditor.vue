@@ -32,6 +32,7 @@ bunt-input-outline-container.c-rich-text-editor(ref="outline")
 /* global ENV_DEVELOPMENT */
 import Quill from 'quill'
 import 'quill/dist/quill.core.css'
+import BuntTheme from 'lib/quill/BuntTheme'
 
 const Delta = Quill.import('delta')
 
@@ -46,11 +47,14 @@ export default {
 	},
 	computed: {},
 	mounted () {
+		Quill.register('themes/bunt', BuntTheme, false)
 		this.quill = new Quill(this.$refs.editor, {
 			debug: ENV_DEVELOPMENT ? 'info' : 'warn',
+			theme: 'bunt',
 			modules: {
 				toolbar: this.$refs.toolbar,
 			},
+			bounds: this.$refs.editor,
 		})
 		if (this.value) {
 			this.quill.setContents(this.value)
@@ -91,4 +95,63 @@ export default {
 			color: rgba(0, 0, 0, 0.5)
 		.ql-active .bunt-icon
 			color: var(--clr-primary)
+	.ql-hidden
+		display: none
+	.ql-tooltip
+		z-index: 1000
+		position: absolute
+		background-color: #fff
+		border: 1px solid #ccc
+		box-shadow: 0px 0px 5px #ddd
+		padding: 5px 12px
+		white-space: nowrap
+
+		&::before
+			content: "Visit URL:"
+			line-height: 26px
+			margin-right: 8px
+
+		input[type=text]
+			display: none
+			border: 1px solid #ccc
+			font-size: 13px
+			height: 26px
+			margin: 0px
+			padding: 3px 5px
+			width: 170px
+
+		a.ql-preview
+			display: inline-block
+			max-width: 200px
+			overflow-x: hidden
+			text-overflow: ellipsis
+			vertical-align: top
+
+		a.ql-action::after
+			border-right: 1px solid #ccc
+			content: 'Edit'
+			margin-left: 16px
+			padding-right: 8px
+
+		a.ql-remove::before
+			content: 'Remove'
+			margin-left: 8px
+
+		a
+			line-height: 26px
+
+	.ql-tooltip.ql-editing
+		a.ql-preview, a.ql-remove
+			display: none
+
+		input[type=text]
+			display: inline-block
+
+		a.ql-action::after
+			border-right: 0px
+			content: 'Save'
+			padding-right: 0px
+
+	.ql-tooltip[data-mode=link]::before
+		content: "Enter link:"
 </style>
