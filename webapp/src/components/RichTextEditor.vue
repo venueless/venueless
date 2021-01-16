@@ -97,7 +97,7 @@ export default {
 			color: var(--clr-primary)
 	.ql-hidden
 		display: none
-	.ql-tooltip
+	.ql-tooltip  /* based on https://github.com/quilljs/quill/blob/develop/assets/snow/tooltip.styl */
 		z-index: 1000
 		position: absolute
 		background-color: #fff
