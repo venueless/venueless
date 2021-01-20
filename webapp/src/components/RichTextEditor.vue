@@ -26,6 +26,8 @@ bunt-input-outline-container.c-rich-text-editor(ref="outline")
 		.buttongroup
 			bunt-icon-button.ql-clean(v-tooltip="$t('RichTextEditor:clean:tooltip')") format-clear
 	.editor.rich-text-content(ref="editor")
+	.uploading(v-if="uploading")
+		bunt-progress-circular(size="huge")
 
 </template>
 <script>
@@ -33,6 +35,8 @@ bunt-input-outline-container.c-rich-text-editor(ref="outline")
 import Quill from 'quill'
 import 'quill/dist/quill.core.css'
 import BuntTheme from 'lib/quill/BuntTheme'
+import Emitter from 'quill/core/emitter'
+import config from '../../config'
 
 const Delta = Quill.import('delta')
 
@@ -43,6 +47,7 @@ export default {
 	data () {
 		return {
 			quill: null,
+			uploading: false,
 		}
 	},
 	computed: {},
@@ -52,7 +57,56 @@ export default {
 			debug: ENV_DEVELOPMENT ? 'info' : 'warn',
 			theme: 'bunt',
 			modules: {
-				toolbar: this.$refs.toolbar,
+				toolbar: {
+					container: this.$refs.toolbar,
+					handlers: {
+						image: () => {
+							const fileInput = document.createElement('input')
+							fileInput.setAttribute('type', 'file')
+							fileInput.setAttribute('accept', 'image/png, image/gif, image/jpeg, image/bmp, image/x-icon')
+							fileInput.addEventListener('change', () => {
+								if (fileInput.files != null && fileInput.files[0] != null) {
+									const data = new FormData()
+									const file = fileInput.files[0]
+									data.append('file', file)
+
+									const headers = new Headers()
+									if (this.$store.state.token) {
+										headers.append('Authorization', `Bearer ${this.$store.state.token}`)
+									} else if (this.$store.state.clientId) {
+										headers.append('Authorization', `Client ${this.$store.state.clientId}`)
+									}
+
+									this.uploading = true
+									fetch(config.api.upload, {
+										method: 'POST',
+										headers: headers,
+										body: data
+									}).then(response => response.json()).then(data => {
+										if (data.error) {
+											alert(`Upload error: ${data.error}`) // Proper user-friendly messages
+											this.$emit('input', '')
+										} else {
+											const range = this.quill.getSelection(true)
+											this.quill.updateContents(new Delta()
+												.retain(range.index)
+												.delete(range.length)
+												.insert({ image: data.url }), Emitter.sources.USER)
+											this.quill.setSelection(range.index + 1, Emitter.sources.SILENT)
+										}
+										this.uploading = false
+									}).catch(error => {
+										// TODO: better error handling
+										console.log(error)
+										alert(`error: ${error}`)
+										this.uploading = false
+									})
+								}
+							})
+							fileInput.click()
+						},
+					}
+				}
 			},
 			bounds: this.$refs.editor,
 		})
@@ -83,6 +137,18 @@ export default {
 <style lang="stylus">
 .c-rich-text-editor
 	padding-top: 0
+	position: relative
+
+	.uploading
+		position: absolute
+		left: 0
+		top: 0
+		width: 100%
+		height: 100%
+		background: rgba(255, 255, 255, 0.7)
+		display: flex
+		align-items: center
+		justify-content: center
 
 	.toolbar
 		border-bottom: 1px solid #ccc
