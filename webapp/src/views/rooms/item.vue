@@ -8,6 +8,7 @@
 	.main
 		.stage(v-if="modules['livestream.native'] || modules['livestream.youtube'] || modules['call.janus']")
 			.mediasource-placeholder
+				bunt-icon-button.btn-expand-media(v-if="primaryMediaSourceCollapsed", @click="$emit('expand-media')") {{ $mq.above.m ? 'chevron-right' : 'chevron-down' }}
 			reactions-overlay(v-if="modules['livestream.native'] || modules['livestream.youtube'] || modules['call.janus']")
 			.stage-tool-blocker(v-if="activeStageTool !== null", @click="activeStageTool = null")
 			.stage-tools(v-if="modules['livestream.native'] || modules['livestream.youtube'] || modules['call.janus']")
@@ -26,7 +27,7 @@
 			bunt-tabs(v-if="modules['question'] && modules['chat.native']", :active-tab="activeSidebarTab")
 				bunt-tab(id="chat", :header="$t('Room:sidebar:tabs-header:chat')", @selected="activeSidebarTab = 'chat'")
 				bunt-tab(id="questions", :header="$t('Room:sidebar:tabs-header:questions')", @selected="activeSidebarTab = 'questions'")
-			chat(v-show="modules['chat.native'] && activeSidebarTab === 'chat'", :room="room", :module="modules['chat.native']", mode="compact", :key="room.id", @change="changedTabContent('chat')")
+			chat(v-show="modules['chat.native'] && activeSidebarTab === 'chat'", :room="room", :module="modules['chat.native']", :mode="primaryMediaSourceCollapsed ? 'standalone' : 'compact'", :key="room.id", @change="changedTabContent('chat')")
 			questions(v-show="modules['question'] && activeSidebarTab === 'questions'", :module="modules['question']", @change="changedTabContent('questions')")
 	transition(name="prompt")
 		recordings-prompt(:room="room", v-if="showRecordingsPrompt", @close="showRecordingsPrompt = false")
@@ -55,7 +56,8 @@ export default {
 	name: 'Room',
 	components: { EditRoomSchedule, Chat, Exhibition, Livestream, LandingPage, MarkdownPage, IframePage, ReactionsBar, ReactionsOverlay, RecordingsPrompt, UserListPage, Roulette, Questions },
 	props: {
-		roomId: String
+		roomId: String,
+		primaryMediaSourceCollapsed: Boolean
 	},
 	data () {
 		return {
@@ -155,6 +157,17 @@ export default {
 		flex: auto
 	.mediasource-placeholder
 		flex: auto
+		display: flex
+		justify-content: flex-end
+		padding: 8px
+		.btn-expand-media
+			icon-button-style(style: clear)
+			height: 42px
+			width: @height
+			.bunt-icon
+				height: 42px
+				font-size: 32px
+				line-height: @height
 	.room-sidebar
 		display: flex
 		flex-direction: column
@@ -236,4 +249,13 @@ export default {
 				flex: auto
 				width: 100vw
 				min-height: 0
+.primary-media-collapsed .c-room
+	+above('m')
+		.stage
+			max-width: 248px
+		.room-sidebar
+			flex: auto
+	+below('m')
+		.mediasource-placeholder
+			height: auto
 </style>

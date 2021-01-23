@@ -11,7 +11,7 @@
 				span {{ $t('Livestream:automuted-unmute:text') }}
 			.big-button.mdi.mdi-play(v-if="!offline && !playing")
 			bunt-progress-circular(v-if="(buffering || seeking) && !offline", size="huge")
-			bunt-icon-button.btn-collapse(@click="$emit('collapse')") close
+			bunt-icon-button.btn-collapse(@click="$emit('collapse')") {{ $mq.above.m ? 'chevron-left' : 'chevron-up' }}
 			.bottom-controls(@click.stop="")
 				.progress-hover(v-if="!offline && seekable", ref="progress", @pointerdown="onProgressPointerdown", @pointermove="onProgressPointermove", @pointerup="onProgressPointerup", @pointercancel="onProgressPointerup", :style="progressStyles.play")
 					.progress

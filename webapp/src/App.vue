@@ -1,5 +1,5 @@
 <template lang="pug">
-#app(:class="{'has-background-room': backgroundRoom}", :style="[themeVariables, browserhackStyle, mediaConstraintsStyle]")
+#app(:class="{'has-background-room': backgroundRoom, 'primary-media-collapsed': primaryMediaSourceCollapsed}", :style="[themeVariables, browserhackStyle, mediaConstraintsStyle]")
 	.fatal-connection-error(v-if="fatalConnectionError")
 		template(v-if="fatalConnectionError.code === 'world.unknown_world'")
 			.mdi.mdi-help-circle
@@ -21,10 +21,10 @@
 		transition(name="backdrop")
 			.sidebar-backdrop(v-if="$mq.below['l'] && showSidebar", @pointerup="showSidebar = false")
 		rooms-sidebar(:show="$mq.above['l'] || showSidebar", @close="showSidebar = false")
-		router-view(:key="$route.fullPath")
+		router-view(:key="$route.fullPath", :primaryMediaSourceCollapsed="primaryMediaSourceCollapsed", @expand-media="primaryMediaSourceCollapsed = false")
 		//- defining keys like this keeps the playing dom element alive for uninterupted transitions
 		media-source(v-if="roomHasMedia && !primaryMediaSourceCollapsed", ref="primaryMediaSource", :room="room", :key="room.id", @collapse="primaryMediaSourceCollapsed = true")
-		media-source(v-if="backgroundRoom", ref="backgroundMediaSource", :room="backgroundRoom", :background="true", :key="backgroundRoom.id", @close="closeBackgroundRoom()")
+		media-source(v-if="backgroundRoom", ref="backgroundMediaSource", :room="backgroundRoom", :background="true", :key="backgroundRoom.id", @close="closeBackgroundRoom")
 		notifications(:has-background-media="!!backgroundRoom")
 		.disconnected-warning(v-if="!connected") {{ $t('App:disconnected-warning:text') }}
 		transition(name="prompt")
@@ -164,7 +164,7 @@ export default {
 		closeBackgroundRoom () {
 			api.call('room.leave', {room: this.backgroundRoom.id})
 			this.backgroundRoom = null
-		}
+		},
 	}
 }
 </script>

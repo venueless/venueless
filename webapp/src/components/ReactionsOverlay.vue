@@ -111,4 +111,13 @@ export default {
 		right: 0
 		bottom: none
 		top: 48px + 56px
+
+.primary-media-collapsed
+	.c-reactions-overlay
+		+above('m')
+			right: unset
+			left: var(--sidebar-width)
+			width: 248px
+		+below('m')
+			height: 128px
 </style>
