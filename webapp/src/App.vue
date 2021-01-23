@@ -120,6 +120,8 @@ export default {
 			document.title = this.world.title
 		},
 		roomChange (newRoom, oldRoom) {
+			// HACK find out why this is triggered often
+			if (newRoom === oldRoom) return
 			this.primaryMediaSourceCollapsed = false
 			// TODO non-room urls
 			let title = this.world.title
