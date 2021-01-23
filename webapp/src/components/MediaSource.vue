@@ -7,14 +7,13 @@
 				.room-name {{ room.name }}
 			.global-placeholder
 			bunt-icon-button(@click.prevent.stop="$emit('close')") close
-	livestream(v-if="module.type === 'livestream.native'", ref="livestream", :room="room", :module="module", :size="background ? 'tiny' : 'normal'", :key="`livestream-${room.id}`")
+	livestream(v-if="module.type === 'livestream.native'", ref="livestream", :room="room", :module="module", :size="background ? 'tiny' : 'normal'", :key="`livestream-${room.id}`", @collapse="$emit('collapse')")
 	you-tube(v-if="module.type === 'livestream.youtube'", ref="youtube", :room="room", :module="module", :size="background ? 'tiny' : 'normal'", :key="`youtube-${room.id}`")
 	big-blue-button(v-else-if="module.type === 'call.bigbluebutton'", ref="bigbluebutton", :room="room", :module="module", :background="background", :key="`bbb-${room.id}`")
 	janus-call(v-else-if="module.type === 'call.janus'", ref="janus", :room="room", :module="module", :background="background", :size="background ? 'tiny' : 'normal'", :key="`janus-${room.id}`")
 </template>
 <script>
 // TODO functional component?
-import api from 'lib/api'
 import BigBlueButton from 'components/BigBlueButton'
 import JanusCall from 'components/JanusCall'
 import Livestream from 'components/Livestream'
@@ -37,13 +36,6 @@ export default {
 		module () {
 			return this.room.modules.find(module => ['livestream.native', 'livestream.youtube', 'call.bigbluebutton', 'call.janus'].includes(module.type))
 		},
-	},
-	created () {
-		api.call('room.enter', {room: this.room.id})
-	},
-	beforeDestroy () {
-		if (api.socketState !== 'open') return
-		api.call('room.leave', {room: this.room.id})
 	},
 	methods: {
 		isPlaying () {

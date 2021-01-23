@@ -23,8 +23,8 @@
 		rooms-sidebar(:show="$mq.above['l'] || showSidebar", @close="showSidebar = false")
 		router-view(:key="$route.fullPath")
 		//- defining keys like this keeps the playing dom element alive for uninterupted transitions
-		media-source(v-if="roomHasMedia", ref="primaryMediaSource", :room="room", :key="room.id")
-		media-source(v-if="backgroundRoom", ref="backgroundMediaSource", :room="backgroundRoom", :background="true", :key="backgroundRoom.id", @close="backgroundRoom = null")
+		media-source(v-if="roomHasMedia && !primaryMediaSourceCollapsed", ref="primaryMediaSource", :room="room", :key="room.id", @collapse="primaryMediaSourceCollapsed = true")
+		media-source(v-if="backgroundRoom", ref="backgroundMediaSource", :room="backgroundRoom", :background="true", :key="backgroundRoom.id", @close="closeBackgroundRoom()")
 		notifications(:has-background-media="!!backgroundRoom")
 		.disconnected-warning(v-if="!connected") {{ $t('App:disconnected-warning:text') }}
 		transition(name="prompt")
@@ -35,6 +35,7 @@
 </template>
 <script>
 import { mapState } from 'vuex'
+import api from 'lib/api'
 import { themeVariables } from 'theme'
 import AppBar from 'components/AppBar'
 import RoomsSidebar from 'components/RoomsSidebar'
@@ -53,7 +54,8 @@ export default {
 			themeVariables,
 			backgroundRoom: null,
 			showSidebar: false,
-			windowHeight: null
+			windowHeight: null,
+			primaryMediaSourceCollapsed: false
 		}
 	},
 	computed: {
@@ -118,6 +120,7 @@ export default {
 			document.title = this.world.title
 		},
 		roomChange (newRoom, oldRoom) {
+			this.primaryMediaSourceCollapsed = false
 			// TODO non-room urls
 			let title = this.world.title
 			if (this.room) {
@@ -126,16 +129,18 @@ export default {
 			document.title = title
 			this.$store.dispatch('changeRoom', newRoom)
 			const isBBB = module => module.type === 'call.bigbluebutton'
-			if (!this.$mq.above.m) return // no background rooms for mobile
 			if (oldRoom &&
+				this.$mq.above.m && // no background rooms for mobile
 				this.rooms.includes(oldRoom) &&
 				!this.backgroundRoom &&
 				oldRoom.modules.some(module => mediaModules.includes(module.type)) &&
-				this.$refs.primaryMediaSource.isPlaying() &&
+				this.$refs.primaryMediaSource?.isPlaying() &&
 				// don't background bbb room when switching to new bbb room
 				!(newRoom?.modules.some(isBBB) && oldRoom?.modules.some(isBBB))
 			) {
 				this.backgroundRoom = oldRoom
+			} else if (api.socketState === 'open' && oldRoom) {
+				api.call('room.leave', {room: oldRoom.id})
 			}
 			// returning to room currently playing in background should maximize again
 			if (this.backgroundRoom && (
@@ -144,7 +149,9 @@ export default {
 				(newRoom?.modules.some(isBBB) && this.backgroundRoom.modules.some(isBBB))
 			)) {
 				this.backgroundRoom = null
+				return // don't enter which we never left
 			}
+			api.call('room.enter', {room: newRoom.id})
 		},
 		roomListChange () {
 			if (this.room && !this.rooms.includes(this.room)) {
@@ -153,6 +160,10 @@ export default {
 			if (!this.backgroundRoom && !this.rooms.includes(this.backgroundRoom)) {
 				this.backgroundRoom = null
 			}
+		},
+		closeBackgroundRoom () {
+			api.call('room.leave', {room: this.backgroundRoom.id})
+			this.backgroundRoom = null
 		}
 	}
 }

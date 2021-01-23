@@ -11,6 +11,7 @@
 				span {{ $t('Livestream:automuted-unmute:text') }}
 			.big-button.mdi.mdi-play(v-if="!offline && !playing")
 			bunt-progress-circular(v-if="(buffering || seeking) && !offline", size="huge")
+			bunt-icon-button.btn-collapse(@click="$emit('collapse')") close
 			.bottom-controls(@click.stop="")
 				.progress-hover(v-if="!offline && seekable", ref="progress", @pointerdown="onProgressPointerdown", @pointermove="onProgressPointermove", @pointerup="onProgressPointerup", @pointercancel="onProgressPointerup", :style="progressStyles.play")
 					.progress
@@ -493,6 +494,17 @@ export default {
 			background-color: $clr-secondary-text-dark
 			color: $clr-primary-text-light
 			border-radius: 50%
+		.btn-collapse
+			position: absolute
+			right: 8px
+			top: 8px
+			icon-button-style(color: $clr-primary-text-dark, style: clear)
+			height: 42px
+			width: @height
+			.bunt-icon
+				height: 42px
+				font-size: 32px
+				line-height: @height
 		.bottom-controls
 			position: absolute
 			bottom: 0
