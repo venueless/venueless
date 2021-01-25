@@ -36,7 +36,7 @@ import Quill from 'quill'
 import 'quill/dist/quill.core.css'
 import BuntTheme from 'lib/quill/BuntTheme'
 import Emitter from 'quill/core/emitter'
-import config from '../../config'
+import api from 'lib/api'
 
 const Delta = Quill.import('delta')
 
@@ -68,21 +68,9 @@ export default {
 								if (fileInput.files != null && fileInput.files[0] != null) {
 									const data = new FormData()
 									const file = fileInput.files[0]
-									data.append('file', file)
-
-									const headers = new Headers()
-									if (this.$store.state.token) {
-										headers.append('Authorization', `Bearer ${this.$store.state.token}`)
-									} else if (this.$store.state.clientId) {
-										headers.append('Authorization', `Client ${this.$store.state.clientId}`)
-									}
 
 									this.uploading = true
-									fetch(config.api.upload, {
-										method: 'POST',
-										headers: headers,
-										body: data
-									}).then(response => response.json()).then(data => {
+									api.uploadFilePromise(file, file.name).then(data => {
 										if (data.error) {
 											alert(`Upload error: ${data.error}`) // Proper user-friendly messages
 											this.$emit('input', '')
