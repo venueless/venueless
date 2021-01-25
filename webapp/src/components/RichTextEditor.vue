@@ -144,10 +144,16 @@ export default {
 		display: flex
 		flex-direction: row
 		flex-wrap: wrap
+		padding: 4px
 		.buttongroup
 			margin-right: 16px
-		.bunt-icon-button .bunt-icon
-			color: rgba(0, 0, 0, 0.5)
+		.bunt-icon-button
+			border-radius: 8px
+			margin-right: 2px
+			.bunt-icon
+				color: rgba(0, 0, 0, 0.5)
+		.ql-active
+			background: #f0f0f0
 		.ql-active .bunt-icon
 			color: var(--clr-primary)
 	.ql-hidden
