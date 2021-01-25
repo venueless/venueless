@@ -66,7 +66,6 @@ export default {
 							fileInput.setAttribute('accept', 'image/png, image/gif, image/jpeg, image/bmp, image/x-icon')
 							fileInput.addEventListener('change', () => {
 								if (fileInput.files != null && fileInput.files[0] != null) {
-									const data = new FormData()
 									const file = fileInput.files[0]
 
 									this.uploading = true

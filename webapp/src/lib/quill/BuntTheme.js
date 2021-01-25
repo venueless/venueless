@@ -1,8 +1,8 @@
-import extend from 'extend'
 import Quill from 'quill'
 import BaseTheme, { BaseTooltip } from 'quill/themes/base'
 import Emitter from 'quill/core/emitter'
 import { Range } from 'quill/core/selection'
+import { defaultsDeep } from 'lodash'
 
 const LinkBlot = Quill.import('formats/link')
 
@@ -18,7 +18,7 @@ class BuntTheme extends BaseTheme {
 		}
 	}
 }
-BuntTheme.DEFAULTS = extend(true, {}, BaseTheme.DEFAULTS, {
+BuntTheme.DEFAULTS = defaultsDeep(defaultsDeep({}, BaseTheme.DEFAULTS), {
 	modules: {
 		toolbar: {
 			handlers: {
