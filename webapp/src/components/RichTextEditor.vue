@@ -135,6 +135,8 @@ export default {
 }
 </script>
 <style lang="stylus">
+@import 'typography'
+
 .c-rich-text-editor
 	padding-top: 0
 	position: relative
@@ -220,4 +222,13 @@ export default {
 
 	.ql-tooltip[data-mode=link]::before
 		content: "Enter link:"
+
+	.ql-container
+		font-family: $font-stack
+
+	.ql-editor
+		typography()
+
+		ol li::before, ul li::before
+			content: ""
 </style>
