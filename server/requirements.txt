@@ -7,14 +7,15 @@ celery==5.0.*
 channels>=3.0.3,<3.1.0
 channels_redis==3.2.*
 Django==3.1.*
-django-cors-headers==3.6.*
+django-cors-headers==3.7.*
 django-extensions==3.1.*
 djangorestframework==3.12.*
-emoji==0.6.*
+emoji==1.1.*
 lxml==4.6.*
 matplotlib==3.3.*
 numpy==1.19.*
 orjson==3.4.*
+Pillow==8.1.*
 pdfrw==0.4
 pyjwt==2.0.*
 python-dateutil==2.8.*
@@ -23,7 +24,7 @@ redis
 reportlab==3.5.*
 requests==2.25.*
 sentry-sdk==0.19.*
-tqdm==4.55.*
+tqdm==4.56.*
 websockets==8.*
 
 # deploy

@@ -6,6 +6,9 @@ export default {
 		questions: null
 	},
 	getters: {
+		pinnedQuestion (state) {
+			return state.questions?.find(q => q.is_pinned)
+		}
 	},
 	mutations: {
 
@@ -30,10 +33,29 @@ export default {
 			// update handled in create_or_update
 			// TODO error handling
 		},
+		archiveQuestion ({state, rootState}, question) {
+			return api.call('question.update', {room: rootState.activeRoom.id, id: question.id, state: 'archived', is_pinned: false})
+			// update handled in create_or_update
+			// TODO error handling
+		},
+		unarchiveQuestion ({state, rootState}, question) {
+			return api.call('question.update', {room: rootState.activeRoom.id, id: question.id, state: 'visible'})
+			// update handled in create_or_update
+			// TODO error handling
+		},
+		archiveAll ({state, rootState}) {
+			// just send all updates in parallel
+			for (const question of state.questions) {
+				api.call('question.update', {room: rootState.activeRoom.id, id: question.id, state: 'archived', is_pinned: false})
+			}
+		},
 		deleteQuestion ({state, rootState}, question) {
 			return api.call('question.delete', {room: rootState.activeRoom.id, id: question.id})
 			// update handled in api::question.deleted
 			// TODO error handling
+		},
+		pinQuestion ({state, rootState}, question) {
+			return api.call('question.pin', {room: rootState.activeRoom.id, id: question.id})
 		},
 		'api::question.created_or_updated' ({state}, {question}) {
 			const existingQuestion = state.questions.find(q => q.id === question.id)
@@ -48,6 +70,12 @@ export default {
 			const questionIndex = state.questions.findIndex(q => q.id === id)
 			if (questionIndex > -1) {
 				state.questions.splice(questionIndex, 1)
+			}
+		},
+		'api::question.pinned' ({state}, {id}) {
+			for (const question of state.questions) {
+				// unpin all other questions
+				question.is_pinned = question.id === id
 			}
 		}
 	}
