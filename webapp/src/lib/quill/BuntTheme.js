@@ -6,7 +6,6 @@ import { defaultsDeep } from 'lodash'
 
 const LinkBlot = Quill.import('formats/link')
 
-
 // This is based on the "snow" theme from quill, but optimized to work with buntpapier
 class BuntTheme extends BaseTheme {
 	extendToolbar (toolbar) {
