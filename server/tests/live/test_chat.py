@@ -585,6 +585,7 @@ async def test_fetch_messages_after_join(chat_room):
             ]
         )
         response = await c1.receive_json_from()
+        print(response)
         assert response[0] == "success"
         assert response[2]["reactions"]
 
