@@ -449,11 +449,7 @@ class ChatModule(BaseModule):
     )
     async def react(self, body):
         reaction = body["reaction"]
-        if reaction not in emoji.UNICODE_EMOJI:
-            print(
-                emoji.EMOJI_UNICODE.get(":smiling_face_with_horns:"),
-                emoji.UNICODE_EMOJI,
-            )
+        if reaction not in emoji.UNICODE_EMOJI["en"]:
             raise ConsumerException("emoji.sadpanda")
 
         event = await self.service.get_event(
