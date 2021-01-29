@@ -5,7 +5,7 @@ import pytest
 from channels.db import database_sync_to_async
 from channels.testing import WebsocketCommunicator
 
-from venueless.core.models import User, Exhibitor, ExhibitorStaff
+from venueless.core.models import Exhibitor, ExhibitorStaff, User
 from venueless.routing import application
 
 
