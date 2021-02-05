@@ -188,6 +188,7 @@ INSTALLED_APPS = [
     "venueless.graphs.GraphsConfig",
     "venueless.storage.StorageConfig",
     "venueless.zoom.ZoomConfig",
+    "venueless.control.ControlConfig",
 ]
 
 try:
