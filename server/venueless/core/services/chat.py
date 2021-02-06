@@ -1,4 +1,3 @@
-import uuid
 from contextlib import suppress
 
 from channels.db import database_sync_to_async
@@ -202,7 +201,6 @@ class ChatService:
         if content.get("type") == "call":
             if "janus" in self.world.feature_flags:
                 content.setdefault("body", {})
-                content["body"]["id"] = str(uuid.uuid4())
                 content["body"]["type"] = "janus"
             else:
                 call = BBBCall.objects.create(

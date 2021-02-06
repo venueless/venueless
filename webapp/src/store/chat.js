@@ -204,16 +204,16 @@ export default {
 			})
 			dispatch('joinCall', event.content.body)
 		},
-		async joinCall ({state}, {type, id}) {
-			if (type === 'janus') {
+		async joinCall ({state}, body) {
+			if (body.type === 'janus') {
 				state.call = {
 					type: 'janus',
-					id: id,
-					parameters: await api.call('januscall.call_url', {id: id}),
+					id: state.channel,
+					parameters: await api.call('januscall.channel_url', {channel: state.channel}),
 					channel: state.channel
 				}
 			} else {
-				const {url} = await api.call('bbb.call_url', {call: id})
+				const {url} = await api.call('bbb.call_url', {call: body.id})
 				window.open(url, '_blank')
 			}
 		},
