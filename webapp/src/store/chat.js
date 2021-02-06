@@ -113,11 +113,11 @@ export default {
 		async markChannelRead ({state}) {
 			if (state.timeline.length === 0) return
 			const pointer = state.timeline[state.timeline.length - 1].event_id
+			Vue.set(state.readPointers, state.channel, pointer)
 			await api.call('chat.mark_read', {
 				channel: state.channel,
 				id: pointer
 			})
-			Vue.set(state.readPointers, state.channel, pointer)
 		},
 		async fetchUsers ({state}, ids) {
 			const users = await api.call('user.fetch', {ids})
