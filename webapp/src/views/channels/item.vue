@@ -5,7 +5,6 @@
 		bunt-icon-button(@click="startCall", tooltip="start video call", tooltipPlacement="left") phone_outline
 	.main
 		.channel-call(v-if="hasCall")
-			.channel-call-placeholder
 		chat(:mode="hasCall ? 'compact' : 'standalone'", :module="{channel_id: channelId}", :showUserlist="false")
 </template>
 <script>
@@ -57,11 +56,20 @@ export default {
 		display: flex
 		min-height: 0
 		.channel-call
-			display: flex
-			flex-direction: column
 			min-height: 0
-			flex: auto
+			flex: auto 1 1
 	&.has-call .c-chat
 		flex: 380px 0 0
 
+	+below('m')
+		&.has-call
+			.main
+				flex-direction: column
+			.c-chat
+				flex: auto
+				width: 100vw
+				min-height: 0
+			.channel-call
+				height: var(--mobile-media-height)
+				flex: var(--mobile-media-height) 0 0
 </style>
