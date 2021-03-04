@@ -179,6 +179,7 @@ CACHES = {
 
 INSTALLED_APPS = [
     "django.contrib.contenttypes",
+    "django.contrib.auth",
     "channels",
     "corsheaders",
     "rest_framework",
@@ -190,6 +191,8 @@ INSTALLED_APPS = [
     "venueless.zoom.ZoomConfig",
     "venueless.control.ControlConfig",
 ]
+
+## TODO if not flag: remove control from installed apps and middlewares
 
 try:
     import django_extensions  # noqa

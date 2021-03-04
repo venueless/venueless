@@ -1,0 +1,41 @@
+{% extends "registration/base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Login" %}{% endblock %}
+
+{% block content %}
+    <section class="welcome">
+    <h1>Login</h1>
+    {% if request.user.is_authenticated %}
+
+    {% else %}
+        <form method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+
+            {{ form.as_p }}
+
+            <input type="submit" value="login">
+            <input type="hidden" name="next" value="{{ next }}">
+        </form>
+        <p><a href="{% url 'password_reset' %}">Passwort vergessen?</a></p>
+    {% endif %}
+</section>
+
+{% if form.errors %}
+    <p>Dein Nutzer oder Passwort sind nicht richtig. Bitte versuche es erneut.</p>
+{% endif %}
+
+{% if next %}
+    {% if user.is_authenticated %}
+    <h1>404</h1>
+    <p>hm… hier ist was Falsch gelaufen.</p>
+    {% else %}
+    <p>Bitte logge dich ein, um diesen Inhalt zu sehen.</p>
+    {% endif %}
+{% endif %}
+
+
+
+
+
+{% endblock %}

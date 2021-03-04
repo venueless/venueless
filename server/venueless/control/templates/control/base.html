@@ -1,0 +1,45 @@
+{% load static %}
+<html>
+    <head>
+        <title>{% block title %}{% endblock %} :: mysoftub</title>
+        <link rel="stylesheet" href="https://unpkg.com/tachyons@4.12.0/css/tachyons.min.css"/>
+        <link rel="stylesheet" href="{% static 'meinsoftub.css' %}">
+    </head>
+    <body>
+    <div class="main-wrapper">
+        <main>
+        <header class="header">
+        <h1 class="header__headline"><a class="header__link" href="/">Softub Impressionen <span class="header__version">[beta v0.3]</span></a></h1>
+        <a href="#menu"><svg class="header__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M24 6h-24v-4h24v4zm0 4h-24v4h24v-4zm0 8h-24v4h24v-4z"/></svg></a>
+        </header>
+
+        <nav class="menu" id="menu">
+        <ul class="menu__list">
+        {% if request.user.is_authenticated %}
+            <li class="menu__item"><a class="menu__link" href="/upload">Upload</a></li>
+            <li class="menu__item"><a class="menu__link" href="{% url 'profile' %}">Profil</a></li>
+            <li class="menu__item"><a class="menu__link" href="{% url 'logout' %}">Logout</a></li>
+        {% else %}
+            <li class="menu__item"><a class="menu__link" href="{% url 'login' %}">Login</a></li>
+        {% endif %}
+
+        </ul>
+        </nav>
+
+                {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+
+            {% block content %}
+
+            {% endblock %}
+
+        </main>
+    </div>
+    </body>
+</html>
