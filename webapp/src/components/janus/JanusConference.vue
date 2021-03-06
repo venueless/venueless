@@ -1,5 +1,5 @@
 <template lang="pug">
-.c-janusvideoroom
+.c-janusconference
 
 	.connection-state(v-if="connectionState != 'connected'")
 		div(v-if="connectionState == 'disconnected'") {{ $t('JanusVideoroom:disconnected:text') }}
@@ -8,17 +8,19 @@
 			p {{ connectionError }}
 		bunt-progress-circular(v-else-if="connectionState == 'connecting'", size="huge", :page="true")
 
+	audio(v-show="false", ref="mixedAudio", autoplay, playsinline)
+
 	.users(v-show="connectionState == 'connected'", ref="container", :style="gridStyle", v-resize-observer="onResize")
 
 		.me.feed
-			.video-container(:style="{boxShadow: size != 'tiny' ? `0 0 0px 4px ${primaryColor.alpha(soundLevels.ourVideo * 20)}` : 'none'}")
-				video(v-show="publishingWithVideo && publishingState !== 'unpublished'", ref="ourVideo", autoplay, playsinline, muted="muted")
-			.publishing-state(v-if="publishingState !== 'published'")
-				bunt-progress-circular(v-if="publishingState == 'publishing'", size="huge", :page="true")
-				div.publishing-error(v-else-if="publishingState == 'failed'")
+			.video-container(:style="{boxShadow: size != 'tiny' ? `0 0 0px 4px ${primaryColor}` : 'none'}")
+				video(v-show="publishingWithVideo && videoPublishingState !== 'unpublished'", ref="ourVideo", autoplay, playsinline, muted="muted")
+			.publishing-state(v-if="videoPublishingState !== 'published'")
+				bunt-progress-circular(v-if="videoPublishingState == 'publishing'", size="huge", :page="true")
+				div.publishing-error(v-else-if="videoPublishingState == 'failed'")
 					p {{ $t('JanusVideoroom:publishing-error:text') }}
 					p {{ publishingError }}
-			.novideo-indicator(v-if="publishingState == 'published' && !publishingWithVideo")
+			.novideo-indicator(v-if="videoPublishingState == 'published' && !publishingWithVideo")
 				avatar(:user="user", :size="96")
 			.controls
 				.user(@click="showUserCard($event, user)")
@@ -29,7 +31,7 @@
 				.bunt-icon.mdi.mdi-microphone-off
 
 		.peer.feed(v-for="(f, idx) in feeds", :key="f.rfid", :style="{width: layout.width, height: layout.height}")
-			.video-container(v-show="f.rfattached", :style="{boxShadow: size != 'tiny' ? `0 0 0px 4px ${primaryColor.alpha(soundLevels[f.rfid] * 20)}` : 'none'}")
+			.video-container(v-show="f.rfattached", :style="{boxShadow: size != 'tiny' ? `0 0 0px 4px ${primaryColor}` : 'none'}")
 				video(ref="peerVideo", autoplay, playsinline)
 			.subscribing-state(v-if="!f.rfattached")
 				bunt-progress-circular(size="huge", :page="true")
@@ -148,7 +150,9 @@ export default {
 		return {
 			// State machines
 			connectionState: 'disconnected', // disconnected, connecting, connected, failed
-			publishingState: 'unpublished', // unpublished, publishing, published, failed
+			audioReceivingState: 'pending', // pending, receiving
+			audioPublishingState: 'unpublished', // unpublished, publishing, published, failed
+			videoPublishingState: 'unpublished', // unpublished, publishing, published, failed
 			screensharingState: 'unpublished', // unpublished, publishing, published, unpublishing, failed
 
 			// Error handling
@@ -160,11 +164,19 @@ export default {
 
 			// References to Janus.js
 			janus: null,
-			mainPluginHandle: null,
+			audioPluginHandle: null,
+			videoPluginHandle: null,
 			screensharePluginHandle: null,
 
 			// Video controls state
 			videoRequested: localStorage.videoRequested !== 'false', // user *wants* to send video
+
+			// Janus audiobridge state
+			audioInput: null, // audio input currently requested from janus
+			audioReceived: true, // janus *has* received our audio
+			ourAudioId: null,
+			participants: [],
+			knownMuteState: false,
 
 			// Janus video call state
 			feeds: [],
@@ -172,12 +184,9 @@ export default {
 			ourPrivateId: null,
 			ourStream: null,
 			ourScreenShareStream: null,
-			knownMuteState: false,
 			publishingWithVideo: false, // we are *trying* to send video
 			videoReceived: false, // janus *has* received our video
-			audioReceived: true, // janus *has* received our audio
 			videoInput: null, // video input currently requested from janus
-			audioInput: null, // audio input currently requested from janus
 			videoOutput: localStorage.videoOutput !== 'false',
 			waitingForConsent: false,
 
@@ -186,12 +195,8 @@ export default {
 			upstreamSlowLinkCount: 0,
 			downstreamSlowLinkCount: 0,
 
-			// Sound metering
-			soundMeters: {},
-			soundLevels: {},
-			soundMeterInterval: null,
-
 			// Layout utilities
+			userCache: {},
 			primaryColor: Color(colors.primary),
 			showFeedbackPrompt: false,
 			showDevicePrompt: false,
@@ -227,9 +232,6 @@ export default {
 		if (this.connectionRetryTimeout) {
 			window.clearTimeout(this.connectionRetryTimeout)
 		}
-		if (this.soundMeterInterval) {
-			window.clearInterval(this.soundMeterInterval)
-		}
 	},
 	mounted () {
 		LOG_ENTRIES.splice(0, LOG_ENTRIES.length)
@@ -241,11 +243,6 @@ export default {
 			this.downstreamSlowLinkCount = Math.max(this.downstreamSlowLinkCount - 1, 0)
 			this.upstreamSlowLinkCount = Math.max(this.upstreamSlowLinkCount - 1, 0)
 		}, 10000)
-		this.soundMeterInterval = window.setInterval(() => {
-			for (const idx in this.soundMeters) {
-				this.$set(this.soundLevels, idx, this.soundMeters[idx].slow.toFixed(2))
-			}
-		}, 200)
 	},
 	methods: {
 		collectTrace () {
@@ -256,18 +253,17 @@ export default {
 		cleanup () {
 			this.janus.destroy({cleanupHandles: true})
 			this.connectionState = 'disconnected'
-			this.publishingState = 'unpublished'
+			this.audioReceivingState = 'pending'
+			this.audioPublishingState = 'unpublished'
+			this.videoPublishingState = 'unpublished'
 			this.screensharingState = 'unpublished'
 			this.retryInterval = 1000
 			this.connectionError = null
 			this.screensharingError = null
 			this.feeds = []
+			this.participants = []
 			this.ourStream = null
 			this.ourScreenShareStream = null
-			for (const idx in this.soundMeters) {
-				this.soundMeters[idx].context.close()
-			}
-			this.soundMeters = {}
 		},
 		onResize () {
 			const bbox = this.$refs.container.getBoundingClientRect()
@@ -290,7 +286,8 @@ export default {
 				this.videoOutput = (localStorage.videoOutput !== 'false')
 				this.onJanusInitialized()
 			}
-			this.publishOwnFeed()
+			this.publishOwnAudio()
+			this.publishOwnVideo()
 			if (typeof this.$refs.peerVideo !== 'undefined') {
 				for (let i = 0; i < this.$refs.peerVideo.length; i++) {
 					if (this.$refs.peerVideo[i].setSinkId) { // chrome only for now
@@ -329,7 +326,7 @@ export default {
 						success: (pluginHandle) => {
 							this.screensharePluginHandle = pluginHandle
 							log('venueless', 'info',
-								'Plugin attached! (' + this.screensharePluginHandle.getPlugin() + ', id=' + this.mainPluginHandle.getId() + ')')
+								'Plugin attached! (' + this.screensharePluginHandle.getPlugin() + ', id=' + this.videoPluginHandle.getId() + ')')
 
 							const register = {
 								request: 'join',
@@ -428,7 +425,7 @@ export default {
 		toggleVideo () {
 			this.videoRequested = !this.videoRequested
 			localStorage.videoRequested = this.videoRequested
-			this.publishOwnFeed()
+			this.publishOwnVideo()
 		},
 		disableVideo () {
 			this.videoRequested = false
@@ -438,26 +435,28 @@ export default {
 				this.cleanup()
 				this.onJanusInitialized()
 			} else {
-				this.publishOwnFeed()
+				this.publishOwnVideo()
 			}
 		},
 		toggleMute () {
-			if (this.mainPluginHandle == null) {
+			if (this.audioPluginHandle == null) {
 				return
 			}
-			this.knownMuteState = this.mainPluginHandle.isAudioMuted()
+			this.knownMuteState = this.audioPluginHandle.isAudioMuted()
 			if (this.knownMuteState) {
-				this.mainPluginHandle.unmuteAudio()
+				this.audioPluginHandle.unmuteAudio()
+				this.audioPluginHandle.send({message: { request: 'configure', muted: false }})
 			} else {
-				this.mainPluginHandle.muteAudio()
+				this.audioPluginHandle.muteAudio()
+				this.audioPluginHandle.send({message: { request: 'configure', muted: true }})
 			}
-			this.knownMuteState = this.mainPluginHandle.isAudioMuted()
+			this.knownMuteState = this.audioPluginHandle.isAudioMuted()
 		},
-		publishOwnFeed () {
+		publishOwnVideo () {
 			const media = {
 				audioRecv: false,
 				videoRecv: false,
-				audioSend: true,
+				audioSend: false,
 				videoSend: this.videoRequested,
 			}
 
@@ -467,7 +466,7 @@ export default {
 				} else {
 					media.video = 'hires'
 				}
-				if (this.publishingState !== 'unpublished' && !this.publishingWithVideo) {
+				if (this.videoPublishingState !== 'unpublished' && !this.publishingWithVideo) {
 					media.addVideo = true
 				} else if (localStorage.videoInput !== this.videoInput) {
 					media.replaceVideo = true
@@ -477,18 +476,10 @@ export default {
 				media.removeVideo = true
 			}
 
-			if (localStorage.audioInput) {
-				media.audio = {deviceId: localStorage.audioInput}
-			}
-			if (localStorage.audioInput !== this.audioInput) {
-				media.replaceAudio = true
-				this.audioInput = localStorage.audioInput
-			}
-
 			this.publishingWithVideo = this.videoRequested
-			this.publishingState = 'publishing'
+			this.videoPublishingState = 'publishing'
 
-			this.mainPluginHandle.createOffer(
+			this.videoPluginHandle.createOffer(
 				{
 					media: media,
 					// If you want to test simulcasting (Chrome and Firefox only), set to true
@@ -496,18 +487,39 @@ export default {
 					simulcast2: false,
 					success: (jsep) => {
 						const publish = {request: 'configure', audio: true, video: this.publishingWithVideo, bitrate: this.upstreamBitrate}
-						this.mainPluginHandle.send({message: publish, jsep: jsep})
+						this.videoPluginHandle.send({message: publish, jsep: jsep})
 					},
 					error: (error) => {
 						if (this.publishingWithVideo) {
 							this.videoRequested = false
-							this.publishOwnFeed()
+							this.publishOwnVideo()
 						} else {
-							this.publishingState = 'failed'
+							this.videoPublishingState = 'failed'
 							this.publishingError = error.message
 						}
 					},
 				})
+		},
+		publishOwnAudio () {
+			const media = {video: false}
+			if (localStorage.audioInput) {
+				media.audio = {deviceId: localStorage.audioInput}
+			}
+			if (localStorage.audioInput !== this.audioInput) {
+				media.replaceAudio = true
+				this.audioInput = localStorage.audioInput
+			}
+			this.audioPluginHandle.createOffer({
+				media: media,
+				success: (jsep) => {
+					const publish = {request: 'configure', muted: this.knownMuteState}
+					this.audioPluginHandle.send({message: publish, jsep: jsep})
+				},
+				error: (error) => {
+					this.audioPublishingState = 'failed'
+					this.publishingError = error.message
+				},
+			})
 		},
 		publishOwnScreenshareFeed () {
 			// TODO: framerate? default of 3 is pretty low
@@ -654,20 +666,174 @@ export default {
 						} else {
 							remoteFeed.hasVideo = true
 						}
-						this.initSoundMeter(stream, remoteFeed.rfid)
 					})
 				},
 			})
 		},
 		onJanusConnected () {
+			// Roughly based on https://janus.conf.meetecho.com/audiobridgetest.js
+			this.janus.attach(
+				{
+					plugin: 'janus.plugin.audiobridge',
+					opaqueId: this.user.id,
+					success: (pluginHandle) => {
+						this.audioPluginHandle = pluginHandle
+						log('venueless', 'info', 'Plugin attached! (' + this.audioPluginHandle.getPlugin() + ', id=' + this.audioPluginHandle.getId() + ')')
+
+						const register = {
+							request: 'join',
+							room: this.roomId,
+							token: this.token,
+							display: this.user.id, // we abuse janus' display name field for the venueless user id
+							muted: this.automute
+						}
+						this.knownMuteState = this.automute
+						this.audioPluginHandle.send({message: register})
+					},
+					error: (error) => {
+						this.connectionState = 'failed'
+						this.connectionError = error
+						this.cleanup()
+						window.setTimeout(this.onJanusInitialized, this.retryInterval)
+						this.retryInterval = this.retryInterval * 2
+					},
+					consentDialog: (on) => {
+						this.waitingForConsent = on
+					},
+					iceState: (state) => {
+						log('venueless', 'info', 'ICE state changed to ' + state)
+						if (state === 'failed') {
+							this.connectionState = 'failed'
+							this.connectionError = `ICE connection ${state}`
+							this.cleanup()
+							window.setTimeout(this.onJanusInitialized, this.retryInterval)
+							this.retryInterval = this.retryInterval * 2
+						}
+					},
+					mediaState: (medium, on) => {
+						log('venueless', 'info', 'Janus ' + (on ? 'started' : 'stopped') + ' receiving our ' + medium)
+						if (medium === 'audio') {
+							this.audioReceived = on
+						}
+					},
+					webrtcState: (on) => {
+						log('venueless', 'info', 'Janus says our WebRTC PeerConnection is ' + (on ? 'up' : 'down') + ' now')
+					},
+					onmessage: (msg, jsep) => {
+						const event = msg.audiobridge
+						if (event) {
+							if (event === 'joined') {
+								log('venueless', 'info', 'Successfully joined audiobridge ' + msg.room + ' with ID ' + this.ourId)
+
+								// Publisher/manager created, negotiate WebRTC and attach to existing feeds, if any
+								this.ourAudioId = msg.id
+								this.connectionState = 'connected'
+								this.connectionError = null
+
+								if (this.audioPublishingState !== 'published') {
+									this.publishOwnAudio()
+								}
+
+								// Any remote feeds to attach to?
+								this.participants = msg.participants
+								if (msg.participants) {
+									for (const p of this.participants) {
+										p.venueless_user_id = p.display
+										this.fetchUser(p)
+									}
+								}
+								// start video plugin
+							} else if (event === 'destroyed') {
+								this.connectionState = 'failed'
+								this.connectionError = 'Room destroyed'
+								this.cleanup()
+							} else if (event === 'event') {
+								if (msg.participants) {
+									// Any remote feeds to attach to?
+									this.participants = msg.participants
+									if (msg.participants) {
+										for (const p of this.participants) {
+											p.venueless_user_id = p.display
+											this.fetchUser(p)
+										}
+									}
+								} else if (msg.leaving) {
+									// One of the publishers has gone away?
+									this.participants = this.participants.find((rf) => rf.id !== msg.leaving)
+								} else if (msg.error) {
+									if (msg.error_code === 485) {
+										this.connectionState = 'failed'
+										this.connectionError = 'Room does not exist'
+										this.cleanup()
+									} else {
+										this.connectionState = 'failed'
+										this.connectionError = `Server error: ${msg.error}`
+										this.cleanup()
+									}
+								}
+							}
+						}
+						if (jsep) {
+							log('venueless', 'debug', 'Handling SDP as well...', jsep)
+							this.audioPluginHandle.handleRemoteJsep({jsep: jsep})
+						}
+					},
+					slowLink: (uplink) => {
+						this.upstreamSlowLinkCount++
+						if (this.upstreamSlowLinkCount > 2 && this.videoRequested) {
+							const newUpstreamBitrate = Math.max(this.upstreamBitrate / 2, MIN_BITRATE)
+							if (newUpstreamBitrate !== this.upstreamBitrate) {
+								this.upstreamBitrate = newUpstreamBitrate
+								log('venueless', 'info', 'Received slowLink on outgoing audio, reducing video bitrate to ' + this.upstreamBitrate)
+								const publish = {request: 'configure', audio: true, video: this.publishingWithVideo, bitrate: this.upstreamBitrate}
+								this.videoPluginHandle.send({message: publish})
+								this.upstreamSlowLinkCount = 0
+							} else {
+								if (this.upstreamSlowLinkCount > 5) {
+									log('venueless', 'info', 'Received slowLink on outgoing audio, video bitrate already at minimum, turning video off')
+									this.videoRequested = false
+									this.publishOwnVideo()
+								} else {
+									log('venueless', 'info', 'Received slowLink on outgoing audio, video bitrate already at minimum')
+								}
+							}
+						}
+					},
+					onlocalstream: (stream) => {
+						// Ignore our own audio stream, we don't want an echo, let's just confirm that it's there
+						if (this.audioPluginHandle.webrtcStuff.pc.iceConnectionState !== 'completed' &&
+							this.audioPluginHandle.webrtcStuff.pc.iceConnectionState !== 'connected') {
+							this.audioPublishingState = 'publishing'
+						} else {
+							if (this.audioReceived) {
+								this.audioPublishingState = 'published'
+								this.publishingError = null
+							}
+						}
+						if (this.automute) {
+							// Mute client side as well as server side
+							this.audioPluginHandle.muteAudio()
+						}
+					},
+					onremotestream: (stream) => {
+						this.audioReceivingState = 'receiving'
+						Janus.attachMediaStream(this.$refs.mixedAudio, stream)
+					},
+					oncleanup: () => {
+						log('venueless', 'info', ' ::: Got a cleanup notification: we are unpublished now :::')
+						this.audioPublishingState = 'unpublished'
+					},
+				})
+		},
+		connectVideoroom () {
 			// Roughly based on https://janus.conf.meetecho.com/videoroomtest.js
 			this.janus.attach(
 				{
 					plugin: 'janus.plugin.videoroom',
 					opaqueId: this.user.id,
 					success: (pluginHandle) => {
-						this.mainPluginHandle = pluginHandle
-						log('venueless', 'info', 'Plugin attached! (' + this.mainPluginHandle.getPlugin() + ', id=' + this.mainPluginHandle.getId() + ')')
+						this.videoPluginHandle = pluginHandle
+						log('venueless', 'info', 'Plugin attached! (' + this.videoPluginHandle.getPlugin() + ', id=' + this.videoPluginHandle.getId() + ')')
 
 						const register = {
 							request: 'join',
@@ -676,7 +842,7 @@ export default {
 							token: this.token,
 							display: this.user.id, // we abuse janus' display name field for the venueless user id
 						}
-						this.mainPluginHandle.send({message: register})
+						this.videoPluginHandle.send({message: register})
 					},
 					error: (error) => {
 						this.connectionState = 'failed'
@@ -704,11 +870,8 @@ export default {
 						if (medium === 'video') {
 							this.videoReceived = on
 						}
-						if (medium === 'audio') {
-							this.audioReceived = on
-						}
 						if ((this.videoReceived || !this.publishingWithVideo) && this.audioReceived) {
-							this.publishingState = 'published'
+							this.videoPublishingState = 'published'
 							this.publishingError = null
 						}
 					},
@@ -735,7 +898,7 @@ export default {
 										this.onNewRemoteFeed(f.id, f.display, f.audio_codec, f.video_codec)
 									}
 								}
-								this.publishOwnFeed()
+								this.publishOwnVideo()
 							} else if (event === 'destroyed') {
 								this.connectionState = 'failed'
 								this.connectionError = 'Room destroyed'
@@ -762,9 +925,9 @@ export default {
 									const unpublished = msg.unpublished
 									if (unpublished === 'ok') {
 										// That's us
-										this.publishingState = 'unpublished'
+										this.videoPublishingState = 'unpublished'
 										this.publishingError = null
-										this.mainPluginHandle.hangup()
+										this.videoPluginHandle.hangup()
 										return
 									}
 									const remoteFeed = this.feeds.find((rf) => rf.rfid === unpublished)
@@ -788,7 +951,7 @@ export default {
 						}
 						if (jsep) {
 							log('venueless', 'debug', 'Handling SDP as well...', jsep)
-							this.mainPluginHandle.handleRemoteJsep({jsep: jsep})
+							this.videoPluginHandle.handleRemoteJsep({jsep: jsep})
 							// Check if any of the media we wanted to publish has
 							// been rejected (e.g., wrong or unsupported codec)
 							var audio = msg.audio_codec
@@ -813,13 +976,13 @@ export default {
 								this.upstreamBitrate = newUpstreamBitrate
 								log('venueless', 'info', 'Received slowLink on outgoing video, reducing bitrate to ' + this.upstreamBitrate)
 								const publish = {request: 'configure', audio: true, video: this.publishingWithVideo, bitrate: this.upstreamBitrate}
-								this.mainPluginHandle.send({message: publish})
+								this.videoPluginHandle.send({message: publish})
 								this.upstreamSlowLinkCount = 0
 							} else {
 								if (this.upstreamSlowLinkCount > 5) {
 									log('venueless', 'info', 'Received slowLink on outgoing video, bitrate already at minimum, turning video off')
 									this.videoRequested = false
-									this.publishOwnFeed()
+									this.publishOwnVideo()
 								} else {
 									log('venueless', 'info', 'Received slowLink on outgoing video, bitrate already at minimum')
 								}
@@ -828,17 +991,17 @@ export default {
 					},
 					onlocalstream: (stream) => {
 						this.ourStream = stream
-						if (this.mainPluginHandle.webrtcStuff.pc.iceConnectionState !== 'completed' &&
-							this.mainPluginHandle.webrtcStuff.pc.iceConnectionState !== 'connected') {
-							this.publishingState = 'publishing'
+						if (this.videoPluginHandle.webrtcStuff.pc.iceConnectionState !== 'completed' &&
+							this.videoPluginHandle.webrtcStuff.pc.iceConnectionState !== 'connected') {
+							this.videoPublishingState = 'publishing'
 						} else {
 							if ((this.videoReceived || !this.publishingWithVideo) && this.audioReceived) {
-								this.publishingState = 'published'
+								this.videoPublishingState = 'published'
 								this.publishingError = null
 							}
 						}
 						if (this.automute) {
-							this.mainPluginHandle.muteAudio()
+							this.videoPluginHandle.muteAudio()
 						}
 						const videoTracks = stream.getVideoTracks()
 						if (!videoTracks || videoTracks.length === 0) {
@@ -847,31 +1010,14 @@ export default {
 						} else {
 							Janus.attachMediaStream(this.$refs.ourVideo, stream)
 							this.$refs.ourVideo.muted = 'muted' // no echo
-							this.knownMuteState = this.mainPluginHandle.isAudioMuted()
+							this.knownMuteState = this.videoPluginHandle.isAudioMuted()
 						}
-						this.initSoundMeter(stream, 'ourVideo')
 					},
 					oncleanup: () => {
 						log('venueless', 'info', ' ::: Got a cleanup notification: we are unpublished now :::')
-						this.publishingState = 'unpublished'
+						this.videoPublishingState = 'unpublished'
 					},
 				})
-		},
-		initSoundMeter (stream, refname) {
-			const atracks = stream.getAudioTracks()
-			if (!atracks || atracks.length === 0) {
-				return
-			}
-			try {
-				window.AudioContext = window.AudioContext || window.webkitAudioContext
-				const actx = new AudioContext()
-				const soundmeter = new SoundMeter(actx)
-				soundmeter.connectToSource(stream)
-				this.$set(this.soundMeters, refname, soundmeter)
-			} catch (e) {
-				log('venueless', 'error', 'Could not init sound meter: ' + e)
-				// do not fail visibly, it is a nice-to-have feature
-			}
 		},
 		onJanusInitialized () {
 			this.connectionState = 'connecting'
@@ -905,13 +1051,18 @@ export default {
 			})
 		},
 		async fetchUser (feed) {
-			this.$set(feed, 'venueless_user', await api.call('user.fetch', {id: feed.venueless_user_id}))
+			let user = this.userCache[feed.venueless_user_id]
+			if (!user) {
+				user = await api.call('user.fetch', {id: feed.venueless_user_id})
+				this.userCache[feed.venueless_user_id] = user
+			}
+			this.$set(feed, 'venueless_user', user)
 		},
 	},
 }
 </script>
 <style lang="stylus">
-.c-janusvideoroom
+.c-janusconference
 	flex: auto 1 1
 	height: 100% // todo: test in safari
 	display: flex

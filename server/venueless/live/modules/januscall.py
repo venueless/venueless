@@ -1,4 +1,5 @@
 import json
+import uuid
 
 from aioredis_lock import RedisLock
 from channels.db import database_sync_to_async
@@ -11,8 +12,8 @@ from venueless.core.services import turn
 from venueless.core.services.janus import (
     JanusError,
     choose_server,
-    create_room,
-    room_exists,
+    create_videoroom,
+    videoroom_exists,
 )
 from venueless.core.services.roulette import is_member_of_roulette_call
 from venueless.core.utils.redis import aioredis
@@ -40,7 +41,9 @@ class JanusCallModule(BaseModule):
     )
     async def room_url(self, body):
         await self.consumer.send_success(
-            await self._get_or_create_janus_room(f"room:{self.room.id}")
+            await self._get_or_create_janus_room(
+                f"room:{self.room.id}", audiobridge=True
+            )
         )
 
     @command("channel_url")
@@ -61,7 +64,7 @@ class JanusCallModule(BaseModule):
             await self._get_or_create_janus_room(f"roulette:{call_id}")
         )
 
-    async def _get_or_create_janus_room(self, redis_key):
+    async def _get_or_create_janus_room(self, redis_key, audiobridge=False):
         if not self.consumer.user.profile.get("display_name"):
             raise ConsumerException("janus.join.missing_profile")
 
@@ -82,17 +85,24 @@ class JanusCallModule(BaseModule):
                         url=room_data["server"]
                     )
                     try:
-                        if not await room_exists(server, room_data["roomId"]):
+                        if not await videoroom_exists(server, room_data["roomId"]):
                             room_data = None
                     except JanusError as e:
                         # todo
                         raise e
 
+                    if room_data.get("audiobridge", False) != audiobridge:
+                        room_data = None
+
                 if not room_data:
                     # no room exists
                     janus_server, turn_server = await self._servers()
                     try:
-                        room_data = await create_room(janus_server)
+                        room_data = await create_videoroom(
+                            janus_server,
+                            room_id=str(uuid.uuid4()),
+                            audiobridge=audiobridge,
+                        )
                         await redis.setex(
                             f"januscall:{redis_key}",
                             3600 * 24,
