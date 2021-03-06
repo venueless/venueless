@@ -182,6 +182,10 @@ async def create_videoroom(server, room_id, audiobridge=False, bitrate=200_000):
                             "secret": hashlib.sha256(
                                 f"{server.room_create_key}:secret:{seed}".encode()
                             ).hexdigest(),
+                            "audiolevel_ext": True,
+                            "audiolevel_event": True,
+                            "audio_active_packets": 50,
+                            "audio_level_average": 50,
                             "is_private": True,
                             "allowed": [token],
                             "record": False,
