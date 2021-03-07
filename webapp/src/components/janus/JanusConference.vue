@@ -38,7 +38,7 @@
 				.bunt-icon.mdi.mdi-microphone-off
 
 		.peer.feed(v-for="(f, idx) in sortedFeeds", :key="f.rfid", :style="{width: layout.width, height: layout.height}")
-			.video-container(:style="{boxShadow: size != 'tiny' ? `0 0 0px 4px ${primaryColor.alpha(!participants.find(pp => pp.id == f.rfid).muted && talkingParticipants.includes(f.rfid) ? 255 : 0)}` : 'none'}")
+			.video-container(:style="{boxShadow: size != 'tiny' ? `0 0 0px 4px ${primaryColor.alpha(f.participant && !f.participant.muted && talkingParticipants.includes(f.rfid) ? 255 : 0)}` : 'none'}")
 				video(v-show="f.rfattached", ref="peerVideo", autoplay, playsinline)
 			.subscribing-state(v-if="!f.rfattached")
 				bunt-progress-circular(size="huge", :page="true")
@@ -47,10 +47,10 @@
 					avatar(:user="f.venueless_user", :size="36")
 					span.display-name {{ f.venueless_user.profile.display_name }}
 				bunt-icon-button(v-if="f.rfattached", @click="requestFullscreen($refs.peerVideo[idx])") fullscreen
-			.mute-indicator(v-if="participants.find(pp => pp.id == f.rfid).muted")
+			.mute-indicator(v-if="f.participant && f.participant.muted")
 				.bunt-icon.mdi.mdi-microphone-off
 
-		.slow-banner(v-if="downstreamSlowLinkCount > 5 && (videoRequested || videoOutput)", @click="disableVideo") {{ $t('JanusVideoroom:slow:text') }}
+		.slow-banner(v-if="downstreamSlowLinkCount > 5 && (videoRequested || videoOutput)", @click="disableAllVideo") {{ $t('JanusConference:slow:text') }}
 
 	.controlbar.controls(v-show="connectionState == 'connected'", :class="knownMuteState ? 'always' : ''")
 		bunt-icon-button(@click="toggleVideo", :tooltip="videoRequested ? $t('JanusVideoroom:tool-video:off') : $t('JanusVideoroom:tool-video:on')") {{ !videoRequested ? 'video-off' : 'video' }}
@@ -76,6 +76,7 @@ import FeedbackPrompt from 'components/FeedbackPrompt'
 import {createPopper} from '@popperjs/core'
 import Color from 'color'
 import {colors} from 'theme'
+import { v4 as uuid } from 'uuid'
 
 const calculateLayout = (containerWidth, containerHeight, videoCount, aspectRatio, videoPadding) => {
 	let bestLayout = {
@@ -191,6 +192,7 @@ export default {
 			knownMuteState: this.automute,
 
 			// Janus video call state
+			videoPublishers: [],
 			feeds: [],
 			ourId: null,
 			ourPrivateId: null,
@@ -303,13 +305,21 @@ export default {
 		closeDevicePrompt () {
 			this.showDevicePrompt = false
 			if (this.videoOutput !== (localStorage.videoOutput !== 'false')) {
-				// it's probably possible to do this without a full reconnect, but it's probably hard
-				this.videoPluginHandle.destroy()
 				this.videoOutput = (localStorage.videoOutput !== 'false')
-				this.connectVideoroom()
+				if (this.videoOutput) {
+					// Enable receiving video
+					for (const f of this.videoPublishers) {
+						if (!this.feeds.find(rf => rf.rfid === f.id)) {
+							this.subscribeRemoteVideo(f.id, f.display, f.audio_codec, f.video_codec)
+						}
+					}
+				} else {
+					this.disableAllVideo()
+				}
+			} else {
+				this.publishOwnVideo()
 			}
 			this.publishOwnAudio()
-			this.publishOwnVideo()
 			if (typeof this.$refs.mixedAudio.setSinkId !== 'undefined') {
 				this.$refs.mixedAudio.setSinkId(localStorage.audioOutput || '')
 			}
@@ -349,7 +359,7 @@ export default {
 							const register = {
 								request: 'join',
 								room: this.roomId,
-								id: this.sessionId + ';screenshare',
+								id: this.sessionId + ';screenshare;' + uuid(),
 								ptype: 'publisher',
 								token: this.token,
 								display: 'new user'
@@ -445,16 +455,18 @@ export default {
 			this.videoRequested = !this.videoRequested
 			this.publishOwnVideo()
 		},
-		disableVideo () {
+		disableAllVideo () {
 			this.videoRequested = false
 			localStorage.videoRequested = false
-			if (this.videoOutput) {
-				this.videoOutput = false
-				this.cleanup()
-				this.onJanusInitialized()
-			} else {
-				this.publishOwnVideo()
+			localStorage.videoOutput = false
+
+			for (const h of this.feeds) {
+				if (!h.rfid.includes(';screenshare;'))
+					h.hangup()
 			}
+
+			this.videoOutput = (localStorage.videoOutput !== 'false')
+			this.publishOwnVideo()
 		},
 		toggleMute () {
 			if (this.audioPluginHandle == null) {
@@ -491,8 +503,8 @@ export default {
 			} else {
 				if (this.publishingWithVideo && this.videoPublishingState !== 'unpublished' && this.videoPublishingState !== 'failed') {
 					this.videoPublishingState = 'unpublishing'
-					const publish = {request: 'unpublish'}
-					this.videoPluginHandle.send({message: publish})
+					const unpublish = {request: 'unpublish'}
+					this.videoPluginHandle.send({message: unpublish})
 				} else {
 					this.videoPublishingState = 'unpublished'
 				}
@@ -563,8 +575,10 @@ export default {
 					},
 				})
 		},
-		onNewRemoteFeed (id, display, audio, video) {
-			// A new feed has been published, create a new plugin handle and attach to it as a subscriber
+		subscribeRemoteVideo (id, display, audio, video) {
+			if (!this.videoOutput && !id.includes(';screenshare;')) {
+				return
+			}
 			let remoteFeed = null
 			this.janus.attach({
 				plugin: 'janus.plugin.videoroom',
@@ -584,7 +598,7 @@ export default {
 					// In case you don't want to receive audio, video or data, even if the
 					// publisher is sending them, set the 'offer_audio', 'offer_video' or
 					// 'offer_data' properties to false (they're true by default), e.g
-					subscribe.offer_video = this.videoOutput
+					subscribe.offer_video = this.videoOutput || id.includes(';screenshare;')
 					// For example, if the publisher is VP8 and this is Safari, let's avoid video
 					if (Janus.webRTCAdapter.browserDetails.browser === 'safari' &&
 						(video === 'vp9' || (video === 'vp8' && !Janus.safariVp8))) {
@@ -613,6 +627,7 @@ export default {
 							remoteFeed.rfattached = false
 							remoteFeed.hasVideo = true
 							remoteFeed.rfid = msg.id
+							remoteFeed.participant = this.participants.find(pp => pp.id === remoteFeed.rfid)
 							remoteFeed.venueless_user = null
 							this.feeds.push(remoteFeed)
 							this.fetchUser(remoteFeed)
@@ -671,17 +686,19 @@ export default {
 				onremotestream: (stream) => {
 					log('venueless', 'debug', 'Remote feed #' + remoteFeed.rfid + ', stream:', stream)
 					const rfindex = this.feeds.findIndex((rf) => rf.rfid === remoteFeed.rfid)
+					const videoTracks = stream.getVideoTracks()
+
+					remoteFeed.rfattached = true
+					remoteFeed.hasVideo = videoTracks && videoTracks.length > 0
+					this.$set(this.feeds, rfindex, remoteFeed) // force reactivity
 					this.$nextTick(() => {
 						Janus.attachMediaStream(this.$refs.peerVideo[rfindex], stream)
-						remoteFeed.rfattached = true
-						const videoTracks = stream.getVideoTracks()
-						if (!videoTracks || videoTracks.length === 0) {
-							remoteFeed.hasVideo = false
-						} else {
-							remoteFeed.hasVideo = true
-						}
 					})
 				},
+				oncleanup: () => {
+					const idx = this.feeds.indexOf(remoteFeed)
+					if (idx > -1) this.feeds.splice(idx, 1)
+				}
 			})
 		},
 		onJanusConnected () {
@@ -942,9 +959,9 @@ export default {
 
 								// Any remote feeds to attach to?
 								if (msg.publishers) {
-									var list = msg.publishers
-									for (const f of list) {
-										this.onNewRemoteFeed(f.id, f.display, f.audio_codec, f.video_codec)
+									this.videoPublishers = msg.publishers
+									for (const f of msg.publishers) {
+										this.subscribeRemoteVideo(f.id, f.display, f.audio_codec, f.video_codec)
 									}
 								}
 								this.publishOwnVideo()
@@ -955,13 +972,14 @@ export default {
 							} else if (event === 'event') {
 								// Any new feed to attach to?
 								if (msg.publishers) {
-									const list = msg.publishers
-									for (const f of list) {
-										this.onNewRemoteFeed(f.id, f.display, f.audio_codec, f.video_codec)
+									for (const f of msg.publishers) {
+										this.videoPublishers.push(f)
+										this.subscribeRemoteVideo(f.id, f.display, f.audio_codec, f.video_codec)
 									}
 								} else if (msg.leaving) {
 									// One of the publishers has gone away?
 									const leaving = msg.leaving
+									this.videoPublishers = this.videoPublishers.filter((rf) => rf.id !== leaving)
 									const remoteFeed = this.feeds.find((rf) => rf.rfid === leaving)
 									if (remoteFeed != null) {
 										log('venueless', 'debug',
@@ -979,6 +997,7 @@ export default {
 										this.videoPluginHandle.hangup()
 										return
 									}
+									this.videoPublishers = this.videoPublishers.filter((rf) => rf.id !== unpublished)
 									const remoteFeed = this.feeds.find((rf) => rf.rfid === unpublished)
 									if (remoteFeed != null) {
 										log('venueless', 'debug', 'Feed ' + remoteFeed.rfid + ' (' + remoteFeed.rfdisplay + ') has left the room, detaching')
@@ -1033,7 +1052,7 @@ export default {
 					},
 					onlocalstream: (stream) => {
 						this.ourStream = stream
-						if (this.videoPluginHandle.webrtcStuff.pc.iceConnectionState !== 'completed' &&
+						if (this.videoPluginHandle.webrtcStuff.pc && this.videoPluginHandle.webrtcStuff.pc.iceConnectionState !== 'completed' &&
 							this.videoPluginHandle.webrtcStuff.pc.iceConnectionState !== 'connected') {
 							this.videoPublishingState = 'publishing'
 						} else {
@@ -1097,7 +1116,9 @@ export default {
 				user = await api.call('januscall.identify', {id: uid})
 				this.userCache[uid] = user
 			}
-			this.$set(feed, 'venueless_user', user)
+			feed.venueless_user = user
+			const rfindex = this.feeds.findIndex((rf) => rf.rfid === feed.rfid)
+			this.$set(this.feeds, rfindex, feed) // force reactivity
 		},
 	},
 }

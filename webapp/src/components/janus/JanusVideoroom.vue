@@ -68,6 +68,7 @@ import {createPopper} from '@popperjs/core'
 import SoundMeter from 'lib/webrtc/soundmeter'
 import Color from 'color'
 import {colors} from 'theme'
+import { v4 as uuid } from 'uuid'
 
 const calculateLayout = (containerWidth, containerHeight, videoCount, aspectRatio, videoPadding) => {
 	let bestLayout = {
@@ -340,7 +341,7 @@ export default {
 								room: this.roomId,
 								ptype: 'publisher',
 								token: this.token,
-								id: this.sessionId + ';screenshare',
+								id: this.sessionId + ';' + uuid(),
 								display: 'venueless user', // we abuse janus' display name field for the venueless user id
 							}
 							this.screensharePluginHandle.send({message: register})
@@ -660,6 +661,7 @@ export default {
 							remoteFeed.hasVideo = true
 						}
 						this.initSoundMeter(stream, remoteFeed.rfid)
+						this.$set(this.feeds, rfindex, remoteFeed) // force reactivity
 					})
 				},
 			})
@@ -911,7 +913,9 @@ export default {
 			})
 		},
 		async fetchUser (feed) {
-			this.$set(feed, 'venueless_user', await api.call('januscall.identify', {id: feed.rfid}))
+			feed.venueless_user = await api.call('januscall.identify', {id: feed.rfid})
+			const rfindex = this.feeds.findIndex((rf) => rf.rfid === feed.rfid)
+			this.$set(this.feeds, rfindex, feed) // force reactivity
 		},
 	},
 }
