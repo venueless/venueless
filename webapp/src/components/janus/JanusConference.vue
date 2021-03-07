@@ -131,6 +131,10 @@ export default {
 			type: String,
 			required: true
 		},
+		sessionId: {
+			type: String,
+			required: true
+		},
 		roomId: {
 			type: String,
 			required: true
@@ -341,9 +345,10 @@ export default {
 							const register = {
 								request: 'join',
 								room: this.roomId,
+								id: this.sessionId + ';screenshare',
 								ptype: 'publisher',
 								token: this.token,
-								display: this.user.id, // we abuse janus' display name field for the venueless user id
+								display: 'new user'
 							}
 							this.screensharePluginHandle.send({message: register})
 						},
@@ -604,7 +609,6 @@ export default {
 							remoteFeed.rfattached = false
 							remoteFeed.hasVideo = true
 							remoteFeed.rfid = msg.id
-							remoteFeed.venueless_user_id = msg.display
 							remoteFeed.venueless_user = null
 							this.feeds.push(remoteFeed)
 							this.fetchUser(remoteFeed)
@@ -690,7 +694,8 @@ export default {
 							request: 'join',
 							room: this.roomId,
 							token: this.token,
-							display: this.user.id, // we abuse janus' display name field for the venueless user id
+							id: this.sessionId,
+							display: 'venueless user',
 							muted: this.automute
 						}
 						this.knownMuteState = this.automute
@@ -744,7 +749,6 @@ export default {
 									this.participants = msg.participants || []
 									if (msg.participants) {
 										for (const p of this.participants) {
-											p.venueless_user_id = p.display
 											this.fetchUser(p)
 											if (p.talking && !this.talkingParticipants.includes(p.id)) {
 												this.talkingParticipants.push(p.id)
@@ -760,7 +764,6 @@ export default {
 									// someone else joined
 									if (msg.participants) {
 										for (const p of msg.participants) {
-											p.venueless_user_id = p.display
 											this.fetchUser(p)
 											if (!this.participants.find(pp => pp.id === p.id)) {
 												this.participants.push(p)
@@ -791,7 +794,6 @@ export default {
 												this.talkingParticipants = this.talkingParticipants.filter(e => e !== p.id)
 											}
 										} else {
-											p.venueless_user_id = p.display
 											this.fetchUser(p)
 											this.participants.push(p.id)
 										}
@@ -882,10 +884,10 @@ export default {
 						const register = {
 							request: 'join',
 							room: this.roomId,
-							id: this.ourAudioId,
+							id: this.sessionId,
 							ptype: 'publisher',
 							token: this.token,
-							display: this.user.id, // we abuse janus' display name field for the venueless user id
+							display: 'venueless user',
 						}
 						this.videoPluginHandle.send({message: register})
 					},
@@ -1087,10 +1089,11 @@ export default {
 			})
 		},
 		async fetchUser (feed) {
-			let user = this.userCache[feed.venueless_user_id]
+			const uid = feed.rfid || feed.id
+			let user = this.userCache[uid]
 			if (!user) {
-				user = await api.call('user.fetch', {id: feed.venueless_user_id})
-				this.userCache[feed.venueless_user_id] = user
+				user = await api.call('januscall.identify', {id: uid})
+				this.userCache[uid] = user
 			}
 			this.$set(feed, 'venueless_user', user)
 		},

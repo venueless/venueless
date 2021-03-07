@@ -127,6 +127,10 @@ export default {
 			type: String,
 			required: true
 		},
+		sessionId: {
+			type: String,
+			required: true
+		},
 		roomId: {
 			type: String,
 			required: true
@@ -336,7 +340,8 @@ export default {
 								room: this.roomId,
 								ptype: 'publisher',
 								token: this.token,
-								display: this.user.id, // we abuse janus' display name field for the venueless user id
+								id: this.sessionId + ';screenshare',
+								display: 'venueless user', // we abuse janus' display name field for the venueless user id
 							}
 							this.screensharePluginHandle.send({message: register})
 						},
@@ -546,6 +551,7 @@ export default {
 						request: 'join',
 						room: this.roomId,
 						ptype: 'subscriber',
+						id: this.sessionId,
 						feed: id,
 						private_id: this.ourPrivateId,
 					}
@@ -581,7 +587,6 @@ export default {
 							remoteFeed.rfattached = false
 							remoteFeed.hasVideo = false
 							remoteFeed.rfid = msg.id
-							remoteFeed.venueless_user_id = msg.display
 							remoteFeed.venueless_user = null
 							this.feeds.push(remoteFeed)
 							this.fetchUser(remoteFeed)
@@ -672,9 +677,10 @@ export default {
 						const register = {
 							request: 'join',
 							room: this.roomId,
+							id: this.sessionId,
 							ptype: 'publisher',
 							token: this.token,
-							display: this.user.id, // we abuse janus' display name field for the venueless user id
+							display: 'venueless user', // we abuse janus' display name field for the venueless user id
 						}
 						this.mainPluginHandle.send({message: register})
 					},
@@ -905,7 +911,7 @@ export default {
 			})
 		},
 		async fetchUser (feed) {
-			this.$set(feed, 'venueless_user', await api.call('user.fetch', {id: feed.venueless_user_id}))
+			this.$set(feed, 'venueless_user', await api.call('januscall.identify', {id: feed.rfid}))
 		},
 	},
 }

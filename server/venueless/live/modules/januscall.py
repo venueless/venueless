@@ -16,8 +16,9 @@ from venueless.core.services.janus import (
     videoroom_exists,
 )
 from venueless.core.services.roulette import is_member_of_roulette_call
+from venueless.core.services.user import get_public_user
 from venueless.core.utils.redis import aioredis
-from venueless.live.decorators import command, room_action
+from venueless.live.decorators import command, require_world_permission, room_action
 from venueless.live.exceptions import ConsumerException
 from venueless.live.modules.base import BaseModule
 
@@ -123,8 +124,38 @@ class JanusCallModule(BaseModule):
                         self.consumer.world
                     )
 
+            user_id = str(uuid.uuid4())
+            await redis.setex(
+                f"januscall:user:{user_id}",
+                3600 * 24,
+                str(self.consumer.user.pk),
+            )
+
+        room_data["sessionId"] = user_id
         if turn_server:
             room_data["iceServers"] = turn_server.get_ice_servers()
         else:
             room_data["iceServers"] = []
+
         await self.consumer.send_success(room_data)
+
+    @command("identify")
+    @require_world_permission(Permission.WORLD_VIEW)
+    async def identify(self, body):
+        async with aioredis() as redis:
+            sessionid = body.get("id", "").split(";")[0]
+            userid = await redis.get(f"januscall:user:{sessionid}")
+            if userid:
+                user = await get_public_user(
+                    self.consumer.world.id,
+                    userid.decode(),
+                    include_admin_info=await self.consumer.world.has_permission_async(
+                        user=self.consumer.user,
+                        permission=Permission.WORLD_USERS_MANAGE,
+                    ),
+                    trait_badges_map=self.consumer.world.config.get("trait_badges_map"),
+                )
+                if user:
+                    await self.consumer.send_success(user)
+                    return
+        await self.consumer.send_error(code="user.not_found")
