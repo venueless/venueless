@@ -188,7 +188,7 @@ export default {
 			ourAudioId: null,
 			participants: [],
 			talkingParticipants: [],
-			knownMuteState: false,
+			knownMuteState: this.automute,
 
 			// Janus video call state
 			feeds: [],
@@ -855,7 +855,7 @@ export default {
 								this.publishingError = null
 							}
 						}
-						if (this.automute) {
+						if (this.knownMuteState) {
 							// Mute client side as well as server side
 							this.audioPluginHandle.muteAudio()
 						}
@@ -1051,8 +1051,6 @@ export default {
 							this.publishingWithVideo = false
 						} else {
 							Janus.attachMediaStream(this.$refs.ourVideo, stream)
-							this.$refs.ourVideo.muted = 'muted' // no echo
-							this.knownMuteState = this.videoPluginHandle.isAudioMuted()
 						}
 					},
 					oncleanup: () => {
