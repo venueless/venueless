@@ -11,18 +11,18 @@
 	audio(v-show="false", ref="mixedAudio", autoplay, playsinline)
 
 	.participants(v-show="connectionState === 'connected'")
-		.participant.me(:class="{talking: talkingParticipants.includes(ourAudioId)}", @click="showUserCard($event, user)")
+		.participant.me(:class="{talking: !knownMuteState && talkingParticipants.includes(ourAudioId)}", @click="showUserCard($event, user)")
 			avatar(:user="user", :size="36")
 			.mute-indicator(v-if="knownMuteState")
 				.bunt-icon.mdi.mdi-microphone-off
-		.participant(v-for="p in sortedParticipants", @click="showUserCard($event, p.venueless_user)", :class="{talking: talkingParticipants.includes(p.id)}")
+		.participant(v-for="p in sortedParticipants", @click="showUserCard($event, p.venueless_user)", :class="{talking: !p.muted && talkingParticipants.includes(p.id)}")
 			avatar(v-if="p.venueless_user", :user="p.venueless_user", :size="36")
 			.mute-indicator(v-if="p.muted")
 				.bunt-icon.mdi.mdi-microphone-off
 
 	.users(v-show="connectionState === 'connected'", ref="container", :style="gridStyle", v-resize-observer="onResize")
 		.me.feed(v-show="videoPublishingState !== 'unpublished'")
-			.video-container(, :style="{boxShadow: size != 'tiny' ? `0 0 0px 4px ${primaryColor.alpha(talkingParticipants.includes(ourAudioId) ? 255 : 0)}` : 'none'}")
+			.video-container(:style="{boxShadow: size != 'tiny' ? `0 0 0px 4px ${primaryColor.alpha(!knownMuteState && talkingParticipants.includes(ourAudioId) ? 255 : 0)}` : 'none'}")
 				video(v-show="publishingWithVideo && videoPublishingState !== 'unpublished'", ref="ourVideo", autoplay, playsinline, muted="muted")
 			.publishing-state(v-if="videoPublishingState !== 'published'")
 				bunt-progress-circular(v-if="videoPublishingState == 'publishing'", size="huge", :page="true")
@@ -38,8 +38,8 @@
 				.bunt-icon.mdi.mdi-microphone-off
 
 		.peer.feed(v-for="(f, idx) in sortedFeeds", :key="f.rfid", :style="{width: layout.width, height: layout.height}")
-			.video-container(v-show="f.rfattached", :style="{boxShadow: size != 'tiny' ? `0 0 0px 4px ${primaryColor.alpha(talkingParticipants.includes(f.rfid) ? 255 : 0)}` : 'none'}")
-				video(ref="peerVideo", autoplay, playsinline)
+			.video-container(:style="{boxShadow: size != 'tiny' ? `0 0 0px 4px ${primaryColor.alpha(!participants.find(pp => pp.id == f.rfid).muted && talkingParticipants.includes(f.rfid) ? 255 : 0)}` : 'none'}")
+				video(v-show="f.rfattached", ref="peerVideo", autoplay, playsinline)
 			.subscribing-state(v-if="!f.rfattached")
 				bunt-progress-circular(size="huge", :page="true")
 			.controls
