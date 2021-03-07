@@ -34,6 +34,8 @@
 					avatar(:user="user", :size="36")
 					span.display-name {{ user.profile.display_name }}
 				bunt-icon-button(v-if="publishingWithVideo", @click="requestFullscreen($refs.ourVideo)") fullscreen
+			.mute-indicator(v-if="knownMuteState")
+				.bunt-icon.mdi.mdi-microphone-off
 
 		.peer.feed(v-for="(f, idx) in sortedFeeds", :key="f.rfid", :style="{width: layout.width, height: layout.height}")
 			.video-container(v-show="f.rfattached", :style="{boxShadow: size != 'tiny' ? `0 0 0px 4px ${primaryColor.alpha(talkingParticipants.includes(f.rfid) ? 255 : 0)}` : 'none'}")
@@ -45,6 +47,8 @@
 					avatar(:user="f.venueless_user", :size="36")
 					span.display-name {{ f.venueless_user.profile.display_name }}
 				bunt-icon-button(v-if="f.rfattached", @click="requestFullscreen($refs.peerVideo[idx])") fullscreen
+			.mute-indicator(v-if="participants.find(pp => pp.id == f.rfid).muted")
+				.bunt-icon.mdi.mdi-microphone-off
 
 		.slow-banner(v-if="downstreamSlowLinkCount > 5 && (videoRequested || videoOutput)", @click="disableVideo") {{ $t('JanusVideoroom:slow:text') }}
 
@@ -1190,17 +1194,23 @@ export default {
 		padding: 8px
 		position: relative
 
-		.novideo-indicator
+		.mute-indicator
 			position: absolute
-			left: 50%
-			top: 50%
-			transform: translate(-50%, -50%)
-			background: white
-			padding: 12px
+			right: 16px
+			bottom: 16px
+			background: black
+			opacity: 0.5
+			width: 32px
+			height: 32px
+			max-width: 100%
+			max-height: 100%
 			border-radius: 50%
 			text-align: center
-			height: 96px
-			width: 96px
+			.bunt-icon
+				width: 100%
+				color: white
+				line-height: 32px
+				font-size: 20px
 
 		.publishing-state, .subscribing-state
 			position: absolute
