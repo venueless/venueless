@@ -9,6 +9,7 @@ from django.views.generic import (
     UpdateView,
 )
 
+from venueless.core.models import World
 from .forms import ProfileForm, SignupForm, WorldForm
 
 
@@ -55,14 +56,19 @@ class IndexView(AdminBase, TemplateView):
 
 
 class WorldList(AdminBase, ListView):
-    template_name = "control/world/list.html"
+    template_name = "control/world_list.html"
+    queryset = World.objects.all()
+    context_object_name = "worlds"
 
 
 class WorldCreate(AdminBase, CreateView):
-    template_name = "control/world/create.html"
+    template_name = "control/world_create.html"
     form_class = WorldForm
+    success_url = "/control/worlds/"
 
 
 class WorldUpdate(AdminBase, UpdateView):
-    template_name = "control/world/update.html"
+    template_name = "control/world_update.html"
     form_class = WorldForm
+    queryset = World.objects.all()
+    success_url = "/control/worlds/"

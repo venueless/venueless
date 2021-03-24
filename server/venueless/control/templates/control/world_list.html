@@ -1,0 +1,24 @@
+{% extends "control/base.html" %}
+{% load i18n %}
+
+{% block content %}
+
+<table>
+    <thead>
+        <tr>
+            <th>{% trans "Name" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for world in worlds %}
+        <tr>
+            <td>
+                <a href="{% url 'control:world.update' pk=world.pk %}">
+                {{ world.pk }}
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

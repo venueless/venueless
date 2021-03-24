@@ -60,6 +60,7 @@ class WorldForm(forms.ModelForm):
     class Meta:
         model = World
         fields = (
+            "id",
             "title",
             "domain",
             "locale",
