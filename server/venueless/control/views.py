@@ -36,8 +36,18 @@ class SignupView(AdminBase, FormView):
 
 
 class ProfileView(AdminBase, FormView):
-    template_name = "accounts/profile.html"
+    template_name = "control/profile.html"
     form_class = ProfileForm
+    success_url = "/control/auth/profile/"
+
+    def form_valid(self, form):
+        form.save()
+        return super().form_valid(form)
+
+    def get_form_kwargs(self):
+        result = super().get_form_kwargs()
+        result["instance"] = self.request.user
+        return result
 
 
 class IndexView(AdminBase, TemplateView):

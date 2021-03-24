@@ -357,9 +357,9 @@ STATICI18N_ROOT = os.path.join(BASE_DIR, "venueless/static")
 
 STATICFILES_STORAGE = "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
 
-LOGIN_REDIRECT_URL = "/"
-LOGIN_URL = "/accounts/login"
-LOGOUT_REDIRECT_URL = "/accounts/login"
+
+LOGIN_URL = LOGOUT_REDIRECT_URL = "control:login"
+LOGIN_REDIRECT_URL = "/control/"
 
 VENUELESS_COMMIT = os.environ.get("VENUELESS_COMMIT_SHA", "unknown")
 VENUELESS_ENVIRONMENT = os.environ.get("VENUELESS_ENVIRONMENT", "unknown")

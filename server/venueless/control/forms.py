@@ -7,9 +7,6 @@ User = get_user_model()
 
 
 class PasswordMixin:
-    password = forms.CharField(widget=forms.PasswordInput())
-    repeat_password = forms.CharField(widget=forms.PasswordInput())
-
     def clean(self):
         super().clean()
         if self.cleaned_data.get("password") != self.cleaned_data.get(
@@ -19,10 +16,14 @@ class PasswordMixin:
 
 
 class SignupForm(PasswordMixin, forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput())
+    repeat_password = forms.CharField(widget=forms.PasswordInput())
+
     def save(self):
         user = User.objects.create(
             email=self.cleaned_data.get("email"),
             username=self.cleaned_data.get("username"),
+            is_staff=True,
         )
         user.set_password(self.cleaned_data.get("password"))
         user.save()
@@ -33,7 +34,23 @@ class SignupForm(PasswordMixin, forms.ModelForm):
         fields = ("email", "username", "password")
 
 
-class ProfileForm(PasswordMixin, forms.ModelForm):
+class ProfileForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput())
+    new_password = forms.CharField(widget=forms.PasswordInput(), required=False)
+
+    def clean_password(self):
+        data = self.cleaned_data["password"]
+        if not self.instance.check_password(data):
+            raise forms.ValidationError("Wrong password!")
+        return data
+
+    def save(self, *args, **kwargs):
+        instance = super().save(*args, **kwargs)
+        if self.cleaned_data.get("new_password"):
+            instance.set_password(self.cleaned_data["new_password"])
+            instance.save()
+        return instance
+
     class Meta:
         model = User
         fields = ("email", "username", "password")
