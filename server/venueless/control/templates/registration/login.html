@@ -1,4 +1,4 @@
-{% extends "registration/base.html" %}
+{% extends "control/base.html" %}
 {% load i18n %}
 
 {% block title %}{% translate "Login" %}{% endblock %}
@@ -9,7 +9,7 @@
     {% if request.user.is_authenticated %}
 
     {% else %}
-        <form method="post" action="{% url 'login' %}">
+        <form method="post" action="{% url 'control:login' %}">
             {% csrf_token %}
 
             {{ form.as_p }}
@@ -17,7 +17,7 @@
             <input type="submit" value="login">
             <input type="hidden" name="next" value="{{ next }}">
         </form>
-        <p><a href="{% url 'password_reset' %}">Passwort vergessen?</a></p>
+        <p><a href="{% url 'control:password_reset' %}">Passwort vergessen?</a></p>
     {% endif %}
 </section>
 
