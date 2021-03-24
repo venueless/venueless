@@ -206,6 +206,9 @@ MIDDLEWARE = [
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.middleware.common.CommonMiddleware",
+    "venueless.control.middleware.SessionMiddleware",  # Conditional for /control
+    "venueless.control.middleware.AuthenticationMiddleware",  # Conditional for /control
+    "venueless.control.middleware.MessageMiddleware",  # Conditional for /control
     "django.middleware.csrf.CsrfViewMiddleware",
     "venueless.middleware.XFrameOptionsMiddleware",
 ]
