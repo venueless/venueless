@@ -1,20 +1,19 @@
 {% extends "control/base.html" %}
+{% load i18n %}
 
-{% block title %}Sign up{% endblock %}
+{% block title %}New staff user{% endblock %}
 
 {% block content %}
 
+<h1>{% trans "New staff user" %}</h1>
 {% if form.errors %}
-<p>Your passwords didn't match, please try again.</p>
+<p>The passwords didn't match, please try again.</p>
 {% endif %}
 
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
-    <input type="submit" value="Sign up!">
+    <input type="submit" value="Create user!">
 </form>
 
-<p><a href="{{ login_url }}">Log in instead</a></p>
-
 {% endblock %}
-
