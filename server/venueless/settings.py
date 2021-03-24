@@ -195,8 +195,6 @@ INSTALLED_APPS = [
     "venueless.control.ControlConfig",
 ]
 
-## TODO if not flag: remove control from installed apps and middlewares
-
 try:
     import django_extensions  # noqa
 
