@@ -5,7 +5,8 @@ from venueless.core.models import World
 
 User = get_user_model()
 
-class SignupForm(forms.ModelForm):
+
+class PasswordMixin:
     password = forms.CharField(widget=forms.PasswordInput())
     repeat_password = forms.CharField(widget=forms.PasswordInput())
 
@@ -16,6 +17,8 @@ class SignupForm(forms.ModelForm):
         ):
             raise forms.ValidationError("Passwords do not match!")
 
+
+class SignupForm(PasswordMixin, forms.ModelForm):
     def save(self):
         user = User.objects.create(
             email=self.cleaned_data.get("email"),
@@ -30,13 +33,18 @@ class SignupForm(forms.ModelForm):
         fields = ("email", "username", "password")
 
 
-class InitialUploadForm(forms.ModelForm):
+class ProfileForm(PasswordMixin, forms.ModelForm):
     class Meta:
-        model = Post
-        fields = ("image",)
+        model = User
+        fields = ("email", "username", "password")
 
 
-class TagForm(forms.ModelForm):
+class WorldForm(forms.ModelForm):
     class Meta:
-        model = Post
-        fields = ("tags",)
+        model = World
+        fields = (
+            "title",
+            "domain",
+            "locale",
+            "timezone",
+        )

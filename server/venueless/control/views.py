@@ -1,10 +1,22 @@
+from django.contrib.auth import login
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.views.generic import TemplateView, CreateView, ListView, UpdateView
-from .forms import SignupForm, ProfileForm, EventUpdateForm, EventCreateForm
+from django.shortcuts import redirect
+from django.views.generic import (
+    CreateView,
+    FormView,
+    ListView,
+    TemplateView,
+    UpdateView,
+)
+
+from .forms import ProfileForm, SignupForm, WorldForm
+
 
 class AdminBase(UserPassesTestMixin):
-    """ Simple View mixin for now, but will make it easier to 
+    """Simple View mixin for now, but will make it easier to
     improve permissions in the future."""
+
+    login_url = "/control/auth/login/"
 
     def test_func(self):
         return self.request.user.is_staff
@@ -32,15 +44,15 @@ class IndexView(AdminBase, TemplateView):
     template_name = "control/index.html"
 
 
-class EventList(AdminBase, ListView):
-    template_name = "control/event/list.html"
+class WorldList(AdminBase, ListView):
+    template_name = "control/world/list.html"
 
 
-class EventCreate(AdminBase, CreateView):
-    template_name = "control/event/create.html"
-    form_class = EventCreateForm
+class WorldCreate(AdminBase, CreateView):
+    template_name = "control/world/create.html"
+    form_class = WorldForm
 
 
-class EventUpdate(AdminBase, UpdateView):
-    template_name = "control/event/update.html"
-    form_class = EventUpdateForm
+class WorldUpdate(AdminBase, UpdateView):
+    template_name = "control/world/update.html"
+    form_class = WorldForm
