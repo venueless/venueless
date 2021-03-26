@@ -167,6 +167,7 @@ The following snippet is an example on how to configure a nginx proxy for venuel
         listen 80 default_server;
         listen [::]:80 ipv6only=on default_server;
         server_name venueless.mydomain.com;
+        return 301 https://$host$request_uri;
     }
     server {
         listen 443 default_server;
