@@ -4,6 +4,7 @@ from typing import List
 
 import jwt
 from django.contrib.postgres.fields import JSONField
+from django.core.validators import RegexValidator
 from django.db import models
 
 from venueless.core.models.cache import VersionedModel
@@ -88,8 +89,21 @@ class World(VersionedModel):
         null=True, blank=True, default=default_roles, encoder=CustomJSONEncoder
     )
     trait_grants = JSONField(null=True, blank=True, default=default_grants)
-    domain = models.CharField(max_length=250, unique=True, null=True, blank=True)
-    locale = models.CharField(max_length=100, default="en")
+    domain = models.CharField(
+        max_length=250,
+        unique=True,
+        null=True,
+        blank=True,
+        validators=[RegexValidator(regex=r"^[a-z0-9-.]+$")],
+    )
+    locale = models.CharField(
+        max_length=100,
+        default="en",
+        choices=(
+            ("en", "English"),
+            ("de", "German"),
+        ),
+    )
     timezone = models.CharField(max_length=120, default="Europe/Berlin")
     feature_flags = JSONField(blank=True, default=default_feature_flags)
 

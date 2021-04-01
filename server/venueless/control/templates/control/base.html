@@ -21,10 +21,7 @@
                     {% trans "Dashboard" %}
                 </a>
                 <a href="{% url "control:world.list" %}"{% if request.path == "/control/worlds/" %} class="active"{% endif %}>
-                    {% trans "World list" %}
-                </a>
-                <a href="{% url "control:world.create" %}"{% if request.path == "/control/worlds/new/" %} class="active"{% endif %}>
-                    {% trans "New world" %}
+                    {% trans "Worlds" %}
                 </a>
                     {% if request.user.is_superuser %}
                     <a href="{% url "control:auth.signup" %}"{% if request.path == "/control/auth/signup" %} class="active"{% endif %}>
