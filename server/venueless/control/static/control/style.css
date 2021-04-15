@@ -141,3 +141,12 @@ form ul {
 	list-style: none;
 	padding-left: 0;
 }
+
+/** LINKS **/
+a, a:visited {
+	color: #0058de;
+	text-decoration: none;
+}
+a:hover, a:active, a:focus {
+	text-decoration: underline;
+}
