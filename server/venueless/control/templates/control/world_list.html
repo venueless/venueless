@@ -42,7 +42,7 @@
         </td>
         <td class="text-right">
             {% if world.domain and world.admin_token %}
-                <a href="https://{{ world.domain }}/#token={{ world.admin_token }}" target="_blank">
+                <a href="{% url 'control:world.admin' pk=world.pk %}">
                     {% trans "Admin access" %}
                 </a>
             {% endif %}
