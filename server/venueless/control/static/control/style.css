@@ -64,7 +64,6 @@ main {
 table {
 	width: 100%;
 	border-collapse: collapse;
-
 }
 
 table tr:hover {
@@ -72,8 +71,11 @@ table tr:hover {
 }
 
 table th, table td {
-	border: 1px solid #ddd;
-	padding: 5px;
+	border-bottom: 1px solid #ddd;
+	padding: 10px;
+}
+table th {
+	border-bottom: 3px solid #ddd;
 }
 
 label {
