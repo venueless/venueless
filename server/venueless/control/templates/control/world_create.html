@@ -6,7 +6,13 @@
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit">{% trans "Save" %}</button>
+    <button type="submit">
+        {% if copy_from %}
+            {% blocktrans with n=copy_from.pk %}Clone "{{ n }}"{% endblocktrans %}
+        {% else %}
+            {% trans "Save" %}
+        {% endif %}
+    </button>
 
 </form>
 {% endblock %}

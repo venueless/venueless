@@ -1,3 +1,4 @@
+import copy
 import datetime
 import json
 
@@ -8,6 +9,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.db.models import Count
 from django.shortcuts import redirect
 from django.utils.crypto import get_random_string
+from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import (
     CreateView,
@@ -101,6 +103,23 @@ class WorldCreate(AdminBase, CreateView):
     form_class = WorldForm
     success_url = "/control/worlds/"
 
+    @cached_property
+    def copy_from(self):
+        if self.request.GET.get("copy_from") and not getattr(self, "object", None):
+            try:
+                return World.objects.get(pk=self.request.GET.get("copy_from"))
+            except World.DoesNotExist:
+                pass
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        if self.copy_from:
+            inst = copy.copy(self.copy_from)
+            inst.pk = None
+            inst.domain = None
+            kwargs["instance"] = inst
+        return kwargs
+
     def form_valid(self, form):
         secret = get_random_string(length=64)
         form.instance.config = {
@@ -112,7 +131,14 @@ class WorldCreate(AdminBase, CreateView):
                 }
             ]
         }
+        if self.copy_from:
+            form.instance.clone_from(self.copy_from, new_secrets=True)
         return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["copy_from"] = self.copy_from
+        return ctx
 
 
 class WorldUpdate(AdminBase, UpdateView):
