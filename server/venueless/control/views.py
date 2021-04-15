@@ -4,9 +4,10 @@ import json
 
 import jwt
 from django.contrib import messages
-from django.contrib.auth import login
+from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.models import User
+from django.db import transaction
 from django.db.models import Count
 from django.shortcuts import redirect
 from django.utils.crypto import get_random_string
@@ -24,6 +25,7 @@ from django.views.generic import (
 from venueless.core.models import World
 
 from .forms import ProfileForm, SignupForm, UserForm, WorldForm
+from .models import LogEntry
 from .tasks import clear_world_data
 
 
@@ -46,6 +48,15 @@ class UserUpdate(SuperuserBase, UpdateView):
     context_object_name = "users"
     form_class = UserForm
     success_url = "/control/users/"
+
+    def form_valid(self, form):
+        LogEntry.objects.create(
+            content_object=self.object,
+            user=self.request.user,
+            action_type="user.changed",
+            data={"changed_keys": form.changed_data},
+        )
+        return super().form_valid(form)
 
 
 class AdminBase(UserPassesTestMixin):
@@ -77,7 +88,15 @@ class ProfileView(AdminBase, FormView):
     success_url = "/control/auth/profile/"
 
     def form_valid(self, form):
+        LogEntry.objects.create(
+            content_object=self.request.user,
+            user=self.request.user,
+            action_type="profile.changed",
+            data={"changed_keys": form.changed_data},
+        )
         form.save()
+        update_session_auth_hash(self.request, self.request.user)
+        messages.success(self.request, _("Ok!"))
         return super().form_valid(form)
 
     def get_form_kwargs(self):
@@ -126,6 +145,12 @@ class WorldAdminToken(AdminBase, DetailView):
             "traits": ["admin"],
         }
         token = jwt.encode(payload, secret, algorithm="HS256")
+        LogEntry.objects.create(
+            content_object=world,
+            user=self.request.user,
+            action_type="world.adminaccess",
+            data={},
+        )
         return redirect(f"https://{world.domain}/#token={token}")
 
 
@@ -151,6 +176,7 @@ class WorldCreate(AdminBase, CreateView):
             kwargs["instance"] = inst
         return kwargs
 
+    @transaction.atomic()
     def form_valid(self, form):
         secret = get_random_string(length=64)
         form.instance.config = {
@@ -164,6 +190,18 @@ class WorldCreate(AdminBase, CreateView):
         }
         if self.copy_from:
             form.instance.clone_from(self.copy_from, new_secrets=True)
+
+        form.save()
+        LogEntry.objects.create(
+            content_object=form.instance,
+            user=self.request.user,
+            action_type="world.created",
+            data={
+                "copy_from": self.copy_from.pk if self.copy_from else None,
+                **form.cleaned_data,
+            },
+        )
+        messages.success(self.request, _("Ok!"))
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -183,6 +221,16 @@ class WorldUpdate(AdminBase, UpdateView):
         ctx["jwtconf"] = json.dumps(self.object.config.get("JWT_secrets", []), indent=4)
         return ctx
 
+    def form_valid(self, form):
+        LogEntry.objects.create(
+            content_object=self.get_object(),
+            user=self.request.user,
+            action_type="world.updated",
+            data=form.cleaned_data,
+        )
+        messages.success(self.request, _("Ok!"))
+        return super().form_valid(form)
+
 
 class WorldClear(AdminBase, DetailView):
     template_name = "control/world_clear.html"
@@ -190,6 +238,12 @@ class WorldClear(AdminBase, DetailView):
     success_url = "/control/worlds/"
 
     def post(self, request, *args, **kwargs):
+        LogEntry.objects.create(
+            content_object=self.get_object(),
+            user=self.request.user,
+            action_type="world.cleared",
+            data={},
+        )
         clear_world_data.apply_async(kwargs={"world": self.get_object().pk})
         messages.success(request, _("The data will soon be deleted."))
         return redirect(self.success_url)
