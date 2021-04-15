@@ -6,6 +6,7 @@ import jwt
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth.models import User
 from django.db.models import Count
 from django.shortcuts import redirect
 from django.utils.crypto import get_random_string
@@ -22,8 +23,29 @@ from django.views.generic import (
 
 from venueless.core.models import World
 
-from .forms import ProfileForm, SignupForm, WorldForm
+from .forms import ProfileForm, SignupForm, UserForm, WorldForm
 from .tasks import clear_world_data
+
+
+class SuperuserBase(UserPassesTestMixin):
+    login_url = "/control/auth/login/"
+
+    def test_func(self):
+        return self.request.user.is_superuser
+
+
+class UserList(SuperuserBase, ListView):
+    template_name = "control/user_list.html"
+    queryset = User.objects.all()
+    context_object_name = "users"
+
+
+class UserUpdate(SuperuserBase, UpdateView):
+    template_name = "control/user_update.html"
+    queryset = User.objects.all()
+    context_object_name = "users"
+    form_class = UserForm
+    success_url = "/control/users/"
 
 
 class AdminBase(UserPassesTestMixin):

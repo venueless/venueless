@@ -24,8 +24,8 @@
                     {% trans "Worlds" %}
                 </a>
                     {% if request.user.is_superuser %}
-                    <a href="{% url "control:auth.signup" %}"{% if request.path == "/control/auth/signup" %} class="active"{% endif %}>
-                        {% trans "New user" %}
+                    <a href="{% url "control:user.list" %}"{% if request.path == "/control/users/" %} class="active"{% endif %}>
+                        {% trans "Users" %}
                     </a>
                     {% endif %}
                 {% endif %}
