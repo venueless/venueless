@@ -73,6 +73,10 @@ table tr:hover {
 table th, table td {
 	border-bottom: 1px solid #ddd;
 	padding: 10px;
+	text-align: left;
+}
+.text-right {
+	text-align: right;
 }
 table th {
 	border-bottom: 3px solid #ddd;
@@ -117,4 +121,12 @@ button, a.btn, input[type=submit] {
 button:hover, a.btn:hover, button:active, a.btn:active, input[type=submit]:hover, input[type=submit]:active {
 	background: #0058de;
 	color: white;
+}
+
+.errorlist {
+	border: 4px solid #fe008e;
+	border-radius: 4px;
+	padding: 10px;
+	color: #fe008e;
+	list-style: none;
 }
