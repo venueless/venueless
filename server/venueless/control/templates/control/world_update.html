@@ -7,6 +7,8 @@
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit">{% trans "Save" %}</button>
-
+    <hr>
+    <label>{% trans "JWT config" %}</label>
+    <pre>{{ jwtconf }}</pre>
 </form>
 {% endblock %}

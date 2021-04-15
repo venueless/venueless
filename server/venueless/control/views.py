@@ -1,4 +1,5 @@
 import datetime
+import json
 
 import jwt
 from django.contrib import messages
@@ -6,6 +7,7 @@ from django.contrib.auth import login
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.db.models import Count
 from django.shortcuts import redirect
+from django.utils.crypto import get_random_string
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import (
     CreateView,
@@ -99,12 +101,30 @@ class WorldCreate(AdminBase, CreateView):
     form_class = WorldForm
     success_url = "/control/worlds/"
 
+    def form_valid(self, form):
+        secret = get_random_string(length=64)
+        form.instance.config = {
+            "JWT_secrets": [
+                {
+                    "issuer": "any",
+                    "audience": "venueless",
+                    "secret": secret,
+                }
+            ]
+        }
+        return super().form_valid(form)
+
 
 class WorldUpdate(AdminBase, UpdateView):
     template_name = "control/world_update.html"
     form_class = WorldForm
     queryset = World.objects.all()
     success_url = "/control/worlds/"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["jwtconf"] = json.dumps(self.object.config.get("JWT_secrets", []), indent=4)
+        return ctx
 
 
 class WorldClear(AdminBase, DetailView):

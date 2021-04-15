@@ -61,6 +61,7 @@ class WorldForm(forms.ModelForm):
     feature_flags = forms.MultipleChoiceField(
         choices=[(a, a) for a in FEATURE_FLAGS],
         widget=forms.CheckboxSelectMultiple,
+        required=False,
     )
 
     class Meta:
