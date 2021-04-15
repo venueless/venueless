@@ -6,6 +6,12 @@ body {
 	font-family: Arial, sans-serif;
 }
 
+/** UTILS **/
+.text-right {
+	text-align: right;
+}
+
+/** LAYOUT **/
 header {
 	height: 40px;
 	display: flex;
@@ -61,6 +67,7 @@ main {
 	flex: auto 1 1;
 }
 
+/** TABLES **/
 table {
 	width: 100%;
 	border-collapse: collapse;
@@ -75,12 +82,11 @@ table th, table td {
 	padding: 10px;
 	text-align: left;
 }
-.text-right {
-	text-align: right;
-}
 table th {
 	border-bottom: 3px solid #ddd;
 }
+
+/** FORMS **/
 
 label {
 	display: block;
@@ -129,4 +135,9 @@ button:hover, a.btn:hover, button:active, a.btn:active, input[type=submit]:hover
 	padding: 10px;
 	color: #fe008e;
 	list-style: none;
+}
+
+form ul {
+	list-style: none;
+	padding-left: 0;
 }

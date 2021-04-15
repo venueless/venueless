@@ -77,6 +77,14 @@ def default_grants():
     }
 
 
+FEATURE_FLAGS = [
+    "schedule-control",
+    "roulette",
+    "muxdata",
+    "page.landing",
+]
+
+
 def default_feature_flags():
     return ["chat-moderation"]
 

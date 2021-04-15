@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth import get_user_model
 
 from venueless.core.models import World
+from venueless.core.models.world import FEATURE_FLAGS
 
 User = get_user_model()
 
@@ -57,6 +58,11 @@ class ProfileForm(forms.ModelForm):
 
 
 class WorldForm(forms.ModelForm):
+    feature_flags = forms.MultipleChoiceField(
+        choices=[(a, a) for a in FEATURE_FLAGS],
+        widget=forms.CheckboxSelectMultiple,
+    )
+
     class Meta:
         model = World
         fields = (
@@ -65,4 +71,10 @@ class WorldForm(forms.ModelForm):
             "domain",
             "locale",
             "timezone",
+            "feature_flags",
         )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            self.fields["id"].disabled = True
