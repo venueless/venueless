@@ -53,9 +53,11 @@
             </a>
         </td>
         <td class="text-right">
-            <a href="{% url 'control:world.clear' pk=world.pk %}">
-                {% trans "Delete data" %}
-            </a>
+            {% if world.user_count %}
+                <a href="{% url 'control:world.clear' pk=world.pk %}">
+                    {% trans "Delete data" %}
+                </a>
+            {% endif %}
         </td>
         <td class="text-right">
             <a href="{% url 'control:world.update' pk=world.pk %}">
