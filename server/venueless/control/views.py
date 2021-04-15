@@ -1,11 +1,15 @@
 import datetime
 
 import jwt
+from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.mixins import UserPassesTestMixin
+from django.db.models import Count
 from django.shortcuts import redirect
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import (
     CreateView,
+    DetailView,
     FormView,
     ListView,
     TemplateView,
@@ -15,6 +19,7 @@ from django.views.generic import (
 from venueless.core.models import World
 
 from .forms import ProfileForm, SignupForm, WorldForm
+from .tasks import clear_world_data
 
 
 class AdminBase(UserPassesTestMixin):
@@ -61,7 +66,7 @@ class IndexView(AdminBase, TemplateView):
 
 class WorldList(AdminBase, ListView):
     template_name = "control/world_list.html"
-    queryset = World.objects.all()
+    queryset = World.objects.annotate(user_count=Count("user")).all()
     context_object_name = "worlds"
 
     def get_context_data(self, *args, **kwargs):
@@ -100,3 +105,14 @@ class WorldUpdate(AdminBase, UpdateView):
     form_class = WorldForm
     queryset = World.objects.all()
     success_url = "/control/worlds/"
+
+
+class WorldClear(AdminBase, DetailView):
+    template_name = "control/world_clear.html"
+    queryset = World.objects.all()
+    success_url = "/control/worlds/"
+
+    def post(self, request, *args, **kwargs):
+        clear_world_data.apply_async(kwargs={"world": self.get_object().pk})
+        messages.success(request, _("The data will soon be deleted."))
+        return redirect(self.success_url)

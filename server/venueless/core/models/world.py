@@ -234,3 +234,45 @@ class World(VersionedModel):
                 result[k] &= MAX_PERMISSIONS_IF_SILENCED
 
         return result
+
+    def clear_data(self):
+        """
+        Clears all personal information. It generally leaves structure such as rooms and exhibitors intact, but to make
+        sure all personal data is scrubbed, it also clears all uploaded files, which includes things like exhibitor
+        logos.
+        """
+        from venueless.core.models import (
+            ChatEvent,
+            ContactRequest,
+            ExhibitorStaff,
+            ExhibitorView,
+            Feedback,
+            Membership,
+            Question,
+            Reaction,
+            RoomView,
+        )
+        from venueless.storage.models import StoredFile
+
+        self.audit_logs.all().delete()
+        self.world_grants.all().delete()
+        self.room_grants.all().delete()
+        self.bbb_calls.all().delete()
+        ChatEvent.objects.filter(channel__world=self).delete()
+        Membership.objects.filter(channel__world=self).delete()
+        ExhibitorStaff.objects.filter(exhibitor__world=self).delete()
+        ContactRequest.objects.filter(exhibitor__world=self).delete()
+        ExhibitorView.objects.filter(exhibitor__world=self).delete()
+        Reaction.objects.filter(room__world=self).delete()
+        RoomView.objects.filter(room__world=self).delete()
+        Question.objects.filter(room__world=self).delete()
+        Feedback.objects.filter(world=self).delete()
+
+        for f in StoredFile.objects.filter(world=self):
+            if f.file:
+                f.file.delete(False)
+            f.delete()
+
+        self.user_set.all().delete()
+        self.domain = None
+        self.save()

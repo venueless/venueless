@@ -150,3 +150,21 @@ a, a:visited {
 a:hover, a:active, a:focus {
 	text-decoration: underline;
 }
+
+/** MESSAGES **/
+.messages {
+	list-style: none;
+	padding: 0;
+}
+.messages .error, .messages.warning {
+	border: 4px solid #fe008e;
+	border-radius: 4px;
+	padding: 10px;
+	color: #fe008e;
+}
+.messages .success, .messages .info {
+	border: 4px solid #0058de;
+	border-radius: 4px;
+	padding: 10px;
+	color: #0058de;
+}

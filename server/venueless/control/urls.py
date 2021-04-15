@@ -17,6 +17,7 @@ urlpatterns = [
     # auth/reset/done/ [name='password_reset_complete']
     path("worlds/", views.WorldList.as_view(), name="world.list"),
     path("worlds/new/", views.WorldCreate.as_view(), name="world.create"),
+    path("worlds/<slug:pk>/clear", views.WorldClear.as_view(), name="world.clear"),
     path("worlds/<slug:pk>/", views.WorldUpdate.as_view(), name="world.update"),
     path("", views.IndexView.as_view(), name="index"),
 ]

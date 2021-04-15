@@ -227,6 +227,8 @@ SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 CSP_DEFAULT_SRC = ("'self'", "'unsafe-eval'")
 
+MESSAGE_STORAGE = "django.contrib.messages.storage.session.SessionStorage"
+
 template_loaders = (
     "django.template.loaders.filesystem.Loader",
     "django.template.loaders.app_directories.Loader",
