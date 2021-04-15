@@ -15,6 +15,7 @@
         <th>{% trans "Name" %}</th>
         <th>{% trans "URL" %}</th>
         <th></th>
+        <th></th>
     </tr>
     </thead>
     <tbody>
@@ -37,6 +38,13 @@
             <a href="{% url 'control:world.update' pk=world.pk %}">
                 {% trans "Edit" %}
             </a>
+        </td>
+        <td>
+            {% if world.domain and world.admin_token %}
+                <a href="https://{{ world.domain }}/#token={{ world.admin_token }}">
+                    {% trans "Admin access" %}
+                </a>
+            {% endif %}
         </td>
     </tr>
     {% endfor %}

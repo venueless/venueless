@@ -1,3 +1,6 @@
+import datetime
+
+import jwt
 from django.contrib.auth import login
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.shortcuts import redirect
@@ -60,6 +63,30 @@ class WorldList(AdminBase, ListView):
     template_name = "control/world_list.html"
     queryset = World.objects.all()
     context_object_name = "worlds"
+
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+
+        for world in ctx["worlds"]:
+            if world.config and world.config.get("JWT_secrets"):
+                jwt_config = world.config["JWT_secrets"][0]
+                secret = jwt_config["secret"]
+                audience = jwt_config["audience"]
+                issuer = jwt_config["issuer"]
+                iat = datetime.datetime.utcnow()
+                exp = iat + datetime.timedelta(days=7)
+                payload = {
+                    "iss": issuer,
+                    "aud": audience,
+                    "exp": exp,
+                    "iat": iat,
+                    "uid": "__admin__",
+                    "traits": ["admin"],
+                }
+                token = jwt.encode(payload, secret, algorithm="HS256")
+                world.admin_token = token
+
+        return ctx
 
 
 class WorldCreate(AdminBase, CreateView):
