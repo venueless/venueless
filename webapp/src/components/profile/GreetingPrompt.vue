@@ -9,6 +9,9 @@ prompt.c-profile-greeting-prompt(:allowCancel="false")
 			a.gravatar-connected-hint(v-if="profile.gravatar_hash", href="#", @click="connectedGravatar = false; showConnectGravatar = true") {{ $t('profile/GreetingPrompt:gravatar-change:label') }}
 			p.gravatar-hint(v-else-if="!showConnectGravatar") {{ $t('profile/GreetingPrompt:gravatar-hint:text') }} #[a(href="#", @click="showConnectGravatar = true") gravatar].
 			bunt-input.display-name(name="displayName", :label="$t('profile/GreetingPrompt:displayname:label')", v-model.trim="profile.display_name", :validation="$v.profile.display_name")
+			label.checkbox-container(v-if="world.greeting_checkbox")
+				input.checkbox(type="checkbox", v-model="checkboxChecked")
+				markdown-content(:markdown="world.greeting_checkbox")
 		.step-avatar(v-else-if="activeStep === 'avatar'")
 			h1 {{ $t('profile/GreetingPrompt:step-avatar:heading') }}
 			p {{ $t('profile/GreetingPrompt:step-avatar:text') }}
@@ -19,7 +22,7 @@ prompt.c-profile-greeting-prompt(:allowCancel="false")
 			change-additional-fields(v-model="profile.fields")
 		.actions(v-if="!showConnectGravatar")
 			bunt-button#btn-back(v-if="previousStep", @click="activeStep = previousStep") {{ $t('profile/GreetingPrompt:button-back:label') }}
-			bunt-button#btn-continue(v-if="nextStep", :class="{invalid: $v.$invalid && $v.$dirty}", :disabled="blockSave || $v.$invalid && $v.$dirty", :loading="processingStep", :key="activeStep", @click="toNextStep") {{ $t('profile/GreetingPrompt:button-continue:label') }}
+			bunt-button#btn-continue(v-if="nextStep", :class="{invalid: $v.$invalid && $v.$dirty}", :disabled="blockSave || (world.greeting_checkbox && !checkboxChecked) || $v.$invalid && $v.$dirty", :loading="processingStep", :key="activeStep", @click="toNextStep") {{ $t('profile/GreetingPrompt:button-continue:label') }}
 			bunt-button#btn-finish(v-else, :loading="saving", :disabled="blockSave", @click="update") {{ $t('profile/GreetingPrompt:button-finish:label') }}
 </template>
 <script>
@@ -31,15 +34,17 @@ import Prompt from 'components/Prompt'
 import ChangeAvatar from './ChangeAvatar'
 import ChangeAdditionalFields from './ChangeAdditionalFields'
 import ConnectGravatar from './ConnectGravatar'
+import MarkdownContent from 'components/MarkdownContent'
 
 export default {
-	components: { Prompt, ChangeAvatar, ChangeAdditionalFields, ConnectGravatar },
+	components: { Prompt, MarkdownContent, ChangeAvatar, ChangeAdditionalFields, ConnectGravatar },
 	data () {
 		return {
 			activeStep: null,
 			showConnectGravatar: false,
 			profile: null,
 			processingStep: false,
+			checkboxChecked: false,
 			blockSave: false,
 			saving: false,
 		}
@@ -148,6 +153,11 @@ export default {
 		.display-name
 			max-width: 280px
 			margin-top: 16px
+		.checkbox-container
+			.checkbox
+				float: left
+				margin-right: 8px
+				margin-bottom: 0px
 		.actions
 			margin-top: 32px
 			align-self: stretch

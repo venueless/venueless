@@ -12,6 +12,7 @@
 			bunt-select(v-model="config.dateLocale", label="Date locale", name="dateLocale", :options="momentLocales")
 			bunt-input(v-model="config.timezone", label="Time zone", name="timezone", :validation="$v.config.timezone")
 			bunt-input(v-model="config.connection_limit", label="Connection limit", name="connection_limit", hint="Set to 0 to allow unlimited connections per user", :validation="$v.config.connection_limit")
+			bunt-input(v-model="config.greeting_checkbox", v-if="$features.enabled('greeting-checkbox')", label="Greeting checkbox text", name="greeting_checkbox")
 			h2 Schedule
 			p(v-if="config.pretalx.url") Schedule is loaded from a file
 				| {{ ' ' }}
@@ -131,6 +132,7 @@ export default {
 				dateLocale: this.config.dateLocale,
 				timezone: this.config.timezone,
 				connection_limit: this.config.connection_limit,
+				greeting_checkbox: this.config.greeting_checkbox,
 				bbb_defaults: this.config.bbb_defaults,
 				track_exhibitor_views: this.config.track_exhibitor_views,
 				track_room_views: this.config.track_room_views,
