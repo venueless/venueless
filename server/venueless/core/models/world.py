@@ -87,6 +87,7 @@ FEATURE_FLAGS = [
     "schedule-control",
     "roulette",
     "muxdata",
+    "greeting-checkbox",
     "page.landing",
     "zoom",
     "janus",

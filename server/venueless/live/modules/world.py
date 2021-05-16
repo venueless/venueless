@@ -73,6 +73,7 @@ class WorldModule(BaseModule):
                 "profile_fields",
                 "track_room_views",
                 "track_exhibitor_views",
+                "greeting_checkbox",
             )
             model_fields = ("title", "locale", "timezone", "roles", "trait_grants")
             update_fields = set()

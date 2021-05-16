@@ -38,6 +38,9 @@ class WorldConfigSerializer(serializers.Serializer):
     profile_fields = serializers.JSONField()
     track_exhibitor_views = serializers.BooleanField()
     track_room_views = serializers.BooleanField()
+    greeting_checkbox = serializers.CharField(
+        required=False, allow_null=True, allow_blank=True
+    )
 
     def _available_permissions(self, *args):
         return [d.value for d in Permission]
@@ -144,6 +147,7 @@ def get_world_config_for_user(world, user):
             "title": world.title,
             "pretalx": world.config.get("pretalx", {}),
             "profile_fields": world.config.get("profile_fields", []),
+            "greeting_checkbox": world.config.get("greeting_checkbox"),
         },
         "permissions": list(permissions[world]),
         "rooms": [],
@@ -326,6 +330,7 @@ def _config_serializer(world, *args, **kwargs):
             "timezone": world.timezone,
             "trait_grants": world.trait_grants,
             "connection_limit": world.config.get("connection_limit", 0),
+            "greeting_checkbox": world.config.get("greeting_checkbox"),
             "profile_fields": world.config.get("profile_fields", []),
         },
         *args,
