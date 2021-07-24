@@ -12,9 +12,11 @@ from .exhibitor import (
 )
 from .feedback import Feedback
 from .janus import JanusServer
+from .poll import Poll, PollOption, PollVote
 from .question import Question, QuestionVote
 from .room import Reaction, Room, RoomView
 from .roulette import RoulettePairing, RouletteRequest
+from .streaming import StreamingServer
 from .turn import TurnServer
 from .world import World
 
@@ -29,6 +31,9 @@ __all__ = [
     "Feedback",
     "JanusServer",
     "Membership",
+    "Poll",
+    "PollOption",
+    "PollVote",
     "Question",
     "QuestionVote",
     "Reaction",
@@ -44,4 +49,5 @@ __all__ = [
     "ExhibitorView",
     "ContactRequest",
     "TurnServer",
+    "StreamingServer",
 ]

@@ -2,17 +2,21 @@ import copy
 import datetime
 import json
 
+import icalendar
 import jwt
+import requests
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.db.models import Count, F, Max, OuterRef, Subquery
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.utils.crypto import get_random_string
 from django.utils.functional import cached_property
+from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import (
     CreateView,
@@ -22,24 +26,31 @@ from django.views.generic import (
     ListView,
     TemplateView,
     UpdateView,
+    View,
 )
 
 from venueless.core.models import (
+    BBBCall,
     BBBServer,
     Feedback,
     JanusServer,
     RoomView,
+    StreamingServer,
     TurnServer,
     World,
 )
 
 from ..core.models.world import PlannedUsage
+from ..core.services.bbb import get_url
 from .forms import (
+    BBBMoveRoomForm,
     BBBServerForm,
     JanusServerForm,
     PlannedUsageFormSet,
     ProfileForm,
     SignupForm,
+    StreamingServerForm,
+    StreamKeyGeneratorForm,
     TurnServerForm,
     UserForm,
     WorldForm,
@@ -85,6 +96,9 @@ class AdminBase(UserPassesTestMixin):
     login_url = "/control/auth/login/"
 
     def test_func(self):
+        secret_key = self.request.GET.get("control_token")
+        if secret_key and secret_key == settings.CONTROL_SECRET:
+            return True
         return self.request.user.is_staff
 
 
@@ -137,7 +151,11 @@ class WorldList(AdminBase, ListView):
         World.objects.annotate(
             user_count=Count("user"),
             current_view_count=Subquery(
-                RoomView.objects.filter(room__world=OuterRef("pk"), end__isnull=True)
+                RoomView.objects.filter(
+                    room__world=OuterRef("pk"),
+                    start__gt=now() - datetime.timedelta(hours=24),
+                    end__isnull=True,
+                )
                 .order_by()
                 .values("room__world")
                 .annotate(c=Count("*"))
@@ -542,3 +560,130 @@ class FeedbackDetail(AdminBase, DetailView):
         ctx = super().get_context_data(**kwargs)
         ctx["trace"] = json.loads(self.object.trace)
         return ctx
+
+
+class WorldCalendar(AdminBase, View):
+    def get(self, request, *args, **kwargs):
+        queryset = PlannedUsage.objects.all().select_related("world")
+        calendar = icalendar.Calendar()
+        for planned_usage in queryset:
+            calendar.add_component(planned_usage.as_ical())
+
+        return HttpResponse(
+            calendar.to_ical(),
+            content_type="text/calendar",
+            headers={"Content-Disposition": 'attachment; filename="venueless.ics"'},
+        )
+
+
+class StreamingServerList(AdminBase, ListView):
+    template_name = "control/streaming_list.html"
+    queryset = StreamingServer.objects.order_by("name")
+    context_object_name = "streamings"
+
+
+class StreamingServerCreate(AdminBase, CreateView):
+    template_name = "control/streaming_form.html"
+    form_class = StreamingServerForm
+    success_url = "/control/streamingservers/"
+
+    @transaction.atomic()
+    def form_valid(self, form):
+        self.object = form.save()
+
+        LogEntry.objects.create(
+            content_object=form.instance,
+            user=self.request.user,
+            action_type="streamingserver.created",
+            data={k: str(v) for k, v in form.cleaned_data.items()},
+        )
+        messages.success(self.request, _("Ok!"))
+        return super().form_valid(form)
+
+
+class StreamingServerUpdate(AdminBase, UpdateView):
+    template_name = "control/streaming_form.html"
+    form_class = StreamingServerForm
+    queryset = StreamingServer.objects.all()
+    success_url = "/control/streamingservers/"
+
+    def form_valid(self, form):
+        self.object = form.save()
+
+        LogEntry.objects.create(
+            content_object=form.instance,
+            user=self.request.user,
+            action_type="streamingserver.updated",
+            data={k: str(v) for k, v in form.cleaned_data.items()},
+        )
+        messages.success(self.request, _("Ok!"))
+        return super().form_valid(form)
+
+
+class StreamingServerDelete(AdminBase, DeleteView):
+    template_name = "control/streaming_delete.html"
+    queryset = StreamingServer.objects.all()
+    success_url = "/control/streamingservers/"
+    context_object_name = "server"
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        LogEntry.objects.create(
+            content_object=self.object,
+            user=self.request.user,
+            action_type="streamingserver.deleted",
+            data={},
+        )
+        success_url = self.get_success_url()
+        self.object.delete()
+        messages.success(self.request, _("Ok!"))
+        return HttpResponseRedirect(success_url)
+
+
+class StreamkeyGenerator(AdminBase, FormView):
+    template_name = "control/streamkey.html"
+    form_class = StreamKeyGeneratorForm
+
+    def form_valid(self, form):
+        return self.get(self.request, *self.args, **self.kwargs)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        form = ctx["form"]
+        if self.request.method == "POST" and form.is_valid():
+            ctx["result"] = form.cleaned_data["server"].generate_streamkey(
+                form.cleaned_data["name"],
+                form.cleaned_data["days"],
+            )
+        return ctx
+
+
+class BBBMoveRoom(AdminBase, FormView):
+    template_name = "control/bbb_moveroom.html"
+    form_class = BBBMoveRoomForm
+
+    def form_valid(self, form):
+        server = form.cleaned_data["server"]
+        room = form.cleaned_data["room"]
+
+        try:
+            c = BBBCall.objects.get(room=room)
+        except BBBCall.DoesNotExist:
+            messages.error(self.request, _("No BBB session found for this room."))
+            return HttpResponseRedirect(self.request.path)
+        try:
+            u = get_url(
+                "end",
+                {"meetingID": c.meeting_id, "password": c.moderator_pw},
+                server.url,
+                server.secret,
+            )
+            r = requests.get(u, timeout=15)
+            r.raise_for_status()
+        except:
+            messages.warning(self.request, _("Kicking all attendees did not work."))
+
+        c.server = server
+        c.save()
+        messages.success(self.request, _("Moved."))
+        return HttpResponseRedirect(self.request.path)

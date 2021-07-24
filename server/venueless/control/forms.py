@@ -1,8 +1,16 @@
 from django import forms
 from django.contrib.auth import get_user_model
+from django.core.validators import RegexValidator
 from django.forms import inlineformset_factory
 
-from venueless.core.models import BBBServer, JanusServer, TurnServer, World
+from venueless.core.models import (
+    BBBServer,
+    JanusServer,
+    Room,
+    StreamingServer,
+    TurnServer,
+    World,
+)
 from venueless.core.models.world import FEATURE_FLAGS, PlannedUsage
 
 User = get_user_model()
@@ -43,9 +51,11 @@ class SecretKeyField(forms.CharField):
 class HasSecretsMixin:
     def save(self):
         for k, v in self.cleaned_data.items():
-            if isinstance(self.fields.get(k), SecretKeyField) and self.cleaned_data.get(
-                k
-            ).endswith(SECRET_REDACTED) and k in self.initial:
+            if (
+                isinstance(self.fields.get(k), SecretKeyField)
+                and self.cleaned_data.get(k).endswith(SECRET_REDACTED)
+                and k in self.initial
+            ):
                 self.cleaned_data[k] = self.initial[k]
                 setattr(self.instance, k, self.initial[k])
         return super().save()
@@ -197,3 +207,33 @@ class TurnServerForm(HasSecretsMixin, forms.ModelForm):
             "world_exclusive",
         )
         field_classes = {"auth_secret": SecretKeyField}
+
+
+class StreamingServerForm(HasSecretsMixin, forms.ModelForm):
+    class Meta:
+        model = StreamingServer
+        fields = (
+            "active",
+            "name",
+            "token_secret",
+            "url_input",
+            "url_output",
+        )
+        field_classes = {"token_secret": SecretKeyField}
+
+
+class StreamKeyGeneratorForm(forms.Form):
+    server = forms.ModelChoiceField(
+        label="Server", queryset=StreamingServer.objects.all()
+    )
+    name = forms.CharField(label="Name", validators=[RegexValidator("^[a-z0-9A-Z]+$")])
+    days = forms.IntegerField(label="Validity in days", initial=180)
+
+
+class BBBMoveRoomForm(forms.Form):
+    room = forms.ModelChoiceField(
+        label="Room ID", queryset=Room.objects.all(), widget=forms.TextInput
+    )
+    server = forms.ModelChoiceField(
+        label="Target Server", queryset=BBBServer.objects.filter(active=True)
+    )

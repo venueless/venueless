@@ -18,6 +18,7 @@ urlpatterns = [
     path("users/", views.UserList.as_view(), name="user.list"),
     path("users/<int:pk>/", views.UserUpdate.as_view(), name="user.update"),
     path("bbbs/", views.BBBServerList.as_view(), name="bbbserver.list"),
+    path("bbbs/moveroom/", views.BBBMoveRoom.as_view(), name="bbbserver.moveroom"),
     path("bbbs/new/", views.BBBServerCreate.as_view(), name="bbbserver.create"),
     path(
         "bbbs/<uuid:pk>/delete",
@@ -43,10 +44,34 @@ urlpatterns = [
         name="turnserver.delete",
     ),
     path(
-        "turns/<uuid:pk>/", views.TurnServerUpdate.as_view(), name="turnserver.update"
+        "turnservers/<uuid:pk>/",
+        views.TurnServerUpdate.as_view(),
+        name="turnserver.update",
+    ),
+    path("streamkey/", views.StreamkeyGenerator.as_view(), name="streamkey"),
+    path(
+        "streamingservers/",
+        views.StreamingServerList.as_view(),
+        name="streamingserver.list",
+    ),
+    path(
+        "streamingservers/new/",
+        views.StreamingServerCreate.as_view(),
+        name="streamingserver.create",
+    ),
+    path(
+        "streamingservers/<uuid:pk>/delete",
+        views.StreamingServerDelete.as_view(),
+        name="streamingserver.delete",
+    ),
+    path(
+        "streamingservers/<uuid:pk>/",
+        views.StreamingServerUpdate.as_view(),
+        name="streamingserver.update",
     ),
     path("worlds/", views.WorldList.as_view(), name="world.list"),
     path("worlds/new/", views.WorldCreate.as_view(), name="world.create"),
+    path("worlds/calendar", views.WorldCalendar.as_view(), name="world.calendar"),
     path("worlds/<slug:pk>/admin", views.WorldAdminToken.as_view(), name="world.admin"),
     path("worlds/<slug:pk>/clear", views.WorldClear.as_view(), name="world.clear"),
     path("worlds/<slug:pk>/", views.WorldUpdate.as_view(), name="world.update"),

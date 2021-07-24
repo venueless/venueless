@@ -3,6 +3,7 @@ import Vuex from 'vuex'
 import api from 'lib/api'
 import chat from './chat'
 import question from './question'
+import poll from './poll'
 import roulette from './roulette'
 import exhibition from './exhibition'
 import schedule from './schedule'
@@ -24,6 +25,7 @@ export default new Vuex.Store({
 		permissions: null,
 		activeRoom: null,
 		reactions: null,
+		mediaSourcePlaceholderRect: null
 	},
 	getters: {
 		hasPermission (state) {
@@ -45,6 +47,9 @@ export default new Vuex.Store({
 				}
 			}
 			state.rooms = rooms
+		},
+		reportMediaSourcePlaceholderRect (state, rect) {
+			state.mediaSourcePlaceholderRect = rect
 		}
 	},
 	actions: {
@@ -66,7 +71,7 @@ export default new Vuex.Store({
 				commit('exhibition/setData', serverState.exhibition)
 				commit('updateRooms', serverState['world.config'].rooms)
 				// FIXME copypasta from App.vue
-				if (state.activeRoom?.modules.some(module => ['livestream.native', 'call.bigbluebutton', 'call.zoom', 'call.janus', 'livestream.youtube'].includes(module.type))) {
+				if (state.activeRoom?.modules.some(module => ['livestream.native', 'livestream.youtube', 'livestream.iframe', 'call.bigbluebutton', 'call.zoom', 'call.janus'].includes(module.type))) {
 					api.call('room.enter', {room: state.activeRoom.id})
 				}
 				// TODO ?
@@ -119,6 +124,7 @@ export default new Vuex.Store({
 			state.activeRoom = room
 			state.reactions = null
 			dispatch('question/changeRoom', room)
+			dispatch('poll/changeRoom', room)
 		},
 		async addReaction ({state}, reaction) {
 			if (!state.activeRoom || !state.connected) return
@@ -167,6 +173,7 @@ export default new Vuex.Store({
 	modules: {
 		chat,
 		question,
+		poll,
 		exhibition,
 		schedule,
 		roulette,

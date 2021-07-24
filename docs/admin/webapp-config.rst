@@ -70,3 +70,5 @@ Experimental Features
 * zoom
 * janus
 * page.landing
+* iframe-player
+* polls
