@@ -133,7 +133,7 @@ REDIS_USE_PUBSUB = os.getenv(
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": (
-            "channels_redis.pubsub.RedisPubSubChannelLayer"
+            "venueless.platforms.channels.pubsub.ChannelLayer"
             if REDIS_USE_PUBSUB
             else "channels_redis.core.RedisChannelLayer"
         ),

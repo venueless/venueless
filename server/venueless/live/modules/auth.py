@@ -258,20 +258,16 @@ class AuthModule(BaseModule):
 
     async def dispatch_disconnect(self, close_code):
         if self.consumer.user:
-            try:
-                await self.consumer.channel_layer.group_discard(
-                    GROUP_USER.format(id=self.consumer.user.id),
-                    self.consumer.channel_name,
-                )
-                await self.consumer.channel_layer.group_discard(
-                    GROUP_WORLD.format(id=self.consumer.world.id),
-                    self.consumer.channel_name,
-                )
-            except AssertionError:
-                # "group not joined"
-                pass
+            await self.consumer.channel_layer.group_discard(
+                GROUP_USER.format(id=self.consumer.user.id),
+                self.consumer.channel_name,
+            )
+            await self.consumer.channel_layer.group_discard(
+                GROUP_WORLD.format(id=self.consumer.world.id),
+                self.consumer.channel_name,
+            )
             await unregister_user_connection(
-                self.consumer.user.id, self.consumer.socket_id
+                self.consumer.user.id, self.consumer.channel_name
             )
 
     @command("list")

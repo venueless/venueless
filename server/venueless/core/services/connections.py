@@ -44,17 +44,23 @@ async def register_user_connection(user_id, channel_name):
         await tr.execute()
 
 
-async def unregister_user_connection(user_id, socket_id):
+async def unregister_user_connection(user_id, channel_name):
     async with aioredis() as redis:
         await redis.lrem(
             f"connections.list.user:{user_id}",
-            10000,
-            socket_id,
+            0,
+            channel_name,
         )
 
 
 async def get_user_connection_count(user_id):
     async with aioredis() as redis:
+        print(
+            f"connections.list.user:{user_id}",
+            await redis.llen(
+                f"connections.list.user:{user_id}",
+            ),
+        )
         return await redis.llen(
             f"connections.list.user:{user_id}",
         )
