@@ -107,3 +107,13 @@ export function markdownEmoji (md) {
 		return `<span class="emoji" style="background-position: ${getEmojiPosition(emoji)}"></span>`
 	}
 }
+
+const emojiReactions = [
+	data.emojis.clap,
+	data.emojis.heart,
+	data.emojis['+1'],
+	data.emojis.rolling_on_the_floor_laughing,
+	data.emojis.open_mouth,
+]
+
+export const availableReactions = emojiReactions.map(e => ({id: e.short_names[0], style: {'background-position': getEmojiPosition(e)}}))

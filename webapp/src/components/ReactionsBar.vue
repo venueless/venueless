@@ -5,8 +5,7 @@
 			.emoji(:style="reaction.style")
 </template>
 <script>
-import emojiData from 'emoji-mart/data/twitter.json'
-import { getEmojiPosition } from 'lib/emoji'
+import { availableReactions } from 'lib/emoji'
 
 export default {
 	props: {
@@ -14,21 +13,7 @@ export default {
 	},
 	data () {
 		return {
-			particlePool: [],
-			freeParticles: [],
-			overlayHeight: null
-		}
-	},
-	computed: {
-		availableReactions () {
-			const emoji = [
-				emojiData.emojis.clap,
-				emojiData.emojis.heart,
-				emojiData.emojis['+1'],
-				emojiData.emojis.rolling_on_the_floor_laughing,
-				emojiData.emojis.open_mouth,
-			]
-			return emoji.map(e => ({id: e.short_names[0], style: {'background-position': getEmojiPosition(e)}}))
+			availableReactions
 		}
 	},
 	methods: {
