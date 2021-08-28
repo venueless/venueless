@@ -1,6 +1,7 @@
 /* global WebSocket */
 import EventEmitter from 'events'
 import ApiError from './ApiError'
+import {decode, encode} from '@msgpack/msgpack'
 
 const defer = function () {
 	const deferred = {}
@@ -46,7 +47,7 @@ class WebSocketClient extends EventEmitter {
 			id,
 			data
 		]
-		this._send(JSON.stringify(payload))
+		this._send(payload)
 		setTimeout(() => {
 			if (this._openRequests[id]) {
 				const timeoutedRequest = this._popPendingRequest(id)
@@ -92,10 +93,10 @@ class WebSocketClient extends EventEmitter {
 	}
 
 	_send (payload) {
-		this._socket.send(payload)
+		this._socket.send(encode(payload))
 		this.emit('log', {
 			direction: 'send',
-			data: payload
+			payload
 		})
 	}
 
@@ -107,7 +108,7 @@ class WebSocketClient extends EventEmitter {
 		if (this._config.clientId) {
 			payload.client_id = this._config.clientId
 		}
-		this._send(JSON.stringify(['authenticate', payload]))
+		this._send(['authenticate', payload])
 	}
 
 	_ping (starterSocket) { // we need a ref to the socket to detect reconnects and stop the old ping loop
@@ -117,7 +118,7 @@ class WebSocketClient extends EventEmitter {
 			'ping',
 			timestamp
 		]
-		this._send(JSON.stringify(payload))
+		this._send(payload)
 		this.emit('ping')
 		setTimeout(() => {
 			if (this._socket.readyState !== 1 || this._socket !== starterSocket) return // looping on old socket, abort
@@ -132,8 +133,8 @@ class WebSocketClient extends EventEmitter {
 		this.emit('closed')
 	}
 
-	_processMessage (rawMessage) {
-		const message = JSON.parse(rawMessage.data)
+	async _processMessage (rawMessage) {
+		const message = decode(await rawMessage.data.arrayBuffer())
 
 		const actionHandlers = {
 			error: this._handleError.bind(this),
@@ -149,7 +150,7 @@ class WebSocketClient extends EventEmitter {
 		}
 		this.emit('log', {
 			direction: 'receive',
-			data: rawMessage.data
+			payload: message
 		})
 	}
 

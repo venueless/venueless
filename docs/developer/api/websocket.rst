@@ -4,7 +4,8 @@ Websocket connection
 The internal API is currently exclusively spoken over a long-standing websocket connection between the client and the
 server. The URL of the websocket endpoint is ``wss://<hostname>/ws/world/<worldid>``.
 
-We use a JSON-based message protocal on the websocket.
+The protocol described below can be encoded either with JSON or with msgpack. JSON is the default, but if the server
+receives at least one msgpack message from the client, the server will always reply in msgpack.
 On the root level, we use an array structure that is built like this::
 
     [$ACTION_NAME, ($SEQUENCE_NUMBER or $COMMAND_ID), $PAYLOAD]

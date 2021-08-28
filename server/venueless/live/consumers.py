@@ -4,6 +4,7 @@ import random
 import time
 import uuid
 
+import msgpack
 import orjson
 from channels.exceptions import StopConsumer
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
@@ -38,7 +39,55 @@ from .modules.zoom import ZoomModule
 logger = logging.getLogger(__name__)
 
 
-class MainConsumer(AsyncJsonWebsocketConsumer):
+class AsyncJsonOrMsgPackWebsocketConsumer(AsyncJsonWebsocketConsumer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.__use_msgpack = False
+
+    async def receive(self, text_data=None, bytes_data=None, **kwargs):
+        if bytes_data:
+            try:
+                d = self.decode_msgpack(bytes_data)
+            except:
+                await super().send(
+                    text_data=await self.encode_json(
+                        ["error", {"code": "invalid_msgpack"}]
+                    )
+                )
+            else:
+                self.__use_msgpack = True
+                await self.receive_json(d, **kwargs)
+        elif text_data:
+            await self.receive_json(await self.decode_json(text_data), **kwargs)
+        else:
+            raise ValueError("No data for incoming WebSocket frame!")
+
+    async def send_json(self, content, close=False):
+        try:
+            if self.__use_msgpack:
+                await super().send(bytes_data=self.encode_msgpack(content), close=close)
+            else:
+                await super().send(
+                    text_data=orjson.dumps(content).decode(), close=close
+                )
+        except (RuntimeError, ConnectionClosedError):
+            # socket has been closed in the meantime
+            pass
+
+    @classmethod
+    def decode_msgpack(cls, bytes_data):
+        return msgpack.unpackb(bytes_data)
+
+    @classmethod
+    def encode_msgpack(cls, content):
+        return msgpack.packb(content, use_bin_type=True)
+
+    @classmethod
+    async def decode_json(cls, text_data):
+        return orjson.loads(text_data)
+
+
+class MainConsumer(AsyncJsonOrMsgPackWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.user = None
@@ -248,16 +297,3 @@ class MainConsumer(AsyncJsonWebsocketConsumer):
 
     async def send_success(self, data=None, close=False):
         await self.send_json(self.build_response("success", data), close=close)
-
-    # Override send and receive methods to use orjson and less function calls
-
-    async def send_json(self, content, close=False):
-        try:
-            await super().send(text_data=orjson.dumps(content).decode(), close=close)
-        except (RuntimeError, ConnectionClosedError):
-            # socket has been closed in the meantime
-            pass
-
-    @classmethod
-    async def decode_json(cls, text_data):
-        return orjson.loads(text_data)

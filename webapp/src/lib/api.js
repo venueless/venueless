@@ -2,6 +2,7 @@
 import config from 'config'
 import store from 'store'
 import WebSocketClient from './WebSocketClient'
+import {decode} from '@msgpack/msgpack'
 
 const api = Object.create(WebSocketClient.prototype)
 api.connect = function ({token, clientId}) {
@@ -33,8 +34,7 @@ api.connect = function ({token, clientId}) {
 		}
 	})
 
-	api.on('log', ({direction, data}) => {
-		const payload = JSON.parse(data)
+	api.on('log', ({direction, payload}) => {
 		const action = payload.shift()
 		let correlationId
 		if (Number.isInteger(payload[0])) {
