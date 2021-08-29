@@ -240,7 +240,7 @@ export default {
 			})
 		},
 		// INCOMING
-		'api::chat.event' ({state, dispatch}, event) {
+		async 'api::chat.event' ({state, dispatch}, event) {
 			if (event.channel !== state.channel) return
 			const handleMembership = (event) => {
 				switch (event.content.membership) {
@@ -273,7 +273,12 @@ export default {
 				case 'channel.message': break
 				case 'channel.member': handleMembership(event); break
 			}
-			dispatch('markChannelRead')
+			await dispatch('markChannelRead')
+
+			// hit the user profile cache for each message
+			if (!state.usersLookup[event.sender]) {
+				await dispatch('fetchUsers', [event.sender])
+			}
 		},
 		'api::chat.channels' ({state}, {channels}) {
 			state.joinedChannels = channels
