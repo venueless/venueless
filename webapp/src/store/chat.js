@@ -273,7 +273,7 @@ export default {
 				case 'channel.message': break
 				case 'channel.member': handleMembership(event); break
 			}
-			await dispatch('markChannelRead')
+			dispatch('markChannelRead')
 
 			// hit the user profile cache for each message
 			if (!state.usersLookup[event.sender]) {
