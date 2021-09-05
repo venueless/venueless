@@ -117,9 +117,6 @@ class UploadView(UploadMixin, View):
         if "file" not in request.FILES:
             return JsonResponse({"error": "file.missing"}, status=400)
 
-        if request.FILES["file"].size > self.max_size:
-            return JsonResponse({"error": "file.size"}, status=400)
-
         if not any(
             request.FILES["file"].name.lower().endswith(e) for e in self.ext_whitelist
         ):
@@ -129,12 +126,16 @@ class UploadView(UploadMixin, View):
             request.FILES["file"].name.lower().endswith(e) for e in self.pillow_formats
         ):
             try:
-                content_type, file = self.validate_image(request.FILES["file"])
+                content_type, file, size = self.validate_image(request.FILES["file"])
             except ValidationError:
                 return JsonResponse({"error": "file.picture.invalid"}, status=400)
         else:
             file = request.FILES["file"]
             content_type = request.FILES["file"].content_type
+            size = request.FILES["file"].size
+
+        if size > self.max_size:
+            return JsonResponse({"error": "file.size"}, status=400)
 
         sf = StoredFile.objects.create(
             world=self.world,
@@ -196,7 +197,11 @@ class UploadView(UploadMixin, View):
         else:
             image.save(o, format=original_image.format)
         o.seek(0)
-        return Image.MIME.get(original_image.format), File(o, name=data.name)
+        return (
+            Image.MIME.get(original_image.format),
+            File(o, name=data.name),
+            len(o.getvalue()),
+        )
 
 
 class ScheduleImportView(UploadMixin, View):
