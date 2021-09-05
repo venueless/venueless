@@ -12,7 +12,8 @@ from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from PIL import Image
+from PIL import Image, ImageOps
+from PIL.Image import LANCZOS
 from rest_framework.authentication import get_authorization_header
 from xlrd import XLRDError
 
@@ -60,6 +61,27 @@ class UploadMixin:
             if any(p.value in room["permissions"] for p in self.permissions):
                 return res.user
         raise PermissionDenied()
+
+
+def get_sizes(size, imgsize):
+    wfactor = min(1, size[0] / imgsize[0])
+    hfactor = min(1, size[1] / imgsize[1])
+
+    if wfactor == hfactor:
+        return int(imgsize[0] * hfactor), int(imgsize[1] * wfactor)
+    elif wfactor < hfactor:
+        return size[0], int(imgsize[1] * wfactor)
+    else:
+        return int(imgsize[0] * hfactor), size[1]
+
+
+def resize_image(image, size):
+    # before we calc thumbnail, we need to check and apply EXIF-orientation
+    image = ImageOps.exif_transpose(image)
+
+    new_size = get_sizes(size, image.size)
+    image = image.resize(new_size, resample=LANCZOS)
+    return image
 
 
 class UploadView(UploadMixin, View):
@@ -150,23 +172,31 @@ class UploadView(UploadMixin, View):
         if hasattr(file, "seek"):
             file.seek(0)
 
-        if image.format == "JPEG":
-            o = BytesIO()
-            o.name = data.name
+        image = original_image = Image.open(file)
+        if self.request.POST.get("width") and self.request.POST.get("height"):
+            try:
+                image = resize_image(
+                    original_image,
+                    (
+                        int(self.request.POST.get("width")),
+                        int(self.request.POST.get("height")),
+                    ),
+                )
+            except ValueError:
+                pass
 
-            image = Image.open(file)
-            logger.error(image.mode)
+        o = BytesIO()
+        o.name = data.name
+        if image.format == "JPEG":
             image_without_exif = Image.new(image.mode, image.size)
             image_without_exif.putdata(image.getdata())
             image_without_exif.save(
                 o, format="JPEG", quality=95
             )  # Pillow's default JPEG quality is 75
-            o.seek(0)
-            return Image.MIME.get(image.format), File(o, name=data.name)
         else:
-            if hasattr(data, "seek"):
-                data.seek(0)
-            return Image.MIME.get(image.format), data
+            image.save(o, format=original_image.format)
+        o.seek(0)
+        return Image.MIME.get(original_image.format), File(o, name=data.name)
 
 
 class ScheduleImportView(UploadMixin, View):
