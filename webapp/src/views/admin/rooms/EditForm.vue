@@ -27,6 +27,7 @@ import ChannelBBB from './types-edit/channel-bbb'
 import ChannelJanus from './types-edit/channel-janus'
 import ChannelZoom from './types-edit/channel-zoom'
 import ChannelRoulette from './types-edit/channel-roulette'
+import Exhibition from './types-edit/exhibition'
 
 export default {
 	components: { Prompt },
@@ -50,7 +51,8 @@ export default {
 				'channel-bbb': ChannelBBB,
 				'channel-roulette': ChannelRoulette,
 				'channel-janus': ChannelJanus,
-				'channel-zoom': ChannelZoom
+				'channel-zoom': ChannelZoom,
+				'exhibition': Exhibition
 			},
 			saving: false,
 			error: null
