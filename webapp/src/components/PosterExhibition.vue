@@ -21,9 +21,13 @@ export default {
 	},
 	data () {
 		return {
+			// TODO
+			// - additional downloadable files
+			// - connection to a session -> room
 			// random examples from https://ur.umbc.edu/poster-presentation-examples/
 			posters: [{
 				id: 1,
+				sorting_priority: 0,
 				title: 'Comparing Emotional Regulation Strategies to Predict Satisfaction with Life and Perceived Stress',
 				authors: ['Mobolanle Adebesin', 'Meagan M. Graydon, M.A.', 'Daniel J. Knoblach, M.A.', 'Taylor B. Crouch, M.A.', 'Carlo C. DiClemente, Ph.D.'],
 				presenters: ['eeb3dc26-8fe7-4564-96f9-36fa30ec6150'], // should be a user id
@@ -34,6 +38,7 @@ export default {
 				paper_url: 'https://ur.umbc.edu/files/2016/06/adebesinMobolanleSm.pdf',
 			}, {
 				id: 2,
+				sorting_priority: 0,
 				title: 'Experimental and Computational Analysis of Lift Generation by Wing Morphing Bird',
 				authors: ['Theophilus Aluko', 'Dr. Meilin Yu, Assistant Professor, Mechanical Engineering', 'Jamie Gurganus, Instructor, Mechanical Engineering'],
 				presenters: ['eeb3dc26-8fe7-4564-96f9-36fa30ec6150'], // should be a user id
