@@ -15,6 +15,8 @@ import Speaker from 'views/schedule/speakers/item'
 import Exhibitor from 'views/exhibitors/item'
 import ContactRequests from 'views/contact-requests'
 import Preferences from 'views/preferences'
+import Poster from 'views/posters/item'
+
 Vue.use(VueRouter)
 
 const routes = [{
@@ -93,6 +95,11 @@ const routes = [{
 		path: '/preferences',
 		name: 'preferences',
 		component: Preferences
+	}, {
+		path: '/posters/:posterId',
+		name: 'poster',
+		component: Poster,
+		props: true
 	}, {
 		path: '/manage-exhibitors',
 		name: 'exhibitors',
