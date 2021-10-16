@@ -30,16 +30,16 @@ class Poster(models.Model):
         related_name="child_posters",
         on_delete=models.CASCADE,
     )
-    chat_room = models.ForeignKey(
+    presentation_room = models.ForeignKey(
         to="Room",
-        related_name="chat_posters",
+        related_name="presentation_posters",
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
     )
-    presentation_room = models.ForeignKey(
-        to="Room",
-        related_name="presentation_posters",
+    channel = models.ForeignKey(
+        to="Channel",
+        related_name="posters",
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
@@ -72,7 +72,7 @@ class Poster(models.Model):
             votes=votes,
             links=links,
             parent_room_id=str(self.parent_room_id),
-            chat_room_id=str(getattr(self, "chat_room_id", "")),
+            channel=str(getattr(self, "channel", "")),
             presentation_room_id=str(getattr(self, "presentation_room_id", "")),
         )
         if user:

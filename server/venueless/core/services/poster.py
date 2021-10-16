@@ -3,6 +3,7 @@ from django.db.transaction import atomic
 
 from venueless.core.models import (
     AuditLog,
+    Channel,
     Poster,
     PosterLink,
     PosterPresenter,
@@ -125,18 +126,18 @@ class PosterService:
     @database_sync_to_async
     @atomic
     def patch(self, data, world, by_user, exclude_fields=tuple()):
+        is_creating = False
+        old = {}
         if data["id"] == "":
-            poster = Poster(
-                world=world,
-            )
-            old = {}
+            is_creating = True
+            poster = Poster(world=world)
         else:
+            old = poster.serialize()
             poster = get_poster_by_id(self.world.pk, data["id"])
             if not poster:
                 return None
-            old = poster.serialize()
 
-        for room_type in ("parent_room", "chat_room", "presentation_room"):
+        for room_type in ("parent_room", "presentation_room"):
             id_attr = f"{room_type}_id"
             room = get_room_by_id(
                 self.world.pk, data.get("{id_attr}", getattr(poster, id_attr, None))
@@ -157,8 +158,11 @@ class PosterService:
             "schedule_session",
         )
         for key, value in data.items():
-            if key in allowed_keys:
+            if key in allowed_keys and key not in exclude_fields:
                 setattr(poster, key, value)
+
+        if is_creating:
+            poster.channel = Channel.objects.create(world=poster.world)
         poster.save()
 
         if "links" in data and "links" not in exclude_fields:
