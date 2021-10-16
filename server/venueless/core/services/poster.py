@@ -90,21 +90,21 @@ class PosterService:
         ]
 
     @database_sync_to_async
-    def get_posters(self, room_id):
+    def get_posters(self, room_id, user=None):
         qs = (
             Poster.objects.filter(world__id=self.world.pk)
             .filter(parent_room__id=room_id)
             .order_by("title")
         ).prefetch_related("links", "votes", "presenters")
 
-        return [p.serialize() for p in qs]
+        return [p.serialize(user) for p in qs]
 
     @database_sync_to_async
-    def get_poster(self, poster_id):
+    def get_poster(self, poster_id, user=None):
         poster = get_poster_by_id(self.world.pk, poster_id)
         if not poster:
             return None
-        return poster.serialize()
+        return poster.serialize(user)
 
     @database_sync_to_async
     @atomic
@@ -209,46 +209,11 @@ class PosterService:
         }
 
     @database_sync_to_async
-    @atomic
-    def add_presenter(self, poster_id, user_id, by_user):
+    def unvote(self, poster_id, user):
         poster = get_poster_by_id(self.world.pk, poster_id)
         if not poster:
             return None
-        user = get_user_by_id(self.world.pk, user_id)
-        if not user:
-            return None
-        presenter, created = PosterPresenter.objects.get_or_create(
-            user=user,
-            poster=poster,
-        )
-        if created:
-            AuditLog.objects.create(
-                world_id=self.world.pk,
-                user=by_user,
-                type="poster.presenter.added",
-                data={
-                    "object": poster_id,
-                    "presenter": user_id,
-                },
-            )
-        return presenter
-
-    @database_sync_to_async
-    @atomic
-    def remove_staff(self, poster_id, user_id, by_user):
-        s = get_presenter_by_id(poster_id, user_id)
-        if not s:
-            return None
-        AuditLog.objects.create(
-            world_id=self.world.pk,
-            user=by_user,
-            type="poster.presenter.removed",
-            data={
-                "object": poster_id,
-                "presenter": user_id,
-            },
-        )
-        return s.delete()
+        return PosterVote.objects.filter(user=user, poster=poster).delete()
 
     @database_sync_to_async
     def get_presenters(self, poster_id):
