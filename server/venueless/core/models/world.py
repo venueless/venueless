@@ -64,6 +64,7 @@ def default_roles():
             Permission.WORLD_ROOMS_CREATE_BBB,
             Permission.WORLD_ROOMS_CREATE_STAGE,
             Permission.WORLD_ROOMS_CREATE_EXHIBITION,
+            Permission.WORLD_ROOMS_CREATE_POSTER,
             Permission.WORLD_USERS_LIST,
             Permission.WORLD_USERS_MANAGE,
             Permission.WORLD_GRAPHS,
