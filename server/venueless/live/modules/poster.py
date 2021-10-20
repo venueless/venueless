@@ -25,7 +25,7 @@ class PosterModule(BaseModule):
             )
         else:
             posters = await self.service.get_all_posters()
-        await self.consumer.send_success({"posters": posters})
+        await self.consumer.send_success(posters)
 
     @command("delete")
     @require_world_permission(Permission.WORLD_ROOMS_CREATE_POSTER)
@@ -70,7 +70,7 @@ class PosterModule(BaseModule):
         if not poster:
             await self.consumer.send_error("poster.unknown_poster")
         else:
-            await self.consumer.send_success({"poster": poster})
+            await self.consumer.send_success(poster)
 
     @command("list")
     @room_action(module_required="poster.native")
@@ -78,7 +78,7 @@ class PosterModule(BaseModule):
         posters = await self.service.get_posters(
             room_id=body["room"], for_user=self.consumer.user
         )
-        await self.consumer.send_success({"posters": posters})
+        await self.consumer.send_success(posters)
 
     @command("get")
     async def get(self, body):
@@ -86,14 +86,14 @@ class PosterModule(BaseModule):
         if not poster:
             await self.consumer.send_error("poster.unknown_poster")
             return
-        await self.consumer.send_success({"poster": poster})
+        await self.consumer.send_success(poster)
 
     @command("get.presented_by_user")
     async def presented_by_user(self, body):
         posters = await self.service.get_posters_presented_by_user(
             user_id=body["user_id"]
         )
-        await self.consumer.send_success({"posters": posters})
+        await self.consumer.send_success(posters)
 
     @command("vote")
     async def vote(self, body):
@@ -102,7 +102,7 @@ class PosterModule(BaseModule):
             await self.consumer.send_error("poster.unknown_poster")
             return
         vote = await self.service.vote(poster_id=poster["id"], user=self.consumer.user)
-        await self.consumer.send_success({"vote": vote})
+        await self.consumer.send_success(vote)
 
     @command("unvote")
     async def unvote(self, body):
