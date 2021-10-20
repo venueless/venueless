@@ -27,9 +27,9 @@ from .modules.auth import AuthModule
 from .modules.bbb import BBBModule
 from .modules.chat import ChatModule
 from .modules.exhibition import ExhibitionModule
-from .modules.poster import PosterModule
 from .modules.januscall import JanusCallModule
 from .modules.poll import PollModule
+from .modules.poster import PosterModule
 from .modules.question import QuestionModule
 from .modules.room import RoomModule
 from .modules.roulette import RouletteModule
