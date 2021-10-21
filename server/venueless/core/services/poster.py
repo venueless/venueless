@@ -140,7 +140,7 @@ class PosterService:
         for room_type in ("parent_room", "presentation_room"):
             id_attr = f"{room_type}_id"
             room = get_room_by_id(
-                self.world.pk, data.get("{id_attr}", getattr(poster, id_attr, None))
+                self.world.pk, data.get(f"{id_attr}", getattr(poster, id_attr, None))
             )
             if not room and room_type == "parent_room":
                 return None
