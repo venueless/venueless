@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
                         default=uuid.uuid4, primary_key=True, serialize=False
                     ),
                 ),
-                ("title", models.CharField(max_length=80, null=True)),
+                ("title", models.CharField(max_length=255, null=True)),
                 (
                     "abstract",
                     models.JSONField(default=venueless.core.models.poster.default_text),
