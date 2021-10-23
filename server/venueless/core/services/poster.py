@@ -139,13 +139,20 @@ class PosterService:
 
         for room_type in ("parent_room", "presentation_room"):
             id_attr = f"{room_type}_id"
-            room = get_room_by_id(
-                self.world.pk, data.get(f"{id_attr}", getattr(poster, id_attr, None))
-            )
-            if not room and room_type == "parent_room":
-                return None
-            elif room_type not in exclude_fields and id_attr not in exclude_fields:
-                setattr(poster, room_type, room)
+            if id_attr in data:
+                room_id = data.get(id_attr)
+                room = (
+                    get_room_by_id(
+                        self.world.pk,
+                        room_id or getattr(poster, id_attr, None),
+                    )
+                    if room_id
+                    else None
+                )
+                if not room and room_type == "parent_room":
+                    return None
+                elif room_type not in exclude_fields and id_attr not in exclude_fields:
+                    setattr(poster, room_type, room)
 
         allowed_keys = (
             "title",
