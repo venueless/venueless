@@ -74,8 +74,10 @@ class Poster(models.Model):
             votes=votes,
             links=links,
             parent_room_id=str(self.parent_room_id),
-            channel=str(getattr(self, "channel", "")),
-            presentation_room_id=str(getattr(self, "presentation_room_id", "")),
+            channel=str(self.channel_id) if getattr(self, "channel_id", None) else None,
+            presentation_room_id=str(self.presentation_room_id)
+            if getattr(self, "presentation_room_id", None)
+            else None,
         )
         if user:
             result["has_voted"] = self.votes.filter(user=user).exists()
