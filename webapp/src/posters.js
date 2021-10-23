@@ -19,12 +19,13 @@ export default [{
 	category: 'Psychology',
 	tags: ['tag 1', 'tag 3'], // probably normalize and multi-lang this?
 	likes: '42',
-	poster_preview: '/poster-1.png',
-	poster_url: 'https://ur.umbc.edu/files/2016/06/adebesinMobolanleSm.pdf',
+	poster_preview: 'http://localhost:8375/media/pub/sample/f4c96ec8-4378-440b-8af9-a903353f1bc9.u9ktSuDTNIae.png',
+	poster_url: 'http://localhost:8375/media/pub/sample/10ec2ab1-8aec-4f52-a8d9-77680038cff2.tnTDYe1bitJ4.pdf',
 	files: [{
 		display_text: 'Full Paper',
 		url: 'somepaper.pdf'
-	}]
+	}],
+	channel: 'f28e2c91-f860-48a7-917b-7a665cfeb590'
 }, {
 	id: '2',
 	title: 'Experimental and Computational Analysis of Lift Generation by Wing Morphing Bird',

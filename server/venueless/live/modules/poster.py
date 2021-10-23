@@ -76,7 +76,7 @@ class PosterModule(BaseModule):
     @room_action(module_required="poster.native")
     async def list(self, body):
         posters = await self.service.get_posters(
-            room_id=body["room"], for_user=self.consumer.user
+            room_id=body["room"], user=self.consumer.user
         )
         await self.consumer.send_success(posters)
 

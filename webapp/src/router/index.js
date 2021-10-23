@@ -110,6 +110,22 @@ const routes = [{
 		component: () => import(/* webpackChunkName: "exhibitors" */ 'views/exhibitor-manager/exhibitor'),
 		props: true
 	}, {
+		path: '/manage-posters',
+		name: 'posters',
+		component: () => import(/* webpackChunkName: "posters" */ 'views/poster-manager')
+	}, {
+		path: '/manage-posters/create',
+		name: 'posters:create-poster',
+		component: () => import(/* webpackChunkName: "posters" */ 'views/poster-manager/poster'),
+		props: {
+			create: true
+		}
+	}, {
+		path: '/manage-posters/:posterId',
+		name: 'posters:poster',
+		component: () => import(/* webpackChunkName: "posters" */ 'views/poster-manager/poster'),
+		props: true
+	}, {
 		path: '/admin',
 		name: 'admin',
 		component: () => import(/* webpackChunkName: "admin" */ 'views/admin')

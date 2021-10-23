@@ -10,23 +10,25 @@
 					.tags
 						.tag(v-for="tag of poster.tags") {{ tag }}
 					h3.title {{ poster.title }}
-					.authors {{ poster.authors.join(', ') }}
-					.abstract {{ poster.abstract }}
+					.authors {{ poster.authors.authors.map(a => a.name).join(', ') }}
+					rich-text-content.abstract(:content="poster.abstract")
 					.actions
 						bunt-button {{ $t('Exhibition:more:label') }}
 				img.poster-screenshot(:src="poster.poster_preview")
 	bunt-progress-circular(v-else, size="huge", :page="true")
 </template>
 <script>
-import posters from 'posters'
+import api from 'lib/api'
+import RichTextContent from 'components/RichTextContent'
 
 export default {
+	components: { RichTextContent },
 	props: {
 		room: Object
 	},
 	data () {
 		return {
-			posters
+			posters: null
 		}
 	},
 	computed: {
@@ -38,7 +40,10 @@ export default {
 			}
 			return categorizedPosters
 		}
-	}
+	},
+	async created () {
+		this.posters = (await api.call('poster.list', {room: this.room.id}))
+	},
 }
 </script>
 <style lang="stylus">
