@@ -16,7 +16,7 @@ class Poster(models.Model):
     tags = models.JSONField(default=default_text)
     category = models.CharField(null=True, blank=True, max_length=50)
 
-    poster = models.URLField(null=True, blank=True)  # TODO file upload
+    poster_url = models.URLField(null=True, blank=True)  # TODO file upload
     poster_preview = models.URLField(null=True, blank=True)  # TODO file upload
     schedule_session = models.CharField(null=True, blank=True, max_length=50)
 
