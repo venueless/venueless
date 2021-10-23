@@ -132,8 +132,8 @@ class PosterService:
             is_creating = True
             poster = Poster(world=world)
         else:
-            old = poster.serialize()
             poster = get_poster_by_id(self.world.pk, data["id"])
+            old = poster.serialize()
             if not poster:
                 return None
 
