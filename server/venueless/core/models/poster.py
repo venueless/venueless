@@ -65,6 +65,8 @@ class Poster(models.Model):
             title=self.title,
             abstract=self.abstract,
             authors=self.authors,
+            category=self.category,
+            tags=self.tags,
             poster_url=self.poster_url,
             poster_preview=self.poster_preview,
             schedule_session=self.schedule_session,
