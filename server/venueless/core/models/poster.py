@@ -49,7 +49,7 @@ class Poster(models.Model):
         presenters = []
         for presenter in self.presenters.order_by("id").all():
             presenters.append(
-                presenters.user.serialize_public(
+                presenter.user.serialize_public(
                     trait_badges_map=self.world.config.get("trait_badges_map")
                 )
             )
