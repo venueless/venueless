@@ -153,7 +153,7 @@ class PosterService:
             "authors",
             "tags",
             "category",
-            "poster",
+            "poster_url",
             "poster_preview",
             "schedule_session",
         )
