@@ -10,6 +10,7 @@ def default_text():
 class Poster(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    import_id = models.TextField(null=True, blank=True, db_index=True)
     title = models.CharField(max_length=255, null=True)
     abstract = models.JSONField(default=default_text)
     authors = models.JSONField(default=default_text)

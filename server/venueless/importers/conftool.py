@@ -8,6 +8,8 @@ import requests
 from django.utils.timezone import make_aware
 from lxml import etree
 
+from venueless.core.models import Poster
+
 
 def escape_markdown(text):
     text = text.replace("*", "\\*")
@@ -176,3 +178,77 @@ def fetch_schedule_from_conftool(url, password):
                 talk["room"] = result["rooms"][0]["id"]
 
     return result
+
+
+def create_posters_from_conftool(world, url, password):
+    nonce = int(time.time())
+    passhash = hashlib.sha256((str(nonce) + password).encode()).hexdigest()
+    r = requests.get(
+        f"{url}?nonce={nonce}&passhash={passhash}&page=adminExport&export_select=papers"
+        f"&form_export_papers_options[]=authors_extended_columns"
+        f"&form_export_papers_options[]=abstracts"
+        f"&form_export_papers_options[]=session"
+        f"&form_export_papers_options[]=downloads"
+        f"&form_export_papers_options[]=submitter"
+        f"&form_export_papers_options[]=newlines"
+        f"&form_export_format=xml"
+        f"&cmd_create_export=true"
+        # TODO: filter by form_track ?
+    )
+    r.encoding = "utf-8"
+    root = etree.fromstring(r.text.encode())
+
+    for paper in root.xpath("paper"):
+        try:
+            poster = Poster.objects.get(
+                world=world, import_id=f"conftool/{paper.xpath('paperID')[0].text}"
+            )
+        except Poster.DoesNotExist:
+            poster = Poster(
+                world=world,
+                import_id=f"conftool/{paper.xpath('paperID')[0].text}",
+                parent_room=[
+                    r
+                    for r in world.rooms.all()
+                    if any(m["type"] == "poster.native" for m in r.module_config)
+                ][
+                    0
+                ],  # todo: replace this hack with configuration?
+            )
+
+        poster.title = paper.xpath("title")[0].text
+        poster.tags = [t.strip() for t in paper.xpath("keywords")[0].text.split(";")]
+        poster.category = paper.xpath("topics")[0].text or None
+        poster.schedule_session = paper.xpath("session_ID")[0].text or None
+        poster.abstract = {"ops": [{"insert": paper.xpath("abstract_plain")[0].text}]}
+
+        poster.authors = {
+            "organizations": [],
+            "authors": [],
+        }
+        for i in range(100):
+            if (
+                paper.xpath(f"authors_formatted_{i}_name")
+                and paper.xpath(f"authors_formatted_{i}_name")[0].text
+            ):
+                name = paper.xpath(f"authors_formatted_{i}_name")[0].text
+                orgs = []
+                for orgname in paper.xpath(f"authors_formatted_{i}_organisation")[
+                    0
+                ].text.split(";"):
+                    orgname = orgname.strip()
+                    if orgname not in poster.authors["organizations"]:
+                        poster.authors["organizations"].append(orgname)
+                    orgidx = poster.authors["organizations"].index(orgname)
+                    orgs.append(orgidx)
+                poster.authors["authors"].append({"name": name, "orgs": orgs})
+
+        poster.poster_url = paper.xpath("download_link_a")[0].text or None
+        # todo: preview
+
+        # todo: rooms, channels
+        poster.save()
+        # todo: links
+        # todo: presenters
+
+    print(r.text)
