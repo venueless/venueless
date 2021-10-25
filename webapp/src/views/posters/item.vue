@@ -37,8 +37,8 @@
 				.likes(v-tooltip="'imagine clicking does something'")
 					.mdi.mdi-heart-outline
 					.count {{ poster.likes }}
-			h3 Discuss
-			chat(mode="compact", :module="{channel_id: poster.channel}")
+			//- h3 Discuss
+			//- chat(mode="compact", :module="{channel_id: poster.channel}")
 	bunt-progress-circular(v-else, size="huge", :page="true")
 </template>
 <script>
