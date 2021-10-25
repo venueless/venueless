@@ -208,7 +208,7 @@ class PosterService:
         poster = get_poster_by_id(self.world.pk, poster_id)
         if not poster:
             return None
-        vote = PosterVote.objects.get_or_create(user=user, poster=poster)
+        vote, created = PosterVote.objects.get_or_create(user=user, poster=poster)
         return {
             "poster": poster_id,
             "user": user,
