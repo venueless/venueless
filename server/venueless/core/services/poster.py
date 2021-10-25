@@ -211,7 +211,7 @@ class PosterService:
         vote, created = PosterVote.objects.get_or_create(user=user, poster=poster)
         return {
             "poster": poster_id,
-            "user": user,
+            "user": str(user.id),
             "datetime": vote.datetime.isoformat(),
         }
 
