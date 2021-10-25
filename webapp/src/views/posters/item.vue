@@ -34,9 +34,9 @@
 		.chat-sidebar
 			.actions
 				bunt-button(tooltip="opens room linked via schedule") go to session
-				.likes(v-tooltip="'imagine clicking does something'")
-					.mdi.mdi-heart-outline
-					.count {{ poster.likes }}
+				bunt-button.btn-likes(tooltip="like this poster", @click="like")
+					.mdi(:class="poster.has_voted ? 'mdi-heart' : 'mdi-heart-outline'")
+					.count {{ poster.votes }}
 			//- h3 Discuss
 			//- chat(mode="compact", :module="{channel_id: poster.channel}")
 	bunt-progress-circular(v-else, size="huge", :page="true")
@@ -66,7 +66,20 @@ export default {
 		this.$nextTick(() => {
 		})
 	},
-	methods: {}
+	methods: {
+		async like () {
+			// TODO error handling
+			if (this.poster.has_voted) {
+				await api.call('poster.unvote', {poster: this.poster.id})
+				this.poster.votes--
+				this.poster.has_voted = false
+			} else {
+				await api.call('poster.vote', {poster: this.poster.id})
+				this.poster.votes++
+				this.poster.has_voted = true
+			}
+		}
+	}
 }
 </script>
 <style lang="stylus">
@@ -131,14 +144,18 @@ export default {
 		display: flex
 		gap: 8px
 		margin: 8px
-	.likes
-		display: flex
-		align-items: center
-		font-size: 18px
-		cursor: pointer
-		.mdi
-			font-size: 32px
-			color: $clr-pink
+	.btn-likes
+		themed-button-secondary()
+		.bunt-button-text
+			display: flex
+			align-items: center
+			font-size: 18px
+			cursor: pointer
+			gap: 8px
+			color: $clr-primary-text-light
+			.mdi
+				font-size: 32px
+				color: $clr-pink
 	.downloads
 		.download
 			display: flex
