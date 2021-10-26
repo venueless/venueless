@@ -101,6 +101,7 @@ FEATURE_FLAGS = [
     "zoom",
     "janus",
     "polls",
+    "poster",
     "conftool",
     "cross-origin-isolation",
 ]
