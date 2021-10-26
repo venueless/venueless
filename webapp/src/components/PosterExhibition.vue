@@ -10,7 +10,7 @@
 					.tags
 						.tag(v-for="tag of poster.tags") {{ tag }}
 					h3.title {{ poster.title }}
-					.authors {{ poster.authors.authors.map(a => a.name).join(', ') }}
+					.authors {{ poster.authors.authors.map(a => a.name).join(' / ') }}
 					rich-text-content.abstract(:content="poster.abstract")
 					.actions
 						bunt-button {{ $t('Exhibition:more:label') }}

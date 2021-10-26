@@ -8,7 +8,14 @@
 					.tags
 						.tag(v-for="tag of poster.tags") {{ tag }}
 					h1.title {{ poster.title }}
-					.authors {{ poster.authors.authors.map(a => a.name).join(', ') }}
+					.authors
+						.author(v-for="author of poster.authors.authors")
+							.name {{ author.name }}
+							.orgs {{ author.orgs.map(org => org + 1).join(',') }}
+					.organizations
+						.organization(v-for="(organziation, index) of poster.authors.organizations")
+							.index {{ index + 1 }}
+							.name {{ organziation }}
 					rich-text-content.abstract(:content="poster.abstract")
 					.downloads(v-if="poster.links.length > 0")
 						h3 {{ $t("Exhibitor:downloads-headline:text") }}
@@ -132,6 +139,25 @@ export default {
 			font-size: 18px
 		.authors
 			color: $clr-secondary-text-light
+			.author
+				display: inline
+				.name
+					display: inline
+				.orgs
+					display: inline
+					font-size: 10px
+					vertical-align: super
+				&:not(:last-child)::after
+					content: ' / '
+		.organizations
+			color: $clr-disabled-text-light
+			font-size: 12px
+			.organization
+				.name, .index
+					display: inline
+				.index
+					vertical-align: super
+					margin-right: 2px
 	.content
 		flex: auto
 		display: flex
