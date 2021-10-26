@@ -125,7 +125,6 @@ $logo-height-large = 427px
 				border: 2px solid $clr-primary
 				border-radius: 12px
 				padding: 2px 6px
-				white-space: nowrap
 		.title
 			margin: 0 0 8px 0
 			line-height: 1.4

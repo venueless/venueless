@@ -170,7 +170,6 @@ export default {
 			border: 2px solid $clr-primary
 			border-radius: 12px
 			padding: 2px 6px
-			white-space: nowrap
 	.presenters
 		display: flex
 		flex-direction: column
