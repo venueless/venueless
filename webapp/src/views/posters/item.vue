@@ -1,7 +1,11 @@
 <template lang="pug">
 .v-poster
 	template(v-if="poster")
-		.info-sidebar
+		bunt-tabs(v-if="$mq.below['1200px']", :active-tab="activeTab")
+			bunt-tab(id="info", header="Info", @selected="activeTab = 'info'")
+			bunt-tab(id="poster", header="Poster", @selected="activeTab = 'poster'")
+			bunt-tab(id="chat", header="Presentation", @selected="activeTab = 'chat'")
+		.info-sidebar(v-if="$mq.above['1200px'] || activeTab === 'info'")
 			scrollbars(y)
 				.info
 					h2.category(v-if="poster.category") {{ poster.category }}
@@ -22,12 +26,13 @@
 						a.download(v-for="file in poster.links", :href="file.url", target="_blank")
 							.mdi.mdi-file-pdf-outline(v-if="file.url.toLowerCase().endsWith('pdf')")
 							.filename {{ file.display_text }}
-		a.poster.no-pdf(v-if="pdfLoadFailed", :href="poster.poster_url", target="_blank", title="Download poster")
-			.mdi(:class="`mdi-${getIconByFileEnding(poster.poster_url)}`")
-			p Download Poster
-		.poster(v-else, v-scrollbar.x.y="")
-			canvas(ref="pdfCanvas")
-		.chat-sidebar
+		template(v-if="$mq.above['1200px'] || activeTab === 'poster'")
+			a.poster.no-pdf(v-if="pdfLoadFailed", :href="poster.poster_url", target="_blank", title="Download poster")
+				.mdi(:class="`mdi-${getIconByFileEnding(poster.poster_url)}`")
+				p Download Poster
+			.poster(v-else, v-scrollbar.x.y="")
+				canvas(ref="pdfCanvas")
+		.chat-sidebar(v-if="$mq.above['1200px'] || activeTab === 'chat'")
 			bunt-button.btn-likes(tooltip="like this poster", @click="like")
 				.mdi(:class="poster.has_voted ? 'mdi-heart' : 'mdi-heart-outline'")
 				.count {{ poster.votes }}
@@ -62,6 +67,7 @@ export default {
 		return {
 			poster: null,
 			pdfLoadFailed: false,
+			activeTab: 'info',
 			getIconByFileEnding
 		}
 	},
@@ -73,6 +79,14 @@ export default {
 		session () {
 			if (!this.poster?.schedule_session || !this.$store.getters['schedule/sessions']) return
 			return this.$store.getters['schedule/sessions'].find(session => session.id === this.poster.schedule_session)
+		}
+	},
+	watch: {
+		async activeTab () {
+			if (this.activeTab === 'poster') {
+				await this.$nextTick()
+				this.renderPdf()
+			}
 		}
 	},
 	async created () {
@@ -119,7 +133,6 @@ export default {
 <style lang="stylus">
 .v-poster
 	display: flex
-	// flex-direction: column
 	min-height: 0
 	flex: auto
 	.info-sidebar
@@ -248,4 +261,15 @@ export default {
 			margin: 0
 			padding: 8px
 			border-bottom: border-separator()
+	+below(1200px)
+		flex-direction: column
+		.bunt-tabs
+			tabs-style(active-color: var(--clr-primary), indicator-color: var(--clr-primary), background-color: transparent)
+			margin-bottom: 0
+			border-bottom: border-separator()
+			.bunt-tabs-header-items
+				justify-content: center
+		.info-sidebar, .chat-sidebar
+			border: none
+			width: auto
 </style>

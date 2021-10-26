@@ -1,7 +1,7 @@
 <template lang="pug">
 .c-poster-exhibition
-	bunt-input#input-search(name="search", placeholder="Search/Filter/Sort", icon="search")
-	p Search by everything, filter by category, tags, ?, sort by name, likes
+	//- bunt-input#input-search(name="search", placeholder="Search/Filter/Sort", icon="search")
+	//- p Search by everything, filter by category, tags, ?, sort by name, likes
 	scrollbars.posters(v-if="posters", y)
 		.category(v-for="(posters, category) of categorizedPosters")
 			h2 {{ category }}
@@ -159,4 +159,9 @@ $logo-height-large = 427px
 				font-size: 64px
 		&:hover
 			border: 1px solid var(--clr-primary)
+		+below('s')
+			flex-direction: column-reverse
+			max-height: none
+			.content
+				padding: 16px 0 0 0
 </style>
