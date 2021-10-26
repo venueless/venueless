@@ -1,8 +1,9 @@
 import copy
 import hashlib
 import logging
-import time
 import string
+import time
+from io import BytesIO
 
 import dateutil.parser
 import pytz
@@ -10,6 +11,7 @@ import requests
 from django.core.files.base import ContentFile
 from django.utils.timezone import make_aware, now
 from lxml import etree
+from pdf2image import convert_from_bytes
 
 from venueless.core.models import Poster
 from venueless.storage.models import StoredFile
@@ -284,25 +286,51 @@ def create_posters_from_conftool(world, url, password):
                 )
                 sf.file.save(f"poster_{linkhash}.{content_types[content_type]}", c)
                 poster.poster_url = sf.file.url
+
+                if content_type == "application/pdf":
+                    o = BytesIO()
+                    images = convert_from_bytes(
+                        r.content,
+                        fmt="png",
+                        dpi=72,
+                        first_page=1,
+                        last_page=1,
+                    )
+                    images[0].save(o, format="PNG")
+                    o.seek(0)
+                    sf = StoredFile.objects.create(
+                        world=world,
+                        date=now(),
+                        filename=f"poster_{linkhash}_preview.png",
+                        type=content_type,
+                        public=True,
+                    )
+                    sf.file.save(
+                        f"poster_{linkhash}_preview.png", ContentFile(o.getvalue())
+                    )
+                    poster.poster_preview = sf.file.url
+
             except Exception:
                 logger.exception("Could not download poster")
-        else:
+                poster.poster_url = poster_url
+        elif not poster.poster_url:
             poster.poster_url = poster_url
 
-        if poster_url:
-            poster.links.get_or_create(
+        if poster.poster_url:
+            poster.links.update_or_create(
                 display_text=paper.xpath(f"original_filename_a")[0].text,
                 defaults={
                     "url": poster.poster_url,
                 },
             )
+
         poster.save()
 
         for fileindex in string.ascii_lowercase[1:]:
             if not paper.xpath(f"download_link_{fileindex}"):
                 break
 
-            poster.links.get_or_create(
+            poster.links.update_or_create(
                 display_text=paper.xpath(f"original_filename_{fileindex}")[0].text,
                 defaults={
                     "url": paper.xpath(f"download_link_{fileindex}")[0].text,
