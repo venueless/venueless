@@ -1,14 +1,20 @@
 import copy
 import hashlib
+import logging
 import time
+import string
 
 import dateutil.parser
 import pytz
 import requests
-from django.utils.timezone import make_aware
+from django.core.files.base import ContentFile
+from django.utils.timezone import make_aware, now
 from lxml import etree
 
 from venueless.core.models import Poster
+from venueless.storage.models import StoredFile
+
+logger = logging.getLogger(__name__)
 
 
 def escape_markdown(text):
@@ -243,12 +249,64 @@ def create_posters_from_conftool(world, url, password):
                     orgs.append(orgidx)
                 poster.authors["authors"].append({"name": name, "orgs": orgs})
 
-        poster.poster_url = paper.xpath("download_link_a")[0].text or None
-        # todo: preview
+        poster_url = paper.xpath("download_link_a")[0].text or None
 
-        # todo: rooms, channels
+        if (
+            poster_url
+            and "downloadPaper" in poster_url
+            and (not poster.poster_url or "downloadPaper" in poster.poster_url)
+        ):
+            try:
+                nonce += 1
+                passhash = hashlib.sha256((str(nonce) + password).encode()).hexdigest()
+                r = requests.get(
+                    f"{poster_url.replace('index.php', 'rest.php')}&nonce={nonce}&passhash={passhash}"
+                )
+                r.raise_for_status()
+
+                if len(r.content) > 10 * 1024 * 1024:
+                    raise ValueError("File to large")
+
+                content_types = {"application/pdf": "pdf"}
+
+                content_type = r.headers["Content-Type"].split(";")[0]
+                if content_type not in content_types:
+                    raise ValueError(f"Content {content_type} type not allowed")
+
+                linkhash = hashlib.sha256((str(poster_url)).encode()).hexdigest()
+                c = ContentFile(r.content)
+                sf = StoredFile.objects.create(
+                    world=world,
+                    date=now(),
+                    filename=f"poster_{linkhash}.{content_types[content_type]}",
+                    type=content_type,
+                    public=True,
+                )
+                sf.file.save(f"poster_{linkhash}.{content_types[content_type]}", c)
+                poster.poster_url = sf.file.url
+            except Exception:
+                logger.exception("Could not download poster")
+        else:
+            poster.poster_url = poster_url
+
+        if poster_url:
+            poster.links.get_or_create(
+                display_text=paper.xpath(f"original_filename_a")[0].text,
+                defaults={
+                    "url": poster.poster_url,
+                },
+            )
         poster.save()
-        # todo: links
-        # todo: presenters
 
-    print(r.text)
+        for fileindex in string.ascii_lowercase[1:]:
+            if not paper.xpath(f"download_link_{fileindex}"):
+                break
+
+            poster.links.get_or_create(
+                display_text=paper.xpath(f"original_filename_{fileindex}")[0].text,
+                defaults={
+                    "url": paper.xpath(f"download_link_{fileindex}")[0].text,
+                },
+            )
+
+        # todo: presenters
