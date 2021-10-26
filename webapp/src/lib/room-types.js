@@ -43,7 +43,8 @@ const ROOM_TYPES = [{
 	icon: 'domain',
 	name: 'Poster Hall',
 	description: 'Hang your posters high!',
-	startingModule: 'poster.native'
+	startingModule: 'poster.native',
+	behindFeatureFlag: 'poster'
 }, {
 	id: 'channel-roulette',
 	icon: 'webcam',
