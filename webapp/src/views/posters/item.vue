@@ -30,7 +30,7 @@
 			a.poster.no-pdf(v-if="pdfLoadFailed", :href="poster.poster_url", target="_blank", title="Download poster")
 				.mdi(:class="`mdi-${getIconByFileEnding(poster.poster_url)}`")
 				p Download Poster
-			.poster(v-else, v-scrollbar.x.y="")
+			a.poster(v-else, v-scrollbar.x.y="", :href="poster.poster_url", target="_blank", title="Download poster")
 				canvas(ref="pdfCanvas")
 		.chat-sidebar(v-if="$mq.above['1200px'] || activeTab === 'chat'")
 			bunt-button.btn-likes(tooltip="like this poster", @click="like")
