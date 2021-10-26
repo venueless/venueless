@@ -9,11 +9,6 @@
 						.tag(v-for="tag of poster.tags") {{ tag }}
 					h1.title {{ poster.title }}
 					.authors {{ poster.authors.authors.map(a => a.name).join(', ') }}
-					.presenters
-						h3 Presenters
-						.presenter(v-for="user in poster.presenters")
-							avatar(:user="user", :size="36")
-							span.display-name {{ user ? user.profile.display_name : '' }}
 					rich-text-content.abstract(:content="poster.abstract")
 					.downloads(v-if="poster.links.length > 0")
 						h3 {{ $t("Exhibitor:downloads-headline:text") }}
@@ -34,7 +29,11 @@
 
 				p presented in {{ presentationRoom.name }}
 				p(v-if="session") {{ session.start.format('dddd DD. MMMM LT') }}
-
+				p presented by
+				.presenters
+					.presenter(v-for="user in poster.presenters")
+						avatar(:user="user", :size="36")
+						span.display-name {{ user ? user.profile.display_name : '' }}
 			//- h3 Discuss
 			//- chat(mode="compact", :module="{channel_id: poster.channel}")
 	bunt-progress-circular(v-else, size="huge", :page="true")
@@ -197,8 +196,22 @@ export default {
 				font-size: 32px
 				color: $clr-pink
 	.downloads
+		display: flex
+		flex-direction: column
+		h3
+			margin: 8px 0 0px
 		.download
 			display: flex
+			align-items: center
+			height: 36px
+			font-weight: 600
+			font-size: 16px
+			&:hover
+				background-color: $clr-grey-100
+				text-decoration: underline
+			.mdi
+				font-size: 28px
+				margin: 0 4px
 	.chat-sidebar
 		display: flex
 		flex-direction: column

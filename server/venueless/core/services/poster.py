@@ -39,7 +39,6 @@ def get_or_create_link(link, poster):
             poster=poster,
             display_text=link["display_text"],
             url=link["url"],
-            category=link["category"],
             sorting_priority=link["sorting_priority"],
         ),
     )

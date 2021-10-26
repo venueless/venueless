@@ -45,6 +45,20 @@
 					bunt-button(@click="showPresenterPrompt = true") Add Presenters
 					bunt-select(name="presentation-room", v-model="poster.presentation_room_id", :disabled="!hasPermission('world:rooms.create.poster')", label="Presentation Room",  :options="presentationRoomOptions", option-label="name")
 					bunt-input(name="schedule-session", v-model="poster.schedule_session", label="Schedule Session Id")
+					h2 Files
+					.links(v-for="(link, index) in poster.links")
+						.header
+							.label Label
+							.url Url
+							//- .actions
+						.link
+							bunt-input.label(name="display-text", v-model="link.display_text")
+							upload-url-input.url(name="url", v-model="link.url")
+						//- .actions
+						//- 	bunt-icon-button(@click="remove_link(index, link.category)") delete-outline
+						//- 	bunt-icon-button(@click="up_link(index, link.category)") arrow-up-bold-outline
+						//- 	bunt-icon-button(@click="down_link(index, link.category)") arrow-down-bold-outline
+					bunt-button(@click="poster.links.push({display_text: '', url: ''})") Add File
 		.ui-form-actions
 			bunt-button.btn-save(@click="save", :loading="saving", :error-message="error") {{ create ? 'create' : 'save' }}
 			//- .errors {{ validationErrors.join(', ') }}
@@ -135,7 +149,8 @@ export default {
 				poster_url: '',
 				poster_preview: null,
 				presentation_room_id: null,
-				schedule_session: null
+				schedule_session: null,
+				links: []
 			}
 		} else {
 			this.poster = await api.call('poster.get', {poster: this.posterId})
@@ -193,6 +208,7 @@ export default {
 			this.poster.tags = this.tags === '' ? [] : this.tags.split(',').map(tag => tag.trim())
 			let poster = Object.assign({}, this.poster)
 			poster.abstract = poster.abstract.ops
+			poster.links.forEach((link, index) => link.sorting_priority = index)
 			poster = await api.call('poster.patch', poster)
 			if (this.create) await router.push({name: 'posters:poster', params: {posterId: poster.id}})
 			this.saving = false
@@ -258,6 +274,19 @@ export default {
 					margin-right: 8px
 			.bunt-icon-button
 				icon-button-style(style: clear)
+	.links
+		display: flex
+		flex-direction: column
+		gap: 8px
+		margin: 8px 0
+		.header, .link
+			display: flex
+			gap: 8px
+		.label, .url
+			flex: 1
+		.bunt-input
+			input-style(size: compact)
+			padding-top: 0
 	.add-presenter-prompt
 		.prompt-wrapper
 			height: 80vh
