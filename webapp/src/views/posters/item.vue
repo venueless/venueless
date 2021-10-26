@@ -1,13 +1,10 @@
 <template lang="pug">
 .v-poster
 	template(v-if="poster")
-		//- .ui-page-header
-		//- 	bunt-icon-button(@click="$router.push({name: 'admin:rooms:index'})") arrow_left
-		//- 	h1.title {{ poster.title }}
 		.info-sidebar
 			scrollbars(y)
 				.info
-					h2.category {{ poster.category }}
+					h2.category(v-if="poster.category") {{ poster.category }}
 					.tags
 						.tag(v-for="tag of poster.tags") {{ tag }}
 					h1.title {{ poster.title }}
@@ -23,26 +20,29 @@
 						a.download(v-for="file in poster.links", :href="file.url", target="_blank")
 							.mdi.mdi-file-pdf-outline(v-if="file.url.toLowerCase().endsWith('pdf')")
 							.filename {{ file.display_text }}
-		.poster
-			//- .poster-content
-				h1.title {{ poster.title }}
-				.authors {{ poster.authors.authors.map(a => a.name).join(', ') }}
-				rich-text-content.abstract(:content="poster.abstract")
-			iframe(:src="poster.poster_url + '#navpanes=0&view=Fit'")
-				//- a.poster(:href="poster.poster_url", target="_blank", title="click me to open poster pdf")
-				//- 	img(:src="poster.poster_preview")
+		a.poster.no-pdf(v-if="pdfLoadFailed", :href="poster.poster_url", target="_blank", title="Download poster")
+			.mdi(:class="`mdi-${getIconByFileEnding(poster.poster_url)}`")
+			p Download Poster
+		.poster(v-else, v-scrollbar.x.y="")
+			canvas(ref="pdfCanvas")
 		.chat-sidebar
-			.actions
-				bunt-button(tooltip="opens room linked via schedule") go to session
-				bunt-button.btn-likes(tooltip="like this poster", @click="like")
-					.mdi(:class="poster.has_voted ? 'mdi-heart' : 'mdi-heart-outline'")
-					.count {{ poster.votes }}
+			bunt-button.btn-likes(tooltip="like this poster", @click="like")
+				.mdi(:class="poster.has_voted ? 'mdi-heart' : 'mdi-heart-outline'")
+				.count {{ poster.votes }}
+			router-link.presentation(v-if="presentationRoom", :to="{name: 'room', params: {roomId: presentationRoom.id}}")
+				h2 Presentation
+
+				p presented in {{ presentationRoom.name }}
+				p(v-if="session") {{ session.start.format('dddd DD. MMMM LT') }}
+
 			//- h3 Discuss
 			//- chat(mode="compact", :module="{channel_id: poster.channel}")
 	bunt-progress-circular(v-else, size="huge", :page="true")
 </template>
 <script>
+import * as pdfjs from 'pdfjs-dist/webpack'
 import api from 'lib/api'
+import { getIconByFileEnding } from 'lib/filetypes'
 import Avatar from 'components/Avatar'
 import Chat from 'components/Chat'
 import RichTextContent from 'components/RichTextContent'
@@ -54,19 +54,47 @@ export default {
 	},
 	data () {
 		return {
-			poster: null
+			poster: null,
+			pdfLoadFailed: false,
+			getIconByFileEnding
 		}
 	},
 	computed: {
+		presentationRoom () {
+			if (!this.poster?.presentation_room_id) return
+			return this.$store.state.rooms.find(room => room.id === this.poster.presentation_room_id)
+		},
+		session () {
+			if (!this.poster?.schedule_session || !this.$store.getters['schedule/sessions']) return
+			return this.$store.getters['schedule/sessions'].find(session => session.id === this.poster.schedule_session)
+		}
 	},
 	async created () {
 		this.poster = await api.call('poster.get', {poster: this.posterId})
-	},
-	mounted () {
-		this.$nextTick(() => {
-		})
+		this.renderPdf()
 	},
 	methods: {
+		async renderPdf () {
+			this.pdfLoadFailed = false
+			await this.$nextTick()
+			try {
+				const canvas = this.$refs.pdfCanvas
+				const canvasRect = canvas.getBoundingClientRect()
+				const pdf = await pdfjs.getDocument(this.poster.poster_url).promise
+				const page = await pdf.getPage(1)
+				const unscaledViewport = page.getViewport({scale: 1})
+				const viewport = page.getViewport({scale: canvasRect.width / unscaledViewport.width})
+				canvas.height = viewport.height
+				canvas.width = viewport.width
+				await page.render({
+					canvasContext: canvas.getContext('2d'),
+					viewport
+				}).promise
+			} catch (error) {
+				console.error(error)
+				this.pdfLoadFailed = true
+			}
+		},
 		async like () {
 			// TODO error handling
 			if (this.poster.has_voted) {
@@ -118,22 +146,32 @@ export default {
 		display: flex
 		flex-direction: column
 		flex: auto
-		.poster-content
-			padding: 0 16px 16px
-		iframe
+		canvas
 			width: 100%
-			flex: auto
-			height: 600px
-			border: 0
-			outline: none
+		&.no-pdf
+			justify-content: center
+			align-items: center
+			background-color: $clr-grey-100
+			color: $clr-grey-600
+			.mdi
+				font-size: 10vw
+			p
+				font-size: 48px
+				font-weight: 600
+				margin: 0
+			&:hover
+				background-color: $clr-grey-200
+				color: $clr-grey-700
 	.tags
 		display: flex
+		flex-wrap: wrap
+		gap: 4px
 		.tag
 			color: $clr-primary-text-light
 			border: 2px solid $clr-primary
 			border-radius: 12px
-			margin-right: 4px
 			padding: 2px 6px
+			white-space: nowrap
 	.presenters
 		display: flex
 		flex-direction: column
@@ -146,6 +184,8 @@ export default {
 		margin: 8px
 	.btn-likes
 		themed-button-secondary()
+		align-self: flex-start
+		margin: 8px
 		.bunt-button-text
 			display: flex
 			align-items: center
