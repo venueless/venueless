@@ -36,30 +36,33 @@
 			bunt-button.btn-likes(tooltip="like this poster", @click="like")
 				.mdi(:class="poster.has_voted ? 'mdi-heart' : 'mdi-heart-outline'")
 				.count {{ poster.votes }}
-			router-link.presentation(v-if="presentationRoom", :to="{name: 'room', params: {roomId: presentationRoom.id}}")
+			.presentation(v-if="presentationRoom")
 				h2 Presentation
-
-				p presented in {{ presentationRoom.name }}
-				p(v-if="session") {{ session.start.format('dddd DD. MMMM LT') }}
-				p presented by
+				p presented in:
+				router-link.room(:to="{name: 'room', params: {roomId: presentationRoom.id}}") {{ presentationRoom.name }}
+				p(v-if="session") {{ session.start.format('dddd DD. MMMM LT') }} - {{ session.end.format('dddd DD. MMMM LT') }}
+				p presented by:
 				.presenters
-					.presenter(v-for="user in poster.presenters")
+					.presenter(v-for="user in poster.presenters", @click="showUserCard($event, user)")
 						avatar(:user="user", :size="36")
 						span.display-name {{ user ? user.profile.display_name : '' }}
 			//- h3 Discuss
 			//- chat(mode="compact", :module="{channel_id: poster.channel}")
 	bunt-progress-circular(v-else, size="huge", :page="true")
+	chat-user-card(v-if="selectedUser", ref="avatarCard", :sender="selectedUser", @close="selectedUser = null")
 </template>
 <script>
 import * as pdfjs from 'pdfjs-dist/webpack'
+import { createPopper } from '@popperjs/core'
 import api from 'lib/api'
 import { getIconByFileEnding } from 'lib/filetypes'
 import Avatar from 'components/Avatar'
 import Chat from 'components/Chat'
+import ChatUserCard from 'components/ChatUserCard'
 import RichTextContent from 'components/RichTextContent'
 
 export default {
-	components: { Avatar, Chat, RichTextContent },
+	components: { Avatar, Chat, ChatUserCard, RichTextContent },
 	props: {
 		posterId: String
 	},
@@ -68,6 +71,7 @@ export default {
 			poster: null,
 			pdfLoadFailed: false,
 			activeTab: 'info',
+			selectedUser: null,
 			getIconByFileEnding
 		}
 	},
@@ -126,6 +130,20 @@ export default {
 				this.poster.votes++
 				this.poster.has_voted = true
 			}
+		},
+		async showUserCard (event, user) {
+			this.selectedUser = user
+			await this.$nextTick()
+			const target = event.target.closest('.presenter')
+			createPopper(target, this.$refs.avatarCard.$refs.card, {
+				placement: 'left-start',
+				modifiers: [{
+					name: 'flip',
+					options: {
+						flipVariations: false
+					}
+				}]
+			})
 		}
 	}
 }
@@ -209,12 +227,6 @@ export default {
 			border: 2px solid $clr-primary
 			border-radius: 12px
 			padding: 2px 6px
-	.presenters
-		display: flex
-		flex-direction: column
-		.presenter
-			display: flex
-			align-items: center
 	.actions
 		display: flex
 		gap: 8px
@@ -261,6 +273,21 @@ export default {
 			margin: 0
 			padding: 8px
 			border-bottom: border-separator()
+		.presentation
+			padding: 8px
+			.room
+				margin-left: 4px
+				font-size: 16px
+				font-weight: 500
+				ellipsis()
+			.presenters
+				display: flex
+				flex-direction: column
+				.presenter
+					display: flex
+					align-items: center
+					gap: 8px
+					cursor: pointer
 	+below(1200px)
 		flex-direction: column
 		.bunt-tabs
