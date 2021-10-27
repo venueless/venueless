@@ -318,7 +318,7 @@ def create_posters_from_conftool(world, url, password):
 
         if poster.poster_url:
             poster.links.update_or_create(
-                display_text=paper.xpath(f"original_filename_a")[0].text,
+                display_text=paper.xpath("original_filename_a")[0].text,
                 defaults={
                     "url": poster.poster_url,
                 },
