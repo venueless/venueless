@@ -78,9 +78,7 @@
 import * as pdfjs from 'pdfjs-dist/webpack'
 import Quill from 'quill'
 import { mapGetters } from 'vuex'
-import { required, maxLength } from 'buntpapier/src/vuelidate/validators'
-import { helpers } from 'vuelidate/lib/validators'
-import { withParams } from 'vuelidate/lib/validators/common'
+import { required} from 'buntpapier/src/vuelidate/validators'
 import api from 'lib/api'
 import router from 'router'
 import Avatar from 'components/Avatar'
@@ -172,8 +170,8 @@ export default {
 				viewport
 			}).promise
 			const blob = await new Promise(canvas.toBlob.bind(canvas))
-			const {error, url} = await api.uploadFilePromise(blob, 'poster_preview.png')
-			// TODO handle error
+			const {url} = await api.uploadFilePromise(blob, 'poster_preview.png')
+			// TODO handle error (const {url, error} = …)
 			this.poster.poster_preview = url
 		},
 		addAuthor () {
