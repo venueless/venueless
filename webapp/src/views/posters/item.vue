@@ -299,4 +299,5 @@ export default {
 		.info-sidebar, .chat-sidebar
 			border: none
 			width: auto
+			flex: auto
 </style>
