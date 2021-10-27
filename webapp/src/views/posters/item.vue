@@ -152,6 +152,7 @@ export default {
 .v-poster
 	display: flex
 	min-height: 0
+	min-width: 0
 	flex: auto
 	.info-sidebar
 		display: flex
@@ -256,12 +257,15 @@ export default {
 			height: 36px
 			font-weight: 600
 			font-size: 16px
+			min-width: 0
 			&:hover
 				background-color: $clr-grey-100
 				text-decoration: underline
 			.mdi
 				font-size: 28px
 				margin: 0 4px
+			.filename
+				ellipsis()
 	.chat-sidebar
 		display: flex
 		flex-direction: column
