@@ -172,7 +172,6 @@
   "preferences/index:heading": "Dein Profil",
   "preferences/index:notification-permission-denied-warning": "Desktop-Benachrichtigungen sind für diese Website blockiert. Bitte ändere die Einstellungen in deinem Browser.",
   "preferences/index:notifications:description": "Erhalte Desktop-Benachrichtigungen für Direktnachrichten, Kontaktanfragen und weitere Ereignisse, während die Veranstaltung im Hintergrund läuft.",
-  "preferences/index:permission-denied:text": "Desktop-Benachrichtigungen sind für diese Seite blockiert. Bitte ändere die Einstellung in deinem Browser.",
   "preferences/index:notifications:header": "Desktop-Benachrichtigungen",
   "preferences/index:switch-enable-desktop-notifications:label": "Desktop-Benachrichtigungen aktivieren",
   "preferences/index:switch-enable-desktop-notification-sound:label": "Benachrichtigungston abspielen",
@@ -265,7 +264,6 @@
   "Roulette:waiting-few:text": "Es sind gerade ein paar Teilnehmer:innen hier, wir sollten demnächst eine Gesprächspartner:in für dich finden.",
   "Roulette:waiting-many:text": "Es sind gerade einige Leute hier, wir haben gleich eine Gesprächspartner:in für dich, wenn jemand anderes ein Gespräch beendet.",
   "Schedule:headline:text": "Zeitplan",
-  "schedule/talks/item:speakers:header": "Vortragende*r | Vortragende",
   "schedule/index:scheduleLoadingError": "Zeitplan konnte nicht geladen werden.",
   "User:state:blocked": "blockiert",
   "User:state:inactive": "nicht aktiv",
@@ -306,5 +304,7 @@
   "UserActionPrompt:action.unsilence:question": "Diesen Benutzer freischalten?",
   "UserListPage:placeholder:text": "Hier kannst Du dir die Profile anderer Teilnehmer*innen ansehen.\nSchau dich ruhig etwas um.",
   "UserListPage:staffed-exhibitions:text": "Von diesem/dieser Benutzer*in betreute Ausstellungen ",
-  "UserSearch:placeholder:text": "Teilnehmer*innen durchsuchen"
+  "UserSearch:placeholder:text": "Teilnehmer*innen durchsuchen",
+  "schedule/talks/item:speakers:header_one": "Vortragende*r",
+  "schedule/talks/item:speakers:header_other": "Vortragende"
 }
