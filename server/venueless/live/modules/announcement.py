@@ -66,7 +66,7 @@ class AnnouncementModule(BaseModule):
         is_moderator = await self.consumer.world.has_permission_async(
             user=self.consumer.user,
             room=self.room,
-            permission=Permission.ROOM_POLL_MANAGE,
+            permission=Permission.WORLD_ANNOUNCE,
         )
         announcements = await get_announcements(
             world=self.consumer.world.id,
@@ -74,21 +74,11 @@ class AnnouncementModule(BaseModule):
         )
         await self.consumer.send_success(announcements)
 
-    @command("announcement.create")
-    @require_world_permission(Permission.WORLD_ANNOUNCE)
-    async def announcement_create(self, body):
-        pass
-
-    @command("announcement.update")
-    @require_world_permission(Permission.WORLD_ANNOUNCE)
-    async def announcement_update(self, body):
-        pass
-
     @event("created_or_updated")
     def push_announce(self, body):
         await self.consumer.send_json(
             [
                 "announcement.created_or_updated",
-                {"announcement": body.get("announcement")},
+                body.get("announcement"),
             ]
         )
