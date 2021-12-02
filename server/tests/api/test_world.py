@@ -77,6 +77,7 @@ def test_world_no_delete(client, world):
 def test_schedule_update(client, world):
     world.trait_grants["apiuser"] = ["foobartrait"]
     world.save()
+    assert not world.config["pretalx"].get("connected")
     r = client.post(
         "/api/v1/worlds/sample/schedule_update",
         {"domain": "https://pretalx.dev"},
@@ -86,6 +87,7 @@ def test_schedule_update(client, world):
     assert r.status_code == 200
     world.refresh_from_db()
     assert world.config["pretalx"]["domain"] != "https://pretalx.dev"
+    assert world.config["pretalx"]["connected"] is True
 
     r = client.post(
         "/api/v1/worlds/sample/schedule_update",

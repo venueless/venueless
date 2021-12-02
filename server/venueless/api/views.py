@@ -1,5 +1,6 @@
 from asgiref.sync import async_to_sync
 from django.db import transaction
+from django.utils.timezone import now
 from rest_framework import viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -87,14 +88,23 @@ def schedule_update(request, **kwargs):
     domain = request.data.get("domain")
     event = request.data.get("event")
 
+    notify_world = False
     if domain and event:
         pretalx_config = request.world.config.get("pretalx", {})
         if domain != pretalx_config.get("domain") or event != pretalx_config.get(
             "event"
         ):
-            request.world.config["pretalx"] = {"domain": domain, "event": event}
-            request.world.save()
-            async_to_sync(notify_world_change)(request.world.id)
+            request.world.config["pretalx"]["domain"] = domain
+            request.world.config["pretalx"]["event"] = event
+            notify_world = True
+
+    # We assume that only pretalx uses this endpoint
+    request.world.config["pretalx"]["connected"] = True
+    request.world.config["pretalx"]["pushed"] = now().isoformat()
+    request.world.save()
+
+    if notify_world:
+        async_to_sync(notify_world_change)(request.world.id)
 
     async_to_sync(notify_schedule_change)(request.world.id)
     return Response()
