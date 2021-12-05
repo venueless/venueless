@@ -8,8 +8,12 @@
 			bunt-select(name="source", label="Schedule source", v-model="source", :options="sourceOptions", :disabled="source === 'conftool'")
 			template(v-if="source === 'pretalx'")
 				p To use pretalx for your event, enter the domain of the pretalx server you use and the short form name of your event. We'll then pull in the schedule automatically and keep it updated. You must be using pretalx version 2 or later.
-				bunt-input(name="domain", label="pretalx domain", v-model="config.pretalx.domain", placeholder="e.g. https://pretalx.com", :validation="$v.config.pretalx.domain")
+				bunt-input(name="domain", label="pretalx domain", v-model="config.pretalx.domain", placeholder="e.g. https://pretalx.com/", hint="must have the format https://…/", :validation="$v.config.pretalx.domain")
 				bunt-input(name="event", label="pretalx event slug", v-model="config.pretalx.event", placeholder="e.g. democon")
+				h2 Pretalx Connection
+				p To enable automatic schedule update pushes from pretalx to venueless, activate the pretalx-venueless plugin and complete the connection procedure.
+				.pretalx-status(v-if="!isPretalxPluginInstalled") pretalx-venueless plugin not installed/activated or domain + event not a valid pretalx instance.
+				bunt-button#btn-pretalx-connect(:disabled="!isPretalxPluginInstalled", @click="startPretalxConnect") Connect to pretalx
 			template(v-else-if="source === 'url'")
 				p To automatically load the schedule from an external system, enter an URL here. Note that the URL must be a JSON file compliant with the pretalx schedule widget API version 2.
 				bunt-input(name="url", label="JSON URL", v-model="config.pretalx.url", placeholder="e.g. https://website.com/event.json", :validation="$v.config.pretalx.url")
@@ -27,6 +31,7 @@
 		.errors {{ validationErrors.join(', ') }}
 </template>
 <script>
+import config from 'config'
 import api from 'lib/api'
 import { required, url } from 'lib/validators'
 import UploadUrlInput from 'components/UploadUrlInput'
@@ -38,6 +43,7 @@ export default {
 	data () {
 		return {
 			showUpload: false, // HACK we need an extra flag to show an empty file upload, since url and file use the same config field
+			isPretalxPluginInstalled: true,
 			config: null,
 			saving: false,
 			error: null
@@ -58,6 +64,7 @@ export default {
 		},
 		source: {
 			get () {
+				if (!this.config) return
 				if (this.config.pretalx.domain !== undefined) return 'pretalx'
 				if (this.config.pretalx.conftool) return 'conftool'
 				if (this.showUpload) return 'file'
@@ -95,7 +102,7 @@ export default {
 						break
 				}
 			}
-		}
+		},
 	},
 	validations () {
 		if (this.source === 'pretalx') {
@@ -135,11 +142,27 @@ export default {
 			this.error = error
 			console.log(error)
 		}
+		this.$watch(() => this.config?.pretalx ? `${this.config.pretalx.domain}${this.config.pretalx.event}/p/venueless/check` : null, async (url) => {
+			console.log(url)
+			try {
+				// this.isPretalxPluginInstalled = false
+				const response = await fetch(url)
+				console.log(response)
+				this.isPretalxPluginInstalled = response.ok
+			} catch (error) {
+				console.warn('failed pretalx check', error)
+			}
+		}, {
+			immediate: true
+		})
 	},
 	async mounted () {
 		await this.$nextTick()
 	},
 	methods: {
+		async startPretalxConnect () {
+			window.location = `${this.config.pretalx.domain}orga/event/${this.config.pretalx.event}/settings/p/venueless?url=${config.api.base}&token={token}&returnUrl=${window.location.href}`
+		},
 		async save () {
 			this.$v.$touch()
 			if (this.$v.$invalid) return
@@ -158,4 +181,10 @@ export default {
 	flex-direction: column
 	.scroll-content
 		flex: auto // take up more space for select dropdown to position correctly
+	.pretalx-status
+		font-weight: bold
+	#btn-pretalx-connect
+		margin: 16px 0
+		align-self: flex-start
+		themed-button-secondary()
 </style>

@@ -5,6 +5,7 @@ if (ENV_DEVELOPMENT || !window.venueless) {
 	const hostname = window.location.hostname
 	config = {
 		api: {
+			base: `http://${hostname}:8375/api/worlds/sample/`,
 			socket: `ws://${hostname}:8375/ws/world/sample/`,
 			upload: `http://${hostname}:8375/storage/upload/`,
 			scheduleImport: `http://${hostname}:8375/storage/schedule_import/`,
