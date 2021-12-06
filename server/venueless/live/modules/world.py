@@ -145,6 +145,7 @@ class WorldModule(BaseModule):
             body["traits"],
             body["days"],
             by_user=self.consumer.user,
+            long=body.get("long") or False,
         )
         await self.consumer.send_success({"results": result})
 
