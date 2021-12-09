@@ -88,23 +88,17 @@ def schedule_update(request, **kwargs):
     domain = request.data.get("domain")
     event = request.data.get("event")
 
-    notify_world = False
-    if domain and event:
-        pretalx_config = request.world.config.get("pretalx", {})
-        if domain != pretalx_config.get("domain") or event != pretalx_config.get(
-            "event"
-        ):
-            request.world.config["pretalx"]["domain"] = domain
-            request.world.config["pretalx"]["event"] = event
-            notify_world = True
+    if not domain or not event:
+        return Response("Missing fields in request.", status=401)
+
+    pretalx_config = request.world.config.get("pretalx", {})
+    if domain != pretalx_config.get("domain") or event != pretalx_config.get("event"):
+        return Response("Incorrect domain or event data", status=401)
 
     # We assume that only pretalx uses this endpoint
     request.world.config["pretalx"]["connected"] = True
     request.world.config["pretalx"]["pushed"] = now().isoformat()
     request.world.save()
 
-    if notify_world:
-        async_to_sync(notify_world_change)(request.world.id)
-
     async_to_sync(notify_schedule_change)(request.world.id)
-    return Response()
+    return Response(status=200)
