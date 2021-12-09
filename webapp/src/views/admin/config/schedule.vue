@@ -11,9 +11,12 @@
 				bunt-input(name="domain", label="pretalx domain", v-model="config.pretalx.domain", placeholder="e.g. https://pretalx.com/", hint="must have the format https://…/", :validation="$v.config.pretalx.domain")
 				bunt-input(name="event", label="pretalx event slug", v-model="config.pretalx.event", placeholder="e.g. democon")
 				h2 Pretalx Connection
-				p To enable automatic schedule update pushes from pretalx to venueless, activate the pretalx-venueless plugin and complete the connection procedure.
-				.pretalx-status(v-if="!isPretalxPluginInstalled") pretalx-venueless plugin not installed/activated or domain + event not a valid pretalx instance.
-				bunt-button#btn-pretalx-connect(:disabled="!isPretalxPluginInstalled", @click="startPretalxConnect") Connect to pretalx
+				template(v-if="config.pretalx.connected")
+					p Your pretalx instance has successfully connected to venueless.
+				template(v-else)
+					p To enable automatic schedule update pushes from pretalx to venueless, activate the pretalx-venueless plugin and complete the connection procedure.
+					.pretalx-status(v-if="!isPretalxPluginInstalled") pretalx-venueless plugin not installed/activated or domain + event not a valid pretalx instance.
+					bunt-button#btn-pretalx-connect(:disabled="!isPretalxPluginInstalled", @click="startPretalxConnect") Connect to pretalx
 			template(v-else-if="source === 'url'")
 				p To automatically load the schedule from an external system, enter an URL here. Note that the URL must be a JSON file compliant with the pretalx schedule widget API version 2.
 				bunt-input(name="url", label="JSON URL", v-model="config.pretalx.url", placeholder="e.g. https://website.com/event.json", :validation="$v.config.pretalx.url")
@@ -169,15 +172,24 @@ export default {
 	},
 	methods: {
 		async startPretalxConnect () {
-			window.location = `${this.config.pretalx.domain}orga/event/${this.config.pretalx.event}/settings/p/venueless?url=${config.api.base}&token={token}&returnUrl=${window.location.href}`
+			// save pretalx config first
+			if (!await this.save()) return
+			const {results: [token]} = await api.call('world.tokens.generate', {
+				number: 1,
+				days: 365,
+				traits: ['schedule-update'],
+				long: true
+			})
+			window.location = `${this.config.pretalx.domain}orga/event/${this.config.pretalx.event}/settings/p/venueless?url=${config.api.base}&token=${token}&returnUrl=${window.location.href}`
 		},
 		async save () {
 			this.$v.$touch()
-			if (this.$v.$invalid) return
+			if (this.$v.$invalid) return false
 			this.saving = true
 			await api.call('world.config.patch', {pretalx: this.config.pretalx})
 			// TODO error handling
 			this.saving = false
+			return true
 		}
 	}
 }
