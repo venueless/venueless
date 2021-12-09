@@ -5,7 +5,7 @@
 		bunt-progress-circular(size="huge", v-if="!error && !config")
 		.error(v-if="error") We could not fetch the current configuration.
 		.ui-form-body(v-if="config")
-			bunt-select(name="source", label="Schedule source", v-model="source", :options="sourceOptions", :disabled="source === 'conftool'")
+			bunt-select(name="source", label="Schedule source", v-model="source", :options="sourceOptions")
 			template(v-if="source === 'pretalx'")
 				p To use pretalx for your event, enter the domain of the pretalx server you use and the short form name of your event. We'll then pull in the schedule automatically and keep it updated. You must be using pretalx version 2 or later.
 				bunt-input(name="domain", label="pretalx domain", v-model="config.pretalx.domain", placeholder="e.g. https://pretalx.com/", hint="must have the format https://…/", :validation="$v.config.pretalx.domain")
@@ -31,6 +31,8 @@
 		.errors {{ validationErrors.join(', ') }}
 </template>
 <script>
+// TODO:
+// - trailing slash validation/enforcement for prexalx domain
 import config from 'config'
 import api from 'lib/api'
 import { required, url } from 'lib/validators'
@@ -57,7 +59,7 @@ export default {
 				{id: 'file', label: 'File Upload'},
 				{id: 'url', label: 'External URL'},
 			]
-			if (this.$features.enabled('conftool') && this.config.pretalx.conftool) {
+			if (this.$features.enabled('conftool')) {
 				sourceOptions.push({id: 'conftool', label: 'Conftool'})
 			}
 			return sourceOptions
@@ -77,7 +79,6 @@ export default {
 				return null
 			},
 			set (value) {
-				// setting pretalx.conftool isn't done via frontend so we don't handle it here
 				this.showUpload = false
 				switch (value) {
 					case 'pretalx':
@@ -95,6 +96,12 @@ export default {
 					case 'url':
 						this.config.pretalx = {
 							url: ''
+						}
+						break
+					case 'conftool':
+						this.config.pretalx = {
+							conftool: true,
+							url: this.config.pretalx.url
 						}
 						break
 					case null:
@@ -142,8 +149,9 @@ export default {
 			this.error = error
 			console.log(error)
 		}
-		this.$watch(() => this.config?.pretalx ? `${this.config.pretalx.domain}${this.config.pretalx.event}/p/venueless/check` : null, async (url) => {
+		this.$watch(() => this.config?.pretalx?.domain ? `${this.config.pretalx.domain}${this.config.pretalx.event}/p/venueless/check` : null, async (url) => {
 			console.log(url)
+			if (!url) return
 			try {
 				// this.isPretalxPluginInstalled = false
 				const response = await fetch(url)
