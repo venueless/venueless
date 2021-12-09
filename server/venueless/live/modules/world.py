@@ -102,11 +102,7 @@ class WorldModule(BaseModule):
                     if f == "pretalx":
                         pretalx_data = s.validated_data["pretalx"]
                         old_pretalx_data = self.consumer.world.config.get("pretalx", {})
-                        if not pretalx_data.get("url") and not pretalx_data.get(
-                            "domain"
-                        ):
-                            s.validated_data["pretalx"] = {"connected": False}
-                        elif any(
+                        if any(
                             (pretalx_data.get(key) or "")
                             != (old_pretalx_data.get(key) or "")
                             for key in ("domain", "url", "event")
