@@ -78,7 +78,7 @@ class WorldView(APIView):
 
 
 @api_view(http_method_names=["POST"])
-@permission_classes([ApiAccessRequiredPermission & WorldPermissions])
+@permission_classes([ApiAccessRequiredPermission])
 def schedule_update(request, **kwargs):
     """POST endpoint to notify venueless that schedule data has changed.
 
