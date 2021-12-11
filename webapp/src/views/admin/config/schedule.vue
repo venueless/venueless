@@ -15,8 +15,16 @@
 					p Your pretalx instance has successfully connected to venueless.
 				template(v-else)
 					p To enable automatic schedule update pushes from pretalx to venueless, activate the pretalx-venueless plugin and complete the connection procedure.
-					.pretalx-status(v-if="!isPretalxPluginInstalled") pretalx-venueless plugin not installed/activated or domain + event not a valid pretalx instance.
-					bunt-button#btn-pretalx-connect(:disabled="!isPretalxPluginInstalled", @click="startPretalxConnect") Connect to pretalx
+					h3 Step 1: Install and activate the pretalx-venueless plugin
+					.pretalx-status(v-if="isPretalxPluginInstalled") pretalx-venueless plugin has been detected!
+					.pretalx-status.plugin-not-installed(v-if="!isPretalxPluginInstalled")
+						| pretalx-venueless plugin not installed/activated or domain + event not a valid pretalx instance.
+						br
+						| Please install and activate the plugin in #[a(:href="`${config.pretalx.domain}orga/event/${config.pretalx.event}/settings/plugins`", target="_blank") your pretalx event plugin settings].
+					h3 Step 2: Connect pretalx to venueless
+					.pretalx-status(v-if="config.pretalx.connected") Pretalx-venueless connection active!
+					.pretalx-status.not-connected(v-else) Pretalx is not connected to venueless.
+					bunt-button#btn-pretalx-connect(:disabled="!isPretalxPluginInstalled", @click="startPretalxConnect") {{ !config.pretalx.connected ? 'Connect to pretalx' : 'Reonnect to pretalx' }}
 			template(v-else-if="source === 'url'")
 				p To automatically load the schedule from an external system, enter an URL here. Note that the URL must be a JSON file compliant with the pretalx schedule widget API version 2.
 				bunt-input(name="url", label="JSON URL", v-model="config.pretalx.url", placeholder="e.g. https://website.com/event.json", :validation="$v.config.pretalx.url")
@@ -48,7 +56,7 @@ export default {
 	data () {
 		return {
 			showUpload: false, // HACK we need an extra flag to show an empty file upload, since url and file use the same config field
-			isPretalxPluginInstalled: true,
+			isPretalxPluginInstalled: false,
 			config: null,
 			saving: false,
 			error: null
@@ -153,10 +161,10 @@ export default {
 			console.log(error)
 		}
 		this.$watch(() => this.config?.pretalx?.domain ? `${this.config.pretalx.domain}${this.config.pretalx.event}/p/venueless/check` : null, async (url) => {
+			this.isPretalxPluginInstalled = false
 			console.log(url)
-			if (!url) return
+			if (!url || !/^https?:\/\//.test(url)) return
 			try {
-				// this.isPretalxPluginInstalled = false
 				const response = await fetch(url)
 				console.log(response)
 				this.isPretalxPluginInstalled = response.ok
@@ -203,6 +211,9 @@ export default {
 		flex: auto // take up more space for select dropdown to position correctly
 	.pretalx-status
 		font-weight: bold
+		color: $clr-success
+		&.plugin-not-installed, &.not-connected
+			color: $clr-danger
 	#btn-pretalx-connect
 		margin: 16px 0
 		align-self: flex-start
