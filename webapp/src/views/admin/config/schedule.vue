@@ -24,7 +24,7 @@
 					h3 Step 2: Connect pretalx to venueless
 					.pretalx-status(v-if="config.pretalx.connected") Pretalx-venueless connection active!
 					.pretalx-status.not-connected(v-else) Pretalx is not connected to venueless.
-					bunt-button#btn-pretalx-connect(:disabled="!isPretalxPluginInstalled", @click="startPretalxConnect") {{ !config.pretalx.connected ? 'Connect to pretalx' : 'Reonnect to pretalx' }}
+					bunt-button#btn-pretalx-connect(:disabled="!isPretalxPluginInstalled", :loading="connecting", @click="startPretalxConnect") {{ !config.pretalx.connected ? 'Connect to pretalx' : 'Reconnect to pretalx' }}
 			template(v-else-if="source === 'url'")
 				p To automatically load the schedule from an external system, enter an URL here. Note that the URL must be a JSON file compliant with the pretalx schedule widget API version 2.
 				bunt-input(name="url", label="JSON URL", v-model="config.pretalx.url", placeholder="e.g. https://website.com/event.json", :validation="$v.config.pretalx.url")
@@ -59,6 +59,7 @@ export default {
 			isPretalxPluginInstalled: false,
 			config: null,
 			saving: false,
+			connecting: false,
 			error: null
 		}
 	},
@@ -182,13 +183,14 @@ export default {
 		async startPretalxConnect () {
 			// save pretalx config first
 			if (!await this.save()) return
+			this.connecting = true
 			const {results: [token]} = await api.call('world.tokens.generate', {
 				number: 1,
 				days: 365,
 				traits: ['schedule-update'],
 				long: true
 			})
-			window.location = `${this.config.pretalx.domain}orga/event/${this.config.pretalx.event}/settings/p/venueless?url=${config.api.base}&token=${token}&returnUrl=${window.location.href}`
+			window.location = `${this.config.pretalx.domain}orga/event/${this.config.pretalx.event}/settings/p/venueless/?url=${config.api.base}&token=${token}&returnUrl=${window.location.href}`
 		},
 		async save () {
 			this.$v.$touch()
