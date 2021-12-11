@@ -44,6 +44,7 @@
 <script>
 // TODO:
 // - trailing slash validation/enforcement for prexalx domain
+// - immediately disconnect pretalx here if domain or event changes
 import config from 'config'
 import api from 'lib/api'
 import { required, url } from 'lib/validators'
