@@ -182,6 +182,7 @@ class MainConsumer(AsyncJsonWebsocketConsumer):
             return await self.close()
 
         try:
+            logger.error(message)
             async with statsd() as s:
                 s.increment(
                     f"event.received,type={message['type']},world={self.world.pk if self.world else 'None'}"

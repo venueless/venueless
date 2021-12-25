@@ -11,11 +11,11 @@
 	audio(v-show="false", ref="mixedAudio", autoplay, playsinline)
 
 	.participants(v-show="connectionState === 'connected'")
-		.participant.me(:class="{talking: !knownMuteState && talkingParticipants.includes(ourAudioId)}", @click="showUserCard($event, user)")
+		.participant.me(:class="{talking: !knownMuteState && talkingParticipants.includes(ourAudioId)}", @click="showUserCard($event, user, null)")
 			avatar(:user="user", :size="36")
 			.mute-indicator(v-if="knownMuteState")
 				.bunt-icon.mdi.mdi-microphone-off
-		.participant(v-for="p in sortedParticipants", @click="showUserCard($event, p.venueless_user)", :class="{talking: !p.muted && talkingParticipants.includes(p.id)}")
+		.participant(v-for="p in sortedParticipants", @click="showUserCard($event, p.venueless_user, p.id)", :class="{talking: !p.muted && talkingParticipants.includes(p.id)}")
 			avatar(v-if="p.venueless_user", :user="p.venueless_user", :size="36")
 			.mute-indicator(v-if="p.muted")
 				.bunt-icon.mdi.mdi-microphone-off
@@ -62,7 +62,7 @@
 		bunt-icon-button(@click="showFeedbackPrompt = true", :tooltip="$t('JanusVideoroom:tool-bug:tooltip')") message-alert-outline
 		bunt-icon-button.hangup(@click="cleanup(); $emit('hangup')", :tooltip="$t('JanusVideoroom:tool-hangup:tooltip')") phone-hangup
 
-	chat-user-card(v-if="selectedUser", ref="avatarCard", :sender="selectedUser", @close="selectedUser = null")
+	chat-user-card(v-if="selectedUser", ref="avatarCard", :sender="selectedUser", @close="selectedUser = null", @action="userAction($event)", :actions="room && hasPermission('room:januscall.moderate') ? [{key: 'mute', label: $t('JanusVideoroom:user-mute')}, {key: 'kick', label: $t('JanusVideoroom:user-kick')}] : []")
 	transition(name="prompt")
 		a-v-device-prompt(v-if="showDevicePrompt", @close="closeDevicePrompt")
 		feedback-prompt(v-if="showFeedbackPrompt", module="janus", :collectTrace="collectTrace", @close="showFeedbackPrompt = false")
@@ -74,7 +74,7 @@
 </template>
 <script>
 import {Janus} from 'janus-gateway'
-import {mapState} from 'vuex'
+import {mapGetters, mapMutations, mapState} from 'vuex'
 import api from 'lib/api'
 import ChatUserCard from 'components/ChatUserCard'
 import Avatar from 'components/Avatar'
@@ -137,6 +137,10 @@ const log = (source, level, message) => {
 export default {
 	components: {Avatar, AVDevicePrompt, ChatUserCard, FeedbackPrompt, Prompt},
 	props: {
+		room: {
+			type: Object,
+			required: false
+		},
 		server: {
 			type: String,
 			required: true
@@ -225,6 +229,7 @@ export default {
 			showFeedbackPrompt: false,
 			showDevicePrompt: false,
 			selectedUser: null,
+			selectedPeerId: null,
 			layout: {
 				area: 0,
 				cols: 0,
@@ -235,7 +240,9 @@ export default {
 		}
 	},
 	computed: {
+		...mapGetters(['hasPermission']),
 		...mapState(['user']),
+		...mapState('janus', ['targetMuteState']),
 
 		sortedParticipants () {
 			return this.participants.slice().sort((a, b) => a.venueless_user && b.venueless_user ? a.venueless_user.profile.display_name.localeCompare(b.venueless_user.profile.display_name) : 1)
@@ -253,6 +260,13 @@ export default {
 	watch: {
 		feeds () {
 			this.onResize()
+		},
+		targetMuteState () {
+			if (this.targetMuteState && !this.knownMuteState && this.audioPluginHandle !== null) {
+				this.audioPluginHandle.muteAudio()
+				this.audioPluginHandle.send({message: { request: 'configure', muted: true }})
+				this.knownMuteState = this.audioPluginHandle.isAudioMuted()
+			}
 		},
 		videoPublishingState () {
 			this.onResize()
@@ -276,8 +290,11 @@ export default {
 			this.downstreamSlowLinkCount = Math.max(this.downstreamSlowLinkCount - 1, 0)
 			this.upstreamSlowLinkCount = Math.max(this.upstreamSlowLinkCount - 1, 0)
 		}, 10000)
+		this.setTargetMuteState(this.automute)
 	},
 	methods: {
+		...mapMutations('janus', ['setTargetMuteState']),
+
 		collectTrace () {
 			// Yes, passing a function to a component is an antipattern in Vue, but I'm worried about the performance
 			// penalty on Vue computing reactivity on our log which might get large.
@@ -334,8 +351,9 @@ export default {
 				this.$refs.mixedAudio.setSinkId(localStorage.audioOutput || '')
 			}
 		},
-		async showUserCard (event, user) {
+		async showUserCard (event, user, peer) {
 			this.selectedUser = user
+			this.selectedPeerId = peer
 			await this.$nextTick()
 			const target = event.target.closest('.user, .participant')
 			createPopper(target, this.$refs.avatarCard.$refs.card, {
@@ -347,6 +365,14 @@ export default {
 					}
 				}]
 			})
+		},
+		async userAction(action) {
+			if (action === 'mute') {
+				await api.call('januscall.mute', {
+					room: this.room.id,
+					client_id: this.selectedPeerId
+				})
+			}
 		},
 		toggleScreenShare () {
 			if (this.screensharingState === 'published') {
@@ -498,6 +524,7 @@ export default {
 				this.audioPluginHandle.send({message: { request: 'configure', muted: true }})
 			}
 			this.knownMuteState = this.audioPluginHandle.isAudioMuted()
+			this.setTargetMuteState(this.knownMuteState)
 		},
 		publishOwnVideo () {
 			const media = {

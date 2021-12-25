@@ -19,7 +19,8 @@ from venueless.core.services.janus import (
 from venueless.core.services.roulette import is_member_of_roulette_call
 from venueless.core.services.user import get_public_user
 from venueless.core.utils.redis import aioredis
-from venueless.live.decorators import command, require_world_permission, room_action
+from venueless.live.channels import GROUP_JANUS_SESSION
+from venueless.live.decorators import command, require_world_permission, room_action, event
 from venueless.live.exceptions import ConsumerException
 from venueless.live.modules.base import BaseModule
 
@@ -147,6 +148,10 @@ class JanusCallModule(BaseModule):
         else:
             iceServers = []
 
+        await self.consumer.channel_layer.group_add(
+            GROUP_JANUS_SESSION.format(id=user_id),
+            self.consumer.channel_name
+        )
         await self.consumer.send_success(
             {
                 "token": user_secret_token,
@@ -177,3 +182,24 @@ class JanusCallModule(BaseModule):
                     await self.consumer.send_success(user)
                     return
         await self.consumer.send_error(code="user.not_found")
+
+    @command("mute")
+    @room_action(
+        permission_required=Permission.ROOM_JANUSCALL_MODERATE,
+        module_required="call.janus",
+    )
+    async def command_mute(self, body):
+        # Janus *does* have an API for server-side muting, but we don't use it here and instead emulate
+        # remote muting client-side, because this more closely matches how other video software behaves.
+        # With the janus moderation API, only a moderator could unmute a person again, which is usually
+        # not wanted. If someone is really ill-behaved, they can still be kicked / banned, after all.
+        client_id = body["client_id"]
+        self.consumer.channel_layer.group_send(
+            GROUP_JANUS_SESSION.format(id=client_id),
+            {"type": "januscall.muted"},
+        )
+        await self.consumer.send_success()
+
+    @event("muted")
+    async def publish_muted(self, body):
+        await self.consumer.send_json(["januscall.muted", {}])

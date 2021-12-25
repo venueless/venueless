@@ -1,7 +1,7 @@
 <template lang="pug">
 .c-januscall(:class="[`size-${size}`]")
 	.error(v-if="error") {{ $t('JanusCall:error:text') }}
-	janus-conference(v-if="server", :server="server", :token="token", :iceServers="iceServers", :sessionId="sessionId", :roomId="roomId", :size="size", :automute="true", @hangup="roomId = null; $router.push('/')")
+	janus-conference(v-if="server", :room="room", :server="server", :token="token", :iceServers="iceServers", :sessionId="sessionId", :roomId="roomId", :size="size", :automute="true", @hangup="roomId = null; $router.push('/')")
 </template>
 <script>
 import api from 'lib/api'

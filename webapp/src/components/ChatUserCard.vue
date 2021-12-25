@@ -13,6 +13,7 @@
 				.value {{ field.value }}
 		.state {{ userStates.join(', ') }}
 		.actions(v-if="sender.id !== user.id && sender.id")
+			bunt-button(v-for="a in actions", @click="$emit('action', a.key)") {{ a.label }}
 			bunt-button.btn-dm(v-if="hasPermission('world:chat.direct')", @click="openDM") {{ $t('UserAction:action.dm:label') }}
 			bunt-button.btn-call(v-if="hasPermission('world:chat.direct')", @click="startCall") {{ $t('UserAction:action.call:label') }}
 			menu-dropdown(v-model="showMoreActions", :blockBackground="false", @mousedown.native.stop="")
@@ -41,6 +42,7 @@ export default {
 	components: { Avatar, MenuDropdown, UserActionPrompt },
 	props: {
 		sender: Object,
+		actions: Array,
 	},
 	data () {
 		return {

@@ -144,6 +144,8 @@
   "JanusVideoroom:tool-screenshare:on": "Bildschirm übertragen",
   "JanusVideoroom:tool-video:off": "Video ausschalten",
   "JanusVideoroom:tool-video:on": "Video anschalten",
+  "JanusVideoroom:user-kick": "Kicken",
+  "JanusVideoroom:user-mute": "Stummschalten",
   "JanusVideoroom:video-output:off": "Du hast in den Video/Audio-Einstellungen ausgeschaltet, die Videos anderer Personen zu sehen.",
   "Livestream:automuted-unmute:text": "Klicken um Ton zu aktivieren",
   "Livestream:captions-off:text": "Aus",

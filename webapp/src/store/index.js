@@ -6,6 +6,7 @@ import chat from './chat'
 import question from './question'
 import poll from './poll'
 import roulette from './roulette'
+import januscall from './januscall'
 import exhibition from './exhibition'
 import schedule from './schedule'
 import notifications from './notifications'
@@ -189,6 +190,7 @@ export default new Vuex.Store({
 		exhibition,
 		schedule,
 		roulette,
+		januscall,
 		notifications
 	}
 })

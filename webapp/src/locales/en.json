@@ -146,6 +146,8 @@
   "JanusVideoroom:tool-screenshare:start": "Select screen",
   "JanusVideoroom:tool-video:off": "Turn video off",
   "JanusVideoroom:tool-video:on": "Turn video on",
+  "JanusVideoroom:user-kick": "Kick",
+  "JanusVideoroom:user-mute": "Mute",
   "JanusVideoroom:video-output:off": "You disabled receiving videos of other participants in the video/audio settings.",
   "Livestream:automuted-unmute:text": "Tap to unmute",
   "Livestream:captions-off:text": "Off",
