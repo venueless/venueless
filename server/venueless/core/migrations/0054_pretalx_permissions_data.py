@@ -6,13 +6,7 @@ from django.utils.timezone import now
 
 def add_permissions(apps, schema_editor):
     World = apps.get_model("core", "World")
-    PlannedUsage = apps.get_model("core", "PlannedUsage")
-    worlds = set(
-        PlannedUsage.objects.all()
-        .filter(end__gte=now())
-        .values_list("world", flat=True)
-    )
-    for world in World.objects.filter(id__in=worlds):
+    for world in World.objects.all():
         world.trait_grants["scheduleuser"] = ["schedule-update"]
         world.roles["scheduleuser"] = "world:api"
         world.save()
