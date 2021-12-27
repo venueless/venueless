@@ -8,7 +8,7 @@ def add_permissions(apps, schema_editor):
     World = apps.get_model("core", "World")
     for world in World.objects.all():
         world.trait_grants["scheduleuser"] = ["schedule-update"]
-        world.roles["scheduleuser"] = "world:api"
+        world.roles["scheduleuser"] = ["world:api"]
         world.save()
 
 
