@@ -45,6 +45,7 @@ class WorldConfigSerializer(serializers.Serializer):
     conftool_password = serializers.CharField(
         required=False, allow_null=True, allow_blank=True
     )
+    is_hybrid_event = serializers.BooleanField(required=False)
 
     def _available_permissions(self, *args):
         return [d.value for d in Permission]
@@ -352,6 +353,7 @@ def _config_serializer(world, *args, **kwargs):
             "profile_fields": world.config.get("profile_fields", []),
             "conftool_url": world.config.get("conftool_url", ""),
             "conftool_password": world.config.get("conftool_password", ""),
+            "is_hybrid_event": world.config.get("is_hybrid_event", False),
         },
         *args,
         **kwargs,

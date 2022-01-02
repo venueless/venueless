@@ -88,6 +88,7 @@ class WorldModule(BaseModule):
                 "track_exhibitor_views",
                 "conftool_url",
                 "conftool_password",
+                "is_hybrid_event"
             )
             model_fields = ("title", "locale", "timezone", "roles", "trait_grants")
             update_fields = set()

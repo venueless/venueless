@@ -12,6 +12,12 @@
 			bunt-select(v-model="config.dateLocale", label="Date locale", name="dateLocale", :options="momentLocales")
 			bunt-input(v-model="config.timezone", label="Time zone", name="timezone", :validation="$v.config.timezone")
 			bunt-input(v-model="config.connection_limit", label="Connection limit", name="connection_limit", hint="Set to 0 to allow unlimited connections per user", :validation="$v.config.connection_limit")
+			template(v-if="$features.enabled('hybrid-event')")
+			h2 Event Mode
+			p Set your event to fully virtual (everyone attends the event online) or hybrid (some people attend the event online, others attend physically on location).
+			.button-group
+				bunt-button(:class="{active: !config.is_hybrid_event}", @click="config.is_hybrid_event = false") Virtual
+				bunt-button(:class="{active: config.is_hybrid_event}", @click="config.is_hybrid_event = true") Hybrid
 			template(v-if="$features.enabled('conftool')")
 				h2 Conftool
 				bunt-input(v-model="config.conftool_url", label="Conftool REST API URL", name="conftool_url", :validation="$v.config.conftool_url")
@@ -121,7 +127,8 @@ export default {
 				bbb_defaults: this.config.bbb_defaults,
 				track_exhibitor_views: this.config.track_exhibitor_views,
 				track_room_views: this.config.track_room_views,
-				track_world_views: this.config.track_world_views
+				track_world_views: this.config.track_world_views,
+				is_hybrid_event: this.config.is_hybrid_event
 			}
 			if (this.$features.enabled('conftool')) {
 				patch.conftool_url = this.config.conftool_url
@@ -164,4 +171,16 @@ export default {
 	.json-error-message
 		color: $clr-danger
 		margin: 4px
+	.button-group
+		> .bunt-button
+			box-sizing: border-box
+			&.active
+				themed-button-primary()
+			&:not(.active)
+				themed-button-secondary()
+				border: 2px solid var(--clr-primary)
+			&:first-child
+				border-radius: 4px 0 0 4px
+			&:last-child
+				border-radius: 0 4px 4px 0
 </style>

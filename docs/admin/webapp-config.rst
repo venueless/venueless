@@ -76,3 +76,4 @@ Experimental Features
 * page.landing
 * iframe-player
 * polls
+* hybrid-event
