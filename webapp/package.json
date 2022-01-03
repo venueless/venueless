@@ -17,6 +17,7 @@
     "@mdi/font": "^5.5.55",
     "@popperjs/core": "^2.6.0",
     "@splidejs/splide": "^4.1.2",
+    "@pretalx/schedule": "^1.10.0",
     "buntpapier": "^1.8.6",
     "color": "^4.0.0",
     "color-blend": "^3.0.0",
