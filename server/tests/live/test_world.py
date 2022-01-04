@@ -178,6 +178,7 @@ async def test_config_get(world):
                     "searchable": True,
                 },
             ],
+            "is_hybrid_event": False,
         }
 
 
