@@ -70,9 +70,6 @@ export default {
 			}
 		}
 	},
-	created () {
-		this.rawFavs = this.loadFavs()
-	},
 	methods: {
 		changeDay (day) {
 			if (day.isSame(this.currentDay)) return
@@ -84,24 +81,10 @@ export default {
 			// TODO smooth scroll, seems to not work with chrome {behavior: 'smooth', block: 'center', inline: 'center'}
 			tabEl?.$el.scrollIntoView()
 		},
-		loadFavs () {
-			const data = localStorage.getItem('favs')
-			if (data) {
-				try {
-					return JSON.parse(data)
-				} catch {
-					localStorage.setItem('favs', '[]')
-				}
-			}
-			return []
-		},
 		pruneFavs (favs, sessions) {
 			const talks = sessions || []
 			const talkIds = talks.map(e => e.id)
 			return favs.filter(e => talkIds.includes(e))
-		},
-		saveFavs () {
-			localStorage.setItem('favs', JSON.stringify(this.favs))
 		}
 	}
 }
