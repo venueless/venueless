@@ -1,10 +1,13 @@
 import moment from 'lib/timetravelMoment'
+import api from 'lib/api'
 
 export default {
 	namespaced: true,
 	state: {
 		schedule: null,
-		errorLoading: null
+		errorLoading: null,
+		favs: [],
+		now: moment()
 	},
 	getters: {
 		pretalxScheduleUrl (state, getters, rootState) {
@@ -98,6 +101,14 @@ export default {
 			return rooms
 		}
 	},
+	mutations: {
+		updateNow (state) {
+			state.now = moment()
+		},
+		updateFavs (state, favs) {
+			state.favs = favs || []
+		}
+	},
 	actions: {
 		async fetch ({state, getters}) {
 			// TODO error handling
@@ -110,5 +121,21 @@ export default {
 				state.errorLoading = error
 			}
 		},
+		async fav ({state, dispatch}, id) {
+			if (!state.favs.includes(id)) {
+				state.favs.push(id)
+				await dispatch('saveFavs')
+			}
+		},
+		async unfav ({state, dispatch}, id) {
+			state.favs = state.favs.filter(fav => fav !== id)
+			await dispatch('saveFavs')
+		},
+		async saveFavs ({state}) {
+			await api.call('schedule.favs.update', state.favs)
+		},
+		'api::schedule.favs.updated' ({state}, favs) {
+			state.favs = favs
+		}
 	}
 }

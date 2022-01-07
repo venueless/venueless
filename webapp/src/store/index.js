@@ -96,6 +96,7 @@ export default new Vuex.Store({
 				commit('chat/setReadPointers', serverState['chat.read_pointers'])
 				commit('exhibition/setData', serverState.exhibition)
 				commit('announcement/setAnnouncements', serverState.announcements)
+				commit('schedule/updateFavs', serverState['schedule.favs'])
 				commit('updateRooms', serverState['world.config'].rooms)
 				// FIXME copypasta from App.vue
 				if (state.activeRoom?.modules.some(module => ['livestream.native', 'livestream.youtube', 'livestream.iframe', 'call.bigbluebutton', 'call.zoom', 'call.janus'].includes(module.type))) {

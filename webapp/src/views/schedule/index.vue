@@ -15,8 +15,8 @@
 				:scrollParent="$refs.scrollParent",
 				:favs="favs",
 				@changeDay="currentDay = $event",
-				@fav="fav",
-				@unfav="unfav"
+				@fav="$store.dispatch('schedule/fav', $event)",
+				@unfav="$store.dispatch('schedule/unfav', $event)"
 			)
 			linear-schedule(v-else,
 				:sessions="sessions",
@@ -47,15 +47,14 @@ export default {
 	data () {
 		return {
 			moment,
-			currentDay: moment().startOf('day'),
-			rawFavs: []
+			currentDay: moment().startOf('day')
 		}
 	},
 	computed: {
 		...mapState('schedule', ['now', 'schedule', 'errorLoading']),
 		...mapGetters('schedule', ['days', 'sessions']),
 		favs () {
-			return this.pruneFavs(this.rawFavs, this.sessions)
+			return this.pruneFavs(this.$store.state.schedule.favs, this.sessions)
 		}
 	},
 	provide: {
@@ -103,17 +102,6 @@ export default {
 		},
 		saveFavs () {
 			localStorage.setItem('favs', JSON.stringify(this.favs))
-		},
-		fav (id) {
-			if (!this.favs.includes(id)) {
-				this.favs.push(id)
-				this.saveFavs()
-			}
-		},
-		unfav (id) {
-			this.favs = this.favs.filter(elem => elem !== id)
-			this.saveFavs()
-			if (!this.favs.length) this.onlyFavs = false
 		}
 	}
 }
