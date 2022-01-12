@@ -40,6 +40,7 @@ The following error codes are currently used during authentication:
 
 * ``auth.missing_id_or_token``
 * ``auth.invalid_token``
+* ``auth.expired_token``
 * ``auth.denied``
 
 User objects
