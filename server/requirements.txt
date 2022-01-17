@@ -6,7 +6,7 @@ beautifulsoup4==4.10.*
 celery==5.1.*
 channels>=3.0.3,<3.1.0
 channels_redis==3.3.*,>=3.3.1
-Django==3.2.*
+Django==4.0.*
 django-cors-headers==3.10.*
 django-decorator-include
 django-extensions==3.1.*
