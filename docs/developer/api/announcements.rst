@@ -12,6 +12,9 @@ Announcements are always sent out with a ``created_or_updated`` message::
 
     <= ["announcement.created_or_updated", {"id": "", "text": "", "show_until": "", "is_active": true}]
 
+Additionally, all currently visible announcements are listed in the initial
+response after authenticating, as the ``"announcements"`` field.
+
 List announcements
 ------------------
 
