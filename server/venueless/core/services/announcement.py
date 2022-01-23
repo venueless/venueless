@@ -34,8 +34,14 @@ def update_announcement(**kwargs):
     announcement = Announcement.objects.get(
         pk=kwargs.pop("id"), world=kwargs.pop("world")
     )
+    permitted_fields = {
+        field.name
+        for field in Announcement._meta.get_fields()
+        if field.name not in ("id", "world")
+    }
     for key, value in kwargs.items():
-        setattr(announcement, key, value)
+        if key in permitted_fields:
+            setattr(announcement, key, value)
     announcement.save()
     announcement.refresh_from_db()
     return announcement.serialize_public()
