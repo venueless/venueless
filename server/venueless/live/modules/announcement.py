@@ -66,7 +66,6 @@ class AnnouncementModule(BaseModule):
         announcements = []
         is_moderator = await self.consumer.world.has_permission_async(
             user=self.consumer.user,
-            room=self.room,
             permission=Permission.WORLD_ANNOUNCE,
         )
         announcements = await get_announcements(

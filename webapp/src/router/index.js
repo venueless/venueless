@@ -151,6 +151,10 @@ const routes = [{
 		component: () => import(/* webpackChunkName: "admin" */ 'views/admin/rooms/item'),
 		props: true
 	}, {
+		path: '/admin/announcements',
+		name: 'admin:announcements',
+		component: () => import(/* webpackChunkName: "admin" */ 'views/admin/announcements')
+	}, {
 		path: '/admin/config',
 		component: () => import(/* webpackChunkName: "admin" */ 'views/admin/config'),
 		children: [{

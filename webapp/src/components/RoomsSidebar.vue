@@ -57,9 +57,10 @@ transition(name="sidebar")
 				.group-title {{ $t('RoomsSidebar:posters-headline:text') }}
 				.admin
 					router-link(:to="{name: 'posters'}")  {{ $t('RoomsSidebar:posters-manage:label') }}
-			template(v-if="hasPermission('world:users.list') || hasPermission('world:update') || hasPermission('room:update')")
+			template(v-if="hasPermission('world:users.list') || hasPermission('world:update') || hasPermission('world:announce') || hasPermission('room:update')")
 				.group-title {{ $t('RoomsSidebar:admin-headline:text') }}
 				.admin
+					router-link.room(:to="{name: 'admin:announcements'}", v-if="hasPermission('world:announce')") {{ $t('RoomsSidebar:admin-announcements:label') }}
 					router-link.room(:to="{name: 'admin:users'}", v-if="hasPermission('world:users.list')") {{ $t('RoomsSidebar:admin-users:label') }}
 					router-link.room(:to="{name: 'admin:rooms:index'}", v-if="hasPermission('room:update')") {{ $t('RoomsSidebar:admin-rooms:label') }}
 					router-link.room(:to="{name: 'admin:config'}", v-if="hasPermission('world:update')") {{ $t('RoomsSidebar:admin-config:label') }}
