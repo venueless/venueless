@@ -45,7 +45,9 @@ class AnnouncementModule(BaseModule):
         old_announcement = await get_announcement(
             body.get("id"), world=self.consumer.world.id
         )
-        new_announcement = await update_announcement(**body)
+        new_announcement = await update_announcement(
+            world=self.consumer.world.id, **body
+        )
 
         await self.consumer.send_success({"announcement": new_announcement})
 
