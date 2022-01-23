@@ -45,7 +45,6 @@ class AnnouncementModule(BaseModule):
         old_announcement = await get_announcement(
             body.get("id"), world=self.consumer.world.id
         )
-        body["room"] = self.room
         new_announcement = await update_announcement(**body)
 
         await self.consumer.send_success({"announcement": new_announcement})
@@ -75,7 +74,7 @@ class AnnouncementModule(BaseModule):
         await self.consumer.send_success(announcements)
 
     @event("created_or_updated")
-    def push_announce(self, body):
+    async def push_announce(self, body):
         await self.consumer.send_json(
             [
                 "announcement.created_or_updated",
