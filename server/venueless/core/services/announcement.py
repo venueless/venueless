@@ -8,7 +8,7 @@ from venueless.core.models.announcement import Announcement
 @database_sync_to_async
 def create_announcement(**kwargs):
     return Announcement.objects.create(
-        **{key: value for key, value in kwargs.items() if value}
+        **{key: value for key, value in kwargs.items() if value is not None}
     ).serialize_public()
 
 
