@@ -52,7 +52,7 @@ class AnnouncementModule(BaseModule):
         await self.consumer.send_success({"announcement": new_announcement})
 
         if old_announcement.pop("is_visible") or new_announcement.pop("is_visible"):
-            self.consumer.channel_layer.group_send(
+            await self.consumer.channel_layer.group_send(
                 GROUP_WORLD.format(id=self.consumer.world.id),
                 {
                     "type": "announcement.created_or_updated",
