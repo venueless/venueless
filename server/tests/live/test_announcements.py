@@ -1,5 +1,3 @@
-import asyncio
-import copy
 import uuid
 from contextlib import asynccontextmanager
 
@@ -70,7 +68,7 @@ async def test_announcement_lifecycle(chat_room, world):
                     123,
                     {
                         "text": "Test announcement",
-                        "is_active": False,
+                        "state": "draft",
                     },
                 ]
             )
@@ -83,14 +81,14 @@ async def test_announcement_lifecycle(chat_room, world):
                     123,
                     {
                         "text": "Test announcement",
-                        "is_active": False,
+                        "state": "draft",
                     },
                 ]
             )
             response = await c_mod.receive_json_from()
             assert response[0] == "success"
             announcement = await get_announcement(response[2]["announcement"]["id"])
-            assert not announcement.is_active
+            assert not announcement.is_visible
 
             # no idea why this doesn't work; the line does produce a timeout error when not wrapped in raises()
             # with pytest.raises(asyncio.TimeoutError):
@@ -102,13 +100,13 @@ async def test_announcement_lifecycle(chat_room, world):
                     123,
                     {
                         "id": str(announcement.id),
-                        "is_active": True,
+                        "state": "active",
                     },
                 ]
             )
             response = await c_mod.receive_json_from()
             assert response[0] == "success"
-            assert response[2]["announcement"]["is_active"]
+            assert response[2]["announcement"]["state"] == "active"
 
             response = await c_mod.receive_json_from()
             assert response[0] == "announcement.created_or_updated"
