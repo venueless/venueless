@@ -1,11 +1,11 @@
 <template lang="pug">
-.c-announcement(v-if="announcement")
+.c-announcement(v-if="announcement", :class="[announcement.state, {expired: announcement.expired}]")
 	.header
-		h2(v-if="!announcement.id") New Announcement
+		h2(v-if="!announcement.id") Draft New Announcement
 		template(v-else)
 			h2 Edit Announcement
 			.actions
-				bunt-button#btn-toggle-is-active(:class="{'is-active': announcement.is_active}", :loading="togglingActive", @click="toggleIsActive") {{ !announcement.is_active ? 'activate' : 'deactivate' }}
+				bunt-button#btn-progress-state(v-if="announcement.state !== 'archived'", :loading="settingState", @click="progressState") {{ announcement.state === 'draft' ? 'activate' : 'archive' }}
 	scrollbars(y)
 		bunt-input-outline-container(label="Text", name="text")
 			textarea.text(slot-scope="{focus, blur}", @focus="focus", @blur="blur", v-model="announcement.text")
@@ -16,9 +16,11 @@
 			bunt-button +30min
 			bunt-button +1h
 			bunt-button +25h
-		bunt-button#btn-save(:loading="saving", @click="saveActiveAnnouncement") {{ !announcement.id ? 'create' : 'save' }}
+		bunt-button#btn-save(:loading="saving", @click="save") {{ !announcement.id ? 'create' : 'save' }}
 </template>
 <script>
+// TODO
+// - disable textarea when active?
 import api from 'lib/api'
 
 export default {
@@ -30,10 +32,11 @@ export default {
 		return {
 			announcement: null,
 			saving: false,
-			togglingActive: false
+			settingState: false
 		}
 	},
-	computed: {},
+	computed: {
+	},
 	watch: {
 		announcementId: {
 			handler () {
@@ -50,35 +53,32 @@ export default {
 			immediate: true
 		}
 	},
-	async created () {
-	},
-	async mounted () {
-		await this.$nextTick()
-	},
 	methods: {
-		async saveActiveAnnouncement () {
+		async save () {
 			this.saving = true
-			if (this.activeAnnouncement.id) {
-				const { announcement } = await api.call('announcement.update', this.activeAnnouncement)
+			if (this.announcement.id) {
+				const { announcement } = await api.call('announcement.update', this.announcement)
 				const existingAnnouncement = this.announcements.find(a => a.id === announcement.id)
 				Object.assign(existingAnnouncement, announcement)
 			} else {
-				const { announcement } = await api.call('announcement.create', this.activeAnnouncement)
+				const { announcement } = await api.call('announcement.create', this.announcement)
+				// TODO not really best practice
 				this.announcements.push(announcement)
-				this.activeAnnouncement = Object.assign({}, announcement)
+				this.$router.push({ name: 'admin:announcements:item', params: {announcementId: announcement.id}})
+				this.announcement = Object.assign({}, announcement)
 			}
 			this.saving = false
 		},
-		async toggleIsActive () {
-			this.togglingActive = true
+		async progressState () {
+			this.settingState = true
 			const { announcement } = await api.call('announcement.update', {
-				id: this.activeAnnouncement.id,
-				is_active: !this.activeAnnouncement.is_active
+				id: this.announcement.id,
+				state: this.announcement.state === 'draft' ? 'active' : 'archived'
 			})
-			this.activeAnnouncement = announcement
+			this.announcement = announcement
 			const existingAnnouncement = this.announcements.find(a => a.id === announcement.id)
 			Object.assign(existingAnnouncement, announcement)
-			this.togglingActive = false
+			this.settingState = false
 		}
 	}
 }
@@ -105,10 +105,10 @@ export default {
 			display: flex
 			flex: auto
 			justify-content: flex-end
-			#btn-toggle-is-active
-				button-style(color: $clr-success)
-				&.is-active
-					button-style(color: $clr-danger)
+			#btn-progress-state
+				button-style(color: $clr-danger)
+				^[0].draft ^[1..-1]
+					button-style(color: $clr-success)
 	.scroll-content
 		padding: 8px
 	.bunt-input-outline-container

@@ -7,43 +7,58 @@
 	.page-content(v-if="announcements")
 		.announcements-list
 			.header
-				.active active
+				.state state
 				.text text
 				.show-until show until
-			.tbody
+			.tbody(v-scrollbar.y="")
 				router-link.announcement.table-row(v-for="announcement of announcements", :to="{name: 'admin:announcements:item', params: {announcementId: announcement.id}}")
-					.active.mdi(:class="{'is-active': announcement.is_active, 'mdi-check-bold': announcement.is_active, 'mdi-close-thick': !announcement.is_active}")
+					.state(:class="[announcement.state, {expired: announcement.expired}]")
 					.text {{ announcement.text }}
 					.show-until {{ announcement.show_until }}
-		router-view(:announcements="announcements")
+		router-view(:announcements="rawAnnouncements")
 	bunt-progress-circular(v-else, size="huge", :page="true")
 </template>
 <script>
+import { mapState } from 'vuex'
+import moment from 'moment'
 import api from 'lib/api'
 
 export default {
 	components: {},
 	data () {
 		return {
-			announcements: null,
-			activeAnnouncement: null
+			rawAnnouncements: null
+		}
+	},
+	computed: {
+		...mapState(['now']),
+		announcements () {
+			if (!this.rawAnnouncements) return null
+			return this.rawAnnouncements.map(announcement => {
+				return Object.assign({}, announcement, {
+					expired: announcement.show_until?.isAfter(this.now)
+				})
+			}).sort((a, b) => {
+				if (a.state === 'draft' && b.state === 'active') return -1
+				if (a.state === 'active' && b.state === 'draft') return 1
+				if (a.state === 'draft' && b.state === 'archived') return -1
+				if (a.state === 'archived' && b.state === 'draft') return 1
+				if (a.state === 'active' && b.state === 'archived') return -1
+				if (a.state === 'archived' && b.state === 'active') return 1
+				if (a.state === 'active' && b.state === 'active') {
+					if (a.expired && !b.expired) return -1
+					if (!a.expired && b.expired) return 1
+				}
+				return a.show_until?.isAfter(b.show_until) ? -1 : 1
+			})
 		}
 	},
 	async created () {
-		this.announcements = await api.call('announcement.list')
-	},
-	async mounted () {
-		await this.$nextTick()
-	},
-	methods: {
-		newAnnouncement () {
-			this.activeAnnouncement = {
-				is_active: false,
-				text: '',
-				show_until: null
-			}
-		},
-
+		this.rawAnnouncements = (await api.call('announcement.list')).map(announcement => {
+			return Object.assign({}, announcement, {
+				show_until: announcement.show_until ? moment(announcement.show_until) : null
+			})
+		})
 	}
 }
 </script>
@@ -64,6 +79,7 @@ export default {
 		min-height: 0
 		.announcements-list
 			flex-table()
+			min-height: 0
 			.announcement
 				display: flex
 				align-items: center
@@ -71,8 +87,8 @@ export default {
 				cursor: pointer
 				&.router-link-exact-active
 					background-color: $clr-grey-200
-			.active
-				width: 36px
+			.state
+				width: 80px
 				padding: 0 4px 0 16px
 				text-align: center
 			.text
@@ -85,4 +101,29 @@ export default {
 					color: $clr-danger
 					&.is-active
 						color: $clr-success
+			.tbody
+				.state
+					display: flex
+					align-items: center
+					justify-content: center
+					&::before
+						height: 18px
+						padding: 2px 8px
+						display: inline-block
+						text-transform: uppercase
+						font-weight: 500
+						line-height: @height
+						color: $clr-primary-text-dark
+					&.draft::before
+						content: 'draft'
+						background-color: $clr-blue
+					&.active::before
+						content: 'active'
+						background-color: $clr-success
+					&.expired::before
+						content: 'expired'
+						background-color: $clr-warning
+					&.archived::before
+						content: 'archived'
+						background-color: $clr-grey-600
 </style>

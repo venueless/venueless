@@ -8,7 +8,9 @@ export default {
 		announcements: []
 	},
 	getters: {
-		
+		visibleAnnouncements (state, getters, rootState) {
+			return state.announcements.filter(announcement => announcement.is_active && (!announcement.show_until || announcement.show_until.isAfter(rootState.now)))
+		}
 	},
 	mutations: {
 		setAnnouncements (state, announcements) {

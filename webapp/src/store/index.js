@@ -32,7 +32,8 @@ export default new Vuex.Store({
 		userLocale: null, // only used to force UI render
 		userTimezone: null,
 		autoplay: localStorage.disableAutoplay !== 'true',
-		stageStreamCollapsed: false
+		stageStreamCollapsed: false,
+		now: moment()
 	},
 	getters: {
 		hasPermission (state) {
@@ -63,6 +64,9 @@ export default new Vuex.Store({
 		},
 		updateStageStreamCollapsed (state, stageStreamCollapsed) {
 			state.stageStreamCollapsed = stageStreamCollapsed
+		},
+		updateNow (state) {
+			state.now = moment()
 		}
 	},
 	actions: {
