@@ -18,6 +18,7 @@ import '@mdi/font/css/materialdesignicons.css'
 import i18n, { init as i18nInit } from 'i18n'
 import { emojiPlugin } from 'lib/emoji'
 import features from 'features'
+import config from 'config'
 
 async function init () {
 	Vue.config.productionTip = false
@@ -43,9 +44,14 @@ async function init () {
 
 	const token = new URLSearchParams(router.currentRoute.hash.substr(1)).get('token')
 	if (token) {
-		localStorage.token = token
+		if (!config.externalAuthUrl) {
+			localStorage.token = token
+		}
 		router.replace(router.currentRoute.path)
 		store.dispatch('login', {token})
+	} else if (config.externalAuthUrl) {
+		location = config.externalAuthUrl
+		return
 	} else if (localStorage.token) {
 		store.dispatch('login', {token: localStorage.token})
 	} else {
