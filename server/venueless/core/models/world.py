@@ -143,7 +143,7 @@ class World(VersionedModel):
     )
     timezone = models.CharField(max_length=120, default="Europe/Berlin")
     feature_flags = JSONField(blank=True, default=default_feature_flags)
-    external_auth_url = models.CharField(max_length=255, default="")
+    external_auth_url = models.URLField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.id} ({self.title})"

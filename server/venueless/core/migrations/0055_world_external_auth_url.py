@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='world',
             name='external_auth_url',
-            field=models.CharField(default='', max_length=255),
+            field=models.URLField(null=True, blank=True)
         ),
     ]
