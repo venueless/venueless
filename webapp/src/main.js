@@ -50,7 +50,7 @@ async function init () {
 		router.replace(router.currentRoute.path)
 		store.dispatch('login', {token})
 	} else if (config.externalAuthUrl) {
-		location = config.externalAuthUrl
+		window.location = config.externalAuthUrl
 		return
 	} else if (localStorage.token) {
 		store.dispatch('login', {token: localStorage.token})
