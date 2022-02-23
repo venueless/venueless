@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0054_pretalx_permissions_data'),
+        ("core", "0054_pretalx_permissions_data"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='world',
-            name='external_auth_url',
-            field=models.URLField(null=True, blank=True)
+            model_name="world",
+            name="external_auth_url",
+            field=models.URLField(null=True, blank=True),
         ),
     ]
