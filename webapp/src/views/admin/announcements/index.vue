@@ -14,11 +14,14 @@
 				router-link.announcement.table-row(v-for="announcement of announcements", :to="{name: 'admin:announcements:item', params: {announcementId: announcement.id}}")
 					.state(:class="[announcement.state, {expired: announcement.expired}]")
 					.text {{ announcement.text }}
-					.show-until {{ announcement.show_until }}
+					.show-until {{ announcement.show_until ? announcement.show_until.format('LLL') : '' }}
 		router-view(:announcements="rawAnnouncements")
 	bunt-progress-circular(v-else, size="huge", :page="true")
 </template>
 <script>
+// TODO
+// - server won't send draft announcements via websocket?
+// - add created column?
 import { mapState } from 'vuex'
 import moment from 'moment'
 import api from 'lib/api'
@@ -35,8 +38,11 @@ export default {
 		announcements () {
 			if (!this.rawAnnouncements) return null
 			return this.rawAnnouncements.map(announcement => {
+				// COPYPASTA from store
+				const showUntil = announcement.show_until ? moment(announcement.show_until) : null
 				return Object.assign({}, announcement, {
-					expired: announcement.show_until?.isAfter(this.now)
+					show_until: showUntil,
+					expired: showUntil?.isBefore(this.now)
 				})
 			}).sort((a, b) => {
 				if (a.state === 'draft' && b.state === 'active') return -1
@@ -46,19 +52,15 @@ export default {
 				if (a.state === 'active' && b.state === 'archived') return -1
 				if (a.state === 'archived' && b.state === 'active') return 1
 				if (a.state === 'active' && b.state === 'active') {
-					if (a.expired && !b.expired) return -1
-					if (!a.expired && b.expired) return 1
+					if (a.expired && !b.expired) return 1
+					if (!a.expired && b.expired) return -1
 				}
 				return a.show_until?.isAfter(b.show_until) ? -1 : 1
 			})
 		}
 	},
 	async created () {
-		this.rawAnnouncements = (await api.call('announcement.list')).map(announcement => {
-			return Object.assign({}, announcement, {
-				show_until: announcement.show_until ? moment(announcement.show_until) : null
-			})
-		})
+		this.rawAnnouncements = (await api.call('announcement.list'))
 	}
 }
 </script>
@@ -120,7 +122,7 @@ export default {
 					&.active::before
 						content: 'active'
 						background-color: $clr-success
-					&.expired::before
+					&.active.expired::before
 						content: 'expired'
 						background-color: $clr-warning
 					&.archived::before

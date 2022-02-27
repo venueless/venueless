@@ -51,9 +51,10 @@ export default {
 		flex-direction: column
 		margin: 4px 0
 		padding: 8px
+		position: relative
 		#btn-close
 			icon-button-style(style: clear)
 			position: absolute
-			top: 8px
+			top: 4px
 			right: 4px
 </style>
