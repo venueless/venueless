@@ -1,3 +1,4 @@
+import datetime as dt
 import uuid
 
 from django.db import models
@@ -39,7 +40,9 @@ class Announcement(models.Model):
         return {
             "id": str(self.id),
             "text": self.text,
-            "show_until": self.show_until.isoformat() if self.show_until else None,
+            "show_until": self.show_until.isoformat()
+            if isinstance(self.show_until, dt.datetime)
+            else self.show_until,
             "state": self.state,
             "is_visible": self.is_visible,
         }

@@ -1,9 +1,11 @@
+import datetime as dt
 import uuid
 from contextlib import asynccontextmanager
 
 import pytest
 from channels.db import database_sync_to_async
 from channels.testing import WebsocketCommunicator
+from django.utils.timezone import now
 
 from tests.utils import get_token
 from venueless.core.models import Announcement
@@ -82,6 +84,7 @@ async def test_announcement_lifecycle(chat_room, world):
                     {
                         "text": "Test announcement",
                         "state": "draft",
+                        "show_until": (now() + dt.timedelta(days=2)).isoformat(),
                     },
                 ]
             )
