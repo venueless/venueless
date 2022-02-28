@@ -2,7 +2,6 @@
 
 import Vue from 'vue'
 import moment from 'moment'
-import api from 'lib/api'
 
 export default {
 	namespaced: true,

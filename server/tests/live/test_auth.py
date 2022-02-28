@@ -43,7 +43,7 @@ async def test_auth_with_client_id(world, announcement, inactive_announcement):
             "id": str(announcement.id),
             "text": announcement.text,
             "show_until": None,
-            "is_active": True,
+            "state": "active",
             "is_visible": True,
         }
 

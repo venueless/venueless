@@ -199,7 +199,7 @@ def planned_usage(world_data):
 def create_announcement(active):
     world = World.objects.all().get()
     announcement = Announcement.objects.create(
-        world=world, is_active=active, text="Test announcement"
+        world=world, state=Announcement.States.ACTIVE if active else Announcement.States.ARCHIVED, text="Test announcement"
     )
     return announcement
 
