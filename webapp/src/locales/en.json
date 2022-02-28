@@ -13,7 +13,7 @@
   "App:fatal-connection-error:auth.expired_token:action": "Clear token (logout)",
   "App:fatal-connection-error:auth.expired_token:headline": "You are using an expired token.",
   "App:fatal-connection-error:auth.expired_token:text": "Please use the current link provided by your event organizer.",
-  "App:fatal-connection-error:connection.replaced:action": "Continue (logout)",
+  "App:fatal-connection-error:connection.replaced:action": "Continue (disconnect other device)",
   "App:fatal-connection-error:connection.replaced:headline": "You opened this event on a new device or tab.",
   "App:fatal-connection-error:else:headline": "Connection refused",
   "App:fatal-connection-error:world.unknown_world:headline": "Event not found",
