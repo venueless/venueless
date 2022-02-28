@@ -147,6 +147,7 @@ class World(VersionedModel):
         return f"{self.id} ({self.title})"
 
     def decode_token(self, token, allow_raise=False):
+        exc = None
         for jwt_config in self.config["JWT_secrets"]:
             secret = jwt_config["secret"]
             audience = jwt_config["audience"]
@@ -159,9 +160,13 @@ class World(VersionedModel):
                     audience=audience,
                     issuer=issuer,
                 )
-            except jwt.exceptions.InvalidTokenError:
+            except jwt.exceptions.ExpiredSignatureError:
                 if allow_raise:
                     raise
+            except jwt.exceptions.InvalidTokenError as e:
+                exc = e
+        if exc and allow_raise:
+            raise exc
 
     def has_permission_implicit(
         self, *, traits, permissions: List[Permission], room=None
