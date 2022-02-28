@@ -62,7 +62,9 @@ class AuthModule(BaseModule):
             kwargs["client_id"] = client_id
         else:
             try:
-                token = self.consumer.world.decode_token(body["token"], allow_raise=True)
+                token = self.consumer.world.decode_token(
+                    body["token"], allow_raise=True
+                )
             except jwt.exceptions.ExpiredSignatureError:
                 async with statsd() as s:
                     s.increment(
