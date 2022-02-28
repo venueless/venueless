@@ -20,7 +20,7 @@ import { emojiPlugin } from 'lib/emoji'
 import features from 'features'
 import config from 'config'
 
-async function init () {
+async function init (token) {
 	Vue.config.productionTip = false
 	Vue.use(Buntpapier)
 	Vue.use(Vuelidate)
@@ -42,16 +42,10 @@ async function init () {
 	store.commit('setUserLocale', i18n.resolvedLanguage)
 	store.dispatch('updateUserTimezone', localStorage.userTimezone || moment.tz.guess())
 
-	const token = new URLSearchParams(router.currentRoute.hash.substr(1)).get('token')
 	if (token) {
-		if (!config.externalAuthUrl) {
-			localStorage.token = token
-		}
+		localStorage.token = token
 		router.replace(router.currentRoute.path)
 		store.dispatch('login', {token})
-	} else if (config.externalAuthUrl) {
-		window.location = config.externalAuthUrl
-		return
 	} else if (localStorage.token) {
 		store.dispatch('login', {token: localStorage.token})
 	} else {
@@ -75,7 +69,13 @@ async function init () {
 	})
 }
 
-init()
+const token = new URLSearchParams(window.location.hash.substring(1)).get('token')
+
+if (config.externalAuthUrl && !token) {
+	window.location = config.externalAuthUrl
+} else {
+	init(token)
+}
 
 // remove all old service workers
 navigator.serviceWorker?.getRegistrations().then((registrations) => {
