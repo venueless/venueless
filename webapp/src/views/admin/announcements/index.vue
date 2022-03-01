@@ -71,6 +71,7 @@ export default {
 	display: flex
 	flex-direction: column
 	min-height: 0
+	min-width: 0
 	#btn-create
 		themed-button-primary()
 	h2
@@ -90,6 +91,7 @@ export default {
 				&.router-link-exact-active
 					background-color: $clr-grey-200
 			.state
+				flex: none
 				width: 80px
 				padding: 0 4px 0 16px
 				text-align: center
@@ -97,6 +99,7 @@ export default {
 				flex: auto
 				ellipsis()
 			.show-until
+				flex: none
 				width: 160px
 			.announcement
 				.active

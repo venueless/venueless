@@ -21,7 +21,6 @@
 </template>
 <script>
 // TODO
-// - disable textarea when active?
 // - clean up that moment(show_until) mess
 // - warn if show_until is in the past
 import moment from 'moment'
