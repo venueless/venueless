@@ -9,7 +9,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("core", "0054_pretalx_permissions_data"),
+        ("core", "0055_world_external_auth_url"),
     ]
 
     operations = [
