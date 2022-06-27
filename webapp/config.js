@@ -13,7 +13,7 @@ if (ENV_DEVELOPMENT || !window.venueless) {
 		},
 		defaultLocale: 'en',
 		locales: ['en', 'de', 'pt_BR'],
-		timetravelTo: '2020-04-17T10:49:28.975Z'
+		timetravelTo: '2021-06-24T10:49:28.975Z'
 	}
 } else {
 	// load from index.html as `window.venueless = {…}`

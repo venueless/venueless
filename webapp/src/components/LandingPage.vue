@@ -2,6 +2,10 @@
 .c-landing-page(v-scrollbar.y="", :style="{'--header-background': module.config.header_background_color}")
 	.hero
 		img(:src="module.config.header_image")
+	.sponsors.splide(ref="sponsors")
+		.splide__track
+			ul.splide__list
+				li.splide__slide(v-for="sponsor of sponsors"): img.sponsor(:src="sponsor.logo", :alt="sponsor.name")
 	.content
 		markdown-content(:markdown="module.config.content")
 		.sidebar
@@ -10,7 +14,7 @@
 				router-link(:to="{name: 'schedule'}") full schedule
 			.sessions
 				.session(v-for="{session, state}, index of nextSessions", :class="{live: state.isLive}")
-					img.preview(:src="`https://picsum.photos/64?v=${index}`")
+					img.preview(:src="`https://xsgames.co/randomusers/assets/avatars/female/${index + 1}.jpg`")
 					.info
 						.title-time
 							.title {{ $localize(session.title) }}
@@ -18,18 +22,23 @@
 						.speakers-room
 							.speakers {{ session.speakers ? session.speakers.map(s => s.name).join(', ') : '' }}
 							.room {{ $localize(session.room.name) }}
-			//- .header
-			//- 	h3 Sponsors
-			//- 	router-link(:to="{name: 'schedule'}") all sponsors
-			//- .sponsors
-			//- 	.sponsor(v-for="sponsor of sponsors")
-			//- 		img(:src="sponsor.logo")
 
 </template>
 <script>
 import { mapState, mapGetters } from 'vuex'
+// import Swiper, { Autoplay, Navigation, Pagination, Mousewheel, Keyboard, A11y } from 'swiper'
+// // exported paths don't seem to work, webpack too old?
+// // import { Swiper, SwiperSlide } from 'swiper/vue/swiper-vue.js'
+// import 'swiper/swiper.min.css'
+// import 'swiper/modules/navigation/navigation.min.css'
+// // import 'swiper/modules/pagination/pagination.min.css"'
+// // import 'swiper/modules/scrollbar/scrollbar.min.css'
+import '@splidejs/splide/dist/css/splide.min.css'
+import Splide from '@splidejs/splide'
 import moment from 'lib/timetravelMoment'
 import MarkdownContent from 'components/MarkdownContent'
+
+// Swiper.use([Autoplay, Navigation, Pagination, Mousewheel, Keyboard, A11y])
 
 export default {
 	components: { MarkdownContent },
@@ -45,6 +54,33 @@ export default {
 			}, {
 				name: 'pretalx',
 				logo: '/sponsors/pretalx.svg'
+			}, {
+				name: 'assegai',
+				logo: '/sponsors/assegai.webp'
+			}, {
+				name: 'feisar',
+				logo: '/sponsors/feisar.webp'
+			}, {
+				name: 'auricom',
+				logo: '/sponsors/auricom.webp'
+			}, {
+				name: 'qirex',
+				logo: '/sponsors/qirex.webp'
+			}, {
+				name: 'tigron',
+				logo: '/sponsors/tigron.webp'
+			}, {
+				name: 'pirhana',
+				logo: '/sponsors/pirhana.webp'
+			}, {
+				name: 'mirage',
+				logo: '/sponsors/mirage.webp'
+			}, {
+				name: 'jebs',
+				logo: '/sponsors/jebs.webp'
+			}, {
+				name: 'kerbodyne',
+				logo: '/sponsors/kerbodyne.webp'
 			}]
 		}
 	},
@@ -54,17 +90,17 @@ export default {
 		nextSessions () {
 			if (!this.sessions) return
 			const getSessionState = (session) => {
-				if (session.room.schedule_data?.session === session.id) {
-					return {
-						isLive: true,
-						timeString: 'live now'
-					}
-				}
 				if (session.start.isBefore(this.now)) {
 					return {
-						timeString: 'starting soon'
+						isLive: true,
+						timeString: 'live'
 					}
 				}
+				// if (session.start.isBefore(this.now)) {
+				// 	return {
+				// 		timeString: 'starting soon'
+				// 	}
+				// }
 				return {
 					timeString: moment.duration(session.start.diff(this.now)).humanize(true).replace('minutes', 'mins')
 				}
@@ -79,6 +115,24 @@ export default {
 			}
 			return sessions
 		}
+	},
+	mounted () {
+		// const swiper = new Swiper(this.$refs.sponsors, {
+		// 	loop: true,
+		// 	loopedSlides: 50,
+		// 	slidesPerView: 'auto',
+		// 	// centeredSlides: true,
+		// 	// spaceBetween: 52,
+		// 	// slidesOffsetBefore: 32,
+		// 	// watchOverflow: true
+		// })
+		new Splide(this.$refs.sponsors, {
+			type: 'loop',
+			autoWidth: true,
+			clones: 50,
+			focus: 'center',
+			// padding: '16px 0'
+		}).mount()
 	}
 }
 </script>
@@ -170,12 +224,20 @@ export default {
 			&.live .time
 				background-color: $clr-danger
 	.sponsors
+		padding: 8px 0 16px 0
 		.sponsor
-			display: flex
-			justify-content: center
-			padding: 16px
-			img
-				width: 90%
+			height: 10vh
+			max-height: 10vh
+			max-width: 90vw
+			object-fit: contain
+			user-select: none
+			margin: 0 24px 16px 24px
+		// .splide__pagination
+		.splide__pagination__page.is-active
+			background-color: var(--clr-primary)
+		.splide__arrow
+			top: calc(50% - 12px)
+
 	+below('s')
 		.hero
 			height: auto
