@@ -7,14 +7,16 @@
 			ul.splide__list
 				li.splide__slide(v-for="sponsor of sponsors"): img.sponsor(:src="sponsor.logo", :alt="sponsor.name")
 	.content
-		markdown-content(:markdown="module.config.content")
-		.sidebar
+		.schedule
 			.header
 				h3 Schedule
 				router-link(:to="{name: 'schedule'}") full schedule
 			.sessions
 				.session(v-for="{session, state}, index of nextSessions", :class="{live: state.isLive}")
-					img.preview(:src="`https://xsgames.co/randomusers/assets/avatars/female/${index + 1}.jpg`")
+					.speaker-avatars
+						template(v-for="speaker of session.speakers")
+							img(v-if="speaker.avatar", :src="speaker.avatar")
+							identicon(v-else, :id="speaker.name")
 					.info
 						.title-time
 							.title {{ $localize(session.title) }}
@@ -22,26 +24,28 @@
 						.speakers-room
 							.speakers {{ session.speakers ? session.speakers.map(s => s.name).join(', ') : '' }}
 							.room {{ $localize(session.room.name) }}
-
+		.speakers
+			.header
+				h3 Speakers
+				router-link(:to="{name: 'speakers'}") full list
+			.speakers-list
+				.speaker(v-for="speaker of speakers")
+					img.avatar(v-if="speaker.avatar", :src="speaker.avatar")
+					identicon(v-else, :id="speaker.name")
+					.name {{ speaker.name }}
 </template>
 <script>
 import { mapState, mapGetters } from 'vuex'
-// import Swiper, { Autoplay, Navigation, Pagination, Mousewheel, Keyboard, A11y } from 'swiper'
-// // exported paths don't seem to work, webpack too old?
-// // import { Swiper, SwiperSlide } from 'swiper/vue/swiper-vue.js'
-// import 'swiper/swiper.min.css'
-// import 'swiper/modules/navigation/navigation.min.css'
-// // import 'swiper/modules/pagination/pagination.min.css"'
-// // import 'swiper/modules/scrollbar/scrollbar.min.css'
 import '@splidejs/splide/dist/css/splide.min.css'
 import Splide from '@splidejs/splide'
 import moment from 'lib/timetravelMoment'
+import Identicon from 'components/Identicon'
 import MarkdownContent from 'components/MarkdownContent'
 
 // Swiper.use([Autoplay, Navigation, Pagination, Mousewheel, Keyboard, A11y])
 
 export default {
-	components: { MarkdownContent },
+	components: { Identicon, MarkdownContent },
 	props: {
 		module: Object
 	},
@@ -86,6 +90,7 @@ export default {
 	},
 	computed: {
 		...mapState(['now']),
+		...mapState('schedule', ['schedule']),
 		...mapGetters('schedule', ['sessions']),
 		nextSessions () {
 			if (!this.sessions) return
@@ -114,18 +119,12 @@ export default {
 				sessions.push({session, state: getSessionState(session)})
 			}
 			return sessions
+		},
+		speakers () {
+			return this.schedule?.speakers
 		}
 	},
 	mounted () {
-		// const swiper = new Swiper(this.$refs.sponsors, {
-		// 	loop: true,
-		// 	loopedSlides: 50,
-		// 	slidesPerView: 'auto',
-		// 	// centeredSlides: true,
-		// 	// spaceBetween: 52,
-		// 	// slidesOffsetBefore: 32,
-		// 	// watchOverflow: true
-		// })
 		new Splide(this.$refs.sponsors, {
 			type: 'loop',
 			autoWidth: true,
@@ -151,6 +150,10 @@ export default {
 	.content
 		display: flex
 		justify-content: center
+		gap: 32px
+		> *
+			flex: 1
+			max-width: 640px
 	.markdown-content
 		padding: 0 16px
 		width: 100%
@@ -164,8 +167,6 @@ export default {
 		h3
 			margin: 0
 			line-height: 56px
-	.sidebar
-		width: 420px
 	.sessions
 		display: flex
 		flex-direction: column
@@ -181,11 +182,16 @@ export default {
 				border-bottom: border-separator()
 			&:hover
 				background-color: $clr-grey-100
-			.preview
-				border-radius: 50%
-				height: 48px
-				width: 48px
-				margin: 0 8px 0 4px
+			.speaker-avatars
+				> *:not(:first-child)
+					margin-left: -28px
+				img
+					background-color: $clr-white
+					border-radius: 50%
+					height: 48px
+					width: 48px
+					margin: 0 8px 0 4px
+					object-fit: cover
 			.info
 				flex: auto
 				min-width: 0
@@ -223,6 +229,29 @@ export default {
 				text-align: right
 			&.live .time
 				background-color: $clr-danger
+	.speakers-list
+		display: flex
+		flex-wrap: wrap
+		.speaker
+			display: flex
+			flex-direction: column
+			align-items: center
+			gap: 4px
+			width: 124px
+			cursor: pointer
+			padding: 12px 2px
+			&:hover
+				background-color: $clr-grey-200
+			img
+				border-radius: 50%
+				height: 92px
+				width: @height
+				object-fit: cover
+			.name
+				text-align: center
+				white-space: break-word
+				font-weight: 500
+				font-size: 16px
 	.sponsors
 		padding: 8px 0 16px 0
 		.sponsor
