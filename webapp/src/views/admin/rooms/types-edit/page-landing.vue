@@ -6,9 +6,11 @@
 	bunt-input(v-model="modules['page.landing'].config.header_background_color", label="Header background color", name="headerbackgroundcolor")
 </template>
 <script>
+import UploadUrlInput from 'components/UploadUrlInput'
 import mixin from './mixin'
 
 export default {
+	components: { UploadUrlInput },
 	mixins: [mixin]
 }
 </script>
