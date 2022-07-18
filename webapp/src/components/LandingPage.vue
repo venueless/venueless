@@ -5,11 +5,13 @@
 	.sponsors.splide(ref="sponsors")
 		.splide__track
 			ul.splide__list
-				li.splide__slide(v-for="sponsor of sponsors"): img.sponsor(:src="sponsor.logo", :alt="sponsor.name")
+				li.splide__slide(v-for="sponsor of sponsors")
+					router-link(:to="{name: 'exhibitor', params: {exhibitorId: sponsor.id}}")
+						img.sponsor(:src="sponsor.logo", :alt="sponsor.name")
 	.content
 		.schedule
 			.header
-				h3 Schedule
+				h3 Sessions Happening Soon
 				router-link(:to="{name: 'schedule'}") full schedule
 			.sessions
 				.session(v-for="{session, state}, index of nextSessions", :class="{live: state.isLive}")
@@ -26,7 +28,7 @@
 							.room {{ $localize(session.room.name) }}
 		.speakers
 			.header
-				h3 Speakers
+				h3 Our Speakers
 				router-link(:to="{name: 'speakers'}") full list
 			.speakers-list
 				.speaker(v-for="speaker of speakers")
@@ -38,6 +40,7 @@
 import { mapState, mapGetters } from 'vuex'
 import '@splidejs/splide/dist/css/splide.min.css'
 import Splide from '@splidejs/splide'
+import api from 'lib/api'
 import moment from 'lib/timetravelMoment'
 import Identicon from 'components/Identicon'
 import MarkdownContent from 'components/MarkdownContent'
@@ -52,44 +55,11 @@ export default {
 	data () {
 		return {
 			moment,
-			sponsors: [{
-				name: 'pretix',
-				logo: '/sponsors/pretix.svg'
-			}, {
-				name: 'pretalx',
-				logo: '/sponsors/pretalx.svg'
-			}, {
-				name: 'assegai',
-				logo: '/sponsors/assegai.webp'
-			}, {
-				name: 'feisar',
-				logo: '/sponsors/feisar.webp'
-			}, {
-				name: 'auricom',
-				logo: '/sponsors/auricom.webp'
-			}, {
-				name: 'qirex',
-				logo: '/sponsors/qirex.webp'
-			}, {
-				name: 'tigron',
-				logo: '/sponsors/tigron.webp'
-			}, {
-				name: 'pirhana',
-				logo: '/sponsors/pirhana.webp'
-			}, {
-				name: 'mirage',
-				logo: '/sponsors/mirage.webp'
-			}, {
-				name: 'jebs',
-				logo: '/sponsors/jebs.webp'
-			}, {
-				name: 'kerbodyne',
-				logo: '/sponsors/kerbodyne.webp'
-			}]
+			sponsors: null
 		}
 	},
 	computed: {
-		...mapState(['now']),
+		...mapState(['now', 'rooms']),
 		...mapState('schedule', ['schedule']),
 		...mapGetters('schedule', ['sessions']),
 		nextSessions () {
@@ -124,7 +94,12 @@ export default {
 			return this.schedule?.speakers
 		}
 	},
-	mounted () {
+	async mounted () {
+		// TODO make this configurable?
+		const sponsorRoom = this.rooms.find(r => r.modules[0].type === 'exhibition.native')
+		if (!sponsorRoom) return
+		this.sponsors = (await api.call('exhibition.list', {room: sponsorRoom.id})).exhibitors
+		await this.$nextTick()
 		new Splide(this.$refs.sponsors, {
 			type: 'loop',
 			autoWidth: true,
@@ -183,6 +158,7 @@ export default {
 			&:hover
 				background-color: $clr-grey-100
 			.speaker-avatars
+				flex: none
 				> *:not(:first-child)
 					margin-left: -28px
 				img
