@@ -51,6 +51,7 @@ User objects currently contain the following properties:
 
 * ``id``
 * ``profile``
+* ``pretalx_id`` (string) Only set on speakers added by pretalx or other scheduling tools
 * ``badges`` list of user-visible badges to show for this user (i.e. "orga team member")
 * ``moderation_state`` (``""``, ``"silenced"``, or ``"banned"``). Only set on *other* users' profiles if you're allowed
   to perform silencing and banning.
@@ -83,6 +84,11 @@ You can also fetch multiple profiles at once::
 If one of the user does not exist, it will not be part of the response, but there will be no error message.
 The maximum number of users that can be fetched in one go is 100.
 
+Instead of IDs, you can also pass a set of ``pretalx_id`` values::
+
+    => ["user.fetch", 123, {"pretalx_ids": ["DKJ2E", "24"]}]
+    <- ["success", 123, {"DKJ2E": {"id": "1234", "pretalx_id": "DKJ2E", "profile": {…}}, "5679": {…}}]
+
 Profile updates
 ---------------
 
@@ -106,13 +112,14 @@ Searching users
 
 You can search all users to get a 1-based paginated list like this::
 
-    => ["user.list.search", 123, {"search_term": "", "page": 1}]
+    => ["user.list.search", 123, {"search_term": "", "badge": null, "page": 1}]
     <- ["success", 123, {"results": [{"id": "1234", "profile": {…}}, "5679": {…}], "isLastPage": true}]
 
 The size of the pages can be configured in the world config with ``user_list.page_size``. The default is 20.
 An empty list will be returned if ``search_term`` is shorter than ``user_list.search_min_chars``.
 If ``user_list.search_min_chars`` is set to 0, which is also the default, an empty search term will return a paginated
 list of all users.
+If you set ``badge``, only users with that badge will be retunred.
 Invalid page numbers return an empty list.
 If there are no more results to be fetched the ``isLastPage`` will be set to true.
 
