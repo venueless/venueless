@@ -86,8 +86,8 @@ The maximum number of users that can be fetched in one go is 100.
 
 Instead of IDs, you can also pass a set of ``pretalx_id`` values::
 
-    => ["user.fetch", 123, {"pretalx_ids": ["23", "24"]}]
-    <- ["success", 123, {"23": {"id": "1234", "pretalx_id": "23", "profile": {…}}, "5679": {…}}]
+    => ["user.fetch", 123, {"pretalx_ids": ["DKJ2E", "24"]}]
+    <- ["success", 123, {"DKJ2E": {"id": "1234", "pretalx_id": "DKJ2E", "profile": {…}}, "5679": {…}}]
 
 Profile updates
 ---------------
