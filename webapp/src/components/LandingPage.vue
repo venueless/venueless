@@ -29,7 +29,7 @@
 		.speakers
 			.header
 				h3 Our Speakers
-				router-link(:to="{name: 'speakers'}") full list
+				router-link(:to="{name: 'schedule:speakers'}") full list
 			.speakers-list
 				.speaker(v-for="speaker of speakers")
 					img.avatar(v-if="speaker.avatar", :src="speaker.avatar")
