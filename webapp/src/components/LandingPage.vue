@@ -30,11 +30,12 @@
 			.header
 				h3 Our Speakers
 				router-link(:to="{name: 'schedule:speakers'}") full list
-			.speakers-list
-				.speaker(v-for="speaker of speakers")
+			.speakers-list(v-if="speakers")
+				.speaker(v-for="speaker of speakers.slice(0, 32)")
 					img.avatar(v-if="speaker.avatar", :src="speaker.avatar")
 					identicon(v-else, :id="speaker.name")
 					.name {{ speaker.name }}
+				router-link(:to="{name: 'schedule:speakers'}").additional-speakers(v-if="speakers.length > 32") and {{ speakers.length - 32 }} more
 </template>
 <script>
 import { mapState, mapGetters } from 'vuex'
@@ -91,6 +92,7 @@ export default {
 			return sessions
 		},
 		speakers () {
+			// sort alphabetically by name ?
 			return this.schedule?.speakers
 		}
 	},
@@ -228,6 +230,11 @@ export default {
 				white-space: break-word
 				font-weight: 500
 				font-size: 16px
+		.additional-speakers
+			font-size: 18px
+			font-weight: 600
+			align-self: center
+			margin: 0 auto
 	.sponsors
 		padding: 8px 0 16px 0
 		.sponsor
