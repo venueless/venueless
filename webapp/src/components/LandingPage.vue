@@ -233,7 +233,7 @@ export default {
 		.sponsor
 			height: 10vh
 			max-height: 10vh
-			max-width: 90vw
+			max-width: unquote("min(260px, 90vw)")
 			object-fit: contain
 			user-select: none
 			margin: 0 24px 16px 24px
