@@ -10,8 +10,6 @@
 		.sessions
 			h2 Sessions
 			session-list(:sessions="sessions")
-
-	
 </template>
 <script>
 import { mapGetters } from 'vuex'

@@ -15,7 +15,6 @@
 </template>
 <script>
 import { mapGetters, mapState } from 'vuex'
-import api from 'lib/api'
 
 export default {
 	data () {
