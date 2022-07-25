@@ -47,7 +47,7 @@
 				h3 Our Speakers
 				router-link(:to="{name: 'schedule:speakers'}") full list
 			.speakers-list(v-if="speakers")
-				.speaker(v-for="speaker of speakers.slice(0, 32)")
+				router-link.speaker(v-for="speaker of speakers.slice(0, 32)", :to="speaker.attendee ? {name: '', params: {}} : { name: 'schedule:speaker', params: { speakerId: speaker.code } }")
 					img.avatar(v-if="speaker.avatar", :src="speaker.avatar")
 					identicon(v-else, :id="speaker.name")
 					.name {{ speaker.name }}
@@ -239,6 +239,7 @@ export default {
 			width: 124px
 			cursor: pointer
 			padding: 12px 2px
+			color: $clr-primary-text-light
 			&:hover
 				background-color: $clr-grey-200
 			img
