@@ -11,6 +11,22 @@
 	.content
 		.schedule
 			.header
+				h3 Featured Sessions
+				router-link(:to="{name: 'schedule'}") full schedule
+			.sessions
+				.session(v-for="{session, state}, index of featuredSessions", :class="{live: state.isLive}")
+					.speaker-avatars
+						template(v-for="speaker of session.speakers")
+							img(v-if="speaker.avatar", :src="speaker.avatar")
+							identicon(v-else, :id="speaker.name")
+					.info
+						.title-time
+							.title {{ $localize(session.title) }}
+							.time {{ state.timeString }}
+						.speakers-room
+							.speakers {{ session.speakers ? session.speakers.map(s => s.name).join(', ') : '' }}
+							.room {{ $localize(session.room.name) }}
+			.header
 				h3 Sessions Happening Soon
 				router-link(:to="{name: 'schedule'}") full schedule
 			.sessions
@@ -46,8 +62,6 @@ import moment from 'lib/timetravelMoment'
 import Identicon from 'components/Identicon'
 import MarkdownContent from 'components/MarkdownContent'
 
-// Swiper.use([Autoplay, Navigation, Pagination, Mousewheel, Keyboard, A11y])
-
 export default {
 	components: { Identicon, MarkdownContent },
 	props: {
@@ -63,31 +77,21 @@ export default {
 		...mapState(['now', 'rooms']),
 		...mapState('schedule', ['schedule']),
 		...mapGetters('schedule', ['sessions']),
+		featuredSessions () {
+			if (!this.sessions) return
+			// return this.sessions.filter(session => session.featured)
+			// TODO remove mock data
+			return this.sessions.slice(0, 3).map(session => ({session, state: this.getSessionState(session)}))
+		},
 		nextSessions () {
 			if (!this.sessions) return
-			const getSessionState = (session) => {
-				if (session.start.isBefore(this.now)) {
-					return {
-						isLive: true,
-						timeString: 'live'
-					}
-				}
-				// if (session.start.isBefore(this.now)) {
-				// 	return {
-				// 		timeString: 'starting soon'
-				// 	}
-				// }
-				return {
-					timeString: moment.duration(session.start.diff(this.now)).humanize(true).replace('minutes', 'mins')
-				}
-			}
 			// current or next sessions per room
 			const sessions = []
 			// TODO filter out sessions with no venueless room?
 			for (const session of this.sessions) {
 				if (!session.room) continue
 				if (session.end.isBefore(this.now) || sessions.reduce((acc, s) => s.session.room === session.room ? ++acc : acc, 0) >= 2) continue
-				sessions.push({session, state: getSessionState(session)})
+				sessions.push({session, state: this.getSessionState(session)})
 			}
 			return sessions
 		},
@@ -108,6 +112,24 @@ export default {
 			focus: 'center',
 			// padding: '16px 0'
 		}).mount()
+	},
+	methods: {
+		getSessionState (session) {
+			if (session.start.isBefore(this.now)) {
+				return {
+					isLive: true,
+					timeString: 'live'
+				}
+			}
+			// if (session.start.isBefore(this.now)) {
+			// 	return {
+			// 		timeString: 'starting soon'
+			// 	}
+			// }
+			return {
+				timeString: moment.duration(session.start.diff(this.now)).humanize(true).replace('minutes', 'mins')
+			}
+		}
 	}
 }
 </script>
