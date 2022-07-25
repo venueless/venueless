@@ -3,7 +3,7 @@
 	bunt-progress-circular(v-if="!speakers || !schedule", size="huge", :page="true")
 	.speakers(v-else)
 		scrollbars(y="")
-			router-link.speaker(v-for="speaker of speakers", :to="{ name: 'schedule:speaker', params: { speakerId: speaker.code } }")
+			router-link.speaker(v-for="speaker of speakers", :to="speaker.attendee ? {name: '', params: {}} : { name: 'schedule:speaker', params: { speakerId: speaker.code } }")
 				img.avatar(v-if="speaker.avatar", :src="speaker.avatar")
 				identicon(v-else, :id="speaker.name")
 				.content
@@ -15,6 +15,7 @@
 </template>
 <script>
 import { mapGetters, mapState } from 'vuex'
+import api from 'lib/api'
 
 export default {
 	data () {
@@ -28,9 +29,11 @@ export default {
 	},
 	async created () {
 		if (!this.$store.getters['schedule/pretalxApiBaseUrl']) return
-		this.speakers = (await (await fetch(`${this.$store.getters['schedule/pretalxApiBaseUrl']}/speakers/?limit=999`)).json()).results
+		this.speakers = (await (await fetch(`${this.$store.getters['schedule/pretalxApiBaseUrl']}/speakers/?limit=999`)).json()).results.sort((a, b) => a.name.localeCompare(b.name))
+		// const speakersToAttendee = await api.call('user.fetch', {pretalx_ids: this.speakers.map(speaker => speaker.code)})
 		for (const speaker of this.speakers) {
 			speaker.sessions = speaker.submissions.map(submission => this.sessionsLookup[submission])
+			// speaker.attendee = speakersToAttendee[speaker.code]
 		}
 	},
 	async mounted () {

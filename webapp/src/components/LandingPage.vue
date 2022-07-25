@@ -92,8 +92,7 @@ export default {
 			return sessions
 		},
 		speakers () {
-			// sort alphabetically by name ?
-			return this.schedule?.speakers
+			return this.schedule?.speakers.slice().sort((a, b) => a.name.localeCompare(b.name))
 		}
 	},
 	async mounted () {
