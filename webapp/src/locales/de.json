@@ -364,6 +364,7 @@
   "preferences/index:interface-language:header": "Interface-Sprache",
   "Questions:asking-form:mod-approve-question:label": "bestätigen",
   "Questions:asking-form:mod-delete-question:label": "löschen",
+  "User:label:deleted": "Gelöschter Benutzer",
   "User:state:banned": "verbannt",
   "RoomsSidebar:posters-headline:text": "Poster",
   "RoomsSidebar:posters-manage:label": "Verwalte"

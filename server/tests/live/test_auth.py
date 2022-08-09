@@ -205,6 +205,7 @@ async def test_update_user():
             {
                 "profile": {"display_name": "Cool User"},
                 "badges": [],
+                "deleted": False,
                 "pretalx_id": None,
                 "inactive": False,
                 "id": user_id,
@@ -379,6 +380,7 @@ async def test_fetch_user():
                 "id": user_id,
                 "profile": {"display_name": "Cool User"},
                 "badges": [],
+                "deleted": False,
                 "pretalx_id": None,
                 "inactive": False,
             },
@@ -393,6 +395,7 @@ async def test_fetch_user():
                 user_id: {
                     "id": user_id,
                     "badges": [],
+                    "deleted": False,
                     "pretalx_id": None,
                     "inactive": False,
                     "profile": {"display_name": "Cool User"},
@@ -416,6 +419,7 @@ async def test_fetch_user():
                 "1337": {
                     "id": user_id,
                     "badges": [],
+                    "deleted": False,
                     "pretalx_id": "1337",
                     "inactive": False,
                     "profile": {"display_name": "Cool User"},
@@ -603,8 +607,10 @@ async def test_list_users(world):
                         "id": user_id,
                         "profile": {},
                         "moderation_state": "",
+                        "deleted": False,
                         "inactive": False,
                         "badges": [],
+                        "deleted": False,
                         "pretalx_id": None,
                         "token_id": None,
                     }

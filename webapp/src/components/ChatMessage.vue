@@ -142,6 +142,7 @@ export default {
 			return this.usersLookup[this.message.sender] || {id: this.message.sender, badges: {}}
 		},
 		senderDisplayName () {
+			if (this.sender.deleted) return this.$t('User:label:deleted')
 			return this.sender.profile?.display_name ?? this.message.sender ?? '(unknown user)'
 		},
 		timestamp () {

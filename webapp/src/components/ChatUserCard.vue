@@ -4,15 +4,15 @@
 	.user-card(v-if="!userAction", v-scrollbar.y="", ref="card", @mousedown="showMoreActions=false")
 		avatar(:user="sender", :size="128")
 		.name
-			.online-status(:class="onlineStatus ? 'online' : (onlineStatus === false ? 'offline' : 'unknown')", v-tooltip="onlineStatus ? $t('UserAction:state.online:tooltip') : (onlineStatus === false ? $t('UserAction:state.offline:tooltip') : '')")
-			| {{ sender.profile ? sender.profile.display_name : (sender.id ? sender.id : '(unknown user)') }}
+			.online-status(v-if="!sender.deleted", :class="onlineStatus ? 'online' : (onlineStatus === false ? 'offline' : 'unknown')", v-tooltip="onlineStatus ? $t('UserAction:state.online:tooltip') : (onlineStatus === false ? $t('UserAction:state.offline:tooltip') : '')")
+			| {{ sender.deleted ? $t('User:label:deleted') : (sender.profile ? sender.profile.display_name : (sender.id ? sender.id : '(unknown user)')) }}
 			.ui-badge(v-for="badge in sender.badges") {{ badge }}
 		.fields(v-if="availableFields")
 			.field(v-for="field of availableFields")
 				.label {{ field.label }}
 				.value {{ field.value }}
 		.state {{ userStates.join(', ') }}
-		.actions(v-if="sender.id !== user.id && sender.id")
+		.actions(v-if="sender.id !== user.id && sender.id && !sender.deleted")
 			bunt-button.btn-dm(v-if="hasPermission('world:chat.direct')", @click="openDM") {{ $t('UserAction:action.dm:label') }}
 			bunt-button.btn-call(v-if="hasPermission('world:chat.direct')", @click="startCall") {{ $t('UserAction:action.call:label') }}
 			menu-dropdown(v-model="showMoreActions", :blockBackground="false", @mousedown.native.stop="")
