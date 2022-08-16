@@ -10,10 +10,11 @@
 						img.sponsor(:src="sponsor.logo", :alt="sponsor.name")
 	.content
 		.schedule
-			.header
-				h3 {{ $t('LandingPage:sessions:featured:header') }}
-				bunt-link-button(:to="{name: 'schedule'}") {{ $t('LandingPage:sessions:featured:link') }}
-			session-list(:sessions="featuredSessions")
+			template(v-if="featuredSessions.length")
+				.header
+					h3 {{ $t('LandingPage:sessions:featured:header') }}
+					bunt-link-button(:to="{name: 'schedule'}") {{ $t('LandingPage:sessions:featured:link') }}
+				session-list(:sessions="featuredSessions")
 			.header
 				h3 {{ $t('LandingPage:sessions:next:header') }}
 				bunt-link-button(:to="{name: 'schedule'}") {{ $t('LandingPage:sessions:next:link') }}
@@ -56,9 +57,7 @@ export default {
 		...mapGetters('schedule', ['sessions']),
 		featuredSessions () {
 			if (!this.sessions) return
-			// return this.sessions.filter(session => session.featured)
-			// TODO remove mock data
-			return this.sessions.slice(0, 3)
+			return this.sessions.filter(session => session.featured)
 		},
 		nextSessions () {
 			if (!this.sessions) return
