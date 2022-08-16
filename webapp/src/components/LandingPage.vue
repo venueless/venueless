@@ -10,7 +10,7 @@
 						img.sponsor(:src="sponsor.logo", :alt="sponsor.name")
 	.content
 		.schedule
-			template(v-if="featuredSessions.length")
+			template(v-if="featuredSessions && featuredSessions.length")
 				.header
 					h3 {{ $t('LandingPage:sessions:featured:header') }}
 					bunt-link-button(:to="{name: 'schedule'}") {{ $t('LandingPage:sessions:featured:link') }}
