@@ -28,7 +28,7 @@
 					img.avatar(v-if="speaker.avatar", :src="speaker.avatar")
 					identicon(v-else, :id="speaker.name")
 					.name {{ speaker.name }}
-				router-link(:to="{name: 'schedule:speakers'}").additional-speakers(v-if="speakers.length > 32") {{ $t('LandingPage:speakers:more', {additional_speakers: speakers.length - 32}) }}
+				router-link.additional-speakers(v-if="speakers.length > 32", :to="{name: 'schedule:speakers'}") {{ $t('LandingPage:speakers:more', {additional_speakers: speakers.length - 32}) }}
 </template>
 <script>
 import { mapState, mapGetters } from 'vuex'
