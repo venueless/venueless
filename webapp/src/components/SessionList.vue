@@ -74,6 +74,7 @@ export default {
 			background-color: $clr-grey-100
 		.speaker-avatars
 			flex: none
+			min-width: 8px
 			> *:not(:first-child)
 				margin-left: -28px
 			img

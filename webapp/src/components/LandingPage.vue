@@ -111,9 +111,13 @@ export default {
 		display: flex
 		justify-content: center
 		gap: 32px
+		padding: 0 16px
 		> *
 			flex: 1
 			max-width: 640px
+			min-width: 0
+			display: flex
+			flex-direction: column
 	.markdown-content
 		padding: 0 16px
 		width: 100%
@@ -130,6 +134,7 @@ export default {
 	.speakers-list
 		display: flex
 		flex-wrap: wrap
+		justify-content: center
 		.speaker
 			display: flex
 			flex-direction: column
@@ -156,6 +161,7 @@ export default {
 			font-weight: 600
 			align-self: center
 			margin: 0 auto
+			padding: 16px 32px 64px
 	.sponsors
 		padding: 8px 0 16px 0
 		.sponsor
@@ -171,15 +177,11 @@ export default {
 		.splide__arrow
 			top: calc(50% - 12px)
 
-	+below('s')
-		.hero
-			height: auto
 	+below('m')
 		.content
 			flex-direction: column
 			align-items: center
 			padding: 0 8px
-			.sidebar
-				width: 100%
-				max-width: 560px
+			> *
+				max-width: 100%
 </style>
