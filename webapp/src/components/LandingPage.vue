@@ -1,5 +1,5 @@
 <template lang="pug">
-.c-landing-page(v-scrollbar.y="", :style="{'--header-background': module.config.header_background_color}")
+.c-landing-page(v-scrollbar.y="", :style="{'--header-background-color': module.config.header_background_color, '--header-background-image': `url(${module.config.header_background_image})`}")
 	.hero
 		img(:src="module.config.header_image")
 	.sponsors.splide(ref="sponsors")
@@ -77,7 +77,7 @@ export default {
 	},
 	async mounted () {
 		// TODO make this configurable?
-		const sponsorRoom = this.rooms.find(r => r.modules[0].type === 'exhibition.native')
+		const sponsorRoom = this.rooms.find(r => r.id === this.module.config.sponsor_room_id)
 		if (!sponsorRoom) return
 		this.sponsors = (await api.call('exhibition.list', {room: sponsorRoom.id})).exhibitors
 		await this.$nextTick()
@@ -99,7 +99,11 @@ export default {
 		height: calc(var(--vh) * 30)
 		display: flex
 		justify-content: center
-		background-color: var(--header-background)
+		background-color: var(--header-background-color)
+		background-image: var(--header-background-image)
+		background-repeat: no-repeat
+		background-size: cover
+		background-position: center
 		img
 			height: 100%
 			object-fit: contain
