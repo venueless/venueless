@@ -11,23 +11,23 @@
 	.content
 		.schedule
 			.header
-				h3 Featured Sessions
-				router-link(:to="{name: 'schedule'}") full schedule
+				h3 {{ $t('LandingPage:sessions:featured:header') }}
+				bunt-link-button(:to="{name: 'schedule'}") {{ $t('LandingPage:sessions:featured:link') }}
 			session-list(:sessions="featuredSessions")
 			.header
-				h3 Sessions Happening Soon
-				router-link(:to="{name: 'schedule'}") full schedule
+				h3 {{ $t('LandingPage:sessions:next:header') }}
+				bunt-link-button(:to="{name: 'schedule'}") {{ $t('LandingPage:sessions:next:link') }}
 			session-list(:sessions="nextSessions")
 		.speakers
 			.header
-				h3 Our Speakers
-				router-link(:to="{name: 'schedule:speakers'}") full list
+				h3 {{ $t('LandingPage:speakers:header') }}
+				bunt-link-button(:to="{name: 'schedule:speakers'}") {{ $t('LandingPage:speakers:link') }}
 			.speakers-list(v-if="speakers")
 				router-link.speaker(v-for="speaker of speakers.slice(0, 32)", :to="speaker.attendee ? {name: '', params: {}} : { name: 'schedule:speaker', params: { speakerId: speaker.code } }")
 					img.avatar(v-if="speaker.avatar", :src="speaker.avatar")
 					identicon(v-else, :id="speaker.name")
 					.name {{ speaker.name }}
-				router-link(:to="{name: 'schedule:speakers'}").additional-speakers(v-if="speakers.length > 32") and {{ speakers.length - 32 }} more
+				router-link(:to="{name: 'schedule:speakers'}").additional-speakers(v-if="speakers.length > 32") {{ $t('LandingPage:speakers:more', {additional_speakers: speakers.length - 32}) }}
 </template>
 <script>
 import { mapState, mapGetters } from 'vuex'
@@ -131,6 +131,8 @@ export default {
 		h3
 			margin: 0
 			line-height: 56px
+		.bunt-link-button
+			themed-button-primary()
 	.speakers-list
 		display: flex
 		flex-wrap: wrap
