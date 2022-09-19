@@ -73,7 +73,7 @@ export default {
 			return sessions
 		},
 		speakers () {
-			return this.schedule?.speakers.slice().sort((a, b) => a.name.localeCompare(b.name))
+			return this.schedule?.speakers.slice().sort((a, b) => a.name.split(' ').at(-1).localeCompare(b.name.split(' ').at(-1)))
 		}
 	},
 	async mounted () {
