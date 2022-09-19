@@ -14,6 +14,8 @@
 							.title {{ session.title }}
 </template>
 <script>
+// TODOs
+// search
 import { mapGetters, mapState } from 'vuex'
 
 export default {

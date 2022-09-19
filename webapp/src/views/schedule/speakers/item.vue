@@ -14,6 +14,7 @@
 <script>
 import { mapGetters } from 'vuex'
 import MarkdownContent from 'components/MarkdownContent'
+// TODO remove this again
 import SessionList from 'components/SessionList'
 
 export default {

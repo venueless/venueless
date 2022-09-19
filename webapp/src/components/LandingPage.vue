@@ -14,16 +14,18 @@
 				.header
 					h3 {{ $t('LandingPage:sessions:featured:header') }}
 					bunt-link-button(:to="{name: 'schedule'}") {{ $t('LandingPage:sessions:featured:link') }}
-				session-list(:sessions="featuredSessions")
+				.sessions
+					session(v-for="session of featuredSessions", :session="session")
 			.header
 				h3 {{ $t('LandingPage:sessions:next:header') }}
 				bunt-link-button(:to="{name: 'schedule'}") {{ $t('LandingPage:sessions:next:link') }}
-			session-list(:sessions="nextSessions")
-		.speakers
+			.sessions
+				session(v-for="session of nextSessions", :session="session")
+		.speakers(v-if="speakers")
 			.header
-				h3 {{ $t('LandingPage:speakers:header') }}
+				h3 {{ $t('LandingPage:speakers:header', {speakers: speakers.length}) }}
 				bunt-link-button(:to="{name: 'schedule:speakers'}") {{ $t('LandingPage:speakers:link') }}
-			.speakers-list(v-if="speakers")
+			.speakers-list
 				router-link.speaker(v-for="speaker of speakers.slice(0, 32)", :to="speaker.attendee ? {name: '', params: {}} : { name: 'schedule:speaker', params: { speakerId: speaker.code } }")
 					img.avatar(v-if="speaker.avatar", :src="speaker.avatar")
 					identicon(v-else, :id="speaker.name")
@@ -38,10 +40,10 @@ import api from 'lib/api'
 import moment from 'lib/timetravelMoment'
 import Identicon from 'components/Identicon'
 import MarkdownContent from 'components/MarkdownContent'
-import SessionList from 'components/SessionList'
+import Session from 'components/schedule/Session'
 
 export default {
-	components: { Identicon, MarkdownContent, SessionList },
+	components: { Identicon, MarkdownContent, Session },
 	props: {
 		module: Object
 	},
@@ -93,9 +95,9 @@ export default {
 <style lang="stylus">
 .c-landing-page
 	flex: auto
-	background-color: $clr-white
+	background-color: $clr-grey-50
 	.hero
-		height: calc(var(--vh) * 30)
+		height: calc(var(--vh) * 20)
 		display: flex
 		justify-content: center
 		background-color: var(--header-background-color)
@@ -105,6 +107,7 @@ export default {
 		background-position: center
 		img
 			height: 100%
+			max-width: 100%
 			object-fit: contain
 	.content
 		display: flex
@@ -113,7 +116,6 @@ export default {
 		padding: 0 16px
 		> *
 			flex: 1
-			max-width: 640px
 			min-width: 0
 			display: flex
 			flex-direction: column
@@ -126,16 +128,25 @@ export default {
 		justify-content: space-between
 		align-items: baseline
 		height: 56px
-		padding: 0 4px
 		h3
 			margin: 0
 			line-height: 56px
 		.bunt-link-button
 			themed-button-primary()
+	.schedule
+		max-width: 960px
+		.header
+			padding: 0 8px
+	.speakers
+		max-width: calc(124px * 3 + 2px)
 	.speakers-list
 		display: flex
 		flex-wrap: wrap
 		justify-content: center
+		background-color: $clr-white
+		border-radius: 6px
+		border: border-separator()
+		margin: 8px 0
 		.speaker
 			display: flex
 			flex-direction: column
@@ -143,7 +154,8 @@ export default {
 			gap: 4px
 			width: 124px
 			cursor: pointer
-			padding: 12px 2px
+			padding: 12px 4px
+			box-sizing: border-box
 			color: $clr-primary-text-light
 			&:hover
 				background-color: $clr-grey-200
@@ -156,22 +168,28 @@ export default {
 				text-align: center
 				white-space: break-word
 				font-weight: 500
-				font-size: 16px
+				font-size: 14px
 		.additional-speakers
 			font-size: 18px
 			font-weight: 600
 			align-self: center
-			margin: 0 auto
-			padding: 16px 32px 64px
+			width: 100%
+			height: 92px
+			text-align: center
+			line-height: 90px
+			&:hover
+				background-color: $clr-grey-200
 	.sponsors
 		padding: 8px 0 16px 0
+		margin: 0 0 8px 0
+		background-color: $clr-white
 		.sponsor
 			height: 10vh
 			max-height: 10vh
 			max-width: unquote("min(260px, 90vw)")
 			object-fit: contain
 			user-select: none
-			margin: 0 24px 16px 24px
+			margin: 0 24px 0 24px
 		// .splide__pagination
 		.splide__pagination__page.is-active
 			background-color: var(--clr-primary)
