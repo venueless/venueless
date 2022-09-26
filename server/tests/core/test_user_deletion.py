@@ -3,7 +3,6 @@ import os
 import uuid
 
 import pytest
-from django.conf import settings
 from django.core.files.base import ContentFile
 from django.utils.timezone import now
 
@@ -18,10 +17,8 @@ from venueless.core.models import (
     Poster,
     RoulettePairing,
     RouletteRequest,
-    World,
 )
-from venueless.core.models.auth import RoomGrant
-from venueless.core.services.user import create_user, get_user, update_user
+from venueless.core.services.user import create_user, update_user
 from venueless.storage.models import StoredFile
 
 
