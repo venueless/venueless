@@ -2,6 +2,7 @@ import pytest
 from django.conf import settings
 
 from tests.utils import get_token_header
+from venueless.core.services.user import create_user
 
 
 @pytest.mark.django_db
@@ -36,6 +37,29 @@ def test_world_config_protect_secrets(client, world):
         HTTP_AUTHORIZATION=get_token_header(world, ["api", "admin", "foobartrait"]),
     )
     assert r.status_code == 403
+
+
+@pytest.mark.django_db
+def test_world_update(client, world):
+    world.trait_grants["apiuser"] = ["foobartrait"]
+    world.save()
+    u1 = create_user(world_id="sample", client_id="1234")
+
+    r = client.post(
+        "/api/v1/worlds/sample/delete_user",
+        {"user_id": str(u1.pk)},
+        HTTP_AUTHORIZATION=get_token_header(world),
+    )
+    assert r.status_code == 403
+
+    r = client.post(
+        "/api/v1/worlds/sample/delete_user",
+        {"user_id": str(u1.pk)},
+        HTTP_AUTHORIZATION=get_token_header(world, ["foobartrait", "admin", "api"]),
+    )
+    assert r.status_code == 204
+    u1.refresh_from_db()
+    assert not u1.client_id
 
 
 @pytest.mark.django_db
