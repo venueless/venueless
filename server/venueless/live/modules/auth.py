@@ -29,7 +29,7 @@ from venueless.core.services.user import (
     set_user_silenced,
     unblock_user,
     update_user,
-    user_broadcast,
+    user_broadcast, delete_user,
 )
 from venueless.core.utils.redis import aioredis
 from venueless.core.utils.statsd import statsd
@@ -378,6 +378,25 @@ class AuthModule(BaseModule):
                 trait_badges_map=self.consumer.world.config.get("trait_badges_map"),
             )
         await self.consumer.send_success(result)
+
+    @command("delete")
+    @require_world_permission(Permission.WORLD_USERS_MANAGE)
+    async def delete(self, body):
+        if body.get("id") == str(self.consumer.user.id):
+            await self.consumer.send_error(code="user.delete.self")
+            return
+        ok = await delete_user(
+            self.consumer.world, body.get("id"), by_user=self.consumer.user
+        )
+        if ok:
+            await self.consumer.send_success({})
+            # Force user browser to reload instead of drop to kick out of e.g. BBB sessions
+            await self.consumer.channel_layer.group_send(
+                GROUP_USER.format(id=body.get("id")),
+                {"type": "connection.reload"},
+            )
+        else:
+            await self.consumer.send_error(code="user.not_found")
 
     @command("ban")
     @require_world_permission(Permission.WORLD_USERS_MANAGE)

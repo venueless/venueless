@@ -368,6 +368,25 @@ def set_user_banned(world, user_id, by_user) -> bool:
 
 @database_sync_to_async
 @atomic
+def delete_user(world, user_id, by_user) -> bool:
+    user = get_user_by_id(world_id=world.pk, user_id=user_id)
+    if not user:
+        return False
+    user.soft_delete()
+
+    AuditLog.objects.create(
+        world=world,
+        user=by_user,
+        type="auth.user.deleted",
+        data={
+            "object": user_id,
+        },
+    )
+    return True
+
+
+@database_sync_to_async
+@atomic
 def set_user_silenced(world, user_id, by_user) -> bool:
     user = get_user_by_id(world_id=world.pk, user_id=user_id)
     if not user:
