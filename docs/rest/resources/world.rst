@@ -110,7 +110,8 @@ Endpoints
    :statuscode 401: Authentication failure
    :statuscode 403: The requested organizer/event does not exist **or** you have no permission to create this resource.
 
-.. http:get:: /api/v1/worlds/(world_id)/delete_user
+.. http:post:: /api/v1/worlds/(world_id)/delete_user
+
    Deletes a given user by ID.
 
    **Example request**:
