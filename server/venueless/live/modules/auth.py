@@ -18,6 +18,7 @@ from venueless.core.services.connections import (
 from venueless.core.services.user import (
     AuthError,
     block_user,
+    delete_user,
     end_view,
     get_blocked_users,
     get_public_user,
@@ -29,7 +30,7 @@ from venueless.core.services.user import (
     set_user_silenced,
     unblock_user,
     update_user,
-    user_broadcast, delete_user,
+    user_broadcast,
 )
 from venueless.core.utils.redis import aioredis
 from venueless.core.utils.statsd import statsd

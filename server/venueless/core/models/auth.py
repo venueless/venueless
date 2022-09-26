@@ -70,7 +70,7 @@ class User(VersionedModel):
                         for file in event.content.get("files", []):
                             basename = os.path.basename(file["url"])
                             fileid = basename.split(".")[0]
-                            sf = StoredFile.objects.filter(id=fileid).first()
+                            sf = StoredFile.objects.filter(id=fileid, user=self).first()
                             if sf:
                                 sf.full_delete()
                 dm_channel.channel.delete()
@@ -78,7 +78,7 @@ class User(VersionedModel):
         if "avatar" in self.profile and "url" in self.profile["avatar"]:
             basename = os.path.basename(self.profile["avatar"]["url"])
             fileid = basename.split(".")[0]
-            sf = StoredFile.objects.filter(id=fileid).first()
+            sf = StoredFile.objects.filter(id=fileid, user=self).first()
             if sf:
                 sf.full_delete()
 

@@ -298,7 +298,7 @@
   "UserActionPrompt:action.block:question": "Diesen Benutzer blockieren?",
   "UserActionPrompt:action.delete:confirmation": "Benutzer wurde gelöscht.",
   "UserActionPrompt:action.delete:execute:label": "delete",
-  "UserActionPrompt:action.delete:explanation": "Das Profil des Benutzers wird anonymisiert. Öffentliche Nachrichten des Benutzers bleiben erhalten, Direktnachrichten werden gelöscht, wenn die andere Partei auch bereits gelöscht wurde. Löschen eines Benutzers kann nicht rückgängig gemacht werden im Gegensatz zu einer Blockierung.",
+  "UserActionPrompt:action.delete:explanation": "Das Profil des Benutzers wird anonymisiert. Öffentliche Nachrichten des Benutzers bleiben erhalten, Direktnachrichten werden gelöscht, wenn die andere Partei auch bereits gelöscht wurde. Löschen eines Benutzers kann nicht rückgängig gemacht werden im Gegensatz zu einer Blockierung. Wenn der Benutzer sich wieder einloggt, wird ein neues Benutzerkonto erstellt.",
   "UserActionPrompt:action.delete:question": "Diesen Benutzer löschen?",
   "UserActionPrompt:action.silence:confirmation": "Benutzer wurde stummgeschaltet.",
   "UserActionPrompt:action.silence:execute:label": "stummschalten",
