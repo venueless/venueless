@@ -170,11 +170,9 @@ def test_delete_user(world, chat_room):
 
     assert bbbcall.invited_members.count() == 1
     for obj in should_be_deleted_after_u1_is_deleted:
-        try:
+        with pytest.raises(type(obj).DoesNotExist):
+            # Make sure the object was deleted
             obj.refresh_from_db()
-            assert False, f"object {repr(obj)} was unexpectedly not deleted"
-        except type(obj).DoesNotExist:
-            pass
 
     # Messages stay
     chat_message_u1_pub.refresh_from_db()
@@ -185,31 +183,16 @@ def test_delete_user(world, chat_room):
     # DMs between u1 and u2 now get deleted too
     chat_message_u1_pub.refresh_from_db()
     chat_message_u2_pub.refresh_from_db()
-    try:
+    with pytest.raises(ChatEvent.DoesNotExist):
         chat_message_u1_dm.refresh_from_db()
-        assert False, "DM was not deleted"
-    except ChatEvent.DoesNotExist:
-        pass
-    try:
+    with pytest.raises(ChatEvent.DoesNotExist):
         chat_message_u2_dm.refresh_from_db()
-        assert False, "DM was not deleted"
-    except ChatEvent.DoesNotExist:
-        pass
-    try:
+    with pytest.raises(StoredFile.DoesNotExist):
         sf.refresh_from_db()
-        assert False, "DM attachment was not deleted"
-    except StoredFile.DoesNotExist:
-        pass
-    try:
+    with pytest.raises(Channel.DoesNotExist):
         dm_channel.refresh_from_db()
-        assert False, "DM channel was not deleted"
-    except Channel.DoesNotExist:
-        pass
     assert not os.path.exists(sf.file.path)
 
-    try:
+    with pytest.raises(StoredFile.DoesNotExist):
         sf_avatar.refresh_from_db()
-        assert False, "Avatar was not deleted"
-    except StoredFile.DoesNotExist:
-        pass
     assert not os.path.exists(sf_avatar.file.path)
