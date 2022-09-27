@@ -86,7 +86,6 @@ class UserDeletePermissions(permissions.BasePermission):
             traits=traits,
             permissions=[Permission.WORLD_USERS_MANAGE],
         )
-        return False
 
 
 class RoomPermissions(permissions.BasePermission):

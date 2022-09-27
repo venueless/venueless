@@ -40,18 +40,20 @@ def test_world_config_protect_secrets(client, world):
 
 
 @pytest.mark.django_db
-def test_world_update(client, world):
-    world.trait_grants["apiuser"] = ["foobartrait"]
+def test_delete_user(client, world):
+    world.trait_grants["admin"] = ["blafasel"]
     world.save()
     u1 = create_user(world_id="sample", client_id="1234")
 
     r = client.post(
         "/api/v1/worlds/sample/delete_user",
         {"user_id": str(u1.pk)},
-        HTTP_AUTHORIZATION=get_token_header(world),
+        HTTP_AUTHORIZATION=get_token_header(world, ["noadmin"]),
     )
     assert r.status_code == 403
 
+    world.trait_grants["admin"] = ["admin"]
+    world.save()
     r = client.post(
         "/api/v1/worlds/sample/delete_user",
         {"user_id": str(u1.pk)},
