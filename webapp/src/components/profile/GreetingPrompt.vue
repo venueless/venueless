@@ -2,12 +2,25 @@
 prompt.c-profile-greeting-prompt(:allowCancel="false")
 	.content
 		connect-gravatar(v-if="showConnectGravatar", @change="setGravatar", @close="showConnectGravatar = false")
+		.step-connect-social(v-else-if="activeStep === 'connectSocial'")
+			h1 {{ $t('profile/GreetingPrompt:step-display-name:heading') }}
+			p {{ $t('profile/GreetingPrompt:step-display-name:text') }}
+			bunt-button.social-connection.social-twitter(@click="connectSocial('twitter')")
+				.mdi.mdi-twitter
+				.label twitter
+			bunt-button.social-connection.social-linkedin(@click="connectSocial('linkedin')")
+				.mdi.mdi-linkedin
+				.label linkedin
+			bunt-button.social-connection.social-gravatar(@click="showConnectGravatar = true")
+				svg(viewBox="0 0 27 27")
+					path(d="M10.8 2.699v9.45a2.699 2.699 0 005.398 0V5.862a8.101 8.101 0 11-8.423 1.913 2.702 2.702 0 00-3.821-3.821A13.5 13.5 0 1013.499 0 2.699 2.699 0 0010.8 2.699z")
+				.label gravatar
+			p.joiner or
+			bunt-button.manual(@click="activeStep = 'displayName'") fill manually
 		.step-display-name(v-else-if="activeStep === 'displayName'")
 			h1 {{ $t('profile/GreetingPrompt:step-display-name:heading') }}
 			p {{ $t('profile/GreetingPrompt:step-display-name:text') }}
 			//- link here not strictly good UX
-			a.gravatar-connected-hint(v-if="profile.gravatar_hash", href="#", @click="connectedGravatar = false; showConnectGravatar = true") {{ $t('profile/GreetingPrompt:gravatar-change:label') }}
-			p.gravatar-hint(v-else-if="!showConnectGravatar") {{ $t('profile/GreetingPrompt:gravatar-hint:text') }} #[a(href="#", @click="showConnectGravatar = true") gravatar].
 			bunt-input.display-name(name="displayName", :label="$t('profile/GreetingPrompt:displayname:label')", v-model.trim="profile.display_name", :validation="$v.profile.display_name")
 		.step-avatar(v-else-if="activeStep === 'avatar'")
 			h1 {{ $t('profile/GreetingPrompt:step-avatar:heading') }}
@@ -17,7 +30,7 @@ prompt.c-profile-greeting-prompt(:allowCancel="false")
 			h1 {{ $t('profile/GreetingPrompt:step-fields:heading') }}
 			p {{ $t('profile/GreetingPrompt:step-fields:text') }}
 			change-additional-fields(v-model="profile.fields")
-		.actions(v-if="!showConnectGravatar")
+		.actions(v-if="activeStep !== 'connectSocial' && !showConnectGravatar")
 			bunt-button#btn-back(v-if="previousStep", @click="activeStep = previousStep") {{ $t('profile/GreetingPrompt:button-back:label') }}
 			bunt-button#btn-continue(v-if="nextStep", :class="{invalid: $v.$invalid && $v.$dirty}", :disabled="blockSave || $v.$invalid && $v.$dirty", :loading="processingStep", :key="activeStep", @click="toNextStep") {{ $t('profile/GreetingPrompt:button-continue:label') }}
 			bunt-button#btn-finish(v-else, :loading="saving", :disabled="blockSave", @click="update") {{ $t('profile/GreetingPrompt:button-finish:label') }}
@@ -58,6 +71,7 @@ export default {
 		...mapState(['user', 'world']),
 		steps () {
 			const steps = [
+				'connectSocial',
 				'displayName',
 				'avatar'
 			]
@@ -93,10 +107,6 @@ export default {
 			delete this.profile.gravatar_hash
 		}
 	},
-	mounted () {
-		this.$nextTick(() => {
-		})
-	},
 	methods: {
 		async toNextStep () {
 			this.$v.$touch()
@@ -107,6 +117,13 @@ export default {
 				this.processingStep = false
 			}
 			this.activeStep = this.nextStep
+		},
+		async connectSocial (network) {
+			const { url } = await api.call('user.social.connect', {
+				network,
+				return_url: window.location.href
+			})
+			window.location = url
 		},
 		setGravatar (gravatar) {
 			Object.assign(this.profile, gravatar)
@@ -141,10 +158,37 @@ export default {
 		p
 			margin: 0 0 8px 0
 			width: 360px
-		.step-display-name, .step-avatar, .step-additional-fields
+		.step-connect-social, .step-display-name, .step-avatar, .step-additional-fields
 			display: flex
 			flex-direction: column
 			align-items: center
+		.step-connect-social
+			margin-bottom: 16px
+			.social-connection
+				// margin-bottom: 8px
+				.bunt-button-text
+					display: flex
+					align-items: center
+					.mdi
+						margin-right: 8px
+						font-size: 24px
+					.label
+						width: 72px
+			.social-twitter
+				button-style(style: clear, color: #1DA1F2)
+			.social-linkedin
+				button-style(style: clear, color: #0A66C2)
+			.social-gravatar
+				button-style(style: clear, color: #4678eb)
+				svg
+					width: 20px
+					margin: 0 12px 0 4px
+					path
+						fill: #4678eb
+			.joiner
+				text-align: center
+			.manual
+				themed-button-secondary()
 		.display-name
 			max-width: 280px
 			margin-top: 16px
