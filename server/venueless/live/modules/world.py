@@ -91,6 +91,7 @@ class WorldModule(BaseModule):
                 "conftool_url",
                 "conftool_password",
                 "iframe_blockers",
+                "social_logins",
             )
             model_fields = ("title", "locale", "timezone", "roles", "trait_grants")
             update_fields = set()
