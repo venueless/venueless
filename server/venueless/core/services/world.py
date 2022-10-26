@@ -63,13 +63,13 @@ class WorldConfigSerializer(serializers.Serializer):
         if any(v not in known for v in val):
             raise ValidationError("Invalid value for social_logins")
 
-        if "twitter" in val and settings.TWITTER_CLIENT_ID:
+        if "twitter" in val and not settings.TWITTER_CLIENT_ID:
             raise ValidationError(
                 "Twitter login can't be enabled since there's no Twitter API keys set for this "
                 "Venueless installation."
             )
 
-        if "linkedin" in val and settings.VENUELESS_LINKEDIN_CLIENT_ID:
+        if "linkedin" in val and not settings.LINKEDIN_CLIENT_ID:
             raise ValidationError(
                 "LinkedIn login can't be enabled since there's no LinkedIn API keys set for this "
                 "Venueless installation."

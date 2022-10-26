@@ -5,13 +5,13 @@ prompt.c-profile-greeting-prompt(:allowCancel="false")
 		.step-connect-social(v-else-if="activeStep === 'connectSocial'")
 			h1 {{ $t('profile/GreetingPrompt:step-display-name:heading') }}
 			p {{ $t('profile/GreetingPrompt:step-display-name:text') }}
-			bunt-button.social-connection.social-twitter(@click="connectSocial('twitter')")
+			bunt-button.social-connection.social-twitter(v-if="world.social_logins.includes('twitter')", @click="connectSocial('twitter')")
 				.mdi.mdi-twitter
 				.label twitter
-			bunt-button.social-connection.social-linkedin(@click="connectSocial('linkedin')")
+			bunt-button.social-connection.social-linkedin(v-if="world.social_logins.includes('linkedin')", @click="connectSocial('linkedin')")
 				.mdi.mdi-linkedin
 				.label linkedin
-			bunt-button.social-connection.social-gravatar(@click="showConnectGravatar = true")
+			bunt-button.social-connection.social-gravatar(v-if="world.social_logins.includes('gravatar')",@click="showConnectGravatar = true")
 				svg(viewBox="0 0 27 27")
 					path(d="M10.8 2.699v9.45a2.699 2.699 0 005.398 0V5.862a8.101 8.101 0 11-8.423 1.913 2.702 2.702 0 00-3.821-3.821A13.5 13.5 0 1013.499 0 2.699 2.699 0 0010.8 2.699z")
 				.label gravatar
@@ -71,10 +71,10 @@ export default {
 		...mapState(['user', 'world']),
 		steps () {
 			const steps = [
-				'connectSocial',
 				'displayName',
 				'avatar'
 			]
+			if (this.world?.social_logins?.length) steps.unshift('connectSocial')
 			if (this.world?.profile_fields?.length) steps.push('additionalFields')
 			return steps
 		},
