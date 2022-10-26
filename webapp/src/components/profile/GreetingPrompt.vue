@@ -94,6 +94,8 @@ export default {
 			},
 			fields: {}
 		}, this.user.profile)
+		// assume that when avatar url is set the social connection happened and skip first step
+		if (this.activeStep === 'connectSocial' && this.profile.avatar.url) this.activeStep = this.nextStep
 	},
 	methods: {
 		async toNextStep () {
