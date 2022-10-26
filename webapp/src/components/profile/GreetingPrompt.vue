@@ -39,7 +39,6 @@ prompt.c-profile-greeting-prompt(:allowCancel="false")
 import { mapState } from 'vuex'
 import { required } from 'buntpapier/src/vuelidate/validators'
 import api from 'lib/api'
-import { getAvatarUrl } from 'lib/gravatar'
 import Prompt from 'components/Prompt'
 import ChangeAvatar from './ChangeAvatar'
 import ChangeAdditionalFields from './ChangeAdditionalFields'
@@ -95,17 +94,6 @@ export default {
 			},
 			fields: {}
 		}, this.user.profile)
-		// TODO delete this after pycon au
-		if (this.profile.gravatar_hash) {
-			const avatarUrl = getAvatarUrl(this.profile.gravatar_hash, 128)
-			const imageBlob = await (await fetch(avatarUrl)).blob()
-			const request = api.uploadFile(imageBlob, 'avatar.png')
-			request.addEventListener('load', (event) => {
-				const response = JSON.parse(request.responseText)
-				this.profile.avatar = {url: response.url}
-			})
-			delete this.profile.gravatar_hash
-		}
 	},
 	methods: {
 		async toNextStep () {
