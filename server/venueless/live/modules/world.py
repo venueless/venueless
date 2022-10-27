@@ -134,7 +134,11 @@ class WorldModule(BaseModule):
             if old["pretalx"] != new["pretalx"]:
                 await notify_schedule_change(world_id=self.consumer.world.id)
         else:
-            await self.consumer.send_error(code="config.invalid")
+            print(s.errors)
+            await self.consumer.send_error(
+                code="config.invalid",
+                details=s.errors,
+            )
 
     @command("tokens.generate")
     @require_world_permission(Permission.WORLD_UPDATE)  # TODO: stricter permission?

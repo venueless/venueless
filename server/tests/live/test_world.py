@@ -203,3 +203,7 @@ async def test_config_patch(world):
         )
         response = await c1.receive_json_from()
         assert response[0] == "error"
+        assert response[2] == {
+            "code": "config.invalid",
+            "details": {"social_logins": ["Invalid value for social_logins"]},
+        }
