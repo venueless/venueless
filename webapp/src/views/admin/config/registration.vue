@@ -14,6 +14,7 @@
 					bunt-checkbox(name="social-gravatar", v-model="socialGravatar") Gravatar
 			bunt-tab(header="Additional Fields", v-scrollbar.y="")
 				.additional-fields-form(v-if="config")
+					// TODO REORDER
 					table.additional-fields
 							thead
 								tr
@@ -28,12 +29,13 @@
 									td
 										bunt-input(v-model="field.label", label="Label", name="label")
 									td
-										bunt-select(v-model="field.type", label="Type", name="type", :options="['text', 'textarea', 'select']")
+										bunt-select(v-model="field.type", label="Type", name="type", :options="['text', 'textarea', 'select', 'link']")
 									td
 										//- ids are needed to match external tools' (pretix) supplied fields
 										bunt-input(v-model="field.id", label="ID", name="id")
 									td
 										bunt-input(v-if="field.type === 'select'", v-model="field.choices", label="Choices (comma seperated)", name="choices")
+										bunt-select(v-if="field.type === 'link'", v-model="field.network", label="Link Type", name="link-type", :options="['website', 'twitter', 'linkedin']")
 									td
 										bunt-checkbox(v-model="field.searchable", name="searchable")
 									td.actions
