@@ -100,12 +100,17 @@ export default {
 		},
 		async save () {
 			this.saving = true
-			await api.call('world.config.patch', {
-				profile_fields: this.config.profile_fields,
-				social_logins: this.config.social_logins
-			})
-			this.saving = false
-			// TODO error handling
+			try {
+				await api.call('world.config.patch', {
+					profile_fields: this.config.profile_fields,
+					social_logins: this.config.social_logins
+				})
+			} catch (error) {
+				console.error(error.apiError || error)
+				this.error = error.apiError?.details?.social_logins?.join(', ') || error.apiError?.code || error
+			} finally {
+				this.saving = false
+			}
 		},
 	}
 }
