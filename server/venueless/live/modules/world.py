@@ -134,7 +134,6 @@ class WorldModule(BaseModule):
             if old["pretalx"] != new["pretalx"]:
                 await notify_schedule_change(world_id=self.consumer.world.id)
         else:
-            print(s.errors)
             await self.consumer.send_error(
                 code="config.invalid",
                 details=s.errors,
