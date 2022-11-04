@@ -44,6 +44,9 @@ def update_user_profile_from_social(
 
     if url:
         user.profile.setdefault("fields", {})
-        user.profile["fields"][network] = url
+
+        for field in user.world.config.get("profile_fields", []):
+            if field.get("type") == "link" and field.get("network") == network:
+                user.profile["fields"][field["id"]] = url
 
     user.save(update_fields=["profile"])
