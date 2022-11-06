@@ -2,7 +2,7 @@
 .c-profile-fields(v-if="fields")
 	.field(v-for="field of fields")
 		a.link(v-if="field.type === 'link'", :href="field.value", :title="field.label", target="_blank")
-			.mdi(:class="`mdi-${field.network === 'website' ? 'link-variant' : field.network}`")
+			.mdi.mdi-link-variant(:class="`mdi-${field.network}`")
 			span {{ getLinkLabel(field) }}
 		template(v-else)
 			.label {{ field.label }}
@@ -72,4 +72,7 @@ export default {
 			.mdi
 				font-size: 24px
 				margin-right: 4px
+// hack specificity to create fallback icon for things not in mdi
+:where(.c-profile-fields a.link .mdi)::before
+	content: "\F0339"
 </style>

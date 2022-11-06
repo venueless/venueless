@@ -35,7 +35,10 @@
 										bunt-input(v-model="field.id", label="ID", name="id")
 									td
 										bunt-input(v-if="field.type === 'select'", v-model="field.choices", label="Choices (comma seperated)", name="choices")
-										bunt-select(v-if="field.type === 'link'", v-model="field.network", label="Link Type", name="link-type", :options="['website', 'twitter', 'linkedin']")
+										bunt-select.link-network(v-if="field.type === 'link'", v-model="field.network", label="Link Type", name="link-type", :options="socialNetworks")
+											template(slot-scope="{ option }")
+												.mdi(:class="`mdi-${option}`")
+												.label {{ option }}
 									td
 										bunt-checkbox(v-model="field.searchable", name="searchable")
 									td.actions
@@ -55,6 +58,20 @@
 <script>
 import api from 'lib/api'
 import { v4 as uuid } from 'uuid'
+
+const socialNetworks = [
+	'website',
+	'facebook',
+	'github',
+	'instagram',
+	'linkedin',
+	'mastodon',
+	'pinterest',
+	'twitter',
+	'vimeo',
+	'xing',
+	'youtube',
+]
 
 function generateSocialComputed (network) {
 	return {
@@ -76,7 +93,8 @@ export default {
 		return {
 			config: null,
 			saving: false,
-			error: null
+			error: null,
+			socialNetworks
 		}
 	},
 	computed: {
@@ -145,7 +163,16 @@ export default {
 				padding: 10px
 			td
 				vertical-align center
+		.link-network
+				ul li
+					display: flex
+					.mdi
+						margin-right: 8px
 		.btn-save
 			margin-top: 16px
 			themed-button-primary(size: large)
+
+// hack specificity to create fallback icon for things not in mdi
+:where(.c-registrationconfig .link-network .mdi)::before
+	content: "\F0339"
 </style>
