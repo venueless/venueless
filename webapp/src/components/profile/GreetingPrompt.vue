@@ -118,6 +118,7 @@ export default {
 		setGravatar (gravatar) {
 			Object.assign(this.profile, gravatar)
 			this.showConnectGravatar = false
+			this.activeStep = this.nextStep
 		},
 		async update () {
 			this.$v.$touch()
