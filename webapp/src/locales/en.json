@@ -269,6 +269,7 @@
   "profile/GreetingPrompt:gravatar-hint:text": "Or, save time by connecting to your",
   "profile/GreetingPrompt:step-social:heading": "Hi there!",
   "profile/GreetingPrompt:step-social:text": "Before you join others in this event, please set up your profile. We can get your profile information from one of your social media accounts, or you can fill in your profile by hand.",
+  "profile/GreetingPrompt:step-social:button-fill-manually:label": "Fill manually",
   "profile/GreetingPrompt:step-avatar:heading": "Choose your look",
   "profile/GreetingPrompt:step-avatar:text": "",
   "profile/GreetingPrompt:step-display-name:heading": "What are you called?",

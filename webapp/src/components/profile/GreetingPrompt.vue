@@ -16,11 +16,10 @@ prompt.c-profile-greeting-prompt(:allowCancel="false")
 					path(d="M10.8 2.699v9.45a2.699 2.699 0 005.398 0V5.862a8.101 8.101 0 11-8.423 1.913 2.702 2.702 0 00-3.821-3.821A13.5 13.5 0 1013.499 0 2.699 2.699 0 0010.8 2.699z")
 				.label gravatar
 			p.joiner or
-			bunt-button.manual(@click="activeStep = 'displayName'") fill manually
+			bunt-button.manual(@click="activeStep = 'displayName'") {{ $t('profile/GreetingPrompt:step-social:button-fill-manually:label') }}
 		.step-display-name(v-else-if="activeStep === 'displayName'")
 			h1 {{ $t('profile/GreetingPrompt:step-display-name:heading') }}
 			p {{ $t('profile/GreetingPrompt:step-display-name:text') }}
-			//- link here not strictly good UX
 			bunt-input.display-name(name="displayName", :label="$t('profile/GreetingPrompt:displayname:label')", v-model.trim="profile.display_name", :validation="$v.profile.display_name")
 		.step-avatar(v-else-if="activeStep === 'avatar'")
 			h1 {{ $t('profile/GreetingPrompt:step-avatar:heading') }}
