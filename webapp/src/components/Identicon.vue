@@ -2,15 +2,20 @@
 img.c-identicon(:src="url")
 </template>
 <script>
-import { renderUrl } from 'lib/identicons'
+import theme from 'theme'
+import { renderUrl as renderIdenticonUrl } from 'lib/identicons'
 
 export default {
 	props: {
-		user: Object
+		user: Object,
+		identiconStyle: {
+			type: String,
+			default: theme.identicons.style
+		}
 	},
 	computed: {
 		url () {
-			return renderUrl(this.user)
+			return renderIdenticonUrl(this.user, this.identiconStyle)
 		}
 	}
 }

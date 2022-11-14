@@ -1,5 +1,11 @@
 import { Random, MersenneTwister19937 } from 'random-js'
 import * as identiheart from './renderer-identiheart.js'
+import * as initials from './renderer-initials.js'
+
+const renderers = {
+	identiheart,
+	initials
+}
 
 const hashFunc = function (source) {
 	return String(source).split('').reduce(function (a, b) {
@@ -8,18 +14,22 @@ const hashFunc = function (source) {
 	}, 0)
 }
 
-export function renderSvg (user) {
+export function renderSvg (user, style) {
 	const random = new Random(
-		MersenneTwister19937.seed(+hashFunc(user.profile?.avatar?.identicon ?? user.profile?.identicon ?? user.id))
+		MersenneTwister19937.seed(hashFunc(user.profile?.avatar?.identicon ?? user.profile?.identicon ?? user.id))
 	)
 
+	const renderer = renderers[style] || identiheart
+
 	const config = {
-		colorPalette: identiheart.definition.colorPalette.defaults
+		colorPalette: renderer.definition.colorPalette.defaults
 	}
 
-	return identiheart.renderSvg(random, user.profile, config)
+	return renderer.renderSvg(random, user.profile, config)
 }
 
-export function renderUrl (user) {
-	return `data:image/svg+xml;base64,${btoa(renderSvg(user).replace(/[\t\n]/g, ''))}`
+export function renderUrl (user, style) {
+	return `data:image/svg+xml;base64,${btoa(renderSvg(user, style).replace(/[\t\n]/g, ''))}`
 }
+
+export { renderers }
