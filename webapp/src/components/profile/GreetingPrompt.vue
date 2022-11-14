@@ -3,8 +3,8 @@ prompt.c-profile-greeting-prompt(:allowCancel="false")
 	.content
 		connect-gravatar(v-if="showConnectGravatar", @change="setGravatar", @close="showConnectGravatar = false")
 		.step-connect-social(v-else-if="activeStep === 'connectSocial'")
-			h1 {{ $t('profile/GreetingPrompt:step-display-name:heading') }}
-			p {{ $t('profile/GreetingPrompt:step-display-name:text') }}
+			h1 {{ $t('profile/GreetingPrompt:step-social:heading') }}
+			p {{ $t('profile/GreetingPrompt:step-social:text') }}
 			bunt-button.social-connection.social-twitter(v-if="world.social_logins.includes('twitter')", @click="connectSocial('twitter')")
 				.mdi.mdi-twitter
 				.label twitter
