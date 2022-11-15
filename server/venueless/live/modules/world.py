@@ -16,7 +16,9 @@ from venueless.core.services.world import (
 )
 from venueless.graphs.tasks import (
     generate_attendee_list,
+    generate_attendee_session_list,
     generate_chat_history,
+    generate_poll_history,
     generate_question_history,
     generate_report,
     generate_room_views,
@@ -91,6 +93,7 @@ class WorldModule(BaseModule):
                 "conftool_url",
                 "conftool_password",
                 "iframe_blockers",
+                "social_logins",
             )
             model_fields = ("title", "locale", "timezone", "roles", "trait_grants")
             update_fields = set()
@@ -133,7 +136,10 @@ class WorldModule(BaseModule):
             if old["pretalx"] != new["pretalx"]:
                 await notify_schedule_change(world_id=self.consumer.world.id)
         else:
-            await self.consumer.send_error(code="config.invalid")
+            await self.consumer.send_error(
+                code="config.invalid",
+                details=s.errors,
+            )
 
     @command("tokens.generate")
     @require_world_permission(Permission.WORLD_UPDATE)  # TODO: stricter permission?
@@ -198,6 +204,16 @@ class WorldModule(BaseModule):
         )
         await self.consumer.send_success({"resultid": str(result.id)})
 
+    @command("report.generate.poll_history")
+    @require_world_permission(
+        Permission.WORLD_UPDATE
+    )  # to be safe, "graphs" suggests only statistical data
+    async def question_poll_generate(self, body):
+        result = await sync_to_async(generate_poll_history.apply_async)(
+            kwargs={"world": str(self.consumer.world.id), "input": body}
+        )
+        await self.consumer.send_success({"resultid": str(result.id)})
+
     @command("report.generate.chat_history")
     @require_world_permission(
         Permission.WORLD_UPDATE
@@ -212,6 +228,14 @@ class WorldModule(BaseModule):
     @require_world_permission(Permission.WORLD_GRAPHS)
     async def attendee_list_generate(self, body):
         result = await sync_to_async(generate_attendee_list.apply_async)(
+            kwargs={"world": str(self.consumer.world.id), "input": body}
+        )
+        await self.consumer.send_success({"resultid": str(result.id)})
+
+    @command("report.generate.attendee_session_list")
+    @require_world_permission(Permission.WORLD_GRAPHS)
+    async def attendee_session_list_generate(self, body):
+        result = await sync_to_async(generate_attendee_session_list.apply_async)(
             kwargs={"world": str(self.consumer.world.id), "input": body}
         )
         await self.consumer.send_success({"resultid": str(result.id)})

@@ -82,3 +82,5 @@ Experimental Features
 * page.landing
 * iframe-player
 * polls
+* social-twitter
+* social-linkedin
