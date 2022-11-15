@@ -145,6 +145,7 @@ export default {
 		padding: 16px
 		h1
 			margin: 8px 0
+			text-align: center
 		p
 			margin: 0 0 8px 0
 			width: 360px
