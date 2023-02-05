@@ -95,7 +95,7 @@ def test_delete_user(world, chat_room):
     assert update_user(
         "sample",
         str(u1.pk),
-        public_data={
+        data={
             "profile": {
                 "display_name": "John Doe",
                 "avatar": {
