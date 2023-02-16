@@ -110,6 +110,7 @@ def test_delete_user(world, chat_room):
         "object": str(u1.pk),
         "old": {},
         "new": {
+            "is_admin": False,
             "display_name": "John Doe",
             "avatar": {
                 "url": "http://localhost:8375/media/pub/sample/5693b299-c912-4941-8dc2-91981b37c1fc.S50ehvbVo7fw.png"
