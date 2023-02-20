@@ -26,8 +26,8 @@
 				:scrollParent="$refs.scrollParent",
 				:favs="favs",
 				@changeDay="changeDayByScroll",
-				@fav="fav",
-				@unfav="unfa"
+				@fav="$store.dispatch('schedule/fav', $event)",
+				@unfav="$store.dispatch('schedule/unfav', $event)"
 			)
 	.error(v-else-if="errorLoading")
 		.mdi.mdi-alert-octagon
@@ -53,10 +53,7 @@ export default {
 	computed: {
 		...mapState(['now']),
 		...mapState('schedule', ['schedule', 'errorLoading']),
-		...mapGetters('schedule', ['days', 'sessions']),
-		favs () {
-			return this.pruneFavs(this.$store.state.schedule.favs, this.sessions)
-		}
+		...mapGetters('schedule', ['days', 'sessions', 'favs']),
 	},
 	methods: {
 		changeDay (day) {
@@ -68,11 +65,6 @@ export default {
 			const tabEl = this.$refs.tabs.$refs.tabElements.find(el => el.id === day.toISOString())
 			// TODO smooth scroll, seems to not work with chrome {behavior: 'smooth', block: 'center', inline: 'center'}
 			tabEl?.$el.scrollIntoView()
-		},
-		pruneFavs (favs, sessions) {
-			const talks = sessions || []
-			const talkIds = talks.map(e => e.id)
-			return favs.filter(e => talkIds.includes(e))
 		}
 	}
 }

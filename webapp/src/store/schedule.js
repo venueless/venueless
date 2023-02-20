@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import moment from 'lib/timetravelMoment'
 import api from 'lib/api'
 
@@ -6,10 +7,12 @@ export default {
 	state: {
 		schedule: null,
 		errorLoading: null,
-		favs: [],
 		now: moment()
 	},
 	getters: {
+		favs (state, getters, rootState) {
+			return rootState.user?.client_state?.schedule?.favs || []
+		},
 		pretalxScheduleUrl (state, getters, rootState) {
 			if (rootState.world.pretalx?.url) {
 				return rootState.world.pretalx.url
@@ -101,11 +104,6 @@ export default {
 			return rooms
 		}
 	},
-	mutations: {
-		updateFavs (state, favs) {
-			state.favs = favs || []
-		}
-	},
 	actions: {
 		async fetch ({state, getters}) {
 			// TODO error handling
@@ -118,21 +116,35 @@ export default {
 				state.errorLoading = error
 			}
 		},
-		async fav ({state, dispatch}, id) {
-			if (!state.favs.includes(id)) {
-				state.favs.push(id)
-				await dispatch('saveFavs')
+		async fav ({state, dispatch, rootState}, id) {
+			let favs = rootState.user.client_state.schedule?.favs
+			if (!favs) {
+				favs = []
+				Vue.set(rootState.user.client_state, 'schedule', {
+					favs
+				})
+			}
+			if (!favs.includes(id)) {
+				favs.push(id)
+				await dispatch('saveFavs', favs)
 			}
 		},
-		async unfav ({state, dispatch}, id) {
-			state.favs = state.favs.filter(fav => fav !== id)
-			await dispatch('saveFavs')
+		async unfav ({state, dispatch, rootState}, id) {
+			let favs = rootState.user.client_state.schedule?.favs
+			if (!favs) return
+			rootState.user.client_state.schedule.favs = favs = favs.filter(fav => fav !== id)
+			await dispatch('saveFavs', favs)
 		},
-		async saveFavs ({state}) {
-			await api.call('schedule.favs.update', state.favs)
-		},
-		'api::schedule.favs.updated' ({state}, favs) {
-			state.favs = favs
+		async saveFavs ({rootState}, favs) {
+			await api.call('user.update', {
+				client_state: {
+					...rootState.user.client_state,
+					schedule: {
+						favs: favs
+					}
+				}
+			})
+			// TODO error handling
 		}
 	}
 }
