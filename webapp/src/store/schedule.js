@@ -102,9 +102,6 @@ export default {
 		}
 	},
 	mutations: {
-		updateNow (state) {
-			state.now = moment()
-		},
 		updateFavs (state, favs) {
 			state.favs = favs || []
 		}

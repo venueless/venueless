@@ -36,14 +36,14 @@
 </template>
 <script>
 import { mapState, mapGetters } from 'vuex'
-import router from 'router'
+import { LinearSchedule, GridSchedule} from '@pretalx/schedule'
 import moment from 'lib/timetravelMoment'
 import TimezoneChanger from 'components/TimezoneChanger'
-import { LinearSchedule, GridSchedule} from '@pretalx/schedule'
-import '@pretalx/schedule/dist/schedule.css'
+import scheduleProvidesMixin from 'components/mixins/schedule-provides'
 
 export default {
 	components: { LinearSchedule, GridSchedule, TimezoneChanger },
+	mixins: [scheduleProvidesMixin],
 	data () {
 		return {
 			moment,
@@ -51,23 +51,11 @@ export default {
 		}
 	},
 	computed: {
-		...mapState('schedule', ['now', 'schedule', 'errorLoading']),
+		...mapState(['now']),
+		...mapState('schedule', ['schedule', 'errorLoading']),
 		...mapGetters('schedule', ['days', 'sessions']),
 		favs () {
 			return this.pruneFavs(this.$store.state.schedule.favs, this.sessions)
-		}
-	},
-	provide: {
-		linkTarget: '_blank',
-		generateSessionLinkUrl ({session}) {
-			if (session.url) return this.session.url
-			return router.resolve({name: 'schedule:talk', params: {talkId: session.id}}).href
-		},
-		async onSessionLinkClick (event, session) {
-			if (!session.url) {
-				event.preventDefault()
-				await router.push({name: 'schedule:talk', params: {talkId: session.id}})
-			}
 		}
 	},
 	methods: {

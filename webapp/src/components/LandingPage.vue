@@ -35,14 +35,16 @@
 import { mapState, mapGetters } from 'vuex'
 import '@splidejs/splide/dist/css/splide.min.css'
 import Splide from '@splidejs/splide'
+import { Session } from '@pretalx/schedule'
 import api from 'lib/api'
 import moment from 'lib/timetravelMoment'
 import Identicon from 'components/Identicon'
 import MarkdownContent from 'components/MarkdownContent'
-import Session from 'components/schedule/Session'
+import scheduleProvidesMixin from 'components/mixins/schedule-provides'
 
 export default {
 	components: { Identicon, MarkdownContent, Session },
+	mixins: [scheduleProvidesMixin],
 	props: {
 		module: Object
 	},
