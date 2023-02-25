@@ -1,6 +1,6 @@
 <template lang="pug">
 .c-kiosk-slide-vote
-	h1 VOTE
+	h1 VOTE!!
 </template>
 <script>
 export default {

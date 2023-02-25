@@ -5,7 +5,7 @@
 			PollSlide(v-if="activeSlide === 'poll'", :room="room")
 			VoteSlide(v-else-if="activeSlide === 'vote'", :room="room")
 			QuestionSlide(v-else-if="activeSlide === 'question'", :room="room")
-			NextTalkSlide(v-else-if="activeSlide === 'nextTalk'", :room="room")
+			NextSessionSlide(v-else-if="activeSlide === 'nextSession'", :room="room")
 			ViewersSlide(v-else-if="activeSlide === 'viewers'", :room="room")
 	.reactions
 </template>
@@ -13,15 +13,15 @@
 import PollSlide from './Poll'
 import VoteSlide from './Vote'
 import QuestionSlide from './Question'
-import NextTalkSlide from './NextTalk'
+import NextSessionSlide from './NextSession'
 import ViewersSlide from './Viewers'
 
 const SLIDE_ORDER = [
 	'poll',
-	// 'vote',
+	'vote',
 	'question',
-	// 'nextTalk',
-	// 'viewers'
+	'nextSession',
+	'viewers'
 ]
 
 const SLIDE_INTERVAL = 2000
@@ -31,7 +31,7 @@ export default {
 		PollSlide,
 		VoteSlide,
 		QuestionSlide,
-		NextTalkSlide,
+		NextSessionSlide,
 		ViewersSlide
 	},
 	props: {

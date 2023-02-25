@@ -1,8 +1,10 @@
 <template lang="pug">
-.c-kiosk-slide-viewers
+.c-standalone-viewers
 	h1 VIEWERS
+	p {{ members }}
 </template>
 <script>
+import { mapState, mapGetters } from 'vuex'
 export default {
 	components: {},
 	props: {
@@ -12,7 +14,9 @@ export default {
 		return {
 		}
 	},
-	computed: {},
+	computed: {
+		...mapState('chat', ['members']),
+	},
 }
 </script>
 <style lang="stylus">
