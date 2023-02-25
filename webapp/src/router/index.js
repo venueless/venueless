@@ -1,10 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import App from 'App'
-import PresentationMode from 'views/rooms/presentation'
-import PresentationModeChat from 'views/rooms/presentation/chat'
-import PresentationModePoll from 'views/rooms/presentation/poll'
-import PresentationModeQuestion from 'views/rooms/presentation/question'
 import RoomHeader from 'views/rooms/RoomHeader'
 import Room from 'views/rooms/item'
 import RoomManager from 'views/rooms/manage'
@@ -20,22 +16,36 @@ import Preferences from 'views/preferences'
 Vue.use(VueRouter)
 
 const routes = [{
-	path: '/rooms/:roomId/presentation',
-	name: 'presentation-mode',
-	component: PresentationMode,
+	path: '/standalone/:roomId',
+	name: 'standalone',
+	component: () => import(/* webpackChunkName: "standalone" */ 'views/standalone'),
 	children: [{
 		path: 'chat',
-		name: 'presentation-mode:chat',
-		component: PresentationModeChat
+		name: 'standaloneode:chat',
+		component: () => import(/* webpackChunkName: "standalone" */ 'views/standalone/Chat')
 	}, {
 		path: 'poll',
-		name: 'presentation-mode:poll',
-		component: PresentationModePoll
+		name: 'standalone:poll',
+		component: () => import(/* webpackChunkName: "standalone" */ 'views/standalone/Poll')
 	}, {
 		path: 'question',
-		name: 'presentation-mode:question',
-		component: PresentationModeQuestion
+		name: 'standalone:question',
+		component: () => import(/* webpackChunkName: "standalone" */ 'views/standalone/Question')
+	}, {
+		path: 'kiosk',
+		name: 'standalone:kiosk',
+		component: () => import(/* webpackChunkName: "standalone" */ 'views/standalone/kiosk')
 	}]
+}, {
+	path: '/rooms/:roomId/presentation/:mode',
+	redirect (to) {
+		return {
+			path: `/standalone/${to.params.roomId}/${to.params.mode}`
+		}
+	}
+}, {
+	path: '/rooms/:roomId/kiosk',
+	name: 'kiosk-mode',
 }, {
 	path: '/',
 	component: App,

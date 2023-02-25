@@ -19,10 +19,6 @@ export default {
 	props: {
 		room: Object
 	},
-	data () {
-		return {
-		}
-	},
 	computed: {
 		...mapState('chat', ['usersLookup']),
 		...mapGetters('question', ['pinnedQuestion']),
@@ -36,14 +32,8 @@ export default {
 	watch: {
 		pinnedQuestion: 'fetchSender'
 	},
-	created () {},
-	mounted () {
-		this.$nextTick(() => {
-		})
-	},
 	methods: {
 		fetchSender () {
-			console.log(this.pinnedQuestion)
 			this.$store.dispatch('chat/fetchUsers', [this.pinnedQuestion.sender])
 		}
 	}

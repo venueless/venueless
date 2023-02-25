@@ -1,5 +1,5 @@
 <template lang="pug">
-#presentation-mode(:class="{fullscreen}", :style="[style, themeVariables]")
+#standalone-app(:class="{fullscreen}", :style="[style, themeVariables]")
 	.fatal-indicator.mdi.mdi-alert-octagon(v-if="fatalError || fatalConnectionError", :title="errorMessage")
 	.content(v-else-if="world")
 		router-view(:room="room")
@@ -65,7 +65,7 @@ export default {
 }
 </script>
 <style lang="stylus">
-#presentation-mode
+#standalone-app
 	height: 100%
 	display: flex
 	flex-direction: column
