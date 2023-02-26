@@ -37,6 +37,15 @@ export default {
 	align-items: center
 	.svg
 		width: 500px
+		svg
+			// hide white background
+			:first-child
+				display: none
 	.url
 		font-size: 48px
+
+	.themed-bg &
+		svg
+			path
+					stroke: var(--clr-input-primary-fg)
 </style>

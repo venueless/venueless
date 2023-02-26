@@ -1,5 +1,5 @@
 <template lang="pug">
-#standalone-app(:class="{fullscreen}", :style="[style, themeVariables]")
+#standalone-app(:class="{fullscreen, 'themed-bg': themedBackground}", :style="[style, themeVariables]")
 	.fatal-indicator.mdi.mdi-alert-octagon(v-if="fatalError || fatalConnectionError", :title="errorMessage")
 	.content(v-else-if="world")
 		router-view(:room="room")
@@ -20,6 +20,7 @@ export default {
 	data () {
 		return {
 			fullscreen: false,
+			themedBackground: true,
 			themeVariables,
 			scale: 1
 		}
@@ -94,4 +95,7 @@ export default {
 			width: 960px
 			height: 700px
 			flex: none
+	&.themed-bg
+		background-color: var(--clr-primary)
+		color: var(--clr-input-primary-fg)
 </style>

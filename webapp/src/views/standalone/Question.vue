@@ -55,6 +55,8 @@ export default {
 			.mdi
 				font-size: 24px
 				color: $clr-secondary-text-light
+				.themed-bg &
+					color: var(--clr-input-primary-fg)
 			.vote-count
 				margin: 0 0 0 8px
 				font-size: 24px

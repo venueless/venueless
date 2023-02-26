@@ -61,4 +61,6 @@ export default {
 		&.most-votes
 			.votes::before
 				background-color: var(--clr-primary)
+				.themed-bg &
+					background-color: var(--clr-input-primary-fg)
 </style>
