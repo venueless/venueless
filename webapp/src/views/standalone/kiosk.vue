@@ -1,12 +1,8 @@
 <template lang="pug">
 .v-standalone-kiosk
 	transition(name="kiosk")
-		.slide(:key="activeSlide")
-			PollSlide(v-if="activeSlide === 'poll'", :room="room")
-			VoteSlide(v-else-if="activeSlide === 'vote'", :room="room")
-			QuestionSlide(v-else-if="activeSlide === 'question'", :room="room")
-			NextSessionSlide(v-else-if="activeSlide === 'nextSession'", :room="room")
-			ViewersSlide(v-else-if="activeSlide === 'viewers'", :room="room")
+		.slide(:key="activeSlide.id")
+			component(:is="activeSlide.component", :room="room")
 	.reactions
 </template>
 <script>
@@ -16,30 +12,47 @@ import QuestionSlide from './Question'
 import NextSessionSlide from './NextSession'
 import ViewersSlide from './Viewers'
 
-const SLIDE_ORDER = [
-	'poll',
-	'vote',
-	'question',
-	'nextSession',
-	'viewers'
-]
+const SLIDES = [{
+	id: 'poll',
+	condition () {
+		return !!this.$store.getters['poll/pinnedPoll']
+	},
+	component: PollSlide
+}, {
+	id: 'vote',
+	condition () {
+		return !!this.$store.getters['poll/pinnedPoll']
+	},
+	component: VoteSlide
+}, {
+	id: 'question',
+	condition () {
+		return !!this.$store.getters['question/pinnedQuestion']
+	},
+	component: QuestionSlide
+}, {
+	id: 'nextSession',
+	condition () {
+		return !!this.$store.getters['schedule/sessions']?.find(session => session.room === this.room && session.start.isAfter(this.now))
+	},
+	component: NextSessionSlide
+}, {
+	id: 'viewers',
+	condition () {
+		return true
+	},
+	component: ViewersSlide
+}]
 
 const SLIDE_INTERVAL = 2000
 
 export default {
-	components: {
-		PollSlide,
-		VoteSlide,
-		QuestionSlide,
-		NextSessionSlide,
-		ViewersSlide
-	},
 	props: {
 		room: Object
 	},
 	data () {
 		return {
-			activeSlide: 'poll',
+			activeSlide: SLIDES[0],
 		}
 	},
 	mounted () {
@@ -47,8 +60,13 @@ export default {
 	},
 	methods: {
 		nextSlide () {
-			const index = SLIDE_ORDER.indexOf(this.activeSlide)
-			this.activeSlide = SLIDE_ORDER[(index + 1) % SLIDE_ORDER.length]
+			let index = SLIDES.indexOf(this.activeSlide)
+			let nextSlide
+			do {
+				index++
+				nextSlide = SLIDES[(index) % SLIDES.length]
+			} while (!nextSlide.condition.call(this))
+			this.activeSlide = nextSlide
 			setTimeout(this.nextSlide.bind(this), SLIDE_INTERVAL)
 		}
 	}
