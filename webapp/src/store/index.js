@@ -27,6 +27,7 @@ export default new Vuex.Store({
 		user: null,
 		world: null,
 		rooms: null,
+		roomViewers: null,
 		permissions: null,
 		activeRoom: null,
 		reactions: null,
@@ -97,9 +98,9 @@ export default new Vuex.Store({
 				commit('exhibition/setData', serverState.exhibition)
 				commit('announcement/setAnnouncements', serverState.announcements)
 				commit('updateRooms', serverState['world.config'].rooms)
-				// FIXME copypasta from App.vue
-				if (state.activeRoom?.modules.some(module => ['livestream.native', 'livestream.youtube', 'livestream.iframe', 'call.bigbluebutton', 'call.zoom', 'call.janus'].includes(module.type))) {
-					api.call('room.enter', {room: state.activeRoom.id})
+				// rejoin room if reconnecting
+				if (state.activeRoom) {
+					dispatch('changeRoom', state.activeRoom)
 				}
 				// TODO ?
 				// if (!state.user.profile.display_name) {
@@ -149,9 +150,14 @@ export default new Vuex.Store({
 		async createRoom ({state}, room) {
 			return await api.call('room.create', room)
 		},
-		changeRoom ({state, dispatch}, room) {
+		async changeRoom ({state, dispatch}, room) {
 			state.activeRoom = room
 			state.reactions = null
+			state.roomViewers = null
+			if (room.modules.some(module => ['livestream.native', 'livestream.youtube', 'livestream.iframe', 'call.bigbluebutton', 'call.zoom', 'call.janus'].includes(module.type))) {
+				const { viewers } = await api.call('room.enter', {room: room.id})
+				state.roomViewers = viewers
+			}
 			dispatch('question/changeRoom', room)
 			dispatch('poll/changeRoom', room)
 		},
@@ -219,6 +225,23 @@ export default new Vuex.Store({
 				Vue.set(state.user, key, value)
 			}
 			dispatch('chat/updateUser', {id: state.user.id, update})
+		},
+		'api::room.viewer.added' ({state}, {user}) {
+			if (!state.roomViewers) return
+			// overwrite existing user
+			const index = state.roomViewers.findIndex(u => u.id === user.id)
+			if (index >= 0) {
+				Vue.set(state.roomViewers, index, user)
+			} else {
+				state.roomViewers.push(user)
+			}
+		},
+		'api::room.viewer.removed' ({state}, {user_id: userId}) {
+			if (!state.roomViewers) return
+			const index = state.roomViewers.findIndex(u => u.id === userId)
+			if (index >= 0) {
+				state.roomViewers.splice(index, 1)
+			}
 		}
 	},
 	modules: {

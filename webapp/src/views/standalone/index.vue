@@ -8,7 +8,6 @@
 <script>
 import { mapState } from 'vuex'
 import { themeVariables } from 'theme'
-import api from 'lib/api'
 
 const SLIDE_WIDTH = 960
 const SLIDE_HEIGHT = 700
@@ -42,7 +41,6 @@ export default {
 	watch: {
 		room () {
 			this.$store.dispatch('changeRoom', this.room)
-			api.call('room.enter', {room: this.room.id})
 		}
 	},
 	created () {
