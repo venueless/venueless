@@ -550,7 +550,7 @@ class AuthModule(BaseModule):
                 token_id=uid,
                 world=self.consumer.world,
                 show_publicly=False,
-                profile={},
+                profile=body["profile"] if isinstance(body.get("profile"), dict) else {},
                 traits=[],
             )
 
