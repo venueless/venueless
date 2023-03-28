@@ -176,6 +176,19 @@ const routes = [{
 			props: true
 		}]
 	}, {
+		path: '/admin/kiosks',
+		name: 'admin:kiosks:index',
+		component: () => import(/* webpackChunkName: "admin" */ 'views/admin/kiosks/index')
+	}, {
+		path: '/admin/kiosks/new',
+		name: 'admin:kiosks:new',
+		component: () => import(/* webpackChunkName: "admin" */ 'views/admin/kiosks/new')
+	}, {
+		path: '/admin/kiosks/:kioskId',
+		name: 'admin:kiosks:item',
+		component: () => import(/* webpackChunkName: "admin" */ 'views/admin/kiosks/item'),
+		props: true
+	}, {
 		path: '/admin/config',
 		component: () => import(/* webpackChunkName: "admin" */ 'views/admin/config'),
 		children: [{

@@ -1,0 +1,68 @@
+<template lang="pug">
+.c-admin-kiosk-new
+	.ui-page-header
+		bunt-icon-button(@click="$router.replace({name: 'admin:kiosk:index'})") arrow_left
+		h1 New kiosk
+	.scroll-wrapper(v-scrollbar.y="")
+		.ui-form-body
+			bunt-input(name="name", v-model="profile.display_name", label="Name", :validation="$v.profile.display_name")
+	.ui-form-actions
+		bunt-button.btn-save(@click="save", :loading="saving", :error-message="error") create
+		.errors {{ validationErrors.join(', ') }}
+</template>
+<script>
+import api from 'lib/api'
+import { required } from 'lib/validators'
+import ValidationErrorsMixin from 'components/mixins/validation-errors'
+
+export default {
+	components: {},
+	mixins: [ValidationErrorsMixin],
+	data () {
+		return {
+			profile: {
+				display_name: ''
+			},
+			saving: false,
+			error: null
+		}
+	},
+	computed: {},
+	validations: {
+		profile: {
+			display_name: {
+				required: required('Name is required')
+			}
+		}
+	},
+	methods: {
+		async save () {
+			this.error = null
+			this.$v.$touch()
+			if (this.$v.$invalid) return
+			this.saving = true
+			try {
+				await api.call('user.kiosk.create', {
+					profile: this.profile
+				})
+				this.$router.replace({name: 'admin:kiosks:item'})
+			} catch (e) {
+				this.error = e.message
+			} finally {
+				this.saving = false
+			}
+		}
+	}
+}
+</script>
+<style lang="stylus">
+.c-admin-kiosk-new
+	background-color: $clr-white
+	display: flex
+	flex-direction: column
+	min-height: 0
+	.scroll-wrapper
+		flex: auto
+		display: flex
+		flex-direction: column
+</style>
