@@ -6,6 +6,7 @@
 	.scroll-wrapper(v-scrollbar.y="")
 		.ui-form-body
 			bunt-input(name="name", v-model="profile.display_name", label="Name", :validation="$v.profile.display_name")
+			bunt-select(v-model="profile.room_id", label="Room", name="room", :options="rooms", option-label="name", :validation="$v.profile.room_id")
 	.ui-form-actions
 		bunt-button.btn-save(@click="save", :loading="saving", :error-message="error") create
 		.errors {{ validationErrors.join(', ') }}
@@ -13,6 +14,7 @@
 <script>
 import api from 'lib/api'
 import { required } from 'lib/validators'
+import { inferRoomType } from 'lib/room-types'
 import ValidationErrorsMixin from 'components/mixins/validation-errors'
 
 export default {
@@ -27,11 +29,18 @@ export default {
 			error: null
 		}
 	},
-	computed: {},
+	computed: {
+		rooms () {
+			return this.$store.state.rooms.filter(room => inferRoomType(room)?.id === 'stage')
+		},
+	},
 	validations: {
 		profile: {
 			display_name: {
 				required: required('Name is required')
+			},
+			room_id: {
+				required: required('Room is required')
 			}
 		}
 	},
