@@ -8,12 +8,15 @@
 	.kiosks-list
 		.header
 			.name Name
+			.room Room
 		.tbody(v-if="filteredKiosks", v-scrollbar.y="")
 			router-link.kiosk.table-row(v-for="kiosk of filteredKiosks", :to="{name: 'admin:kiosks:item', params: {kioskId: kiosk.id}}")
 				.name {{ kiosk.profile.display_name }}
+				.room {{ roomsLookup[kiosk.profile.room_id] ? roomsLookup[kiosk.profile.room_id].name : '' }}
 		bunt-progress-circular(v-else, size="huge", :page="true")
 </template>
 <script>
+import { mapGetters } from 'vuex'
 import api from 'lib/api'
 import fuzzysearch from 'lib/fuzzysearch'
 
@@ -26,6 +29,7 @@ export default {
 		}
 	},
 	computed: {
+		...mapGetters(['roomsLookup']),
 		filteredKiosks () {
 			if (!this.kiosks) return
 			if (!this.search) return this.kiosks
@@ -70,7 +74,7 @@ export default {
 			display: flex
 			align-items: center
 			color: $clr-primary-text-light
-		.name
-			flex: auto
+		.name, .room
+			flex: 1
 			ellipsis()
 </style>

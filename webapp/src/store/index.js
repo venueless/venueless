@@ -50,6 +50,12 @@ export default new Vuex.Store({
 			if (!state.token) return true
 			const token = jwtDecode(state.token)
 			return !doesTraitsMatchGrants(token.traits, state.world.onsite_traits)
+		},
+		roomsLookup (state) {
+			return state.rooms?.reduce((lookup, room) => {
+				lookup[room.id] = room
+				return lookup
+			}, {})
 		}
 	},
 	mutations: {

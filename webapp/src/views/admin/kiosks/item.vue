@@ -10,6 +10,7 @@
 		.scroll-wrapper(v-scrollbar.y="")
 			.ui-form-body
 				bunt-input(name="name", v-model="kiosk.profile.display_name", label="Name", :validation="$v.kiosk.profile.display_name")
+				bunt-select(v-model="kiosk.profile.room_id", label="Room", name="room", :options="rooms", option-label="name", :validation="$v.kiosk.profile.room_id")
 		.ui-form-actions
 			bunt-button.btn-save(@click="save", :loading="saving", :error-message="saveError") Save
 			.errors {{ validationErrors.join(', ') }}
@@ -28,6 +29,7 @@
 <script>
 import api from 'lib/api'
 import { required } from 'lib/validators'
+import { inferRoomType } from 'lib/room-types'
 import Prompt from 'components/Prompt'
 import ValidationErrorsMixin from 'components/mixins/validation-errors'
 
@@ -50,11 +52,19 @@ export default {
 			deleteError: null
 		}
 	},
+	computed: {
+		rooms () {
+			return this.$store.state.rooms.filter(room => inferRoomType(room)?.id === 'stage')
+		},
+	},
 	validations: {
 		kiosk: {
 			profile: {
 				display_name: {
 					required: required('Name is required')
+				},
+				room_id: {
+					required: required('Room is required')
 				}
 			}
 		}
