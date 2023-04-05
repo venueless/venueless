@@ -37,7 +37,7 @@ from venueless.core.services.user import (
     set_user_silenced,
     unblock_user,
     update_user,
-    user_broadcast,
+    user_broadcast, get_user_by_id,
 )
 from venueless.core.utils.redis import aioredis
 from venueless.core.utils.statsd import statsd
@@ -538,9 +538,6 @@ class AuthModule(BaseModule):
     @command("kiosk.create")
     @require_world_permission(Permission.WORLD_UPDATE)  # TODO: stricter permission?
     async def kiosk_create(self, body):
-        jwt_config = self.consumer.world.config["JWT_secrets"][0]
-        iat = datetime.datetime.utcnow()
-        exp = iat + datetime.timedelta(days=365)
         uid = str(uuid.uuid4())
 
         @database_sync_to_async
@@ -567,17 +564,46 @@ class AuthModule(BaseModule):
                 self.consumer.world.save()
 
             user.world_grants.create(role="kiosk", world=self.consumer.world)
+            return user
 
-        await create_user()
-        payload = {
-            "iss": jwt_config["issuer"],
-            "aud": jwt_config["audience"],
-            "exp": exp,
-            "iat": iat,
-            "uid": uid,
-            "traits": ["-kiosk"],
-        }
-        token = jwt.encode(payload, jwt_config["secret"], algorithm="HS256")
-        st = ShortToken(world=self.consumer.world, long_token=token, expires=exp)
+        user = await create_user()
 
-        await self.consumer.send_success({"token": st.short_token})
+        await self.consumer.send_success({"user": str(user.pk)})
+
+    @command("kiosk.fetch")
+    @require_world_permission(Permission.WORLD_USERS_MANAGE)  # TODO: stricter permission?
+    async def kiosk_fetch(self, body):
+
+        @database_sync_to_async
+        def get_user(uid):
+            user = get_user_by_id(self.consumer.world.pk, id)
+            if not user or user.type != User.UserType.KIOSK:
+                return None
+            user = user.serialize_public(
+                include_admin_info=True,
+                trait_badges_map=None,
+                include_client_state=True,
+            )
+            jwt_config = self.consumer.world.config["JWT_secrets"][0]
+            iat = datetime.datetime.utcnow()
+            exp = iat + datetime.timedelta(days=365)
+            payload = {
+                "iss": jwt_config["issuer"],
+                "aud": jwt_config["audience"],
+                "exp": exp,
+                "iat": iat,
+                "uid": user.token_id,
+                "traits": ["-kiosk"],
+            }
+
+            token = jwt.encode(payload, jwt_config["secret"], algorithm="HS256")
+            st = ShortToken(world=self.consumer.world, long_token=token, expires=exp)
+            st.save()
+            user["token"] = st.short_token
+            return user
+
+        user = await get_user(body.get("id"))
+        if user:
+            await self.consumer.send_success(user)
+        else:
+            await self.consumer.send_error(code="user.not_found")
