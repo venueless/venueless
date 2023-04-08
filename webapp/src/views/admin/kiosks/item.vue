@@ -9,6 +9,12 @@
 				bunt-button.btn-delete-kiosk(@click="showDeletePrompt = true") delete
 		.scroll-wrapper(v-scrollbar.y="")
 			.ui-form-body
+				.kiosk-url
+					label Kiosk Login URL:
+					.copyable-url(@click="copyLoginUrl")
+						.url {{ loginUrl }}
+						.mdi.mdi-content-copy
+						.copy-success(v-if="urlCopied", v-tooltip="{text: 'Copied!', show: true, placement: 'top', fixed: true}")
 				bunt-input(name="name", v-model="kiosk.profile.display_name", label="Name", :validation="$v.kiosk.profile.display_name")
 				bunt-select(v-model="kiosk.profile.room_id", label="Room", name="room", :options="rooms", option-label="name", :validation="$v.kiosk.profile.room_id")
 		.ui-form-actions
@@ -49,13 +55,17 @@ export default {
 			showDeletePrompt: false,
 			deletingKioskName: '',
 			deleting: false,
-			deleteError: null
+			deleteError: null,
+			urlCopied: false
 		}
 	},
 	computed: {
 		rooms () {
 			return this.$store.state.rooms.filter(room => inferRoomType(room)?.id === 'stage')
 		},
+		loginUrl () {
+			return `${window.location.origin}?token=${this.kiosk.token}`
+		}
 	},
 	validations: {
 		kiosk: {
@@ -71,7 +81,7 @@ export default {
 	},
 	async created () {
 		try {
-			this.kiosk = await api.call('user.fetch', {id: this.kioskId})
+			this.kiosk = await api.call('user.kiosk.fetch', {id: this.kioskId})
 		} catch (error) {
 			this.error = error
 			console.error(error)
@@ -105,6 +115,13 @@ export default {
 				this.deleteError = this.$t(`error:${error.code}`)
 			}
 			this.deleting = false
+		},
+		async copyLoginUrl () {
+			await navigator.clipboard.writeText(this.loginUrl)
+			this.urlCopied = true
+			setTimeout(() => {
+				this.urlCopied = false
+			}, 3000)
 		}
 	}
 }
@@ -139,6 +156,26 @@ export default {
 		flex: auto
 		display: flex
 		flex-direction: column
+
+	.kiosk-url
+		display: flex
+		gap: 8px
+		align-items: center
+		.copyable-url
+			position: relative
+			display: flex
+			gap: 8px
+			padding: 4px
+			background-color: $clr-grey-200
+			border-radius: 2px
+			cursor: pointer
+			.copy-success
+				position: absolute
+				top: 0
+				left: 0
+				right: 0
+				bottom: 0
+				background-color: $clr-secondary-text-dark
 	.delete-prompt
 		.content
 			display: flex
