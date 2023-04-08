@@ -51,10 +51,10 @@ export default {
 			if (this.$v.$invalid) return
 			this.saving = true
 			try {
-				await api.call('user.kiosk.create', {
+				const response = await api.call('user.kiosk.create', {
 					profile: this.profile
 				})
-				this.$router.replace({name: 'admin:kiosks:item'})
+				this.$router.replace({name: 'admin:kiosks:item', params: {kioskId: response.user}})
 			} catch (e) {
 				this.error = e.message
 			} finally {
