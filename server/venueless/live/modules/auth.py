@@ -576,7 +576,7 @@ class AuthModule(BaseModule):
 
         @database_sync_to_async
         def get_user(uid):
-            user = get_user_by_id(self.consumer.world.pk, id)
+            user = get_user_by_id(self.consumer.world.pk, uid)
             if not user or user.type != User.UserType.KIOSK:
                 return None
             user = user.serialize_public(
@@ -592,7 +592,7 @@ class AuthModule(BaseModule):
                 "aud": jwt_config["audience"],
                 "exp": exp,
                 "iat": iat,
-                "uid": user.token_id,
+                "uid": user["token_id"],
                 "traits": ["-kiosk"],
             }
 
