@@ -64,7 +64,7 @@ export default {
 			return this.$store.state.rooms.filter(room => inferRoomType(room)?.id === 'stage')
 		},
 		loginUrl () {
-			return `${window.location.origin}?token=${this.kiosk.token}`
+			return `${window.location.origin}/login/${this.kiosk.token}`
 		}
 	},
 	validations: {
