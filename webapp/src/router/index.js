@@ -44,9 +44,6 @@ const routes = [{
 		}
 	}
 }, {
-	path: '/rooms/:roomId/kiosk',
-	name: 'kiosk-mode',
-}, {
 	path: '/',
 	component: App,
 	children: [{

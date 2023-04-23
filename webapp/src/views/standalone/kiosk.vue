@@ -3,7 +3,6 @@
 	transition(name="kiosk")
 		.slide(:key="activeSlide.id")
 			component(:is="activeSlide.component", :room="room")
-	.reactions
 </template>
 <script>
 import PollSlide from './Poll'
