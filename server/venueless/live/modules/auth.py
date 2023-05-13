@@ -30,6 +30,7 @@ from venueless.core.services.user import (
     get_blocked_users,
     get_public_user,
     get_public_users,
+    get_user_by_id,
     list_users,
     login,
     set_user_banned,
@@ -37,7 +38,7 @@ from venueless.core.services.user import (
     set_user_silenced,
     unblock_user,
     update_user,
-    user_broadcast, get_user_by_id,
+    user_broadcast,
 )
 from venueless.core.utils.redis import aioredis
 from venueless.core.utils.statsd import statsd
@@ -547,23 +548,12 @@ class AuthModule(BaseModule):
                 token_id=uid,
                 world=self.consumer.world,
                 show_publicly=False,
-                profile=body["profile"] if isinstance(body.get("profile"), dict) else {},
+                profile=body["profile"]
+                if isinstance(body.get("profile"), dict)
+                else {},
                 traits=[],
             )
-
-            if "kiosk" not in self.consumer.world.roles:
-                self.consumer.world.refresh_from_db()
-                self.consumer.world.roles["kiosk"] = [
-                    "world:view",
-                    "room:view",
-                    "room:chat.read",
-                    "room:question.read",
-                    "room:poll.read",
-                    "room:viewers",
-                ]
-                self.consumer.world.save()
-
-            user.world_grants.create(role="kiosk", world=self.consumer.world)
+            user.world_grants.create(world=self.consumer.world, role="__kiosk")
             return user
 
         user = await create_user()
@@ -571,9 +561,10 @@ class AuthModule(BaseModule):
         await self.consumer.send_success({"user": str(user.pk)})
 
     @command("kiosk.fetch")
-    @require_world_permission(Permission.WORLD_USERS_MANAGE)  # TODO: stricter permission?
+    @require_world_permission(
+        Permission.WORLD_USERS_MANAGE
+    )  # TODO: stricter permission?
     async def kiosk_fetch(self, body):
-
         @database_sync_to_async
         def get_user(uid):
             user = get_user_by_id(self.consumer.world.pk, uid)
