@@ -12,7 +12,6 @@ import { mapState } from 'vuex'
 import { themeVariables } from 'theme'
 import ReactionsOverlay from 'components/ReactionsOverlay.vue'
 
-
 const SLIDE_WIDTH = 960
 const SLIDE_HEIGHT = 700
 
@@ -49,6 +48,7 @@ export default {
 		}
 	},
 	created () {
+		this.$store.dispatch('changeRoom', this.room)
 		this.fullscreen = this.$route.query.fullscreen ?? !this.$route.name.endsWith('chat')
 	},
 	mounted () {
