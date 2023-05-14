@@ -72,7 +72,6 @@ export default {
 	},
 	mounted () {
 		this.nextSlide()
-		setTimeout(this.nextSlide.bind(this), SLIDE_INTERVAL)
 		for (const slide of SLIDES) {
 			if (slide.watch) {
 				this.$watch(slide.watch.bind(this), () => {
@@ -87,6 +86,7 @@ export default {
 	},
 	methods: {
 		nextSlide () {
+			if (this.slideTimer) clearTimeout(this.slideTimer)
 			let index = SLIDES.indexOf(this.activeSlide)
 			const stoppingIndex = Math.max(0, index)
 			let nextSlide
@@ -100,7 +100,7 @@ export default {
 				) nextSlide = SLIDES[index]
 			} while (index !== stoppingIndex)
 			this.activeSlide = nextSlide
-			setTimeout(this.nextSlide.bind(this), SLIDE_INTERVAL)
+			this.slideTimer = setTimeout(this.nextSlide.bind(this), SLIDE_INTERVAL)
 		}
 	}
 }
