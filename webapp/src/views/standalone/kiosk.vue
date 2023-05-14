@@ -6,7 +6,7 @@
 </template>
 <script>
 import PollSlide from './Poll'
-import VoteSlide from './Vote'
+// import VoteSlide from './Vote'
 import QuestionSlide from './Question'
 import NextSessionSlide from './NextSession'
 import ViewersSlide from './Viewers'
@@ -17,12 +17,12 @@ const SLIDES = [{
 		return !!this.$store.getters['poll/pinnedPoll']
 	},
 	component: PollSlide
-}, {
-	id: 'vote',
-	condition () {
-		return !!this.$store.getters['poll/pinnedPoll']
-	},
-	component: VoteSlide
+// }, {
+// 	id: 'vote',
+// 	condition () {
+// 		return !!this.$store.getters['poll/pinnedPoll']
+// 	},
+// 	component: VoteSlide
 }, {
 	id: 'question',
 	condition () {
