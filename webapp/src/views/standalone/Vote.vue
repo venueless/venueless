@@ -19,7 +19,7 @@ export default {
 	},
 	computed: {
 		url () {
-			return `vle.ss/AB12`
+			return 'vle.ss/AB12'
 		},
 		fullUrl () {
 			return `https://${this.url}`
