@@ -16,6 +16,10 @@ const SLIDES = [{
 	condition () {
 		return !!this.$store.getters['poll/pinnedPoll']
 	},
+	watch () {
+		return this.$store.getters['poll/pinnedPoll']
+	},
+	priority: 10,
 	component: PollSlide
 // }, {
 // 	id: 'vote',
@@ -28,18 +32,25 @@ const SLIDES = [{
 	condition () {
 		return !!this.$store.getters['question/pinnedQuestion']
 	},
+	watch () {
+		return this.$store.getters['question/pinnedQuestion']
+	},
+	priority: 10,
 	component: QuestionSlide
 }, {
 	id: 'nextSession',
 	condition () {
-		return !!this.$store.getters['schedule/sessions']?.find(session => session.room === this.room && session.start.isAfter(this.now))
+		const nextSession = this.$store.getters['schedule/sessions']?.find(session => session.room === this.room && session.start.isAfter(this.now))
+		return !!nextSession
 	},
+	priority: 1,
 	component: NextSessionSlide
 }, {
 	id: 'viewers',
 	condition () {
-		return true
+		return this.$store.state.roomViewers?.length > 0
 	},
+	priority: 1,
 	component: ViewersSlide
 }]
 
@@ -55,16 +66,34 @@ export default {
 		}
 	},
 	mounted () {
+		this.nextSlide()
 		setTimeout(this.nextSlide.bind(this), SLIDE_INTERVAL)
+		for (const slide of SLIDES) {
+			if (slide.watch) {
+				this.$watch(slide.watch.bind(this), () => {
+					if (slide.condition.call(this)) {
+						this.activeSlide = slide
+					} else {
+						this.nextSlide()
+					}
+				})
+			}
+		}
 	},
 	methods: {
 		nextSlide () {
 			let index = SLIDES.indexOf(this.activeSlide)
+			const stoppingIndex = index
 			let nextSlide
 			do {
 				index++
-				nextSlide = SLIDES[(index) % SLIDES.length]
-			} while (!nextSlide.condition.call(this))
+				if (index >= SLIDES.length) index = 0
+				const slide = SLIDES[index]
+				if (
+					slide.priority > (nextSlide?.priority ?? 0) &&
+					slide.condition.call(this)
+				) nextSlide = SLIDES[index]
+			} while (index !== stoppingIndex)
 			this.activeSlide = nextSlide
 			setTimeout(this.nextSlide.bind(this), SLIDE_INTERVAL)
 		}
