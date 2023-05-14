@@ -1,10 +1,11 @@
 <template lang="pug">
 .v-standalone-kiosk
 	transition(name="kiosk")
-		.slide(:key="activeSlide.id")
+		.slide(v-if="activeSlide", :key="activeSlide.id")
 			component(:is="activeSlide.component", :room="room")
 </template>
 <script>
+import moment from 'lib/timetravelMoment'
 import PollSlide from './Poll'
 // import VoteSlide from './Vote'
 import QuestionSlide from './Question'
@@ -40,8 +41,12 @@ const SLIDES = [{
 }, {
 	id: 'nextSession',
 	condition () {
+		const currentSession = this.$store.getters['schedule/currentSessionPerRoom']?.[this.room.id]?.session
 		const nextSession = this.$store.getters['schedule/sessions']?.find(session => session.room === this.room && session.start.isAfter(this.now))
-		return !!nextSession
+		return !!nextSession && (!currentSession || currentSession.end.isBefore(moment().add(10, 'minutes')))
+	},
+	watch () {
+		return this.$store.getters['schedule/sessions']
 	},
 	priority: 1,
 	component: NextSessionSlide
@@ -83,7 +88,7 @@ export default {
 	methods: {
 		nextSlide () {
 			let index = SLIDES.indexOf(this.activeSlide)
-			const stoppingIndex = index
+			const stoppingIndex = Math.max(0, index)
 			let nextSlide
 			do {
 				index++
