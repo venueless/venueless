@@ -1,6 +1,6 @@
 <template lang="pug">
 .c-standalone-next-session(v-if="nextSession")
-	h2 Next Session
+	h2 {{ $t('standalone/NextSession:header') }}
 	Session(:session="nextSession")
 </template>
 <script>
