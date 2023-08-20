@@ -1,13 +1,22 @@
 <template lang="pug">
+Poll(:poll="pinnedPoll")
 </template>
 <script>
+import { mapGetters } from 'vuex'
+import Poll from 'components/Poll'
+
 export default {
-	components: {},
+	components: { Poll },
+	props: {
+		room: Object
+	},
 	data () {
 		return {
 		}
 	},
-	computed: {},
+	computed: {
+		...mapGetters('poll', ['pinnedPoll']),
+	},
 	async created () {},
 	async mounted () {
 		await this.$nextTick()
