@@ -100,7 +100,7 @@ class AppView(View):
                 return redirect(
                     urljoin(
                         request.scheme + "://" + invite.world.domain,
-                        f"/standalone/{invite.room_id}/join/{invite.short_token}/",
+                        f"/standalone/{invite.room_id}/anonymous#invite={invite.short_token}",
                     )
                 )
         elif not short_host and len(request.path) == 7:
@@ -113,7 +113,7 @@ class AppView(View):
                 return redirect(
                     urljoin(
                         request.scheme + "://" + invite.world.domain,
-                        f"/standalone/{invite.room_id}/join/{invite.short_token}/",
+                        f"/standalone/{invite.room_id}/anonymous#invite={invite.short_token}",
                     )
                 )
             except AnonymousInvite.DoesNotExist:

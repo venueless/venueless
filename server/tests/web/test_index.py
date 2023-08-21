@@ -42,7 +42,7 @@ def test_known_anonymous_invite_on_main_domain(client, world, stream_room):
     assert r.status_code == 302
     assert (
         r["Location"]
-        == f"http://foobar.com/standalone/{stream_room.id}/join/{ai.short_token}/"
+        == f"http://foobar.com/standalone/{stream_room.id}/anonymous#invite={ai.short_token}"
     )
 
 
@@ -67,7 +67,7 @@ def test_known_anonymous_invite_on_world_domain(client, world, stream_room):
     assert r.status_code == 302
     assert (
         r["Location"]
-        == f"http://foobar.com/standalone/{stream_room.id}/join/{ai.short_token}/"
+        == f"http://foobar.com/standalone/{stream_room.id}/anonymous#invite={ai.short_token}"
     )
 
 
@@ -97,7 +97,7 @@ def test_known_anonymous_invite_on_short_domain(client, world, stream_room):
     assert r.status_code == 302
     assert (
         r["Location"]
-        == f"http://foobar.com/standalone/{stream_room.id}/join/{ai.short_token}/"
+        == f"http://foobar.com/standalone/{stream_room.id}/anonymous#invite={ai.short_token}"
     )
 
 
