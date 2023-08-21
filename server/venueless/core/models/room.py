@@ -78,8 +78,10 @@ class RoomQuerySet(models.QuerySet):
         for i, role in enumerate(roles):
             if traits:
                 ext = ""
+                ext_args = []
                 if not allow_empty_traits:
                     ext = " AND jsonb_array_length(trait_grants->%s) > 0"
+                    ext_args.append(role)
 
                 qs = qs.annotate(
                     **{
@@ -102,6 +104,7 @@ class RoomQuerySet(models.QuerySet):
                                 tuple(traits),  # IN check
                                 tuple(traits),  # IN check
                                 role,  # jsonb_array_elements
+                                *ext_args,
                             ),
                         )
                     }
