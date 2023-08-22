@@ -5,7 +5,7 @@
 		router-view(:room="room", :config="config")
 	bunt-progress-circular(v-else, size="small")
 	//- hoist reactions to escale scaling
-	ReactionsOverlay(v-if="$route.name === 'standalone:kiosk' && config.show_reactions")
+	ReactionsOverlay(v-if="$route.name === 'standalone:kiosk' && config.show_reactions !== false")
 </template>
 <script>
 // TODO
