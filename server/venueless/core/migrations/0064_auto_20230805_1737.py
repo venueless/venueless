@@ -7,7 +7,6 @@ import venueless.core.models.room
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("core", "0063_user_type"),
     ]
