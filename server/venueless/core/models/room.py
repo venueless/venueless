@@ -29,7 +29,7 @@ class RoomQuerySet(models.QuerySet):
         from .auth import RoomGrant, WorldGrant
 
         traits = traits or user.traits
-        allow_empty_traits = user.type == User.UserType.PERSON
+        allow_empty_traits = not user or user.type == User.UserType.PERSON
         if world.has_permission_implicit(
             traits=traits,
             permissions=[permission],
