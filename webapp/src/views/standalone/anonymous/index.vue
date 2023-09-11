@@ -4,7 +4,7 @@
 	.content-wrapper
 		h2.room
 			| Room:&nbsp;
-			span.room-name {{ room.name }}
+			span.room-name(v-html="$emojify(room.name)")
 		.session(v-if="session")
 			.title {{ $localize(session.title) }}
 			.speakers {{ session.speakers ? session.speakers.map(s => s.name).join(', ') : '' }}
@@ -21,7 +21,7 @@
 					Session(:session="session")
 					h3 Next Sessions
 					Session(v-for="session of nextSessions", :session="session")
-		.hint(v-if="activeSidebarTab !== 'schedule' && Object.keys(user.profile).length === 0") You're voting anonymously
+		.hint(v-if="activeSidebarTab !== 'schedule' && isAnonymous") You're voting anonymously
 </template>
 <script>
 // TODO
@@ -56,6 +56,9 @@ export default {
 				acc[module.type] = module
 				return acc
 			}, {})
+		},
+		isAnonymous () {
+			return Object.keys(this.user.profile).length === 0
 		},
 		unreadTabsClasses () {
 			return Object.entries(this.unreadTabs).filter(([tab, value]) => value).map(([tab]) => `tab-${tab}-unread`)

@@ -11,10 +11,7 @@
 			.ui-form-body
 				.kiosk-url
 					label Kiosk Login URL:
-					.copyable-url(@click="copyLoginUrl")
-						.url {{ loginUrl }}
-						.mdi.mdi-content-copy
-						.copy-success(v-if="urlCopied", v-tooltip="{text: 'Copied!', show: true, placement: 'top', fixed: true}")
+					copyable-text(:text="loginUrl")
 				bunt-input(name="name", v-model="kiosk.profile.display_name", label="Name", :validation="$v.kiosk.profile.display_name")
 				bunt-select(v-model="kiosk.profile.room_id", label="Room", name="room", :options="rooms", option-label="name", :validation="$v.kiosk.profile.room_id")
 				color-picker(name="background_color", v-model="kiosk.profile.background_color", label="Background color", :validation="$v.kiosk.profile.background_color")
@@ -46,12 +43,13 @@ import api from 'lib/api'
 import { color, required } from 'lib/validators'
 import { inferRoomType } from 'lib/room-types'
 import ColorPicker from 'components/ColorPicker'
+import CopyableText from 'components/CopyableText'
 import Prompt from 'components/Prompt'
 import ValidationErrorsMixin from 'components/mixins/validation-errors'
 
 export default {
 	name: 'AdminKiosk',
-	components: { ColorPicker, Prompt },
+	components: { ColorPicker, CopyableText, Prompt },
 	mixins: [ValidationErrorsMixin],
 	props: {
 		kioskId: String
@@ -65,8 +63,7 @@ export default {
 			showDeletePrompt: false,
 			deletingKioskName: '',
 			deleting: false,
-			deleteError: null,
-			urlCopied: false
+			deleteError: null
 		}
 	},
 	computed: {
@@ -137,13 +134,6 @@ export default {
 				this.deleteError = this.$t(`error:${error.code}`)
 			}
 			this.deleting = false
-		},
-		async copyLoginUrl () {
-			await navigator.clipboard.writeText(this.loginUrl)
-			this.urlCopied = true
-			setTimeout(() => {
-				this.urlCopied = false
-			}, 3000)
 		}
 	}
 }
@@ -187,21 +177,6 @@ export default {
 		display: flex
 		gap: 8px
 		align-items: center
-		.copyable-url
-			position: relative
-			display: flex
-			gap: 8px
-			padding: 4px
-			background-color: $clr-grey-200
-			border-radius: 2px
-			cursor: pointer
-			.copy-success
-				position: absolute
-				top: 0
-				left: 0
-				right: 0
-				bottom: 0
-				background-color: $clr-secondary-text-dark
 	.delete-prompt
 		.content
 			display: flex
