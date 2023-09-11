@@ -1,10 +1,10 @@
 <template lang="pug">
 .c-app-bar
 	bunt-icon-button(v-if="showActions", @click="$emit('toggleSidebar')", @touchend.native="$emit('toggleSidebar')") menu
-	.logo
+	router-link.logo(to="/", :class="{anonymous: isAnonymous}")
 		img(:src="theme.logo.url", :alt="world.title")
 	.user(v-if="showUser")
-		p(v-if="Object.keys(user.profile).length === 0") anonymous
+		p(v-if="isAnonymous") anonymous
 		avatar(v-else, :user="user", :size="36")
 </template>
 <script>
@@ -30,7 +30,10 @@ export default {
 		}
 	},
 	computed: {
-		...mapState(['user', 'world'])
+		...mapState(['user', 'world']),
+		isAnonymous () {
+			return Object.keys(this.user.profile).length === 0
+		},
 	}
 }
 </script>
@@ -51,6 +54,8 @@ export default {
 		margin-left: 8px
 		font-size: 24px
 		height: 40px
+		&.anonymous
+			pointer-events: none
 		img
 			height: 100%
 			max-width: 100%
