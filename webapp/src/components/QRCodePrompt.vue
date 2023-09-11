@@ -2,12 +2,12 @@
 prompt.c-qrcode-prompt(@close="$emit('close')")
 	.content
 		bunt-icon-button#btn-close(@click="$emit('close')") close
-		h1 Anonymous room link
+		h1 {{ $t('QRCodePrompt:title') }}
 		bunt-progress-circular(v-if="!url")
 		template(v-else)
 			a.download(:href="downloadUrl", :download="`anonymous-link-room-${room.name}.svg`")
 				.svg(v-html="qrcode")
-				| Download SVG
+				| {{ $t('QRCodePrompt:download-svg') }}
 			CopyableText.url(:text="shortUrl")
 </template>
 <script>

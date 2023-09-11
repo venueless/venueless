@@ -4,7 +4,7 @@
 	router-link.logo(to="/", :class="{anonymous: isAnonymous}")
 		img(:src="theme.logo.url", :alt="world.title")
 	.user(v-if="showUser")
-		p(v-if="isAnonymous") anonymous
+		p(v-if="isAnonymous") {{ $t('AppBar:user-anonymous') }}
 		avatar(v-else, :user="user", :size="36")
 </template>
 <script>
