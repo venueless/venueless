@@ -38,7 +38,7 @@ const routes = [{
 	}, {
 		path: 'anonymous',
 		name: 'standalone:anonymous',
-		component: () => import(/* webpackChunkName: "standalone" */ 'views/standalone/Anonymous')
+		component: () => import(/* webpackChunkName: "standalone" */ 'views/standalone/anonymous')
 	}]
 }, {
 	path: '/rooms/:roomId/presentation/:mode',

@@ -64,7 +64,7 @@ const SLIDES = [{
 	component: ViewersSlide
 }]
 
-const SLIDE_INTERVAL = 2000
+const SLIDE_INTERVAL = 20000
 
 export default {
 	props: {

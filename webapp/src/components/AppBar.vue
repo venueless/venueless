@@ -1,21 +1,36 @@
 <template lang="pug">
 .c-app-bar
-	bunt-icon-button(@click="$emit('toggleSidebar')", @touchend.native="$emit('toggleSidebar')") menu
+	bunt-icon-button(v-if="showActions", @click="$emit('toggleSidebar')", @touchend.native="$emit('toggleSidebar')") menu
 	.logo
 		img(:src="theme.logo.url", :alt="world.title")
+	.user(v-if="showUser")
+		p(v-if="Object.keys(user.profile).length === 0") anonymous
+		avatar(v-else, :user="user", :size="36")
 </template>
 <script>
 import { mapState } from 'vuex'
 import theme from 'theme'
+import Avatar from 'components/Avatar'
 
 export default {
+	components: { Avatar },
+	props: {
+		showActions: {
+			type: Boolean,
+			default: true
+		},
+		showUser: {
+			type: Boolean,
+			default: false
+		}
+	},
 	data () {
 		return {
 			theme
 		}
 	},
 	computed: {
-		...mapState(['world'])
+		...mapState(['user', 'world'])
 	}
 }
 </script>
@@ -40,6 +55,8 @@ export default {
 			height: 100%
 			max-width: 100%
 			object-fit: contain
+	.user
+		color: var(--clr-sidebar-text-primary)
 #app.override-sidebar-collapse .c-app-bar
 	border-bottom: none // TODO find a better solution, but having a border between app-bar and rooms-sidebar looks ugly
 	.bunt-icon-button
