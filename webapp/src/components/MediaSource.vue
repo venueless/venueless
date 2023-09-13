@@ -71,12 +71,12 @@ export default {
 		if (!this.room) {
 			return
 		}
-		api.call('room.enter', {room: this.room.id})
 		this.initializeIframe()
 	},
 	beforeDestroy () {
 		this.iframe?.remove()
 		if (api.socketState !== 'open') return
+		// TODO move to store?
 		if (this.room) api.call('room.leave', {room: this.room.id})
 	},
 	methods: {
@@ -111,7 +111,7 @@ export default {
 				if (hideIfBackground) {
 					iframe.classList.add('hide-if-background')
 				}
-				iframe.allow = 'camera *; microphone *; fullscreen *; display-capture *' + (this.autoplay ? '; autoplay *' : '')
+				iframe.allow = 'screen-wake-lock *; camera *; microphone *; fullscreen *; display-capture *' + (this.autoplay ? '; autoplay *' : '')
 				iframe.allowfullscreen = true
 				iframe.allowusermedia = true
 				iframe.setAttribute('allowfullscreen', '') // iframe.allowfullscreen is not enough in firefox#media-source-iframes

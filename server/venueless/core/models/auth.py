@@ -17,6 +17,11 @@ class User(VersionedModel):
         SILENCED = "silenced"
         BANNED = "banned"
 
+    class UserType(models.TextChoices):
+        PERSON = "person"
+        KIOSK = "kiosk"
+        ANONYMOUS = "anon"
+
     id = models.UUIDField(default=uuid.uuid4, primary_key=True)
     client_id = models.CharField(max_length=200, db_index=True, null=True, blank=True)
     token_id = models.CharField(max_length=200, db_index=True, null=True, blank=True)
@@ -24,8 +29,12 @@ class User(VersionedModel):
     moderation_state = models.CharField(
         max_length=8, default=ModerationState.NONE, choices=ModerationState.choices
     )
+    type = models.CharField(
+        max_length=8, default=UserType.PERSON, choices=UserType.choices
+    )
     show_publicly = models.BooleanField(default=True)
     profile = JSONField()
+    client_state = JSONField(default=dict)
     traits = ArrayField(models.CharField(max_length=200), blank=True)
     pretalx_id = models.CharField(max_length=200, null=True, blank=True)
     blocked_users = models.ManyToManyField(
@@ -33,6 +42,12 @@ class User(VersionedModel):
     )
     last_login = models.DateTimeField(null=True, blank=True)
     deleted = models.BooleanField(default=False)
+    social_login_id_twitter = models.CharField(
+        null=True, blank=True, max_length=190, db_index=True
+    )
+    social_login_id_linkedin = models.CharField(
+        null=True, blank=True, max_length=190, db_index=True
+    )
 
     class Meta:
         unique_together = (("token_id", "world"), ("client_id", "world"))
@@ -89,7 +104,12 @@ class User(VersionedModel):
         self.profile = {}
         self.save()
 
-    def serialize_public(self, include_admin_info=False, trait_badges_map=None):
+    def serialize_public(
+        self,
+        include_admin_info=False,
+        trait_badges_map=None,
+        include_client_state=False,
+    ):
         # Important: If this is updated, venueless.core.services.user.get_public_users also needs to be updated!
         # For performance reasons, it does not use this method directly.
         d = {
@@ -115,6 +135,8 @@ class User(VersionedModel):
         if include_admin_info:
             d["moderation_state"] = self.moderation_state
             d["token_id"] = self.token_id
+        if include_client_state:
+            d["client_state"] = self.client_state
         return d
 
     @property

@@ -28,10 +28,17 @@ With a token, it works just the same way::
     => ["authenticate", {"token": "JWTTOKEN"}]
     <- ["authenticated", {"user.config": {…}, "world.config": {…}, "chat.channels": [], "chat.read_pointers": {}}]
 
+There is the special case of an "anonymous user" who was invited to join the Q&A or polls of a specific room.
+An anonymous user always has access to one room only. We therefore recommend to store the ``client_id`` in the frontend
+only for that room::
+
+    => ["authenticate", {"client_id": "UUID4", "invite_token": "a2C2j5"}]
+    <- ["authenticated", {"user.config": {…}, "world.config": {…}, "chat.channels": [], "chat.read_pointers": {}}]
+
 ``chat.channels`` contains a list of **non-volatile** chat rooms the user is a member of. See chat module
 documentation for membership semantics.
 
-If authentication failes, you receive an error instead::
+If authentication fails, you receive an error instead::
 
     => ["authenticate", {"client_id": "UUID4"}]
     <- ["error", {"code": "auth.invalid_token"}]
@@ -64,7 +71,7 @@ Change user info
 
 You can change a user's profile using the ``user.update`` call::
 
-    => ["user.update", 123, {"profile": {…}}]
+    => ["user.update", 123, {"profile": {…}, "client_state": {}}]
     <- ["success", 123, {}]
 
 Receiving info on another user
@@ -96,15 +103,19 @@ Profile updates
 If your user data changes, you will receive a broadcast with your new profile. This is e.g. important if your profile
 is changed from a different connection::
 
-    <= ["user.updated", {"id": "1234", "profile": {…}}]
+    <= ["user.updated", {"id": "1234", "profile": {…}, "client_state": {…}}]
 
 Fetching a list of users
 ------------------------
 
 If you have sufficient permissions, you can fetch a list of all users like this::
 
-    => ["user.list", 123, {"ids": ["1234", "5679"]}]
+    => ["user.list", 123, {}]
     <- ["success", 123, {"1234": {"id": "1234", "profile": {…}}, "5679": {…}}]
+
+By default, you only get users of the type ``"person"`` , but you can also get other types like this::
+
+    => ["user.list", 123, {"type": "kiosk"}]
 
 .. note:: Pagination will be implemented on this endpoint in the future.
 
@@ -167,3 +178,16 @@ To get a list of blocked users, send::
 
     => ["user.list.blocked", 123, {}]
     <- ["success", 123, [{"id": "1234", "profile": {…}}]]
+
+Connecting a social media account
+---------------------------------
+
+Users can connect a social media account if the feature is active for the world.
+
+To start, send::
+
+    => ["user.social.connect", 123, {"network": "twitter", "return_url": "https://blafasel.venueless.events/preferences"}]
+    <- ["success", 123, {"url": "https://foo.venueless.events/social/twitter/start?token=…"}]
+
+Then, redirect the user to the given URL. After the authentication was successful (or failed), the user will be returned
+to the given URL. The return URL must be absolute

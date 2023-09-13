@@ -1,6 +1,6 @@
 FROM python:3.8
 
-RUN curl -sL https://deb.nodesource.com/setup_14.x | bash && \
+RUN curl -sL https://deb.nodesource.com/setup_20.x | bash && \
     apt-get install -y --no-install-recommends \
             build-essential \
             git \
@@ -50,8 +50,8 @@ COPY webapp/src/ /venueless/webapp/src/
 COPY webapp/public/ /venueless/webapp/public/
 
 RUN cd /venueless/webapp && \
-    npm ci && \
-    npm run build && \
+    npm ci --legacy-peer-deps && \
+    NODE_OPTIONS=--openssl-legacy-provider npm run build && \
 	mkdir -p data && \
 	cd .. && \
     chown -R venueless:venueless /venueless /data

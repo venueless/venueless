@@ -1,20 +1,28 @@
 import asyncio
 import logging
 import time
+from datetime import timedelta
+from urllib.parse import urljoin
 
 from channels.db import database_sync_to_async
 from channels.layers import get_channel_layer
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.utils.timezone import now
 from sentry_sdk import add_breadcrumb, configure_scope
 
-from venueless.core.models.room import RoomConfigSerializer, approximate_view_number
+from venueless.core.models.room import (
+    AnonymousInvite,
+    RoomConfigSerializer,
+    approximate_view_number,
+)
 from venueless.core.permissions import Permission
 from venueless.core.services.poll import get_polls, get_voted_polls
 from venueless.core.services.reactions import store_reaction
 from venueless.core.services.room import (
     delete_room,
     end_view,
+    get_viewers,
     reorder_rooms,
     save_room,
     start_view,
@@ -28,11 +36,13 @@ from venueless.core.services.world import (
 from venueless.core.utils.redis import aioredis
 from venueless.live.channels import (
     GROUP_ROOM,
+    GROUP_ROOM_POLL_ALL_RESULTS,
     GROUP_ROOM_POLL_MANAGE,
     GROUP_ROOM_POLL_READ,
     GROUP_ROOM_POLL_RESULTS,
     GROUP_ROOM_QUESTION_MODERATE,
     GROUP_ROOM_QUESTION_READ,
+    GROUP_ROOM_VIEWERS,
     GROUP_WORLD,
 )
 from venueless.live.decorators import (
@@ -63,6 +73,7 @@ class RoomModule(BaseModule):
         permissions = {
             Permission.ROOM_QUESTION_READ: GROUP_ROOM_QUESTION_READ,
             Permission.ROOM_QUESTION_MODERATE: GROUP_ROOM_QUESTION_MODERATE,
+            Permission.ROOM_POLL_EARLY_RESULTS: GROUP_ROOM_POLL_ALL_RESULTS,
             Permission.ROOM_POLL_READ: GROUP_ROOM_POLL_READ,
             Permission.ROOM_POLL_MANAGE: GROUP_ROOM_POLL_MANAGE,
         }
@@ -89,7 +100,6 @@ class RoomModule(BaseModule):
                     GROUP_ROOM_POLL_RESULTS.format(id=self.room.pk, poll=poll),
                     self.consumer.channel_name,
                 )
-        await self.consumer.send_success({})
 
         self.current_views[self.room], actual_view_count = await start_view(
             self.room,
@@ -97,6 +107,37 @@ class RoomModule(BaseModule):
             delete=not self.consumer.world.config.get("track_room_views", True),
         )
         await self._update_view_count(self.room, actual_view_count)
+
+        if self.consumer.user.show_publicly:
+            await get_channel_layer().group_send(
+                GROUP_ROOM_VIEWERS.format(id=self.room.pk),
+                {
+                    "type": "room.viewer.added",
+                    "user": self.consumer.user.serialize_public(
+                        trait_badges_map=self.consumer.world.config.get(
+                            "trait_badges_map"
+                        )
+                    ),
+                },
+            )
+
+        data = {}
+
+        if await self.consumer.world.has_permission_async(
+            user=self.consumer.user,
+            room=self.room,
+            permission=Permission.ROOM_VIEWERS,
+        ):
+            await self.consumer.channel_layer.group_add(
+                GROUP_ROOM_VIEWERS.format(id=self.room.pk),
+                self.consumer.channel_name,
+            )
+            data["viewers"] = await get_viewers(
+                self.consumer.world,
+                self.room,
+            )
+
+        await self.consumer.send_success(data)
 
         if settings.SENTRY_DSN:
             add_breadcrumb(
@@ -114,6 +155,7 @@ class RoomModule(BaseModule):
             GROUP_ROOM_QUESTION_READ,
             GROUP_ROOM_POLL_MANAGE,
             GROUP_ROOM_POLL_READ,
+            GROUP_ROOM_VIEWERS,
         ]
         for group_name in group_names:
             await self.consumer.channel_layer.group_discard(
@@ -125,12 +167,20 @@ class RoomModule(BaseModule):
                 self.consumer.channel_name,
             )
         if room in self.current_views:
-            actual_view_count = await end_view(
+            actual_view_count, is_last = await end_view(
                 self.current_views[room],
                 delete=not self.consumer.world.config.get("track_room_views", True),
             )
             del self.current_views[room]
             await self._update_view_count(room, actual_view_count)
+            if self.consumer.user.show_publicly and is_last:
+                await get_channel_layer().group_send(
+                    GROUP_ROOM_VIEWERS.format(id=room.pk),
+                    {
+                        "type": "room.viewer.removed",
+                        "user_id": str(self.consumer.user.id),
+                    },
+                )
 
     async def _update_view_count(self, room, actual_view_count):
         async with aioredis(f"room:approxcount:known:{room.pk}") as redis:
@@ -257,6 +307,24 @@ class RoomModule(BaseModule):
             ]
         )
 
+    @event("viewer.added")
+    async def push_viewer_added(self, body):
+        await self.consumer.send_json(
+            [
+                body["type"],
+                {k: v for k, v in body.items() if k != "type"},
+            ]
+        )
+
+    @event("viewer.removed")
+    async def push_viewer_removed(self, body):
+        await self.consumer.send_json(
+            [
+                body["type"],
+                {k: v for k, v in body.items() if k != "type"},
+            ]
+        )
+
     @event("create", refresh_user=True)
     async def push_room_info(self, body):
         await self.consumer.world.refresh_from_db_if_outdated(allowed_age=0)
@@ -369,4 +437,26 @@ class RoomModule(BaseModule):
                 body["type"],
                 {"room": config["id"], "schedule_data": config.get("schedule_data")},
             ]
+        )
+
+    @command("invite.anonymous.link")
+    @room_action(
+        permission_required=[
+            Permission.ROOM_UPDATE,
+            Permission.ROOM_INVITE_ANONYMOUS,
+        ]
+    )
+    async def invite_anonymous_link(self, body):
+        invite, created = await database_sync_to_async(
+            AnonymousInvite.objects.get_or_create
+        )(
+            world=self.consumer.world,
+            room=self.room,
+            expires__gte=now() + timedelta(days=10),
+            defaults=dict(
+                expires=now() + timedelta(days=90),
+            ),
+        )
+        await self.consumer.send_success(
+            {"url": urljoin(settings.SHORT_URL, "/" + invite.short_token)}
         )

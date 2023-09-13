@@ -1,5 +1,5 @@
 <template lang="pug">
-.v-presentation-poll(v-if="pinnedPoll", :style="{'--total-votes': totalVotes}")
+.c-standalone-poll(v-if="pinnedPoll", :style="{'--total-votes': totalVotes}")
 	.question
 		| {{ pinnedPoll.content }}
 	.option(v-for="option of pinnedPoll.options", :class="{'most-votes': optionsWithMostVotes.includes(option.id)}")
@@ -36,7 +36,8 @@ export default {
 }
 </script>
 <style lang="stylus">
-.v-presentation-poll
+.c-standalone-poll
+	min-width: 500px
 	.question
 		font-size: 36px
 		font-weight: 500
@@ -59,5 +60,7 @@ export default {
 				border-radius: 8px
 		&.most-votes
 			.votes::before
-				background-color: var(--clr-primary)
+				background-color: var(--clr-standalone-bg)
+				.themed-bg &
+					background-color: var(--clr-standalone-fg)
 </style>

@@ -13,6 +13,7 @@ from django.utils.timezone import now
 from ...live.channels import GROUP_USER
 from ..models import AuditLog
 from ..models.auth import User
+from ..models.room import AnonymousInvite
 from ..models.world import WorldView
 from ..permissions import Permission
 
@@ -44,7 +45,9 @@ def get_public_user(world_id, id, include_admin_info=False, trait_badges_map=Non
     if not user:
         return None
     return user.serialize_public(
-        include_admin_info=include_admin_info, trait_badges_map=trait_badges_map
+        include_admin_info=include_admin_info,
+        trait_badges_map=trait_badges_map,
+        include_client_state=include_admin_info and user.type == User.UserType.KIOSK,
     )
 
 
@@ -57,6 +60,8 @@ def get_public_users(
     include_admin_info=False,
     trait_badges_map=None,
     include_banned=True,
+    require_show_publicly=False,
+    type=User.UserType.PERSON,
 ):
     # This method is called a lot, especially when lots of people join at once (event start, server reboot, …)
     # For performance reasons, we therefore do not initialize model instances and use serialize_public()
@@ -66,8 +71,12 @@ def get_public_users(
         qs = User.objects.filter(world_id=world_id, deleted=False).order_by(
             "profile__display_name", "id"
         )
+    if require_show_publicly:
+        qs = qs.filter(show_publicly=True)
     if pretalx_ids is not None:
         qs = qs.filter(pretalx_id__in=pretalx_ids)
+    if type is not None:
+        qs = qs.filter(type=type)
     if not include_banned:
         qs = qs.exclude(moderation_state=User.ModerationState.BANNED)
     return [
@@ -91,6 +100,11 @@ def get_public_users(
             if trait_badges_map
             else [],
             **(
+                {"client_state": u["client_state"]}
+                if include_admin_info and u["type"] == User.UserType.KIOSK
+                else {}
+            ),
+            **(
                 {"moderation_state": u["moderation_state"], "token_id": u["token_id"]}
                 if include_admin_info
                 else {}
@@ -98,6 +112,7 @@ def get_public_users(
         )
         for u in qs.values(
             "id",
+            "type",
             "profile",
             "deleted",
             "moderation_state",
@@ -105,6 +120,7 @@ def get_public_users(
             "traits",
             "last_login",
             "pretalx_id",
+            "client_state",
         )
     ]
 
@@ -115,17 +131,28 @@ def get_user(
     with_id=None,
     with_token=None,
     with_client_id=None,
+    with_invite_token=None,
 ):
     if with_id:
         user = get_user_by_id(world.id, with_id)
         return user
 
     token_id = None
+    anonymous_invite = None
     if with_token:
         token_id = with_token["uid"]
         user = get_user_by_token_id(world.id, token_id)
     elif with_client_id:
         user = get_user_by_client_id(world.id, with_client_id)
+        if not user and with_invite_token:
+            try:
+                anonymous_invite = AnonymousInvite.objects.get(
+                    short_token=with_invite_token,
+                    world=world,
+                    expires__gte=now(),
+                )
+            except AnonymousInvite.DoesNotExist:
+                return None
     else:
         raise Exception(
             "get_user was called without valid with_token, with_id or with_client_id"
@@ -139,8 +166,9 @@ def get_user(
         return user
 
     traits = with_token.get("traits") if with_token else None
-    if not world.has_permission_implicit(
-        traits=traits or [], permissions=[Permission.WORLD_VIEW]
+    if not anonymous_invite and not world.has_permission_implicit(
+        traits=traits or [],
+        permissions=[Permission.WORLD_VIEW],
     ):
         # There is no chance this user gets in, we want to do an early out to prevent empty
         # user profiles from being created
@@ -158,6 +186,7 @@ def get_user(
         user = create_user(
             world_id=world.id,
             client_id=with_client_id,
+            anonymous_invite=anonymous_invite,
             traits=traits,
         )
     return user
@@ -171,20 +200,36 @@ def create_user(
     traits=None,
     profile=None,
     pretalx_id=None,
+    anonymous_invite=None,
 ):
-    return User.objects.create(
+    kwargs = {}
+    if anonymous_invite:
+        kwargs.update(
+            {
+                "type": User.UserType.ANONYMOUS,
+                "show_publicly": False,
+            }
+        )
+    user = User.objects.create(
         world_id=world_id,
         token_id=token_id,
         client_id=client_id,
         pretalx_id=pretalx_id,
         traits=traits or [],
         profile=profile or {},
+        **kwargs,
     )
+    if anonymous_invite:
+        user.world_grants.create(world_id=world_id, role="__anonymous_world")
+        user.room_grants.create(
+            world_id=world_id, room_id=anonymous_invite.room_id, role="__anonymous_room"
+        )
+    return user
 
 
 @atomic
 def update_user(
-    world_id, id, *, traits=None, public_data=None, is_admin=False, serialize=True
+    world_id, id, *, traits=None, data=None, is_admin=False, serialize=True
 ):
     # TODO: Exception handling
     user = (
@@ -204,9 +249,9 @@ def update_user(
             user.traits = traits
         user.save(update_fields=["traits"])
 
-    if public_data is not None:
+    if data is not None:
         save_fields = []
-        if "profile" in public_data and public_data["profile"] != user.profile:
+        if "profile" in data and data["profile"] != user.profile:
             AuditLog.objects.create(
                 world_id=world_id,
                 user=user,
@@ -214,19 +259,16 @@ def update_user(
                 data={
                     "object": str(user.pk),
                     "old": user.profile,
-                    "new": public_data["profile"],
+                    "new": data["profile"],
+                    "is_admin": is_admin,
                 },
             )
 
             # TODO: Anything we want to validate here?
-            user.profile = public_data.get("profile")
+            user.profile = data.get("profile")
             save_fields.append("profile")
 
-        if (
-            is_admin
-            and "pretalx_id" in public_data
-            and public_data["pretalx_id"] != user.pretalx_id
-        ):
+        if is_admin and "pretalx_id" in data and data["pretalx_id"] != user.pretalx_id:
             AuditLog.objects.create(
                 world_id=world_id,
                 user=user,
@@ -234,11 +276,24 @@ def update_user(
                 data={
                     "object": str(user.pk),
                     "old": user.pretalx_id,
-                    "new": public_data["pretalx_id"],
+                    "new": data["pretalx_id"],
                 },
             )
-            user.pretalx_id = public_data.get("pretalx_id")
+            user.pretalx_id = data.get("pretalx_id")
             save_fields.append("pretalx_id")
+
+        if (
+            not is_admin
+            and "client_state" in data
+            and data["client_state"] != user.client_state
+        ) or (
+            is_admin
+            and user.type == User.UserType.KIOSK
+            and "client_state" in data
+            and data["client_state"] != user.client_state
+        ):
+            user.client_state = data.get("client_state")
+            save_fields.append("client_state")
 
         if save_fields:
             user.save(update_fields=save_fields)
@@ -300,12 +355,18 @@ def login(
     world=None,
     token=None,
     client_id=None,
+    invite_token=None,
 ) -> LoginResult:
     from .chat import ChatService
     from .exhibition import ExhibitionService
     from .world import get_world_config_for_user
 
-    user = get_user(world=world, with_client_id=client_id, with_token=token)
+    user = get_user(
+        world=world,
+        with_client_id=client_id,
+        with_token=token,
+        with_invite_token=invite_token,
+    )
 
     if user and user.is_banned:
         raise AuthError("auth.denied")
@@ -478,7 +539,12 @@ def list_users(
     include_admin_info=False,
 ) -> object:
     qs = (
-        User.objects.filter(world_id=world_id, show_publicly=True, deleted=False)
+        User.objects.filter(
+            world_id=world_id,
+            show_publicly=True,
+            deleted=False,
+            type=User.UserType.PERSON,
+        )
         .exclude(profile__display_name__isnull=True)
         .exclude(profile__display_name__exact="")
     )

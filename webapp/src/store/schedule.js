@@ -1,12 +1,18 @@
+import Vue from 'vue'
 import moment from 'lib/timetravelMoment'
+import api from 'lib/api'
 
 export default {
 	namespaced: true,
 	state: {
 		schedule: null,
-		errorLoading: null
+		errorLoading: null,
+		now: moment()
 	},
 	getters: {
+		favs (state, getters, rootState) {
+			return rootState.user?.client_state?.schedule?.favs || []
+		},
 		pretalxScheduleUrl (state, getters, rootState) {
 			if (rootState.world.pretalx?.url) {
 				return rootState.world.pretalx.url
@@ -21,10 +27,14 @@ export default {
 			if (!rootState.world.pretalx?.domain || !rootState.world.pretalx?.event) return
 			return rootState.world.pretalx.domain + 'api/events/' + rootState.world.pretalx.event
 		},
-		roomsLookup (state, getters, rootState) {
+		rooms (state, getters, rootState) {
+			if (!state.schedule) return
+			return state.schedule.rooms.map(room => rootState.rooms.find(r => r.pretalx_id === room.id) || room)
+		},
+		roomsLookup (state, getters) {
 			if (!state.schedule) return {}
-			return state.schedule.rooms.reduce((acc, room) => {
-				acc[room.id] = rootState.rooms.find(r => r.pretalx_id === room.id) || room
+			return getters.rooms.reduce((acc, room) => {
+				acc[room.pretalx_id || room.id] = room
 				return acc
 			}, {})
 		},
@@ -110,5 +120,35 @@ export default {
 				state.errorLoading = error
 			}
 		},
+		async fav ({state, dispatch, rootState}, id) {
+			let favs = rootState.user.client_state.schedule?.favs
+			if (!favs) {
+				favs = []
+				Vue.set(rootState.user.client_state, 'schedule', {
+					favs
+				})
+			}
+			if (!favs.includes(id)) {
+				favs.push(id)
+				await dispatch('saveFavs', favs)
+			}
+		},
+		async unfav ({state, dispatch, rootState}, id) {
+			let favs = rootState.user.client_state.schedule?.favs
+			if (!favs) return
+			rootState.user.client_state.schedule.favs = favs = favs.filter(fav => fav !== id)
+			await dispatch('saveFavs', favs)
+		},
+		async saveFavs ({rootState}, favs) {
+			await api.call('user.update', {
+				client_state: {
+					...rootState.user.client_state,
+					schedule: {
+						favs: favs
+					}
+				}
+			})
+			// TODO error handling
+		}
 	}
 }

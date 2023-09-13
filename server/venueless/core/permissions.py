@@ -25,7 +25,9 @@ class Permission(Enum):
     ROOM_CHAT_READ = "room:chat.read"
     ROOM_CHAT_JOIN = "room:chat.join"
     ROOM_CHAT_SEND = "room:chat.send"
+    ROOM_VIEWERS = "room:viewers"
     ROOM_INVITE = "room:invite"
+    ROOM_INVITE_ANONYMOUS = "room:invite.anonymous"
     ROOM_CHAT_MODERATE = "room:chat.moderate"
     ROOM_JANUSCALL_JOIN = "room:januscall.join"
     ROOM_JANUSCALL_MODERATE = "room:januscall.moderate"
@@ -39,6 +41,7 @@ class Permission(Enum):
     ROOM_QUESTION_MODERATE = "room:question.moderate"
     ROOM_ROULETTE_JOIN = "room:roulette.join"
     ROOM_POLL_READ = "room:poll.read"
+    ROOM_POLL_EARLY_RESULTS = "room:poll.early_results"
     ROOM_POLL_VOTE = "room:poll.vote"
     ROOM_POLL_MANAGE = "room:poll.manage"
 
@@ -48,4 +51,29 @@ MAX_PERMISSIONS_IF_SILENCED = {
     Permission.ROOM_VIEW,
     Permission.ROOM_CHAT_READ,
     Permission.ROOM_CHAT_JOIN,
+}
+
+
+SYSTEM_ROLES = {
+    "__kiosk": [
+        Permission.WORLD_VIEW.value,
+        Permission.ROOM_VIEW.value,
+        Permission.ROOM_CHAT_READ.value,
+        Permission.ROOM_QUESTION_READ.value,
+        Permission.ROOM_POLL_READ.value,
+        Permission.ROOM_POLL_EARLY_RESULTS.value,
+        Permission.ROOM_VIEWERS.value,
+        Permission.ROOM_INVITE_ANONYMOUS.value,
+    ],
+    "__anonymous_world": [
+        Permission.WORLD_VIEW.value,
+    ],
+    "__anonymous_room": [
+        Permission.ROOM_QUESTION_READ.value,
+        Permission.ROOM_QUESTION_ASK.value,
+        Permission.ROOM_QUESTION_VOTE.value,
+        Permission.ROOM_POLL_READ.value,
+        Permission.ROOM_POLL_VOTE.value,
+        Permission.ROOM_VIEW.value,
+    ],
 }

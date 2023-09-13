@@ -10,7 +10,7 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from django.conf import settings
 from django.db import OperationalError
 from sentry_sdk import capture_exception, configure_scope
-from websockets import ConnectionClosed, ConnectionClosedError
+from websockets import ConnectionClosed
 
 from venueless.core.services.connections import (
     ping_connection,
@@ -244,10 +244,12 @@ class MainConsumer(AsyncJsonWebsocketConsumer):
         response.append(data)
         return response
 
-    async def send_error(self, code, message=None, close=False):
+    async def send_error(self, code, message=None, close=False, details=None):
         data = {"code": code}
         if message:
             data["message"] = message
+        if details:
+            data["details"] = details
         await self.send_json(self.build_response("error", data), close=close)
 
     async def send_success(self, data=None, close=False):
@@ -258,7 +260,7 @@ class MainConsumer(AsyncJsonWebsocketConsumer):
     async def send_json(self, content, close=False):
         try:
             await super().send(text_data=orjson.dumps(content).decode(), close=close)
-        except (RuntimeError, ConnectionClosedError):
+        except (RuntimeError, ConnectionClosed):
             # socket has been closed in the meantime
             pass
 
