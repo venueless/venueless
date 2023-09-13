@@ -414,5 +414,10 @@
   "standalone/Viewers:header_zero": "Niemand nimmt online teil",
   "standalone/Viewers:header_one": "Eine Person nimmt online teil",
   "RoomsSidebar:admin-kiosks:label": "Kioske",
-  "standalone/Viewers:header_other": "{{ count }} Personen nehmen online teil"
+  "standalone/Viewers:header_other": "{{ count }} Personen nehmen online teil",
+  "standalone/Anonymous:header_room": "Raum",
+  "standalone/Anonymous:tabs-header:schedule": "Zeitplan",
+  "standalone/Anonymous:schedule:current-session": "Aktuelle Session",
+  "standalone/Anonymous:schedule:next-sessions": "Nächste Sessions",
+  "standalone/Anonymous:footer-anonymously": "Du stimmst anonym ab"
 }
