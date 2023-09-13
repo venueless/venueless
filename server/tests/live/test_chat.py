@@ -8,7 +8,7 @@ from channels.testing import WebsocketCommunicator
 
 from tests.utils import get_token
 from venueless.core.services.chat import ChatService
-from venueless.core.utils.redis import aioredis
+from venueless.core.utils.redis import aredis
 from venueless.routing import application
 
 
@@ -448,7 +448,7 @@ async def test_send_empty(chat_room):
 @pytest.mark.django_db
 async def test_autofix_numbers(chat_room):
     async with world_communicator() as c1:
-        async with aioredis() as redis:
+        async with aredis() as redis:
             await redis.delete("chat.event_id")
         await c1.send_json_to(
             ["chat.join", 123, {"channel": str(chat_room.channel.id)}]
@@ -456,7 +456,7 @@ async def test_autofix_numbers(chat_room):
         await c1.receive_json_from()
         response = await c1.receive_json_from()
         assert response[1]["event_id"] == 1
-        async with aioredis() as redis:
+        async with aredis() as redis:
             await redis.delete("chat.event_id")
         await c1.send_json_to(
             [
@@ -473,7 +473,7 @@ async def test_autofix_numbers(chat_room):
         response = await c1.receive_json_from()
         assert response[1]["event_id"] == 3
 
-        async with aioredis() as redis:
+        async with aredis() as redis:
             await redis.delete("chat.event_id")
 
         await c1.send_json_to(

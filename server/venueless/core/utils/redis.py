@@ -20,18 +20,20 @@ def consistent_hash(value):
 if settings.REDIS_USE_PUBSUB:
 
     @asynccontextmanager
-    async def aioredis(shard_key=None):
+    async def aredis(shard_key=None):
         if shard_key:
             shard_index = consistent_hash(shard_key)
         else:
             shard_index = 0
 
-        conn = await get_channel_layer()._shards[shard_index]._get_pub_conn()
-        yield conn
+        shard = get_channel_layer()._shards[shard_index]
+        async with shard._lock:
+            shard._ensure_redis()
+            yield shard._redis
 
 else:
 
-    def aioredis(shard_key=None):
+    def aredis(shard_key=None):
         if shard_key:
             shard_index = consistent_hash(shard_key)
         else:
@@ -43,7 +45,7 @@ else:
 Currently not needed and therefore not covered by tests
 
 async def get_json(key, default=None):
-    async with aioredis() as redis:
+    async with aredis() as redis:
         data = await redis.get(key)
     result = None
     try:
@@ -56,6 +58,6 @@ async def get_json(key, default=None):
 
 
 async def set_json(key, value):
-    async with aioredis() as redis:
+    async with aredis() as redis:
         await redis.set(key, json.dumps(value))
 """
