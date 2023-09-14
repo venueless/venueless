@@ -28,7 +28,7 @@ jobs:
       redis:
         image: redis:latest
       postgres:
-        image: postgres:11
+        image: postgres:15
         env:
           POSTGRES_PASSWORD: venueless
           POSTGRES_DB: venueless
