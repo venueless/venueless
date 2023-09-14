@@ -191,9 +191,7 @@ WEBSOCKET_PROTOCOL = os.getenv(
 )
 
 STORAGES = {
-    "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage"
-    },
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {
         "BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage",
     },
@@ -202,7 +200,9 @@ STORAGES = {
 nanocdn = os.getenv("VENUELESS_NANOCDN", config.get("urls", "nanocdn", fallback=""))
 if nanocdn:
     NANOCDN_URL = nanocdn
-    STORAGES["default"]["BACKEND"] = "venueless.platforms.storage.nanocdn.NanoCDNStorage"
+    STORAGES["default"][
+        "BACKEND"
+    ] = "venueless.platforms.storage.nanocdn.NanoCDNStorage"
 
 ZOOM_KEY = os.getenv("VENUELESS_ZOOM_KEY", config.get("zoom", "key", fallback=""))
 ZOOM_SECRET = os.getenv(

@@ -233,7 +233,10 @@ class RoomModule(BaseModule):
         # make sure we do not send 500 messages if 500 people react in the same second, but just one.
         async with aredis(redis_debounce_key) as redis:
             debounce = await redis.set(
-                redis_debounce_key, "1", ex=2, nx=True,
+                redis_debounce_key,
+                "1",
+                ex=2,
+                nx=True,
             )
             if not debounce:
                 # User reacted in the 2 seconds, let's ignore this.

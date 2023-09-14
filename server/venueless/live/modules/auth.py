@@ -236,7 +236,10 @@ class AuthModule(BaseModule):
                 args += [int(time.time()), cl.expiry]
                 async with cl.connection(connection_index) as connection:
                     await connection.eval(
-                        group_send_lua, len(channel_redis_keys), *channel_redis_keys, *args
+                        group_send_lua,
+                        len(channel_redis_keys),
+                        *channel_redis_keys,
+                        *args,
                     )
 
     @command("update")
