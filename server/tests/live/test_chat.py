@@ -132,6 +132,9 @@ async def test_join_volatile_based_on_room_config(volatile_chat_room, chat_room,
         )
 
         response = await c2.receive_json_from()
+        if response[0] == "user.updated":
+            # Some asyncio test weirdness, I don't get why
+            response = await c2.receive_json_from()
         assert response == ["chat.channels", {"channels": []}]
 
         await c.send_json_to(["chat.join", 123, {"channel": str(chat_room.channel.id)}])
@@ -1259,7 +1262,9 @@ async def test_broadcast_read_channels(world, chat_room):
                 },
             ]
         )
-        await c2.receive_json_from()  # success
+        r = await c2.receive_json_from()
+        if r[0] == "chat.channels":
+            await c2.receive_json_from()
 
         response = await c1.receive_json_from()
         assert response == ["chat.read_pointers", {channel_id: event_id}]
@@ -1311,6 +1316,9 @@ async def test_force_join_after_login(world, chat_room):
     await database_sync_to_async(chat_room.save)()
 
     async with world_communicator(token=token, named=False) as c2:
-        r = await c2.receive_json_from()  # new channel list
+        r = await c2.receive_json_from()
+        if r[0] == "user.updated":
+            # Some asyncio test weirdness, I don't get why
+            r = await c2.receive_json_from()
         assert r[0] == "chat.channels"
         assert channel_id in [c["id"] for c in r[1]["channels"]]

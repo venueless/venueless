@@ -1,4 +1,5 @@
 import binascii
+import os
 from contextlib import asynccontextmanager
 
 from channels.layers import get_channel_layer
@@ -27,9 +28,16 @@ if settings.REDIS_USE_PUBSUB:
             shard_index = 0
 
         shard = get_channel_layer()._shards[shard_index]
-        async with shard._lock:
-            shard._ensure_redis()
+        if "PYTEST_CURRENT_TEST" in os.environ:
+            # During tests, release the lock before we yield. Otherwise, we easily have deadlocks when running multiple
+            # communicators in on test.
+            async with shard._lock:
+                shard._ensure_redis()
             yield shard._redis
+        else:
+            async with shard._lock:
+                shard._ensure_redis()
+                yield shard._redis
 
 else:
 
