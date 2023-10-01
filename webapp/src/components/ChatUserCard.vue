@@ -6,7 +6,7 @@
 			avatar(:user="sender", :size="128")
 			.name
 				.online-status(v-if="!sender.deleted", :class="onlineStatus ? 'online' : (onlineStatus === false ? 'offline' : 'unknown')", v-tooltip="onlineStatus ? $t('UserAction:state.online:tooltip') : (onlineStatus === false ? $t('UserAction:state.offline:tooltip') : '')")
-				| {{ sender.deleted ? $t('User:label:deleted') : (sender.profile ? sender.profile.display_name : (sender.id ? sender.id : '(unknown user)')) }}
+				| {{ getUserName(sender) }}
 				.ui-badge(v-for="badge in sender.badges") {{ badge }}
 			ProfileFields(:user="sender")
 			.state {{ userStates.join(', ') }}
@@ -32,6 +32,7 @@
 // - i18n
 import { mapState, mapGetters } from 'vuex'
 import api from 'lib/api'
+import { getUserName } from 'lib/profile'
 import Avatar from 'components/Avatar'
 import MenuDropdown from 'components/MenuDropdown'
 import UserActionPrompt from 'components/UserActionPrompt'
@@ -74,6 +75,7 @@ export default {
 		this.blockedUsers = (await api.call('user.list.blocked')).users
 	},
 	methods: {
+		getUserName,
 		async openDM () {
 			// TODO loading indicator
 			await this.$store.dispatch('chat/openDirectMessage', {users: [this.sender]})

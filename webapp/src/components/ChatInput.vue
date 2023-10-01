@@ -28,6 +28,7 @@ bunt-input-outline-container.c-chat-input
 // - add scrollbar when overflowing parent
 import api from 'lib/api'
 import Quill from 'quill'
+import 'quill-mention'
 import EmojiPickerButton from 'components/EmojiPickerButton'
 import UploadButton from 'components/UploadButton'
 import { nativeToStyle as nativeEmojiToStyle, nativeToOps, objectToCssString } from 'lib/emoji'
@@ -70,7 +71,7 @@ export default {
 		this.quill = new Quill(this.$refs.editor, {
 			debug: ENV_DEVELOPMENT ? 'info' : 'warn',
 			placeholder: this.$t('ChatInput:input:placeholder'),
-			formats: ['emoji'],
+			formats: ['emoji', 'mention'],
 			modules: {
 				keyboard: {
 					bindings: {
@@ -78,6 +79,15 @@ export default {
 							key: 'Enter',
 							handler: this.send
 						}
+					}
+				},
+				mention: {
+					allowedChars: /^[A-Za-z\sÅÄÖåäö]*$/,
+					mentionDenotationChars: ['@'],
+					defaultMenuOrientation: 'top',
+					async source (searchTerm, renderList, mentionChar) {
+						const { results } = await api.call('user.list.search', {search_term: searchTerm, page: 1, include_banned: false})
+						renderList(results.map(({id, profile: {display_name}}) => ({id, value: display_name})))
 					}
 				}
 			}
@@ -104,11 +114,14 @@ export default {
 		send () {
 			const contents = this.quill.getContents()
 			let text = ''
+			console.log(contents)
 			for (const op of contents.ops) {
 				if (typeof op.insert === 'string') {
 					text += op.insert
 				} else if (op.insert.emoji) {
 					text += op.insert.emoji
+				} else if (op.insert.mention) {
+					text += '@' + op.insert.mention.id
 				}
 			}
 			text = text.trim()
@@ -191,6 +204,13 @@ export default {
 			height: 20px
 			vertical-align: middle
 			display: inline-block
+	.ql-mention-list-container
+		z-index: 810
+		card()
+		.ql-mention-list-item
+			&.selected
+				background-color: var(--clr-primary)
+				color: $clr-white
 	.bunt-input
 		input-style(size: compact)
 		padding: 0

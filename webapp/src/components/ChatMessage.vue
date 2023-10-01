@@ -12,9 +12,10 @@
 				.timestamp {{ timestamp }}
 			template(v-if="['text', 'files'].includes(message.content.type)")
 				chat-input(v-if="editing", :message="message", @send="editMessage")
-				.content(v-else-if="message.content.type === 'text'", v-html="content")
-				.content(v-else)
-					span(v-if="message.content.body", v-html="content")
+				.content
+					template(v-for="part of content")
+						span(v-if="part.html", v-html="part.html")
+						span.mention(v-if="part.user", @click="showAvatarCard") @{{ getUserName(part.user) }}
 					.files(v-for="file in message.content.files")
 						a(v-if="file.mimeType.startsWith('image/')", :href="file.url", target="_blank")
 							img.chat-image(:src="file.url")
@@ -78,6 +79,7 @@ import MarkdownIt from 'markdown-it'
 import { mapState, mapGetters } from 'vuex'
 import { markdownEmoji, nativeToStyle as nativeEmojiToStyle, getEmojiDataFromNative } from 'lib/emoji'
 import { createPopper } from '@popperjs/core'
+import { getUserName } from 'lib/profile'
 import Avatar from 'components/Avatar'
 import ChatInput from 'components/ChatInput'
 import ChatUserCard from 'components/ChatUserCard'
@@ -105,6 +107,8 @@ const generateHTML = function (input) {
 	if (!input) return
 	return markdownIt.renderInline(input)
 }
+
+const mentionRegex = /(@[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12})/g
 
 export default {
 	name: 'ChatMessage',
@@ -150,8 +154,7 @@ export default {
 			return this.usersLookup[this.message.sender] || {id: this.message.sender, badges: {}}
 		},
 		senderDisplayName () {
-			if (this.sender.deleted) return this.$t('User:label:deleted')
-			return this.sender.profile?.display_name ?? this.message.sender ?? '(unknown user)'
+			return getUserName(this.sender)
 		},
 		timestamp () {
 			const timestamp = moment(this.message.timestamp)
@@ -167,7 +170,17 @@ export default {
 			return moment(this.message.timestamp).format(TIME_FORMAT).split(' ')[0]
 		},
 		content () {
-			return generateHTML(this.message.content?.body)
+			if (!this.message.content?.body) return
+			const parts = this.message.content.body.split(mentionRegex)
+			return parts.map(string => {
+				if (string.match(mentionRegex)) {
+					const user = this.usersLookup[string.slice(1)]
+					if (user) {
+						return {user}
+					}
+				}
+				return {html: generateHTML(string)}
+			})
 		},
 		mergeWithPreviousMessage () {
 			return this.previousMessage && !this.isSystemMessage && this.previousMessage.event_type === 'channel.message' && this.previousMessage.sender === this.message.sender && moment(this.message.timestamp).diff(this.previousMessage.timestamp, 'minutes') < 15
@@ -180,6 +193,7 @@ export default {
 		}
 	},
 	methods: {
+		getUserName,
 		addReaction (emoji) {
 			this.$store.dispatch('chat/addReaction', {message: this.message, reaction: emoji.native})
 		},
@@ -283,6 +297,13 @@ export default {
 			.chat-image
 				max-width: calc(100% - 32px)
 				max-height: 300px
+			.mention
+				display: inline-block
+				background-color: var(--clr-primary)
+				color: var(--clr-input-primary-fg)
+				font-weight: 500
+				border-radius: 4px
+				padding: 0 2px
 		.content, .reactions
 			.emoji
 				color: transparent // hide unicode emoji
