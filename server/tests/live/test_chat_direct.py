@@ -85,7 +85,7 @@ async def test_start_direct_channel(world):
         response = await c1.receive_json_from()
         assert "success" == response[0]
         assert "id" in response[2]
-        assert "notification_pointer" in response[2]
+        assert "unread_pointer" in response[2]
         assert "state" in response[2]
         assert "a" in {a["profile"]["display_name"] for a in response[2]["members"]}
         assert "b" in {a["profile"]["display_name"] for a in response[2]["members"]}

@@ -27,6 +27,7 @@ from ..models import (
     Membership,
     User,
 )
+from ..models.chat import ChatEventNotification
 from ..permissions import Permission
 from ..utils.redis import aredis
 from .bbb import choose_server
@@ -104,7 +105,7 @@ class ChatService:
         for m in qs:
             r = {
                 "id": str(m.channel_id),
-                "notification_pointer": m.max_id or 0,
+                "unread_pointer": m.max_id or 0,
             }
             if not m.channel.room_id:
                 r["members"] = [
@@ -141,6 +142,15 @@ class ChatService:
         async with aredis(f"chat:subscriptions:{uid}:{channel}") as redis:
             await redis.srem(f"chat:subscriptions:{uid}:{channel}", socket_id)
             return await redis.scard(f"chat:subscriptions:{uid}:{channel}")
+
+    @database_sync_to_async
+    def filter_members(self, channel, uids) -> set:
+        if not uids:
+            return set()
+        return {
+            str(m.user_id)
+            for m in Membership.objects.filter(channel=channel, user_id__in=uids)
+        }
 
     @database_sync_to_async
     def membership_is_volatile(self, channel, uid):
@@ -220,8 +230,8 @@ class ChatService:
             for r in e.reactions.all():
                 user_ids.add(str(r.sender.pk))
 
-            if e.content["type"] == "text":
-                user_ids |= extract_mentioned_user_ids(e.content["body"])
+            if e.content.get("type") == "text":
+                user_ids |= extract_mentioned_user_ids(e.content.get("body", ""))
 
         if users_known_to_client:
             user_ids = user_ids - set(users_known_to_client)
@@ -326,6 +336,32 @@ class ChatService:
             chat_event=event, reaction=reaction, sender=user
         )
         return self._get_event(pk=event.pk).serialize_public()
+
+    def get_notification_counts(self, user_id) -> dict:
+        return {
+            str(d["chat_event__channel_id"]): d["c"]
+            for d in ChatEventNotification.objects.filter(recipient_id=user_id)
+            .values("chat_event__channel_id")
+            .order_by()
+            .annotate(c=Count("*"))
+        }
+
+    @database_sync_to_async
+    def store_notification(self, event_id, user_ids):
+        for user in user_ids:
+            ChatEventNotification.objects.create(
+                chat_event_id=event_id,
+                recipient_id=user,
+            )
+
+    @database_sync_to_async
+    def remove_notifications(self, user_id, channel_id, max_id):
+        _, c = ChatEventNotification.objects.filter(
+            chat_event_id__lte=max_id,
+            chat_event__channel_id=channel_id,
+            recipient_id=user_id,
+        ).delete()
+        return bool(c)
 
     @database_sync_to_async
     def get_or_create_direct_channel(

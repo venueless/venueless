@@ -13,6 +13,7 @@ export default {
 		call: null,
 		joinedChannels: null,
 		readPointers: null,
+		notificationCounts: null,
 		channel: null,
 		config: null,
 		members: [],
@@ -28,12 +29,26 @@ export default {
 		hasUnreadMessages (state) {
 			return function (channel) {
 				const joinedChannel = state.joinedChannels?.find(c => c.id === channel)
-				return joinedChannel && (!state.readPointers[channel] || joinedChannel.notification_pointer > state.readPointers[channel])
+				return joinedChannel && (!state.readPointers[channel] || joinedChannel.unread_pointer > state.readPointers[channel])
+			}
+		},
+		notificationCount (state) {
+			return function (channel) {
+				return state.notificationCounts[channel] || 0
 			}
 		},
 		isDirectMessageChannel (state, getters, rootState) {
 			return function (channel) {
 				return channel.members && channel.members.some(member => member.id !== rootState.user.id)
+			}
+		},
+		channelName (state, getters, rootState) {
+			return function (channel) {
+				if (this.isDirectMessageChannel(channel)) {
+					return this.directMessageChannelName(channel)
+				} else {
+					return rootState.rooms.find(room => room.modules.some(m => m.channel_id = channel).name)
+				}
 			}
 		},
 		directMessageChannelName (state, getters, rootState) {
@@ -48,7 +63,10 @@ export default {
 		},
 		setReadPointers (state, readPointers) {
 			state.readPointers = readPointers
-		}
+		},
+		setNotificationCounts (state, notificationCounts) {
+			state.notificationCounts = notificationCounts
+		},
 	},
 	actions: {
 		disconnected ({state}) {
@@ -59,7 +77,7 @@ export default {
 			if (state.channel) {
 				dispatch('unsubscribe')
 			}
-			const { next_event_id: beforeCursor, members, notification_pointer: notificationPointer } = await api.call('chat.subscribe', {channel})
+			const { next_event_id: beforeCursor, members, unread_pointer: notificationPointer } = await api.call('chat.subscribe', {channel})
 			state.channel = channel
 			state.members = members
 			state.usersLookup = members.reduce((acc, member) => { acc[member.id] = member; return acc }, {})
@@ -67,7 +85,7 @@ export default {
 			state.beforeCursor = beforeCursor
 			state.config = config
 			if (getters.activeJoinedChannel) {
-				getters.activeJoinedChannel.notification_pointer = notificationPointer
+				getters.activeJoinedChannel.unread_pointer = notificationPointer
 			}
 			if (config?.volatile) { // autojoin volatile channels
 				dispatch('join')
@@ -85,7 +103,7 @@ export default {
 		async join ({state}, channel) {
 			channel = channel?.modules[0]?.channel_id
 			const response = await api.call('chat.join', {channel: channel || state.channel})
-			state.joinedChannels.push({id: channel || state.channel, notification_pointer: response.notification_pointer})
+			state.joinedChannels.push({id: channel || state.channel, unread_pointer: response.unread_pointer})
 		},
 		async fetchMessages ({state, dispatch}) {
 			if (!state.beforeCursor || state.fetchingMessages) return
@@ -310,24 +328,36 @@ export default {
 				// TODO passively close desktop notifications
 			}
 		},
-		'api::chat.notification_pointers' ({state, rootState, getters, dispatch}, notificationPointers) {
-			for (const [channelId, pointer] of Object.entries(notificationPointers)) {
+		'api::chat.unread_pointers' ({state, rootState, getters, dispatch}, unreadPointers) {
+			for (const [channelId, pointer] of Object.entries(unreadPointers)) {
 				const channel = state.joinedChannels.find(c => c.id === channelId)
 				if (!channel) continue
-				channel.notification_pointer = pointer
-				// TODO show desktop notification when window in focus but route is somewhere else?
-				// TODO show actual message
-				if (getters.isDirectMessageChannel(channel)) {
-					dispatch('notifications/createDesktopNotification', {
-						title: getters.directMessageChannelName(channel),
-						body: i18n.t('DirectMessage:notification-unread:text'),
-						tag: getters.directMessageChannelName(channel),
-						user: channel.members.find(user => user.id !== rootState.user.id),
-						// TODO onClose?
-						onClick: () => router.push({name: 'channel', params: {channelId: channel.id}})
-					}, {root: true})
-				}
+				channel.unread_pointer = pointer
 			}
+		},
+		'api::chat.notification_counts' ({state, rootState, getters, dispatch}, notificationCounts) {
+			state.notificationCounts = notificationCounts
+		},
+		'api::chat.notification' ({state, rootState, getters, dispatch}, data) {
+			const channel = state.joinedChannels.find(c => c.id === data.event.channel)
+			if (!channel) return
+			// Increment notification count
+			state.notificationCounts[channel.id] = (state.notificationCounts[channel.id] || 0) + 1
+			// TODO show desktop notification when window in focus but route is somewhere else?
+			let body = i18n.t('DirectMessage:notification-unread:text')
+			if (data.event.content.type === 'text') {
+				// TODO parse @uuid mentions
+				body = data.event.content.body
+			}
+			// TODO handle image-only message
+			dispatch('notifications/createDesktopNotification', {
+				title: getters.channelName(channel),
+				body: body,
+				tag: getters.channelName(channel),
+				user: data.sender,
+				// TODO onClose?
+				onClick: () => router.push({name: 'channel', params: {channelId: channel.id}})
+			}, {root: true})
 		},
 		'api::chat.event.reaction' ({state}, event) {
 			if (event.channel !== state.channel) return

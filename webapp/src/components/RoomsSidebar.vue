@@ -37,6 +37,7 @@ transition(name="sidebar")
 				router-link.text-chat(v-for="chat of roomsByType.textChat", :to="chat === rooms[0] ? {name: 'home'} : {name: 'room', params: {roomId: chat.id}}", :class="{unread: hasUnreadMessages(chat.modules[0].channel_id), 'starts-with-emoji': startsWithEmoji(chat.name)}")
 					.room-icon(aria-hidden="true")
 					.name(v-html="$emojify(chat.name)")
+					.notifications(v-if="notificationCount(chat.modules[0].channel_id)") {{ notificationCount(chat.modules[0].channel_id) }}
 					bunt-icon-button(@click.prevent.stop="$store.dispatch('chat/leaveChannel', {channelId: chat.modules[0].channel_id})") close
 				bunt-button#btn-browse-channels-trailing(v-if="worldHasTextChannels", @click="showChannelBrowser = true") {{ $t('RoomsSidebar:browse-channels-button:label') }}
 			.group-title#dm-title(v-if="directMessageChannels.length || hasPermission('world:chat.direct')")
@@ -46,6 +47,7 @@ transition(name="sidebar")
 				router-link.direct-message(v-for="channel of directMessageChannels", :to="{name: 'channel', params: {channelId: channel.id}}", :class="{unread: hasUnreadMessages(channel.id)}")
 					i.bunt-icon.mdi(v-if="call && call.channel === channel.id", aria-hidden="true").mdi-phone
 					.name {{ getDMChannelName(channel) }}
+					.notifications(v-if="notificationCount(channel.id)") {{ notificationCount(channel.id) }}
 					bunt-icon-button(tooltip="remove", :tooltip-fixed="true", @click.prevent.stop="$store.dispatch('chat/leaveChannel', {channelId: channel.id})") close
 			.buffer
 			template(v-if="worldHasExhibition && (staffedExhibitions.length > 0 || hasPermission('world:rooms.create.exhibition'))")
@@ -107,7 +109,7 @@ export default {
 		...mapState('chat', ['joinedChannels', 'call']),
 		...mapState('exhibition', ['staffedExhibitions']),
 		...mapGetters(['hasPermission']),
-		...mapGetters('chat', ['hasUnreadMessages']),
+		...mapGetters('chat', ['hasUnreadMessages', 'notificationCount']),
 		...mapGetters('schedule', ['sessions', 'currentSessionPerRoom']),
 		style () {
 			if (this.pointerMovementX === 0) return
@@ -340,6 +342,13 @@ export default {
 					height: 6px
 					width: @height
 					border-radius: 50%
+			.notifications
+				background: $clr-red
+				padding: 0 3px
+				line-height: 12px
+				position: relative
+				margin: 12px 6px
+				border-radius: 50%
 			.name
 				ellipsis()
 		.stage
