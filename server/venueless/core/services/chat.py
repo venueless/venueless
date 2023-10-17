@@ -1,3 +1,4 @@
+import re
 from contextlib import suppress
 
 from channels.db import database_sync_to_async
@@ -31,6 +32,10 @@ from ..utils.redis import aredis
 from .bbb import choose_server
 from .user import get_public_users, user_broadcast
 
+MENTION_RE = re.compile(
+    r"@([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})([^0-9a-fA-F]|$)"
+)
+
 
 @database_sync_to_async
 def _get_channel(**kwargs):
@@ -47,6 +52,10 @@ async def get_channel(**kwargs):
     ):
         c = await _get_channel(**kwargs)
         return c
+
+
+def extract_mentioned_user_ids(message):
+    return set([x.group(1) for x in MENTION_RE.finditer(message)])
 
 
 class ChatService:
@@ -200,26 +209,29 @@ class ChatService:
                 id__lt=before_id,
                 channel=channel,
             )
-            .prefetch_related("reactions", "sender")
+            .prefetch_related("reactions")
             .order_by("-id")[: min(count, 1000)]
         )
+        user_ids = set()
+
+        for e in events:
+            user_ids.add(str(e.sender.pk))
+
+            for r in e.reactions.all():
+                user_ids.add(str(r.sender.pk))
+
+            if e.content["type"] == "text":
+                user_ids |= extract_mentioned_user_ids(e.content["body"])
+
+        if users_known_to_client:
+            user_ids = user_ids - set(users_known_to_client)
+
         users = {
-            str(e.sender.pk): e.sender.serialize_public(
+            str(u.pk): u.serialize_public(
                 include_admin_info=include_admin_info, trait_badges_map=trait_badges_map
             )
-            for e in events
-            if str(e.sender.pk) not in users_known_to_client
+            for u in User.objects.filter(world=self.world, id__in=user_ids)
         }
-        for e in events:
-            for r in e.reactions.all():
-                if (
-                    str(r.sender.pk) not in users
-                    and str(r.sender.pk) not in users_known_to_client
-                ):
-                    users[str(r.sender.pk)] = r.sender.serialize_public(
-                        include_admin_info=include_admin_info,
-                        trait_badges_map=trait_badges_map,
-                    )
         return [e.serialize_public() for e in reversed(events)], users
 
     @database_sync_to_async
