@@ -481,36 +481,42 @@ class ChatModule(BaseModule):
             if self.channel.room:
                 # Normal rooms (possibly big crowds)
 
-                # Handle mentioned users. We only handle them in rooms, because in DMs everyone is notified anyways.
-                if content.get("type") == "text":
-                    # Parse all @uuid mentions
-                    mentioned_users = extract_mentioned_user_ids(
-                        content.get("body", "")
-                    )
-                    if mentioned_users and len(mentioned_users) < 50:  # prevent abuse
-                        # Filter to people who joined this channel
-                        mentioned_users = await self.service.filter_members(
-                            self.channel, mentioned_users
+                if not body.get("replaces"):  # no notifications for edits:
+                    # Handle mentioned users. We only handle them in rooms, because in DMs everyone is notified anyways.
+                    if content.get("type") == "text":
+                        # Parse all @uuid mentions
+                        mentioned_users = extract_mentioned_user_ids(
+                            content.get("body", "")
                         )
-                        if mentioned_users:
-                            await _notify_users(mentioned_users)
+                        if (
+                            mentioned_users and len(mentioned_users) < 50
+                        ):  # prevent abuse
+                            # Filter to people who joined this channel
+                            mentioned_users = await self.service.filter_members(
+                                self.channel, mentioned_users
+                            )
+                            if mentioned_users:
+                                await _notify_users(mentioned_users)
 
-                # For regular unread notifications, we pop user IDs from the list of users to notify, because once
-                # they've been notified they don't need a notification again until they sent a new read pointer.
-                batch_size = 100
-                while True:
-                    users = await redis.spop(
-                        f"chat:unread.notify:{self.channel_id}", 100
-                    )
-                    await _publish_new_pointers([u.decode() for u in users])
+                    # For regular unread notifications, we pop user IDs from the list of users to notify, because once
+                    # they've been notified they don't need a notification again until they sent a new read pointer.
+                    batch_size = 100
+                    while True:
+                        users = await redis.spop(
+                            f"chat:unread.notify:{self.channel_id}", 100
+                        )
+                        await _publish_new_pointers([u.decode() for u in users])
 
-                    if len(users) < batch_size:
-                        break
+                        if len(users) < batch_size:
+                            break
             else:
                 # In DMs, notify everyone.
-                users = await redis.smembers(f"chat:unread.notify:{self.channel_id}")
-                await _publish_new_pointers([u.decode() for u in users])
-                await _notify_users([u.decode() for u in users])
+                if not body.get("replaces"):  # no notifications for edits:
+                    users = await redis.smembers(
+                        f"chat:unread.notify:{self.channel_id}"
+                    )
+                    await _publish_new_pointers([u.decode() for u in users])
+                    await _notify_users([u.decode() for u in users])
 
         if content.get("type") == "text":
             match = re.search(r"(?P<url>https?://[^\s]+)", content.get("body"))
