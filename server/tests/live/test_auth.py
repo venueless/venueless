@@ -37,6 +37,7 @@ async def test_auth_with_client_id(world, announcement, inactive_announcement):
             "user.config",
             "chat.channels",
             "chat.read_pointers",
+            "chat.notification_counts",
             "exhibition",
             "announcements",
         }
@@ -140,6 +141,7 @@ async def test_auth_with_jwt_token(index, world):
             "user.config",
             "chat.channels",
             "chat.read_pointers",
+            "chat.notification_counts",
             "exhibition",
             "announcements",
         }
@@ -180,6 +182,7 @@ async def test_update_user():
             "user.config",
             "chat.channels",
             "chat.read_pointers",
+            "chat.notification_counts",
             "exhibition",
             "announcements",
         }
@@ -224,6 +227,7 @@ async def test_update_user():
             "user.config",
             "chat.channels",
             "chat.read_pointers",
+            "chat.notification_counts",
             "exhibition",
             "announcements",
         }
@@ -271,6 +275,7 @@ async def test_auth_with_jwt_token_update_traits(world):
             "user.config",
             "chat.channels",
             "chat.read_pointers",
+            "chat.notification_counts",
             "exhibition",
             "announcements",
         }
@@ -289,6 +294,7 @@ async def test_auth_with_jwt_token_update_traits(world):
             "user.config",
             "chat.channels",
             "chat.read_pointers",
+            "chat.notification_counts",
             "exhibition",
             "announcements",
         }
@@ -321,6 +327,7 @@ async def test_auth_with_jwt_token_twice(world):
             "user.config",
             "chat.channels",
             "chat.read_pointers",
+            "chat.notification_counts",
             "exhibition",
             "announcements",
         }
@@ -339,6 +346,7 @@ async def test_auth_with_jwt_token_twice(world):
             "user.config",
             "chat.channels",
             "chat.read_pointers",
+            "chat.notification_counts",
             "exhibition",
             "announcements",
         }
@@ -362,6 +370,7 @@ async def test_fetch_user():
             "user.config",
             "chat.channels",
             "chat.read_pointers",
+            "chat.notification_counts",
             "exhibition",
             "announcements",
         }
@@ -457,6 +466,7 @@ async def test_auth_with_jwt_token_and_permission_traits(world):
             "user.config",
             "chat.channels",
             "chat.read_pointers",
+            "chat.notification_counts",
             "exhibition",
             "announcements",
         }

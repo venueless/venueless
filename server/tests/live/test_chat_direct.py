@@ -506,7 +506,8 @@ async def test_send_if_blocked_by_user(world):
 
         await c1.receive_json_from()  # chat event
         await c2.receive_json_from()  # channel list
-        await c2.receive_json_from()  # new notification pointer
+        await c2.receive_json_from()  # new unread pointer
+        await c2.receive_json_from()  # new notificatoin counts
 
         await c2.send_json_to(
             [
@@ -702,9 +703,11 @@ async def test_hide_and_reappear(world):
         cl = await c2.receive_json_from()  # channel list
         assert channel in [c["id"] for c in cl[1]["channels"]]
         await c2.receive_json_from()  # notification pointer
+        await c2.receive_json_from()  # unread pointer
 
         await c2b.receive_json_from()  # channel list
-        await c2b.receive_json_from()  # notification pointer
+        await c2b.receive_json_from()  # notification counts
+        await c2b.receive_json_from()  # unread pointer
 
         await c2.send_json_to(
             [

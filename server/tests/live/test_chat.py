@@ -1209,7 +1209,10 @@ async def test_unread_channels(world, chat_room):
         await c1.receive_json_from()  # receives message
 
         # c2 gets a notification pointer
-        response = await c2.receive_json_from()  # receives notification pointer
+        response = await c2.receive_json_from()  # receives notification counter
+        assert response[0] == "chat.notification_counts"
+        assert response[1] == {}
+        response = await c2.receive_json_from()  # receives unread pointer
         assert response[0] == "chat.unread_pointers"
         assert response[1] == {channel_id: event_id + 1}
 
@@ -1266,6 +1269,10 @@ async def test_broadcast_read_channels(world, chat_room):
 
         response = await c1.receive_json_from()
         assert response == ["chat.read_pointers", {channel_id: event_id}]
+        response = await c1.receive_json_from()
+        assert response == ["chat.notification_counts", {}]
+        response = await c2.receive_json_from()
+        assert response == ["chat.notification_counts", {}]
 
         with pytest.raises(asyncio.TimeoutError):
             await c1.receive_json_from()  # no message to either client
