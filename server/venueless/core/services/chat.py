@@ -144,13 +144,25 @@ class ChatService:
             return await redis.scard(f"chat:subscriptions:{uid}:{channel}")
 
     @database_sync_to_async
-    def filter_members(self, channel, uids) -> set:
+    def filter_mentions(
+        self, channel: Channel, uids, include_all_permitted=False
+    ) -> set:
         if not uids:
             return set()
-        return {
-            str(m.user_id)
-            for m in Membership.objects.filter(channel=channel, user_id__in=uids)
-        }
+
+        if include_all_permitted:
+            result = set()
+            for u in User.objects.filter(id__in=uids):
+                if self.world.has_permission(
+                    user=u, permission=Permission.ROOM_CHAT_READ, room=channel.room
+                ):
+                    result.add(str(u.id))
+            return result
+        else:
+            return {
+                str(m.user_id)
+                for m in Membership.objects.filter(channel=channel, user_id__in=uids)
+            }
 
     @database_sync_to_async
     def membership_is_volatile(self, channel, uid):

@@ -492,8 +492,12 @@ class ChatModule(BaseModule):
                             mentioned_users and len(mentioned_users) < 50
                         ):  # prevent abuse
                             # Filter to people who joined this channel
-                            mentioned_users = await self.service.filter_members(
-                                self.channel, mentioned_users
+                            mentioned_users = await self.service.filter_mentions(
+                                self.channel,
+                                mentioned_users,
+                                include_all_permitted=self.module_config.get(
+                                    "volatile", False
+                                ),
                             )
                             if mentioned_users:
                                 await _notify_users(mentioned_users)
