@@ -113,10 +113,15 @@ export default {
 	},
 	watch: {
 		async 'autocomplete.search' (search) {
+			// TODO debounce?
 			if (!this.autocomplete) return
 			if (this.autocomplete.type === 'mention') {
 				const { results } = await api.call('user.list.search', {search_term: search, page: 1, include_banned: false})
 				this.autocomplete.options = results
+				// if (results.length === 1) {
+				// 	this.autocomplete.selected = 0
+				// 	this.handleMention()
+				// }
 			}
 		}
 	},
@@ -152,7 +157,7 @@ export default {
 			}
 		},
 		onSelectionChange (range, oldRange, source) {
-
+			// TODO check mentions
 		},
 		handleEnter () {
 			if (this.autocomplete) return this.handleMention()

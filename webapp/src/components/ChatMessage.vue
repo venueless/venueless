@@ -15,7 +15,7 @@
 				.content
 					template(v-for="part of content")
 						span(v-if="part.html", v-html="part.html")
-						span.mention(v-if="part.user", @click="showAvatarCard") @{{ getUserName(part.user) }}
+						span.mention(v-if="part.user", @click="showAvatarCard($event, part.user)") {{ getUserName(part.user) }}
 					.files(v-for="file in message.content.files")
 						a(v-if="file.mimeType.startsWith('image/')", :href="file.url", target="_blank")
 							img.chat-image(:src="file.url")
@@ -60,7 +60,7 @@
 				.timestamp {{ timestamp }}
 				span {{ $t('ChatMessage:poll-message:header') }}
 			Poll(:poll="poll")
-	chat-user-card(v-if="showingAvatarCard", ref="avatarCard", :sender="sender", @close="showingAvatarCard = false")
+	chat-user-card(v-if="userCardUser", ref="avatarCard", :user="userCardUser", @close="userCardUser = false")
 	prompt.delete-message-prompt(v-if="showDeletePrompt", @close="showDeletePrompt = false")
 		.prompt-content
 			h2 Delete this message?
@@ -126,7 +126,7 @@ export default {
 	data () {
 		return {
 			selected: false,
-			showingAvatarCard: false,
+			userCardUser: null,
 			editing: false,
 			showDeletePrompt: false,
 			reactionTooltip: null,
@@ -235,10 +235,10 @@ export default {
 			this.$store.dispatch('chat/deleteMessage', this.message)
 			this.showDeletePrompt = false
 		},
-		async showAvatarCard (event) {
-			this.showingAvatarCard = true
+		async showAvatarCard (event, user) {
+			this.userCardUser = user || this.sender
 			await this.$nextTick()
-			createPopper(this.$refs.avatar.$el, this.$refs.avatarCard.$refs.card, {
+			createPopper(event?.target || this.$refs.avatar.$el, this.$refs.avatarCard.$refs.card, {
 				placement: 'right-start',
 				strategy: 'fixed',
 				modifiers: [{
@@ -304,6 +304,10 @@ export default {
 				font-weight: 500
 				border-radius: 4px
 				padding: 0 2px
+				cursor: pointer
+				&::before
+					content: '@'
+					font-family: monospace
 		.content, .reactions
 			.emoji
 				color: transparent // hide unicode emoji
