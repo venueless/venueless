@@ -45,7 +45,6 @@ import { nativeToOps } from 'lib/emoji'
 
 const Delta = Quill.import('delta')
 
-
 export default {
 	components: { Avatar, EmojiPickerButton, UploadButton },
 	props: {
@@ -65,7 +64,7 @@ export default {
 			const bounds = this.quill.getBounds(this.autocomplete.range.index, this.autocomplete.range.length)
 			const editorRect = this.$refs.editor.getBoundingClientRect()
 			return {
-				left: editorRect.x + bounds.left + 'px',
+				left: editorRect.x + bounds.left - Math.max(0, 240 - (editorRect.width + 60 - bounds.left)) + 'px',
 				bottom: window.innerHeight - editorRect.y - bounds.top + 8 + 'px'
 			}
 		}
@@ -115,7 +114,6 @@ export default {
 				const { results } = await api.call('user.list.search', {search_term: search, page: 1, include_banned: false})
 				this.autocomplete.options = results
 			}
-			
 		}
 	},
 	methods: {
@@ -124,8 +122,8 @@ export default {
 			const selection = this.quill.getSelection()
 			if (selection === null) return
 			const caretPos = selection.index
-			const lookbackLength = Math.max(0, caretPos - 32)
-			const lookback = this.quill.getText(0, caretPos - lookbackLength)
+			const lookbackLength = Math.min(32, caretPos)
+			const lookback = this.quill.getText(caretPos - lookbackLength, lookbackLength)
 			const autocompleteCharIndex = lookback.lastIndexOf('@')
 			if (autocompleteCharIndex > -1) {
 				this.autocomplete = {
