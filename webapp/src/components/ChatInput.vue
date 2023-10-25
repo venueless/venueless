@@ -23,7 +23,7 @@ bunt-input-outline-container.c-chat-input
 		.autocomplete-dropdown(:style="autocompleteCoordinates")
 			template(v-if="autocomplete.options")
 				template(v-for="option, index of autocomplete.options")
-					.user(:class="{selected: index === autocomplete.selected}", :title="option.profile.display_name")
+					.user(:class="{selected: index === autocomplete.selected}", :title="option.profile.display_name", @mouseover="selectMention(index)", @click.stop="handleMention")
 						avatar(:user="option", :size="24")
 						.name {{ option.profile.display_name }}
 			bunt-progress-circular(v-else, size="large", :page="true")
@@ -177,6 +177,9 @@ export default {
 		closeAutocomplete () {
 			this.quill.setSelection(this.autocomplete.selection)
 			this.autocomplete = null
+		},
+		selectMention (index) {
+			this.autocomplete.selected = index
 		},
 		handleMention () {
 			if (!this.autocomplete) return
