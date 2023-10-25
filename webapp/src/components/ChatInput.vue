@@ -127,15 +127,21 @@ export default {
 			if (selection === null) return
 			const caretPos = selection.index
 			const lookbackLength = Math.min(32, caretPos)
-			const lookback = this.quill.getText(caretPos - lookbackLength, lookbackLength)
-			const autocompleteCharIndex = lookback.lastIndexOf('@')
+			const lookbackOffset = caretPos - lookbackLength
+			const lookback = this.quill.getText(lookbackOffset, lookbackLength)
+			// only trigger when there is a space before @, except at the beginning of the message
+			const startsWithMention = lookbackOffset === 0 && lookback.startsWith('@')
+			const autocompleteCharIndex =
+				startsWithMention
+					? 0
+					: lookback.lastIndexOf(' @')
 			if (autocompleteCharIndex > -1) {
 				this.autocomplete = {
 					type: 'mention',
-					search: lookback.slice(autocompleteCharIndex + 1),
+					search: lookback.slice(autocompleteCharIndex + 1 + !startsWithMention),
 					selection,
 					range: {
-						index: autocompleteCharIndex,
+						index: autocompleteCharIndex + lookbackOffset + !startsWithMention,
 						length: lookback.length
 					},
 					options: null,
