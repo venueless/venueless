@@ -23,7 +23,7 @@ bunt-input-outline-container.c-chat-input
 		.autocomplete-dropdown(:style="autocompleteCoordinates")
 			template(v-if="autocomplete.options")
 				template(v-for="option, index of autocomplete.options")
-					.user(:class="{selected: index === autocomplete.selected}")
+					.user(:class="{selected: index === autocomplete.selected}", :title="option.profile.display_name")
 						avatar(:user="option", :size="24")
 						.name {{ option.profile.display_name }}
 			bunt-progress-circular(v-else, size="large", :page="true")
@@ -134,7 +134,7 @@ export default {
 			const autocompleteCharIndex =
 				startsWithMention
 					? 0
-					: lookback.lastIndexOf(' @')
+					: lookback.lastIndexOf(' @') // TODO any whitespace
 			if (autocompleteCharIndex > -1) {
 				this.autocomplete = {
 					type: 'mention',
@@ -366,6 +366,7 @@ export default {
 			align-items: center
 			gap: 8px
 			padding: 0 8px
+			cursor: pointer
 			&.selected
 				background-color: var(--clr-input-primary-bg)
 				color: var(--clr-input-primary-fg)
@@ -373,5 +374,6 @@ export default {
 				background-color: $clr-white
 				border-radius: 50%
 				padding: 1px
-
+			.name
+				ellipsis()
 </style>
