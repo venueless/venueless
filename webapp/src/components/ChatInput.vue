@@ -147,18 +147,12 @@ export default {
 
 		},
 		handleEnter () {
-			if (this.autocomplete) {
-				this.quill.deleteText(this.autocomplete.range.index, this.autocomplete.range.length)
-				const user = this.autocomplete.options[this.autocomplete.selected]
-				this.quill.insertEmbed(this.autocomplete.range.index, 'mention', {
-					id: user.id,
-					name: user.profile.display_name
-				})
-				this.quill.setSelection(this.autocomplete.range.index + 1, 0)
-				this.autocomplete = null
-				return
-			}
+			if (this.autocomplete) return this.handleMention()
 			return this.send()
+		},
+		handleTab () {
+			if (this.autocomplete) return this.handleMention()
+			return true
 		},
 		handleArrayUp () {
 			if (!this.autocomplete) return true
@@ -170,6 +164,17 @@ export default {
 		},
 		closeAutocomplete () {
 			this.quill.setSelection(this.autocomplete.selection)
+			this.autocomplete = null
+		},
+		handleMention () {
+			if (!this.autocomplete) return
+			this.quill.deleteText(this.autocomplete.range.index, this.autocomplete.range.length)
+			const user = this.autocomplete.options[this.autocomplete.selected]
+			this.quill.insertEmbed(this.autocomplete.range.index, 'mention', {
+				id: user.id,
+				name: user.profile.display_name
+			})
+			this.quill.setSelection(this.autocomplete.range.index + 1, 0)
 			this.autocomplete = null
 		},
 		send () {
