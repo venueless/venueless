@@ -93,6 +93,10 @@ export default {
 							key: 40,
 							handler: this.handleArrayDown
 						},
+						escape: {
+							key: 27,
+							handler: this.handleEscape
+						},
 					}
 				}
 			}
@@ -159,6 +163,10 @@ export default {
 		handleArrayDown () {
 			if (!this.autocomplete) return true
 			this.autocomplete.selected = Math.min(this.autocomplete.options.length - 1, this.autocomplete.selected + 1)
+		},
+		handleEscape () {
+			if (!this.autocomplete) return true
+			this.closeAutocomplete()
 		},
 		closeAutocomplete () {
 			this.quill.setSelection(this.autocomplete.selection)
