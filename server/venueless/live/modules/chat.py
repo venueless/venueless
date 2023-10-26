@@ -525,17 +525,17 @@ class ChatModule(BaseModule):
                     if mentioned_users:
                         await _notify_users(mentioned_users)
 
-                    # For regular unread notifications, we pop user IDs from the list of users to notify, because once
-                    # they've been notified they don't need a notification again until they sent a new read pointer.
-                    batch_size = 100
-                    while True:
-                        users = await redis.spop(
-                            f"chat:unread.notify:{self.channel_id}", 100
-                        )
-                        await _publish_new_pointers([u.decode() for u in users])
+                # For regular unread notifications, we pop user IDs from the list of users to notify, because once
+                # they've been notified they don't need a notification again until they sent a new read pointer.
+                batch_size = 100
+                while True:
+                    users = await redis.spop(
+                        f"chat:unread.notify:{self.channel_id}", 100
+                    )
+                    await _publish_new_pointers([u.decode() for u in users])
 
-                        if len(users) < batch_size:
-                            break
+                    if len(users) < batch_size:
+                        break
             else:
                 # In DMs, notify everyone.
                 if not body.get("replaces"):  # no notifications for edits:
