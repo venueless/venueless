@@ -34,7 +34,7 @@ from .bbb import choose_server
 from .user import get_public_users, user_broadcast
 
 MENTION_RE = re.compile(
-    r"@([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})([^0-9a-fA-F]|$)"
+    r"@([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})"
 )
 
 
