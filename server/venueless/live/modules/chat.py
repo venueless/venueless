@@ -478,7 +478,6 @@ class ChatModule(BaseModule):
                         },
                     )
 
-
             mentioned_users = set()
             if not body.get("replaces"):  # no notifications for edits:
                 # Handle mentioned users. We only handle them in rooms, because in DMs everyone is notified anyways.
@@ -496,23 +495,31 @@ class ChatModule(BaseModule):
                     filtered_mentioned_users = await self.service.filter_mentions(
                         self.channel,
                         mentioned_users,
-                        include_all_permitted=self.module_config.get(
-                            "volatile", False
-                        ),
+                        include_all_permitted=self.module_config.get("volatile", False),
                     )
                     if mentioned_users - filtered_mentioned_users:
-                        await self.consumer.send_json(["chat.mention_warning", {
-                            "channel": self.channel_id,
-                            "event_id": event["event_id"],
-                            "missed_users": await get_public_users(
-                                self.consumer.world.id,
-                                ids=list(mentioned_users - filtered_mentioned_users),
-                                include_admin_info=await self.consumer.world.has_permission_async(
-                                    user=self.consumer.user, permission=Permission.WORLD_USERS_MANAGE
-                                ),
-                                trait_badges_map=self.consumer.world.config.get("trait_badges_map"),
-                            )
-                        }])
+                        await self.consumer.send_json(
+                            [
+                                "chat.mention_warning",
+                                {
+                                    "channel": self.channel_id,
+                                    "event_id": event["event_id"],
+                                    "missed_users": await get_public_users(
+                                        self.consumer.world.id,
+                                        ids=list(
+                                            mentioned_users - filtered_mentioned_users
+                                        ),
+                                        include_admin_info=await self.consumer.world.has_permission_async(
+                                            user=self.consumer.user,
+                                            permission=Permission.WORLD_USERS_MANAGE,
+                                        ),
+                                        trait_badges_map=self.consumer.world.config.get(
+                                            "trait_badges_map"
+                                        ),
+                                    ),
+                                },
+                            ]
+                        )
 
                     mentioned_users = filtered_mentioned_users
                     if mentioned_users:
@@ -532,23 +539,34 @@ class ChatModule(BaseModule):
             else:
                 # In DMs, notify everyone.
                 if not body.get("replaces"):  # no notifications for edits:
-                    users = {u.decode() for u in await redis.smembers(
-                        f"chat:unread.notify:{self.channel_id}"
-                    )}
+                    users = {
+                        u.decode()
+                        for u in await redis.smembers(
+                            f"chat:unread.notify:{self.channel_id}"
+                        )
+                    }
 
                     if mentioned_users - users:
-                        await self.consumer.send_json(["chat.mention_warning", {
-                            "channel": self.channel_id,
-                            "event_id": event["event_id"],
-                            "missed_users": await get_public_users(
-                                self.consumer.world.id,
-                                ids=list(mentioned_users - users),
-                                include_admin_info=await self.consumer.world.has_permission_async(
-                                    user=self.consumer.user, permission=Permission.WORLD_USERS_MANAGE
-                                ),
-                                trait_badges_map=self.consumer.world.config.get("trait_badges_map"),
-                            )
-                        }])
+                        await self.consumer.send_json(
+                            [
+                                "chat.mention_warning",
+                                {
+                                    "channel": self.channel_id,
+                                    "event_id": event["event_id"],
+                                    "missed_users": await get_public_users(
+                                        self.consumer.world.id,
+                                        ids=list(mentioned_users - users),
+                                        include_admin_info=await self.consumer.world.has_permission_async(
+                                            user=self.consumer.user,
+                                            permission=Permission.WORLD_USERS_MANAGE,
+                                        ),
+                                        trait_badges_map=self.consumer.world.config.get(
+                                            "trait_badges_map"
+                                        ),
+                                    ),
+                                },
+                            ]
+                        )
 
         if content.get("type") == "text":
             match = re.search(r"(?P<url>https?://[^\s]+)", content.get("body"))
@@ -615,7 +633,9 @@ class ChatModule(BaseModule):
             user_profiles_required |= set(uids)
 
         if data["content"].get("type") == "text":
-            user_profiles_required |= extract_mentioned_user_ids(data["content"].get("body", ""))
+            user_profiles_required |= extract_mentioned_user_ids(
+                data["content"].get("body", "")
+            )
 
         user_profiles_required -= self.users_known_to_client
         data["users"] = {}
