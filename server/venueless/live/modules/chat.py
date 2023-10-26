@@ -545,6 +545,8 @@ class ChatModule(BaseModule):
                             f"chat:unread.notify:{self.channel_id}"
                         )
                     }
+                    await _publish_new_pointers(users)
+                    await _notify_users(users)
 
                     if mentioned_users - users:
                         await self.consumer.send_json(
