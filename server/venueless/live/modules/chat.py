@@ -585,6 +585,10 @@ class ChatModule(BaseModule):
         user_profiles_required = {data["sender"]}
         for uids in data["reactions"].values():
             user_profiles_required |= set(uids)
+
+        if data["content"].get("type") == "text":
+            user_profiles_required |= extract_mentioned_user_ids(data["content"].get("body", ""))
+
         user_profiles_required -= self.users_known_to_client
         data["users"] = {}
 
