@@ -478,29 +478,45 @@ class ChatModule(BaseModule):
                         },
                     )
 
+
+            mentioned_users = set()
+            if not body.get("replaces"):  # no notifications for edits:
+                # Handle mentioned users. We only handle them in rooms, because in DMs everyone is notified anyways.
+                if content.get("type") == "text":
+                    # Parse all @uuid mentions
+                    mentioned_users = extract_mentioned_user_ids(
+                        content.get("body", "")
+                    )
+
             if self.channel.room:
                 # Normal rooms (possibly big crowds)
 
-                if not body.get("replaces"):  # no notifications for edits:
-                    # Handle mentioned users. We only handle them in rooms, because in DMs everyone is notified anyways.
-                    if content.get("type") == "text":
-                        # Parse all @uuid mentions
-                        mentioned_users = extract_mentioned_user_ids(
-                            content.get("body", "")
-                        )
-                        if (
-                            mentioned_users and len(mentioned_users) < 50
-                        ):  # prevent abuse
-                            # Filter to people who joined this channel
-                            mentioned_users = await self.service.filter_mentions(
-                                self.channel,
-                                mentioned_users,
-                                include_all_permitted=self.module_config.get(
-                                    "volatile", False
+                if mentioned_users and len(mentioned_users) < 50:  # prevent abuse
+                    # Filter to people who joined this channel
+                    filtered_mentioned_users = await self.service.filter_mentions(
+                        self.channel,
+                        mentioned_users,
+                        include_all_permitted=self.module_config.get(
+                            "volatile", False
+                        ),
+                    )
+                    if mentioned_users - filtered_mentioned_users:
+                        await self.consumer.send_json(["chat.mention_warning", {
+                            "channel": self.channel_id,
+                            "event_id": event["event_id"],
+                            "missed_users": await get_public_users(
+                                self.consumer.world.id,
+                                ids=list(mentioned_users - filtered_mentioned_users),
+                                include_admin_info=await self.consumer.world.has_permission_async(
+                                    user=self.consumer.user, permission=Permission.WORLD_USERS_MANAGE
                                 ),
+                                trait_badges_map=self.consumer.world.config.get("trait_badges_map"),
                             )
-                            if mentioned_users:
-                                await _notify_users(mentioned_users)
+                        }])
+
+                    mentioned_users = filtered_mentioned_users
+                    if mentioned_users:
+                        await _notify_users(mentioned_users)
 
                     # For regular unread notifications, we pop user IDs from the list of users to notify, because once
                     # they've been notified they don't need a notification again until they sent a new read pointer.
@@ -516,11 +532,23 @@ class ChatModule(BaseModule):
             else:
                 # In DMs, notify everyone.
                 if not body.get("replaces"):  # no notifications for edits:
-                    users = await redis.smembers(
+                    users = {u.decode() for u in await redis.smembers(
                         f"chat:unread.notify:{self.channel_id}"
-                    )
-                    await _publish_new_pointers([u.decode() for u in users])
-                    await _notify_users([u.decode() for u in users])
+                    )}
+
+                    if mentioned_users - users:
+                        await self.consumer.send_json(["chat.mention_warning", {
+                            "channel": self.channel_id,
+                            "event_id": event["event_id"],
+                            "missed_users": await get_public_users(
+                                self.consumer.world.id,
+                                ids=list(mentioned_users - users),
+                                include_admin_info=await self.consumer.world.has_permission_async(
+                                    user=self.consumer.user, permission=Permission.WORLD_USERS_MANAGE
+                                ),
+                                trait_badges_map=self.consumer.world.config.get("trait_badges_map"),
+                            )
+                        }])
 
         if content.get("type") == "text":
             match = re.search(r"(?P<url>https?://[^\s]+)", content.get("body"))

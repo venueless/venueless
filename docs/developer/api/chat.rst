@@ -210,6 +210,17 @@ following properties inside the ``content`` property:
 
 This poll type is used when a poll is opened. It has two fields, ``poll_id`` and ``state``.
 
+Mentions
+--------
+
+Mentions are encoded as ``@userid`` in text messages.
+
+If you send a chat message that mentions one or more users, they will be notified (see below). If they can't be notified
+because they are not part of the channel or have no permission to the channel, the client will receive a warning about
+this::
+
+    <= ["chat.mention_warning", {"event_id": 1234, "channel": "abc…", "missed_users": [{"id": "…", …}, …]}]
+
 Notifications
 -------------
 
