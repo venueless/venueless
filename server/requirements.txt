@@ -38,7 +38,7 @@ xlrd~=1.2.0  # do not update, 2.x does not support .xlsx, only .xls
 # deploy
 psycopg2==2.9.9
 gunicorn==21.2.0
-uvicorn[standard]==0.23.2
+uvicorn[standard]==0.24.0
 
 # dev
 daphne==4.0.*
