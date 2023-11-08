@@ -7,6 +7,8 @@
 					div
 				template(v-for="(message, index) of filteredTimeline")
 					chat-message(:message="message", :previousMessage="filteredTimeline[index - 1]", :nextMessage="filteredTimeline[index + 1]", :mode="mode", :key="message.event_id")
+			.warning(v-if="mergedWarning") {{ $t('Chat:warning:missed-users', {count: mergedWarning.missed_users.length, missedUsers: mergedWarning.missed_users}) }}
+				bunt-icon-button(@click="$store.dispatch('chat/dismissWarnings')") close
 			.chat-input
 				.no-permission(v-if="room && !room.permissions.includes('room:chat.join')") {{ $t('Chat:permission-block:room:chat.join') }}
 				bunt-button(v-else-if="!activeJoinedChannel", @click="join", :tooltip="$t('Chat:join-button:tooltip')") {{ $t('Chat:join-button:label') }}
@@ -29,11 +31,12 @@
 <script>
 import { mapState, mapGetters } from 'vuex'
 import { createPopper } from '@popperjs/core'
-import ChatMessage from './ChatMessage'
-import InfiniteScroll from './InfiniteScroll'
+import { getUserName } from 'lib/profile'
 import Avatar from 'components/Avatar'
 import ChatInput from 'components/ChatInput'
 import ChatUserCard from 'components/ChatUserCard'
+import ChatMessage from './ChatMessage'
+import InfiniteScroll from './InfiniteScroll'
 
 export default {
 	components: { ChatMessage, ChatUserCard, Avatar, InfiniteScroll, ChatInput },
@@ -61,7 +64,7 @@ export default {
 	},
 	computed: {
 		...mapState(['connected']),
-		...mapState('chat', ['channel', 'members', 'usersLookup', 'timeline', 'fetchingMessages']),
+		...mapState('chat', ['channel', 'members', 'usersLookup', 'timeline', 'fetchingMessages', 'warnings']),
 		...mapGetters('chat', ['activeJoinedChannel']),
 		...mapState('poll', ['polls']),
 		filteredTimeline () {
@@ -85,6 +88,11 @@ export default {
 				}
 				return bBadges - aBadges
 			})
+		},
+		mergedWarning () {
+			if (this.warnings.length === 0) return null
+			// TODO dedupe users
+			return { missed_users: this.warnings.map(warning => warning.missed_users.map(user => '@' + getUserName(user))).flat() }
 		}
 	},
 	watch: {
@@ -174,6 +182,16 @@ export default {
 			padding-top: 8px
 		> :first-child
 			margin-top: auto
+	.warning
+		display: flex
+		align-items: center
+		justify-content: space-between
+		padding: 0 0 0 16px
+		background-color: $clr-orange-100
+		border-radius: 8px
+		margin: 8px 14px 0 14px
+		.bunt-icon-button
+			icon-button-style(style: clear)
 	.chat-input
 		flex: none
 		min-height: 56px

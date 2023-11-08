@@ -20,7 +20,8 @@ export default {
 		usersLookup: {},
 		timeline: [],
 		beforeCursor: null,
-		fetchingMessages: false
+		fetchingMessages: false,
+		warnings: []
 	},
 	getters: {
 		activeJoinedChannel (state) {
@@ -82,6 +83,7 @@ export default {
 			state.members = members
 			state.usersLookup = members.reduce((acc, member) => { acc[member.id] = member; return acc }, {})
 			state.timeline = []
+			state.warnings = []
 			state.beforeCursor = beforeCursor
 			state.config = config
 			if (getters.activeJoinedChannel) {
@@ -122,6 +124,7 @@ export default {
 				// assume past events don't just appear and stop forever when results are smaller than count
 				state.beforeCursor = results.length < 25 ? null : results[0].event_id
 				// hit the user profile cache for each message
+				// TODO search for mentions
 				const missingProfiles = new Set()
 				for (const event of results) {
 					if (!state.usersLookup[event.sender]) {
@@ -273,6 +276,9 @@ export default {
 				delete: true
 			})
 		},
+		dismissWarnings ({state}) {
+			state.warnings = []
+		},
 		// INCOMING
 		async 'api::chat.event' ({state, dispatch}, event) {
 			if (event.channel !== state.channel) return
@@ -370,6 +376,9 @@ export default {
 					Vue.set(state.usersLookup, user.id, user)
 				}
 			}
+		},
+		'api::chat.mention_warning' ({state}, data) {
+			state.warnings.push(data)
 		}
 	}
 }
