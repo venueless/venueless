@@ -1,21 +1,19 @@
 <template lang="pug">
 .c-chat-message(:class="[mode, {selected, readonly, 'system-message': isSystemMessage, 'merge-with-previous-message': mergeWithPreviousMessage, 'merge-with-next-message': mergeWithNextMessage, 'sender-deleted': sender.deleted}]")
 	.avatar-column(v-if="message.event_type !== 'channel.poll'")
-		avatar(v-if="!mergeWithPreviousMessage", :user="sender", :size="avatarSize", @click.native="showAvatarCard", ref="avatar")
+		avatar(v-if="!mergeWithPreviousMessage", :user="sender", :size="avatarSize", @click.native="$emit('showUserCard', $event, sender, 'right-start')", ref="avatar")
 		.timestamp(v-if="mergeWithPreviousMessage") {{ shortTimestamp }}
 	template(v-if="message.event_type === 'channel.message'")
 		.content-wrapper
 			.message-header(v-if="!mergeWithPreviousMessage")
-				.display-name(@click="showAvatarCard")
+				.display-name(@click="$emit('showUserCard', $event, sender, 'right-start')")
 					| {{ senderDisplayName }}
 					.ui-badge(v-for="badge in sender.badges") {{ badge }}
 				.timestamp {{ timestamp }}
 			template(v-if="['text', 'files'].includes(message.content.type)")
 				chat-input(v-if="editing", :message="message", @send="editMessage")
 				.content
-					template(v-for="part of content")
-						span(v-if="part.html", v-html="part.html")
-						span.mention(v-if="part.user", @click="showAvatarCard($event, part.user)") {{ getUserName(part.user) }}
+					ChatContent(v-if="message.content.body", :content="message.content.body", @clickMention="$emit('showUserCard', $event, sender, 'top-start')")
 					.files(v-for="file in message.content.files")
 						a(v-if="file.mimeType.startsWith('image/')", :href="file.url", target="_blank")
 							img.chat-image(:src="file.url")
@@ -75,12 +73,12 @@
 // - cancel editing
 // - handle editing error
 import moment from 'moment'
-import MarkdownIt from 'markdown-it'
 import { mapState, mapGetters } from 'vuex'
-import { markdownEmoji, nativeToStyle as nativeEmojiToStyle, getEmojiDataFromNative } from 'lib/emoji'
+import { nativeToStyle as nativeEmojiToStyle, getEmojiDataFromNative } from 'lib/emoji'
 import { createPopper } from '@popperjs/core'
 import { getUserName } from 'lib/profile'
 import Avatar from 'components/Avatar'
+import ChatContent from 'components/ChatContent'
 import ChatInput from 'components/ChatInput'
 import ChatUserCard from 'components/ChatUserCard'
 import EmojiPickerButton from 'components/EmojiPickerButton'
@@ -91,28 +89,9 @@ import Poll from 'components/Poll'
 const DATETIME_FORMAT = 'DD.MM. LT'
 const TIME_FORMAT = 'LT'
 
-const markdownIt = MarkdownIt('zero', {
-	linkify: true // TODO more tlds
-})
-markdownIt.enable('linkify')
-markdownIt.renderer.rules.link_open = function (tokens, idx, options, env, self) {
-	tokens[idx].attrPush(['target', '_blank'])
-	tokens[idx].attrPush(['rel', 'noopener noreferrer'])
-	return self.renderToken(tokens, idx, options)
-}
-
-markdownIt.use(markdownEmoji)
-
-const generateHTML = function (input) {
-	if (!input) return
-	return markdownIt.renderInline(input)
-}
-
-const mentionRegex = /(@[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12})/g
-
 export default {
 	name: 'ChatMessage',
-	components: { Avatar, ChatInput, ChatUserCard, EmojiPickerButton, MenuDropdown, Prompt, Poll },
+	components: { Avatar, ChatContent, ChatInput, ChatUserCard, EmojiPickerButton, MenuDropdown, Prompt, Poll },
 	props: {
 		message: Object,
 		previousMessage: Object,
@@ -126,7 +105,6 @@ export default {
 	data () {
 		return {
 			selected: false,
-			userCardUser: null,
 			editing: false,
 			showDeletePrompt: false,
 			reactionTooltip: null,
@@ -168,19 +146,6 @@ export default {
 			// The timestamp below avatars can only accommodate exactly this length
 			// We don't format to HH or hh to make sure the number is the same as in timestamp above
 			return moment(this.message.timestamp).format(TIME_FORMAT).split(' ')[0]
-		},
-		content () {
-			if (!this.message.content?.body) return
-			const parts = this.message.content.body.split(mentionRegex)
-			return parts.map(string => {
-				if (string.match(mentionRegex)) {
-					const user = this.usersLookup[string.slice(1)]
-					if (user) {
-						return {user}
-					}
-				}
-				return {html: generateHTML(string)}
-			})
 		},
 		mergeWithPreviousMessage () {
 			return this.previousMessage && !this.isSystemMessage && this.previousMessage.event_type === 'channel.message' && this.previousMessage.sender === this.message.sender && moment(this.message.timestamp).diff(this.previousMessage.timestamp, 'minutes') < 15
@@ -234,25 +199,6 @@ export default {
 		deleteMessage () {
 			this.$store.dispatch('chat/deleteMessage', this.message)
 			this.showDeletePrompt = false
-		},
-		async showAvatarCard (event, user) {
-			this.userCardUser = user || this.sender
-			await this.$nextTick()
-			createPopper(event?.target || this.$refs.avatar.$el, this.$refs.avatarCard.$refs.card, {
-				placement: 'right-start',
-				strategy: 'fixed',
-				modifiers: [{
-					name: 'flip',
-					options: {
-						flipVariations: false
-					}
-				}, {
-					name: 'preventOverflow',
-					options: {
-						padding: 8
-					}
-				}]
-			})
 		}
 	}
 }
@@ -297,17 +243,6 @@ export default {
 			.chat-image
 				max-width: calc(100% - 32px)
 				max-height: 300px
-			.mention
-				display: inline-block
-				background-color: var(--clr-primary)
-				color: var(--clr-input-primary-fg)
-				font-weight: 500
-				border-radius: 4px
-				padding: 0 2px
-				cursor: pointer
-				&::before
-					content: '@'
-					font-family: monospace
 		.content, .reactions
 			.emoji
 				color: transparent // hide unicode emoji
