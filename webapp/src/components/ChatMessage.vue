@@ -13,7 +13,7 @@
 			template(v-if="['text', 'files'].includes(message.content.type)")
 				chat-input(v-if="editing", :message="message", @send="editMessage")
 				.content
-					ChatContent(v-if="message.content.body", :content="message.content.body", @clickMention="$emit('showUserCard', $event, sender, 'top-start')")
+					ChatContent(v-if="message.content.body", :content="message.content.body", @clickMention="handleMentionClick")
 					.files(v-for="file in message.content.files")
 						a(v-if="file.mimeType.startsWith('image/')", :href="file.url", target="_blank")
 							img.chat-image(:src="file.url")
@@ -58,7 +58,6 @@
 				.timestamp {{ timestamp }}
 				span {{ $t('ChatMessage:poll-message:header') }}
 			Poll(:poll="poll")
-	chat-user-card(v-if="userCardUser", ref="avatarCard", :user="userCardUser", @close="userCardUser = false")
 	prompt.delete-message-prompt(v-if="showDeletePrompt", @close="showDeletePrompt = false")
 		.prompt-content
 			h2 Delete this message?
@@ -199,6 +198,9 @@ export default {
 		deleteMessage () {
 			this.$store.dispatch('chat/deleteMessage', this.message)
 			this.showDeletePrompt = false
+		},
+		handleMentionClick (event, user, placement) {
+			this.$emit('showUserCard', event, user, placement)
 		}
 	}
 }

@@ -27,7 +27,6 @@
 					span.display-name
 						| {{ user.profile.display_name }}
 						span.ui-badge(v-for="badge in user.badges") {{ badge }}
-		chat-user-card(v-if="selectedUser", ref="avatarCard", :user="selectedUser", @close="selectedUser = null")
 		chat-user-card(v-if="userCardUser", ref="avatarCard", :user="userCardUser", @close="userCardUser = false")
 	bunt-progress-circular(v-else, size="huge", :page="true")
 </template>
@@ -143,6 +142,7 @@ export default {
 			this.$store.dispatch('chat/sendMessage', {content})
 		},
 		async showUserCard (event, user, placement = 'left-start') {
+			console.log(user.id)
 			this.userCardUser = user
 			await this.$nextTick()
 			const target = event.target.closest('.user') || event.target
