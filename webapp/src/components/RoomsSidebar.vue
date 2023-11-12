@@ -34,11 +34,11 @@ transition(name="sidebar")
 					.room-icon(aria-hidden="true")
 					.name(v-html="$emojify(chat.name)")
 					i.bunt-icon.activity-icon.mdi(v-if="chat.users === 'many' || chat.users === 'few'", :class="{'mdi-account-group': (chat.users === 'many'), 'mdi-account-multiple': (chat.users === 'few')}", v-tooltip.bottom.fixed="{text: $t('RoomsSidebar:users-tooltip:' + chat.users)}", :aria-label="$t('RoomsSidebar:users-tooltip:' + chat.users)")
-				router-link.text-chat(v-for="chat of roomsByType.textChat", :to="chat === rooms[0] ? {name: 'home'} : {name: 'room', params: {roomId: chat.id}}", :class="{unread: hasUnreadMessages(chat.modules[0].channel_id), 'starts-with-emoji': startsWithEmoji(chat.name)}")
+				router-link.text-chat(v-for="chat of roomsByType.textChat", :to="chat.room === rooms[0] ? {name: 'home'} : {name: 'room', params: {roomId: chat.room.id}}", :class="{unread: hasUnreadMessages(chat.room.modules[0].channel_id), 'starts-with-emoji': startsWithEmoji(chat.room.name)}")
 					.room-icon(aria-hidden="true")
-					.name(v-html="$emojify(chat.name)")
-					.notifications(v-if="notificationCount(chat.modules[0].channel_id)") {{ notificationCount(chat.modules[0].channel_id) }}
-					bunt-icon-button(@click.prevent.stop="$store.dispatch('chat/leaveChannel', {channelId: chat.modules[0].channel_id})") close
+					.name(v-html="$emojify(chat.room.name)")
+					.notifications(v-if="chat.notifications") {{ chat.notifications }}
+					bunt-icon-button(@click.prevent.stop="$store.dispatch('chat/leaveChannel', {channelId: chat.room.modules[0].channel_id})") close
 				bunt-button#btn-browse-channels-trailing(v-if="worldHasTextChannels", @click="showChannelBrowser = true") {{ $t('RoomsSidebar:browse-channels-button:label') }}
 			.group-title#dm-title(v-if="directMessageChannels.length || hasPermission('world:chat.direct')")
 				span {{ $t('RoomsSidebar:direct-messages-headline:text') }}
@@ -47,7 +47,7 @@ transition(name="sidebar")
 				router-link.direct-message(v-for="channel of directMessageChannels", :to="{name: 'channel', params: {channelId: channel.id}}", :class="{unread: hasUnreadMessages(channel.id)}")
 					i.bunt-icon.mdi(v-if="call && call.channel === channel.id", aria-hidden="true").mdi-phone
 					.name {{ getDMChannelName(channel) }}
-					.notifications(v-if="notificationCount(channel.id)") {{ notificationCount(channel.id) }}
+					.notifications(v-if="channel.notifications") {{ channel.notifications }}
 					bunt-icon-button(tooltip="remove", :tooltip-fixed="true", @click.prevent.stop="$store.dispatch('chat/leaveChannel', {channelId: channel.id})") close
 			.buffer
 			template(v-if="worldHasExhibition && (staffedExhibitions.length > 0 || hasPermission('world:rooms.create.exhibition'))")
@@ -127,7 +127,11 @@ export default {
 			for (const room of this.rooms) {
 				if (room.modules.length === 1 && room.modules[0].type === 'chat.native') {
 					if (!this.joinedChannels.some(channel => channel.id === room.modules[0].channel_id)) continue
-					rooms.textChat.push(room)
+					const notifications = this.notificationCount(room.modules[0].channel_id)
+					rooms.textChat.push({
+						room,
+						notifications: notifications > 99 ? '99+' : notifications
+					})
 				} else if (room.modules.some(module => ['call.bigbluebutton', 'call.janus', 'call.zoom'].includes(module.type))) {
 					rooms.videoChat.push(room)
 				} else if (room.modules.some(module => ['livestream.native', 'livestream.youtube', 'livestream.iframe'].includes(module.type))) {
@@ -151,10 +155,14 @@ export default {
 		directMessageChannels () {
 			return this.joinedChannels
 				?.filter(channel => channel.members)
-				.map(channel => ({
-					id: channel.id,
-					users: channel.members.filter(member => member.id !== this.user.id)
-				}))
+				.map(channel => {
+					const notifications = this.notificationCount(channel.id)
+					return {
+						id: channel.id,
+						users: channel.members.filter(member => member.id !== this.user.id),
+						notifications: notifications > 99 ? '99+' : notifications
+					}
+				})
 				.sort((a, b) => (this.hasUnreadMessages(b.id) - this.hasUnreadMessages(a.id)) || this.getDMChannelName(a).localeCompare(this.getDMChannelName(b)))
 		},
 		worldHasTextChannels () {
@@ -342,13 +350,6 @@ export default {
 					height: 6px
 					width: @height
 					border-radius: 50%
-			.notifications
-				background: $clr-red
-				padding: 0 3px
-				line-height: 12px
-				position: relative
-				margin: 12px 6px
-				border-radius: 50%
 			.name
 				ellipsis()
 		.stage
@@ -434,9 +435,20 @@ export default {
 				margin-right: 4px
 				&::before
 					opacity: 0.5 // TODO do a proper color variable for this
+			.notifications
+				margin-left: auto
+				margin-right: 4px
+				background: $clr-red
+				border-radius: 12px
+				line-height: 20px
+				align-self: center
+				padding: 0 8px
+				font-size: 12px
 			.bunt-icon-button
 				icon-button-style(color: var(--clr-sidebar-text-primary), style: clear)
 				margin-left: auto
+			&:hover .notifications
+				display: none
 			&:not(:hover) .bunt-icon-button
 				display: none
 		#btn-browse-channels-trailing
