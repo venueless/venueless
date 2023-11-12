@@ -39,6 +39,7 @@ export default {
 				return state.notificationCounts[channel] || 0
 			}
 		},
+		// TODO this is BAD
 		isDirectMessageChannel (state, getters, rootState) {
 			return function (channel) {
 				return channel.members && channel.members.some(member => member.id !== rootState.user.id)
@@ -49,7 +50,7 @@ export default {
 				if (this.isDirectMessageChannel(channel)) {
 					return this.directMessageChannelName(channel)
 				} else {
-					return rootState.rooms.find(room => room.modules.some(m => m.channel_id = channel).name)
+					return rootState.rooms.find(room => room.modules.some(m => m.channel_id === channel).name)
 				}
 			}
 		},
@@ -349,7 +350,7 @@ export default {
 			const channel = state.joinedChannels.find(c => c.id === data.event.channel)
 			if (!channel) return
 			// Increment notification count
-			state.notificationCounts[channel.id] = (state.notificationCounts[channel.id] || 0) + 1
+			Vue.set(state.notificationCounts, channel.id, (state.notificationCounts[channel.id] || 0) + 1)
 			// TODO show desktop notification when window in focus but route is somewhere else?
 			let body = i18n.t('DirectMessage:notification-unread:text')
 			if (data.event.content.type === 'text') {
