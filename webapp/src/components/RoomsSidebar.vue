@@ -439,8 +439,8 @@ export default {
 				margin-left: auto
 				margin-right: 4px
 				background: $clr-red
-				border-radius: 12px
-				line-height: 20px
+				border-radius: 9px
+				line-height: 18px
 				align-self: center
 				padding: 0 8px
 				font-size: 12px
