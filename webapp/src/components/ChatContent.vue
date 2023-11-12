@@ -1,5 +1,6 @@
 <script>
 import MarkdownIt from 'markdown-it'
+import store from 'store'
 import { markdownEmoji } from 'lib/emoji'
 import { getUserName } from 'lib/profile'
 
@@ -16,6 +17,24 @@ markdownIt.renderer.rules.link_open = function (tokens, idx, options, env, self)
 markdownIt.use(markdownEmoji)
 
 const mentionRegex = /(@[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12})/g
+
+export async function contentToPlainText (content) {
+	const parts = content.split(mentionRegex)
+	let plaintext = ''
+	for (const string of parts) {
+		if (string.match(mentionRegex)) {
+			const userId = string.slice(1)
+			if (!store.state.chat.usersLookup[userId]) await store.dispatch('chat/fetchUsers', [userId])
+			const user = store.state.chat.usersLookup[string.slice(1)]
+			if (user) {
+				plaintext += `@${getUserName(user)}`
+			}
+		} else {
+			plaintext += string
+		}
+	}
+	return plaintext
+}
 
 const generateHTML = function (input) {
 	if (!input) return

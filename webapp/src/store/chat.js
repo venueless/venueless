@@ -6,6 +6,7 @@ import Vue from 'vue'
 import api from 'lib/api'
 import router from 'router'
 import i18n from 'i18n'
+import { contentToPlainText } from 'components/ChatContent'
 
 export default {
 	namespaced: true,
@@ -344,7 +345,7 @@ export default {
 		'api::chat.notification_counts' ({state, rootState, getters, dispatch}, notificationCounts) {
 			state.notificationCounts = notificationCounts
 		},
-		'api::chat.notification' ({state, rootState, getters, dispatch}, data) {
+		async 'api::chat.notification' ({state, rootState, getters, dispatch}, data) {
 			const channel = state.joinedChannels.find(c => c.id === data.event.channel)
 			if (!channel) return
 			// Increment notification count
@@ -358,7 +359,7 @@ export default {
 			// TODO handle image-only message
 			dispatch('notifications/createDesktopNotification', {
 				title: getters.channelName(channel),
-				body: body,
+				body: await contentToPlainText(body),
 				tag: getters.channelName(channel),
 				user: data.sender,
 				// TODO onClose?
