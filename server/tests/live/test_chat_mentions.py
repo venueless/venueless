@@ -147,8 +147,9 @@ async def test_no_notification_on_mention_if_not_joined(world, chat_room):
                 },
             ]
         )
-        await c1.receive_json_from()  # success
-        await c1.receive_json_from()  # receives message back
+        assert 'success' == (await c1.receive_json_from())[0]
+        assert 'chat.mention_warning' == (await c1.receive_json_from())[0]
+        assert 'chat.event' == (await c1.receive_json_from())[0]
 
         with pytest.raises(asyncio.TimeoutError):
             await c1.receive_json_from()  # no message to either client
@@ -230,8 +231,9 @@ async def test_no_notification_on_mention_if_not_joined_volatile_and_no_permitte
                 },
             ]
         )
-        await c1.receive_json_from()  # success
-        await c1.receive_json_from()  # receives message back
+        assert 'success' == (await c1.receive_json_from())[0]
+        assert 'chat.mention_warning' == (await c1.receive_json_from())[0]
+        assert 'chat.event' == (await c1.receive_json_from())[0]
 
         with pytest.raises(asyncio.TimeoutError):
             await c1.receive_json_from()  # no message to either client
