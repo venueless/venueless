@@ -28,6 +28,10 @@ export default {
 		activeJoinedChannel (state) {
 			return state.joinedChannels?.find(channel => channel.id === state.channel)
 		},
+		// TODO maybe merge this with joinedChannels?
+		automaticallyJoinedChannels (state, getters, rootState) {
+			return rootState.rooms.map(room => room.modules.find(m => m.type === 'chat.native')).filter(m => m?.config?.volatile).map(m => m.channel_id)
+		},
 		hasUnreadMessages (state) {
 			return function (channel) {
 				const joinedChannel = state.joinedChannels?.find(c => c.id === channel)
@@ -50,7 +54,7 @@ export default {
 				if (this.isDirectMessageChannel(channel)) {
 					return this.directMessageChannelName(channel)
 				} else {
-					return rootState.rooms.find(room => room.modules.some(m => m.channel_id === channel).name)
+					return rootState.rooms.find(room => room.modules.some(m => m.channel_id === channel.id)).name
 				}
 			}
 		},
@@ -347,7 +351,8 @@ export default {
 			state.notificationCounts = notificationCounts
 		},
 		async 'api::chat.notification' ({state, rootState, getters, dispatch}, data) {
-			const channel = state.joinedChannels.find(c => c.id === data.event.channel)
+			const channelId = data.event.channel
+			const channel = state.joinedChannels.find(c => c.id === channelId) || getters.automaticallyJoinedChannels.includes(channelId) ? {id: channelId} : null
 			if (!channel) return
 			// Increment notification count
 			Vue.set(state.notificationCounts, channel.id, (state.notificationCounts[channel.id] || 0) + 1)
@@ -364,7 +369,12 @@ export default {
 				tag: getters.channelName(channel),
 				user: data.sender,
 				// TODO onClose?
-				onClick: () => router.push({name: 'channel', params: {channelId: channel.id}})
+				onClick: () => {
+					if (getters.isDirectMessageChannel(channel))
+						router.push({name: 'channel', params: {channelId: channel.id}})
+					else
+						router.push({name: 'room', params: {roomId: rootState.rooms.find(room => room.modules.some(m => m.channel_id === channel.id)).id}})
+				}
 			}, {root: true})
 		},
 		'api::chat.event.reaction' ({state}, event) {
