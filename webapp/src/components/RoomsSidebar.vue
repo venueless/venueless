@@ -20,10 +20,13 @@ transition(name="sidebar")
 							.title {{ $localize(stage.session.title) }}
 							.subtitle
 								.speakers {{ stage.session.speakers ? stage.session.speakers.map(s => s.name).join(', ') : '' }}
-								.room {{ stage.room.name }}
+								.room-wrapper
+									.room {{ stage.room.name }}
+									.notifications(v-if="stage.notifications") {{ stage.notifications }}
 					template(v-else)
 						.room-icon(aria-hidden="true")
 						.name(v-html="$emojify(stage.room.name)")
+						.notifications(v-if="stage.notifications") {{ stage.notifications }}
 			.group-title#chats-title(v-if="roomsByType.videoChat.length || roomsByType.textChat.length || hasPermission('world:rooms.create.chat') || hasPermission('world:rooms.create.bbb')")
 				span {{ $t('RoomsSidebar:channels-headline:text') }}
 				.buffer
@@ -139,11 +142,13 @@ export default {
 					if (this.$features.enabled('schedule-control')) {
 						session = this.currentSessionPerRoom?.[room.id]?.session
 					}
+					const notifications = this.notificationCount(room.modules.find(m => m.type === 'chat.native')?.channel_id)
 					// TODO handle session image and multiple speaker avatars
 					// const image = session?.speakers.length === 1 ? session.speakers[0].avatar : null
 					rooms.stage.push({
 						room,
 						session,
+						notifications: notifications > 99 ? '99+' : notifications
 						// image
 					})
 				} else {
@@ -352,7 +357,19 @@ export default {
 					border-radius: 50%
 			.name
 				ellipsis()
+		.stage, .direct-message, .text-chat
+			.notifications
+				margin-left: auto
+				margin-right: 4px
+				background: $clr-red
+				border-radius: 9px
+				line-height: 18px
+				align-self: center
+				padding: 0 8px
+				font-size: 12px
+				color: var(--clr-sidebar-text-primary)
 		.stage
+			padding-right: 8px
 			&.session
 				height: 48px
 				padding: 0 4px 0 8px
@@ -399,8 +416,12 @@ export default {
 					justify-content: space-between
 					line-height: 24px
 					color: var(--clr-sidebar-text-disabled)
-					.room
+					.room-wrapper
 						display: flex
+						flex: 1
+						min-width: 0
+						justify-content: flex-end
+					.room
 						line-height: 24px
 						margin-right: 4px
 						ellipsis()
@@ -413,6 +434,8 @@ export default {
 							line-height: 24px
 							color: var(--clr-sidebar-text-disabled)
 							margin-right: 4px
+					.notifications
+						margin-left: 4px
 				.speakers
 					ellipsis()
 					flex: 1
@@ -435,15 +458,6 @@ export default {
 				margin-right: 4px
 				&::before
 					opacity: 0.5 // TODO do a proper color variable for this
-			.notifications
-				margin-left: auto
-				margin-right: 4px
-				background: $clr-red
-				border-radius: 9px
-				line-height: 18px
-				align-self: center
-				padding: 0 8px
-				font-size: 12px
 			.bunt-icon-button
 				icon-button-style(color: var(--clr-sidebar-text-primary), style: clear)
 				margin-left: auto
