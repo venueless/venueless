@@ -38,6 +38,8 @@
   "ChatInput:btn-send:tooltip": "Send message",
   "Chat:join-button:label": "join chat",
   "Chat:join-button:tooltip": "to start writing, join this channel",
+  "Chat:warning:missed-users_one": "You mentioned {{ missedUsers, list }}, but they're not a member of this channel and will not receive a notification.",
+  "Chat:warning:missed-users_other": "You mentioned {{ missedUsers, list }}, but they're not members of this channel and will not receive a notification.",
   "ChatMessage:join-message:text": "joined",
   "ChatMessage:leave-message:text": "left",
   "ChatMessage:message-delete:label": "delete message",

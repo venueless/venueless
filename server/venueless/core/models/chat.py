@@ -87,6 +87,19 @@ class ChatEventReaction(models.Model):
     )
 
 
+class ChatEventNotification(models.Model):
+    recipient = models.ForeignKey(
+        "User",
+        on_delete=models.CASCADE,
+        related_name="chat_notifications",
+    )
+    chat_event = models.ForeignKey(
+        ChatEvent,
+        on_delete=models.CASCADE,
+        related_name="notifications",
+    )
+
+
 class Membership(models.Model):
     channel = models.ForeignKey(
         to=Channel,

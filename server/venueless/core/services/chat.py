@@ -1,3 +1,4 @@
+import re
 from contextlib import suppress
 
 from channels.db import database_sync_to_async
@@ -26,10 +27,15 @@ from ..models import (
     Membership,
     User,
 )
+from ..models.chat import ChatEventNotification
 from ..permissions import Permission
 from ..utils.redis import aredis
 from .bbb import choose_server
 from .user import get_public_users, user_broadcast
+
+MENTION_RE = re.compile(
+    r"@([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})"
+)
 
 
 @database_sync_to_async
@@ -47,6 +53,10 @@ async def get_channel(**kwargs):
     ):
         c = await _get_channel(**kwargs)
         return c
+
+
+def extract_mentioned_user_ids(message):
+    return set([x.group(1) for x in MENTION_RE.finditer(message)])
 
 
 class ChatService:
@@ -95,7 +105,7 @@ class ChatService:
         for m in qs:
             r = {
                 "id": str(m.channel_id),
-                "notification_pointer": m.max_id or 0,
+                "unread_pointer": m.max_id or 0,
             }
             if not m.channel.room_id:
                 r["members"] = [
@@ -132,6 +142,27 @@ class ChatService:
         async with aredis(f"chat:subscriptions:{uid}:{channel}") as redis:
             await redis.srem(f"chat:subscriptions:{uid}:{channel}", socket_id)
             return await redis.scard(f"chat:subscriptions:{uid}:{channel}")
+
+    @database_sync_to_async
+    def filter_mentions(
+        self, channel: Channel, uids, include_all_permitted=False
+    ) -> set:
+        if not uids:
+            return set()
+
+        if include_all_permitted:
+            result = set()
+            for u in User.objects.filter(id__in=uids):
+                if self.world.has_permission(
+                    user=u, permission=Permission.ROOM_CHAT_READ, room=channel.room
+                ):
+                    result.add(str(u.id))
+            return result
+        else:
+            return {
+                str(m.user_id)
+                for m in Membership.objects.filter(channel=channel, user_id__in=uids)
+            }
 
     @database_sync_to_async
     def membership_is_volatile(self, channel, uid):
@@ -200,26 +231,29 @@ class ChatService:
                 id__lt=before_id,
                 channel=channel,
             )
-            .prefetch_related("reactions", "sender")
+            .prefetch_related("reactions")
             .order_by("-id")[: min(count, 1000)]
         )
+        user_ids = set()
+
+        for e in events:
+            user_ids.add(str(e.sender.pk))
+
+            for r in e.reactions.all():
+                user_ids.add(str(r.sender.pk))
+
+            if e.content.get("type") == "text":
+                user_ids |= extract_mentioned_user_ids(e.content.get("body", ""))
+
+        if users_known_to_client:
+            user_ids = user_ids - set(users_known_to_client)
+
         users = {
-            str(e.sender.pk): e.sender.serialize_public(
+            str(u.pk): u.serialize_public(
                 include_admin_info=include_admin_info, trait_badges_map=trait_badges_map
             )
-            for e in events
-            if str(e.sender.pk) not in users_known_to_client
+            for u in User.objects.filter(world=self.world, id__in=user_ids)
         }
-        for e in events:
-            for r in e.reactions.all():
-                if (
-                    str(r.sender.pk) not in users
-                    and str(r.sender.pk) not in users_known_to_client
-                ):
-                    users[str(r.sender.pk)] = r.sender.serialize_public(
-                        include_admin_info=include_admin_info,
-                        trait_badges_map=trait_badges_map,
-                    )
         return [e.serialize_public() for e in reversed(events)], users
 
     @database_sync_to_async
@@ -314,6 +348,32 @@ class ChatService:
             chat_event=event, reaction=reaction, sender=user
         )
         return self._get_event(pk=event.pk).serialize_public()
+
+    def get_notification_counts(self, user_id) -> dict:
+        return {
+            str(d["chat_event__channel_id"]): d["c"]
+            for d in ChatEventNotification.objects.filter(recipient_id=user_id)
+            .values("chat_event__channel_id")
+            .order_by()
+            .annotate(c=Count("*"))
+        }
+
+    @database_sync_to_async
+    def store_notification(self, event_id, user_ids):
+        for user in user_ids:
+            ChatEventNotification.objects.create(
+                chat_event_id=event_id,
+                recipient_id=user,
+            )
+
+    @database_sync_to_async
+    def remove_notifications(self, user_id, channel_id, max_id):
+        _, c = ChatEventNotification.objects.filter(
+            chat_event_id__lte=max_id,
+            chat_event__channel_id=channel_id,
+            recipient_id=user_id,
+        ).delete()
+        return bool(c)
 
     @database_sync_to_async
     def get_or_create_direct_channel(
