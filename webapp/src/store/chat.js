@@ -149,7 +149,7 @@ export default {
 		},
 		async markChannelRead ({state}) {
 			if (state.timeline.length === 0) return
-			if (state.config?.volatile) return
+			if (state.config?.volatile && !state.notificationCounts[state.channel]) return
 			const pointer = state.timeline[state.timeline.length - 1].event_id
 			await api.call('chat.mark_read', {
 				channel: state.channel,
