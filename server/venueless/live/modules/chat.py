@@ -349,6 +349,18 @@ class ChatModule(BaseModule):
 
     @event("notification")
     async def publish_notification(self, body):
+        event_id = body.get("data", {}).get("event", {}).get("event_id")
+        if event_id:
+            async with aredis() as redis:
+                read_pointer = await redis.hget(f"chat:read:{self.consumer.user.id}", body["data"]["event"]["channel"])
+                read_pointer = int(read_pointer.decode()) if read_pointer else 0
+                if read_pointer >= event_id:
+                    if await self.service.remove_notifications(self.consumer.user.id, self.channel_id, read_pointer):
+                        notification_counts = await database_sync_to_async(
+                            self.service.get_notification_counts
+                        )(self.consumer.user.id)
+                        await self.consumer.send_json(["chat.notification_counts", notification_counts])
+                    return
         await self.consumer.send_json(["chat.notification", body.get("data")])
 
     @command("send")
