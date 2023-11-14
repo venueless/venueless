@@ -51,8 +51,8 @@ export default {
 		},
 		channelName (state, getters, rootState) {
 			return function (channel) {
-				if (this.isDirectMessageChannel(channel)) {
-					return this.directMessageChannelName(channel)
+				if (getters.isDirectMessageChannel(channel)) {
+					return getters.directMessageChannelName(channel)
 				} else {
 					return rootState.rooms.find(room => room.modules.some(m => m.channel_id === channel.id)).name
 				}
@@ -352,7 +352,7 @@ export default {
 		},
 		async 'api::chat.notification' ({state, rootState, getters, dispatch}, data) {
 			const channelId = data.event.channel
-			const channel = state.joinedChannels.find(c => c.id === channelId) || getters.automaticallyJoinedChannels.includes(channelId) ? {id: channelId} : null
+			const channel = state.joinedChannels.find(c => c.id === channelId) || (getters.automaticallyJoinedChannels.includes(channelId) ? {id: channelId} : null)
 			if (!channel) return
 			// Increment notification count
 			Vue.set(state.notificationCounts, channel.id, (state.notificationCounts[channel.id] || 0) + 1)
