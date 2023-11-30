@@ -90,6 +90,7 @@ export default {
 			state.usersLookup = members.reduce((acc, member) => { acc[member.id] = member; return acc }, {})
 			state.timeline = []
 			state.warnings = []
+			state.fetchingMessages = null
 			state.beforeCursor = beforeCursor
 			state.config = config
 			if (getters.activeJoinedChannel) {
