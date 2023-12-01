@@ -86,7 +86,9 @@
 // TODO
 // - better tag input
 
-import * as pdfjs from 'pdfjs-dist/webpack'
+import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.js'
+// eslint-disable-next-line import/no-webpack-loader-syntax
+import PdfjsWorker from 'worker-loader?esModule=false&filename=[name].[contenthash].js!pdfjs-dist/legacy/build/pdf.worker.js'
 import Quill from 'quill'
 import { mapGetters } from 'vuex'
 import { required} from 'buntpapier/src/vuelidate/validators'
@@ -98,6 +100,11 @@ import UserSelect from 'components/UserSelect'
 import UploadUrlInput from 'components/UploadUrlInput'
 import RichTextEditor from 'components/RichTextEditor'
 import ExhibitorPreview from 'views/exhibitors/item'
+
+if (typeof window !== 'undefined' && 'Worker' in window) {
+	console.log(PdfjsWorker)
+	pdfjs.GlobalWorkerOptions.workerPort = new PdfjsWorker()
+}
 
 const Delta = Quill.import('delta')
 
