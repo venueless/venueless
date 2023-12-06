@@ -101,7 +101,7 @@ export default {
 				}
 			}
 		})
-		this.quill.on('text-change', this.onTextChange)
+		this.quill.on('editor-change', this.onEditorChange)
 		this.quill.on('selection-change', this.onSelectionChange)
 		// TODO paste
 		if (this.message) {
@@ -126,8 +126,8 @@ export default {
 		}
 	},
 	methods: {
-		onTextChange (delta, oldDelta, source) {
-			if (source !== 'user') return
+		onEditorChange (eventName, val, oldVal, source) {
+			if (source === 'api') return
 			const selection = this.quill.getSelection()
 			if (selection === null) return
 			const caretPos = selection.index
@@ -141,9 +141,17 @@ export default {
 					? 0
 					: lookback.lastIndexOf(' @') // TODO any whitespace
 			if (autocompleteCharIndex > -1) {
+				const search = lookback.slice(autocompleteCharIndex + 1 + !startsWithMention)
+				// cancel autocomplete if user presses shift+enter
+				if (search.includes('\n')) {
+					this.autocomplete = null
+					return
+				}
+				// don't reset autocomplete if we'd search the same thing
+				if (this.autocomplete?.search === search) return
 				this.autocomplete = {
 					type: 'mention',
-					search: lookback.slice(autocompleteCharIndex + 1 + !startsWithMention),
+					search,
 					selection,
 					range: {
 						index: autocompleteCharIndex + lookbackOffset + !startsWithMention,
@@ -155,9 +163,6 @@ export default {
 			} else {
 				this.autocomplete = null
 			}
-		},
-		onSelectionChange (range, oldRange, source) {
-			// TODO check mentions
 		},
 		handleEnter () {
 			if (this.autocomplete && !this.handleMention()) return
@@ -190,6 +195,8 @@ export default {
 			if (!this.autocomplete) return true
 			const user = this.autocomplete.options[this.autocomplete.selected]
 			if (!user) return true
+			// temporarily set selection to before the complete so deletion doesn't trigger a silent reselect
+			this.quill.setSelection(this.autocomplete.range.index, 0)
 			this.quill.deleteText(this.autocomplete.range.index, this.autocomplete.range.length)
 			this.quill.insertEmbed(this.autocomplete.range.index, 'mention', {
 				id: user.id,
@@ -201,7 +208,6 @@ export default {
 		send () {
 			const contents = this.quill.getContents()
 			let text = ''
-			console.log(contents)
 			for (const op of contents.ops) {
 				if (typeof op.insert === 'string') {
 					text += op.insert
