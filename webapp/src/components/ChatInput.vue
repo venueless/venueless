@@ -160,7 +160,7 @@ export default {
 			// TODO check mentions
 		},
 		handleEnter () {
-			if (this.autocomplete) return this.handleMention()
+			if (this.autocomplete && !this.handleMention()) return
 			return this.send()
 		},
 		handleTab () {
@@ -187,9 +187,10 @@ export default {
 			this.autocomplete.selected = index
 		},
 		handleMention () {
-			if (!this.autocomplete) return
-			this.quill.deleteText(this.autocomplete.range.index, this.autocomplete.range.length)
+			if (!this.autocomplete) return true
 			const user = this.autocomplete.options[this.autocomplete.selected]
+			if (!user) return true
+			this.quill.deleteText(this.autocomplete.range.index, this.autocomplete.range.length)
 			this.quill.insertEmbed(this.autocomplete.range.index, 'mention', {
 				id: user.id,
 				name: user.profile.display_name
