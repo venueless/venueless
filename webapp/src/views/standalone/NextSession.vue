@@ -32,7 +32,11 @@ export default {
 	display: flex
 	flex-direction: column
 	align-items: center
-	scale: 2
+	h2
+		font-size: 3rem
+		margin-bottom: 80px
 	.c-linear-schedule-session
-		min-width: 500px
+		scale: 1.8
+		min-width: 400px
+		max-width: calc(960px / 1.8 - 24px)
 </style>
