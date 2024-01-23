@@ -1,6 +1,6 @@
 <template lang="pug">
 .c-standalone-vote(v-if="linkCache")
-	h1 Vote now here:
+	h1 Vote here now:
 	.svg(v-html="linkCache.qrcode")
 	.url {{ linkCache.shortUrl }}
 </template>
