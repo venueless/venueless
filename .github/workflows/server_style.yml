@@ -24,7 +24,7 @@ jobs:
         with:
           python-version: 3.11
       - name: Install Python dependencies
-        run: pip3 install -U pip wheel setuptools && pip3 install -U black
+        run: pip3 install -U pip wheel setuptools $(grep black requirements.txt)
         working-directory: ./server
       - name: Run checks
         run: black --check venueless tests
@@ -43,7 +43,7 @@ jobs:
         with:
           python-version: 3.11
       - name: Install Python dependencies
-        run: pip3 install -U pip wheel setuptools && pip3 install -U flake8
+        run: pip3 install -U pip wheel setuptools $(grep flake8 requirements.txt)
         working-directory: ./server
       - name: Run checks
         run: flake8 venueless tests
@@ -62,7 +62,7 @@ jobs:
         with:
           python-version: 3.11
       - name: Install Python dependencies
-        run: pip3 install -U pip wheel setuptools && pip3 install -U "isort==5.*"
+        run: pip3 install -U pip wheel setuptools $(grep isort requirements.txt)
         working-directory: ./server
       - name: Run checks
         run: isort -c venueless tests
