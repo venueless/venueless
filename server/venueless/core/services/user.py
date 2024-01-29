@@ -88,17 +88,19 @@ def get_public_users(
             inactive=(
                 u["last_login"] is None or u["last_login"] < now() - timedelta(hours=36)
             ),
-            badges=sorted(
-                list(
-                    {
-                        badge
-                        for trait, badge in trait_badges_map.items()
-                        if trait in u["traits"]
-                    }
+            badges=(
+                sorted(
+                    list(
+                        {
+                            badge
+                            for trait, badge in trait_badges_map.items()
+                            if trait in u["traits"]
+                        }
+                    )
                 )
-            )
-            if trait_badges_map
-            else [],
+                if trait_badges_map
+                else []
+            ),
             **(
                 {"client_state": u["client_state"]}
                 if include_admin_info and u["type"] == User.UserType.KIOSK
@@ -594,17 +596,19 @@ def list_users(
                         pretalx_id=u["pretalx_id"],
                         inactive=u["last_login"] is None
                         or u["last_login"] < now() - timedelta(hours=36),
-                        badges=sorted(
-                            list(
-                                {
-                                    badge
-                                    for trait, badge in trait_badges_map.items()
-                                    if trait in u["traits"]
-                                }
+                        badges=(
+                            sorted(
+                                list(
+                                    {
+                                        badge
+                                        for trait, badge in trait_badges_map.items()
+                                        if trait in u["traits"]
+                                    }
+                                )
                             )
-                        )
-                        if trait_badges_map
-                        else [],
+                            if trait_badges_map
+                            else []
+                        ),
                         **(
                             dict(
                                 moderation_state=u["moderation_state"],

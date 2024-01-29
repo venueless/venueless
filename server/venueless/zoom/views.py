@@ -99,9 +99,9 @@ class MeetingView(ZoomViewMixin, TemplateView):
                 "support_chat": not inp["dc"],
                 "debug": settings.DEBUG,
                 "lang": get_closest_zoom_lang(self.world),
-                "langurl": "/zoom-de-DE.json"
-                if self.world.locale.startswith("de")
-                else "",
+                "langurl": (
+                    "/zoom-de-DE.json" if self.world.locale.startswith("de") else ""
+                ),
             }
         )
 

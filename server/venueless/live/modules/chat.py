@@ -133,14 +133,17 @@ class ChatModule(BaseModule):
             "unread_pointer": await self.service.get_highest_nonmember_id_in_channel(
                 self.channel_id
             ),
-            "members": await self.service.get_channel_users(
-                self.channel,
-                include_admin_info=await self.consumer.world.has_permission_async(
-                    user=self.consumer.user, permission=Permission.WORLD_USERS_MANAGE
-                ),
-            )
-            if not volatile
-            else [],
+            "members": (
+                await self.service.get_channel_users(
+                    self.channel,
+                    include_admin_info=await self.consumer.world.has_permission_async(
+                        user=self.consumer.user,
+                        permission=Permission.WORLD_USERS_MANAGE,
+                    ),
+                )
+                if not volatile
+                else []
+            ),
         }
 
     async def _unsubscribe(self, clean_volatile_membership=True):
