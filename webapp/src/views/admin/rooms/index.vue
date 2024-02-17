@@ -48,7 +48,7 @@ export default {
 }
 </script>
 <style lang="stylus">
-@import '~styles/flex-table'
+@import 'flex-table'
 
 .c-admin-rooms
 	display: flex

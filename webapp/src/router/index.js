@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import App from 'App'
+import App from '~/App'
 import RoomHeader from 'views/rooms/RoomHeader'
 import Room from 'views/rooms/item'
 import RoomManager from 'views/rooms/manage'
