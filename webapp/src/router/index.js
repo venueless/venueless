@@ -1,5 +1,4 @@
-import Vue from 'vue'
-import VueRouter from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import App from '~/App'
 import RoomHeader from 'views/rooms/RoomHeader'
 import Room from 'views/rooms/item'
@@ -12,8 +11,6 @@ import Speaker from 'views/schedule/speakers/item'
 import Exhibitor from 'views/exhibitors/item'
 import ContactRequests from 'views/contact-requests'
 import Preferences from 'views/preferences'
-
-Vue.use(VueRouter)
 
 const routes = [{
 	path: '/standalone/:roomId',
@@ -232,9 +229,8 @@ const routes = [{
 	}]
 }]
 
-const router = new VueRouter({
-	mode: 'history',
-	base: process.env.BASE_URL,
+const router = createRouter({
+	history: createWebHistory(BASE_URL),
 	routes
 })
 

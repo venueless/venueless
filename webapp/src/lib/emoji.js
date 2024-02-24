@@ -4,6 +4,13 @@ import { getEmojiDataFromNative as _getEmojiDataFromNative } from 'emoji-mart'
 import { uncompress } from 'emoji-mart/dist-es/utils/data.js'
 import MarkdownIt from 'markdown-it'
 
+import emojiList from 'has-emoji'
+
+const hasEmoji = emojiList.reduce((acc, emoji) => {
+	acc[emoji] = true
+	return acc
+}, {})
+
 // force uncompress data, because we don't use emoji-mart methods
 if (data.compressed) {
 	uncompress(data)
@@ -43,10 +50,14 @@ export function nativeToStyle (unicodeEmoji) {
 	// drop modifiers if we don't have the full emoji
 	// for example red heart => heart
 	while (codepoints.length) {
-		try {
-			src = require(`twemoji-emojis/vendor/svg/${codepoints.join('-')}.svg`)
+		// console.log(`../../node_modules/twemoji-emojis/vendor/svg/${codepoints.join('-')}.svg`)
+		// src = new URL(`../../node_modules/twemoji-emojis/vendor/svg/${}.svg`, import.meta.url).href
+		// console.log(new URL(`../../node_modules/twemoji-emojis/vendor/svg/${codepoints.join('-')}.svg`, import.meta.url))
+		const name = codepoints.join('-')
+		if (hasEmoji[name]) {
+			src = `/emoji/${name}.svg`
 			break
-		} catch (e) {}
+		}
 		codepoints.pop()
 	}
 
@@ -129,7 +140,7 @@ export function emojifyString (input) {
 }
 
 export const emojiPlugin = {
-	install (Vue) {
-		Vue.prototype.$emojify = emojifyString
+	install (app) {
+		app.config.globalProperties.$emojify = emojifyString
 	}
 }

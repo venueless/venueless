@@ -16,7 +16,7 @@
 <script>
 // TODO functional component?
 import { mapState, mapGetters } from 'vuex'
-import isEqual from 'lodash/isEqual'
+import { isEqual } from 'lodash'
 import api from 'lib/api'
 import JanusCall from 'components/JanusCall'
 import JanusChannelCall from 'components/JanusChannelCall'

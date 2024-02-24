@@ -1,7 +1,7 @@
 // TODO
 // - icon button hover background on dark bg
 import Color from 'color'
-import kebabCase from 'lodash/kebabCase'
+import { kebabCase } from 'lodash'
 import config from 'config'
 
 import { normal as normalBlend } from 'color-blend'
@@ -115,4 +115,10 @@ export { themeVariables, colors, DEFAULT_COLORS, DEFAULT_LOGO, DEFAULT_IDENTICON
 
 export function computeForegroundColor (bgColor) {
 	return firstReadable([CLR_PRIMARY_TEXT.LIGHT, CLR_PRIMARY_TEXT.DARK], bgColor)
+}
+
+const root = document.documentElement
+
+for (const [key, value] of Object.entries(themeVariables)) {
+	root.style.setProperty(key, value)
 }

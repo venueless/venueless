@@ -8,7 +8,7 @@ api.connect = function ({token, clientId, inviteToken}) {
 	if (api._socket) {
 		api.close()
 	}
-	Object.assign(api, WebSocketClient.call(api, `${config.api.socket}`, {token, clientId, inviteToken}))
+	Object.assign(api, new WebSocketClient(`${config.api.socket}`, {token, clientId, inviteToken}))
 	WebSocketClient.prototype.connect.call(api)
 	api.on('closed', () => {
 		console.warn('socket closed')

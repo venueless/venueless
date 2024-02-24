@@ -5,8 +5,7 @@
 			scrollbars.timeline(y, ref="timeline", @scroll="timelineScrolled", v-resize-observer="onResize", @resize="onResize")
 				infinite-scroll(v-if="syncedScroll", :loading="fetchingMessages", @load="fetchMessages")
 					div
-				template(v-for="(message, index) of filteredTimeline")
-					chat-message(:message="message", :previousMessage="filteredTimeline[index - 1]", :nextMessage="filteredTimeline[index + 1]", :mode="mode", :key="message.event_id", @showUserCard="showUserCard")
+				chat-message(v-for="(message, index) of filteredTimeline", :message="message", :previousMessage="filteredTimeline[index - 1]", :nextMessage="filteredTimeline[index + 1]", :mode="mode", :key="message.event_id", @showUserCard="showUserCard")
 			.warning(v-if="mergedWarning")
 				.content
 					ChatContent(:content="$t('Chat:warning:missed-users', {count: mergedWarning.missed_users.length, missedUsers: mergedWarning.missed_users})", @clickMention="showUserCard")
@@ -31,6 +30,8 @@
 	bunt-progress-circular(v-else, size="huge", :page="true")
 </template>
 <script>
+// TODO
+// - renders scrollbar even if messages don't overflow, because actions are influencing container height
 import { mapState, mapGetters } from 'vuex'
 import { createPopper } from '@popperjs/core'
 import Avatar from 'components/Avatar'
@@ -125,14 +126,14 @@ export default {
 			this.$store.dispatch('chat/fetchMessages')
 		},
 		timelineScrolled (event) {
-			const scrollEl = this.$refs.timeline.$refs.content
+			const scrollEl = this.$refs.timeline.contentRef
 			this.scrollPosition = scrollEl.scrollHeight - scrollEl.scrollTop - scrollEl.clientHeight
 		},
 		onResize () {
 			this.refreshScrollbar()
 		},
 		refreshScrollbar () {
-			const scrollEl = this.$refs.timeline.$refs.content
+			const scrollEl = this.$refs.timeline.contentRef
 			this.$refs.timeline.scrollTop(scrollEl.scrollHeight - this.scrollPosition - scrollEl.clientHeight)
 		},
 		join () {
