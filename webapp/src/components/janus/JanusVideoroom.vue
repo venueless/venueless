@@ -56,8 +56,8 @@
 	chat-user-card(v-if="selectedUser", ref="avatarCard", :user="selectedUser", @close="selectedUser = null")
 	transition(name="prompt")
 		a-v-device-prompt(v-if="showDevicePrompt", @close="closeDevicePrompt")
-		feedback-prompt(v-if="showFeedbackPrompt", module="janus", :collectTrace="collectTrace", @close="showFeedbackPrompt = false")
-		prompt.screenshare-prompt(v-if="showScreensharePrompt", @close="showScreensharePrompt=false")
+		feedback-prompt(v-else-if="showFeedbackPrompt", module="janus", :collectTrace="collectTrace", @close="showFeedbackPrompt = false")
+		prompt.screenshare-prompt(v-else-if="showScreensharePrompt", @close="showScreensharePrompt=false")
 			.content
 				h1 {{ $t('JanusVideoroom:tool-screenshare:on') }}
 				form(@submit.prevent="publishOwnScreenshareFeed")
@@ -258,7 +258,7 @@ export default {
 		}, 10000)
 		this.soundMeterInterval = window.setInterval(() => {
 			for (const idx in this.soundMeters) {
-				this.$set(this.soundLevels, idx, this.soundMeters[idx].slow.toFixed(2))
+				this.soundLevels[idx] = this.soundMeters[idx].slow.toFixed(2)
 			}
 		}, 200)
 	},
@@ -686,7 +686,7 @@ export default {
 							remoteFeed.hasVideo = true
 						}
 						this.initSoundMeter(stream, remoteFeed.rfid)
-						this.$set(this.feeds, rfindex, remoteFeed) // force reactivity
+						this.feeds[rfindex] = remoteFeed // force reactivity
 					})
 				},
 			})
@@ -900,7 +900,7 @@ export default {
 				const actx = new AudioContext()
 				const soundmeter = new SoundMeter(actx)
 				soundmeter.connectToSource(stream)
-				this.$set(this.soundMeters, refname, soundmeter)
+				this.soundMeters[refname] = soundmeter
 			} catch (e) {
 				log('venueless', 'error', 'Could not init sound meter: ' + e)
 				// do not fail visibly, it is a nice-to-have feature
@@ -943,7 +943,7 @@ export default {
 		async fetchUser (feed) {
 			feed.venueless_user = await api.call('januscall.identify', {id: feed.rfid})
 			const rfindex = this.feeds.findIndex((rf) => rf.rfid === feed.rfid)
-			this.$set(this.feeds, rfindex, feed) // force reactivity
+			this.feeds[rfindex] = feed // force reactivity
 		},
 	},
 }

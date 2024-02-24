@@ -1,5 +1,5 @@
 <template lang="pug">
-#app(:class="{'has-background-room': backgroundRoom, 'override-sidebar-collapse': overrideSidebarCollapse}", :style="[themeVariables, browserhackStyle, mediaConstraintsStyle]", :key="`${userLocale}-${userTimezone}`")
+.v-app(:class="{'has-background-room': backgroundRoom, 'override-sidebar-collapse': overrideSidebarCollapse}", :style="[browserhackStyle, mediaConstraintsStyle]", :key="`${userLocale}-${userTimezone}`")
 	.fatal-connection-error(v-if="fatalConnectionError")
 		template(v-if="fatalConnectionError.code === 'world.unknown_world'")
 			.mdi.mdi-help-circle
@@ -24,9 +24,8 @@
 		rooms-sidebar(:show="$mq.above['l'] || showSidebar || overrideSidebarCollapse", @close="showSidebar = false")
 		router-view(:key="!$route.path.startsWith('/admin') ? $route.fullPath : null", :role="roomHasMedia ? '' : 'main'")
 		//- defining keys like this keeps the playing dom element alive for uninterupted transitions
-		media-source(v-if="roomHasMedia && user.profile.greeted", ref="primaryMediaSource", :room="room", :key="room.id", role="main")
-		media-source(v-if="call", ref="channelCallSource", :call="call", :background="call.channel !== $route.params.channelId", :key="call.id", @close="$store.dispatch('chat/leaveCall')")
-		media-source(v-else-if="backgroundRoom", ref="backgroundMediaSource", :room="backgroundRoom", :background="true", :key="backgroundRoom.id", @close="backgroundRoom = null")
+		template(v-for="mediaSource of stableMediaSources")
+			media-source(v-if="mediaSource", v-bind="mediaSource", :ref="(el) => mediaSourceRefs[mediaSource.type] = el")
 		#media-source-iframes
 		notifications(:has-background-media="!!backgroundRoom")
 		.disconnected-warning(v-if="!connected") {{ $t('App:disconnected-warning:text') }}
@@ -41,7 +40,6 @@
 </template>
 <script>
 import { mapState } from 'vuex'
-import { themeVariables } from 'theme'
 import AppBar from 'components/AppBar'
 import RoomsSidebar from 'components/RoomsSidebar'
 import MediaSource from 'components/MediaSource'
@@ -56,10 +54,11 @@ export default {
 	components: { AppBar, RoomsSidebar, MediaSource, GreetingPrompt, Notifications },
 	data () {
 		return {
-			themeVariables,
 			backgroundRoom: null,
 			showSidebar: false,
-			windowHeight: null
+			windowHeight: null,
+			stableMediaSources: [],
+			mediaSourceRefs: {}
 		}
 	},
 	computed: {
@@ -83,7 +82,7 @@ export default {
 		},
 		stageStreamCollapsed () {
 			if (this.$mq.above.m) return false
-			return this.$refs.primaryMediaSource?.$refs.livestream ? !this.$refs.primaryMediaSource.$refs.livestream.playing : false
+			return this.mediaSourceRefs.primary?.$refs.livestream ? !this.mediaSourceRefs.primary.$refs.livestream.playing : false
 		},
 		// force open sidebar on medium screens on home page (with no media) so certain people can find the menu
 		overrideSidebarCollapse () {
@@ -117,6 +116,38 @@ export default {
 				'--vh100': this.windowHeight + 'px',
 				'--vh': this.windowHeight && (this.windowHeight / 100) + 'px'
 			}
+		},
+		mediaSources () {
+			const sources = []
+			// media-source(v-if="roomHasMedia && user.profile.greeted", ref="primaryMediaSource", :room="room", :key="room.id", role="main")
+			// media-source(v-if="call", ref="channelCallSource", :call="call", :background="call.channel !== $route.params.channelId", :key="call.id", @close="$store.dispatch('chat/leaveCall')")
+			// media-source(v-else-if="backgroundRoom", ref="backgroundMediaSource", :room="backgroundRoom", :background="true", :key="backgroundRoom.id", @close="backgroundRoom = null")
+			if (this.roomHasMedia && this.user.profile.greeted) {
+				sources.push({
+					key: this.room.id,
+					type: 'primary',
+					room: this.room,
+					role: 'main'
+				})
+			}
+			if (this.call) {
+				sources.push({
+					key: this.call.id,
+					type: 'call',
+					call: this.call,
+					background: this.call.channel !== this.$route.params.channelId,
+				})
+			} else if (this.backgroundRoom) {
+				sources.push({
+					key: this.backgroundRoom.id,
+					type: 'background',
+					room: this.backgroundRoom,
+					background: true,
+					onClose: () => { this.backgroundRoom = null }
+				})
+			}
+
+			return sources
 		}
 	},
 	watch: {
@@ -132,6 +163,32 @@ export default {
 				this.$store.commit('updateStageStreamCollapsed', this.stageStreamCollapsed)
 			},
 			immediate: true
+		},
+		mediaSources () {
+			// we need to keep the array position as stable as possible to not trigger vue remounts, which kills videos
+			const stale = Object.fromEntries(this.stableMediaSources.map(source => [source?.key, true]))
+			for (const source of this.mediaSources) {
+				stale[source.key] = false
+				const index = this.stableMediaSources.findIndex(stableSource => stableSource?.key === source.key)
+				if (index > -1) {
+					this.stableMediaSources.splice(index, 1, source)
+					continue
+				}
+
+				const emptyIndex = this.stableMediaSources.findIndex(stableSource => !stableSource)
+				if (emptyIndex > -1) {
+					this.stableMediaSources.splice(emptyIndex, 1, source)
+					continue
+				}
+
+				this.stableMediaSources.push(source)
+			}
+			for (const [key, isStale] of Object.entries(stale)) {
+				if (!isStale) continue
+				const index = this.stableMediaSources.findIndex(source => source?.key === key)
+				if (index === -1) continue
+				this.stableMediaSources.splice(index, 1, null)
+			}
 		}
 	},
 	mounted () {
@@ -187,7 +244,7 @@ export default {
 				this.rooms.includes(oldRoom) &&
 				!this.backgroundRoom &&
 				oldRoom.modules.some(module => mediaModules.includes(module.type)) &&
-				this.$refs.primaryMediaSource.isPlaying() &&
+				this.mediaSourceRefs.primary.isPlaying() &&
 				// don't background bbb room when switching to new bbb room
 				!(newRoom?.modules.some(isExclusive) && oldRoom?.modules.some(isExclusive))
 			) {
@@ -214,7 +271,9 @@ export default {
 }
 </script>
 <style lang="stylus">
-#app
+.v-app
+	flex: auto
+	min-height: 0
 	display: grid
 	grid-template-columns: var(--sidebar-width) auto
 	grid-template-rows: auto

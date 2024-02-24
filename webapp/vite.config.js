@@ -1,5 +1,7 @@
 import path from 'path'
-import vue from '@vitejs/plugin-vue2'
+import vue from '@vitejs/plugin-vue'
+import ReactivityTransform from '@vue-macros/reactivity-transform/vite'
+import { viteStaticCopy } from 'vite-plugin-static-copy'
 // import { visualizer } from 'rollup-plugin-visualizer'
 
 import BuntpapierStylus from 'buntpapier/stylus.js'
@@ -23,6 +25,16 @@ export default {
 	},
 	plugins:[
 		vue(),
+		ReactivityTransform(),
+		// globbing thousands of emojis absolutely wrecks vite, let's just static copy them, they likely won't change
+		viteStaticCopy({
+			targets: [
+				{
+					src: 'node_modules/twemoji-emojis/vendor/svg/*.svg',
+					dest: 'emoji'
+				}
+			]
+		})
 	],
 	css: {
 		preprocessorOptions: {
@@ -33,6 +45,7 @@ export default {
 	resolve: {
 		extensions: ['.js', '.json', '.vue'],
 		alias: {
+			lodash: 'lodash-es',
 			'~': path.resolve(__dirname, 'src'),
 			config: path.resolve(__dirname, 'config.js'),
 			modernizr$: path.resolve(__dirname, '.modernizrrc'),
@@ -51,14 +64,19 @@ export default {
 			features: path.resolve(__dirname, 'src/features'),
 			i18n: path.resolve(__dirname, 'src/i18n'),
 			theme: path.resolve(__dirname, 'src/theme'),
+			'has-emoji': path.resolve(__dirname, 'build/has-emoji/emoji.json')
 		}
 	},
+	// optimizeDeps: {
+	// 	exclude: ['buntpapier'],
+	// 	include: ['buntpapier > fuzzysearch']
+	// },
 	optimizeDeps: {
-		exclude: ['buntpapier'],
-		include: ['buntpapier > fuzzysearch']
+		exclude: ['@pretalx/schedule']
 	},
 	define: {
 		ENV_DEVELOPMENT: process.env.NODE_ENV === 'development',
-		RELEASE: `'${process.env.VENUELESS_COMMIT_SHA}'`
+		RELEASE: `'${process.env.VENUELESS_COMMIT_SHA}'`,
+		BASE_URL: `'${process.env.BASE_URL || '/'}'`
 	}
 }

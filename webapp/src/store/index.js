@@ -1,4 +1,3 @@
-import Vue from 'vue'
 import Vuex from 'vuex'
 import i18n from 'i18n'
 import jwtDecode from 'jwt-decode'
@@ -13,8 +12,6 @@ import exhibition from './exhibition'
 import schedule from './schedule'
 import notifications from './notifications'
 import moment from 'lib/timetravelMoment'
-
-Vue.use(Vuex)
 
 export default new Vuex.Store({
 	state: {
@@ -145,7 +142,7 @@ export default new Vuex.Store({
 		async updateUser ({state, dispatch}, update) {
 			await api.call('user.update', update)
 			for (const [key, value] of Object.entries(update)) {
-				Vue.set(state.user, key, value)
+				state.user[key] = value
 			}
 			dispatch('chat/updateUser', {id: state.user.id, update})
 		},
@@ -226,11 +223,11 @@ export default new Vuex.Store({
 		'api::room.schedule' ({state}, {room, schedule_data}) {
 			room = state.rooms.find(r => r.id === room)
 			if (!room) return
-			Vue.set(room, 'schedule_data', schedule_data)
+			room['schedule_data'] = schedule_data
 		},
 		'api::user.updated' ({state, dispatch}, update) {
 			for (const [key, value] of Object.entries(update)) {
-				Vue.set(state.user, key, value)
+				state.user[key] = value
 			}
 			dispatch('chat/updateUser', {id: state.user.id, update})
 		},
@@ -239,7 +236,7 @@ export default new Vuex.Store({
 			// overwrite existing user
 			const index = state.roomViewers.findIndex(u => u.id === user.id)
 			if (index >= 0) {
-				Vue.set(state.roomViewers, index, user)
+				state.roomViewers[index] = user
 			} else {
 				state.roomViewers.push(user)
 			}

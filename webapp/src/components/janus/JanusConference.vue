@@ -65,8 +65,8 @@
 	chat-user-card(v-if="selectedUser", ref="avatarCard", :user="selectedUser", @close="selectedUser = null")
 	transition(name="prompt")
 		a-v-device-prompt(v-if="showDevicePrompt", @close="closeDevicePrompt")
-		feedback-prompt(v-if="showFeedbackPrompt", module="janus", :collectTrace="collectTrace", @close="showFeedbackPrompt = false")
-		prompt.screenshare-prompt(v-if="showScreensharePrompt", @close="showScreensharePrompt=false")
+		feedback-prompt(v-else-if="showFeedbackPrompt", module="janus", :collectTrace="collectTrace", @close="showFeedbackPrompt = false")
+		prompt.screenshare-prompt(v-else-if="showScreensharePrompt", @close="showScreensharePrompt=false")
 			.content
 				h1 {{ $t('JanusVideoroom:tool-screenshare:on') }}
 				form(@submit.prevent="publishOwnScreenshareFeed")
@@ -714,7 +714,7 @@ export default {
 
 					remoteFeed.rfattached = true
 					remoteFeed.hasVideo = videoTracks && videoTracks.length > 0
-					this.$set(this.feeds, rfindex, remoteFeed) // force reactivity
+					this.feeds[rfindex] = remoteFeed // force reactivity
 					this.$nextTick(() => {
 						Janus.attachMediaStream(this.$refs.peerVideo[rfindex], stream)
 					})
@@ -1145,7 +1145,7 @@ export default {
 			}
 			feed.venueless_user = user
 			const rfindex = this.feeds.findIndex((rf) => rf.rfid === feed.rfid)
-			this.$set(this.feeds, rfindex, feed) // force reactivity
+			this.feeds[rfindex] = feed // force reactivity
 		},
 	},
 }

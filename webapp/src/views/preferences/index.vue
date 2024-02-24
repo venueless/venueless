@@ -35,7 +35,7 @@
 <script>
 // TODO communicate language change to other tabs?
 import { mapState } from 'vuex'
-import cloneDeep from 'lodash/cloneDeep'
+import { cloneDeep } from 'lodash'
 import config from 'config'
 import { locales } from 'locales'
 import Avatar from 'components/Avatar'
@@ -43,7 +43,7 @@ import Prompt from 'components/Prompt'
 import ChangeAvatar from 'components/profile/ChangeAvatar'
 import ChangeAdditionalFields from 'components/profile/ChangeAdditionalFields'
 import ConnectGravatar from 'components/profile/ConnectGravatar'
-import { required } from 'buntpapier/src/vuelidate/validators'
+import { required } from 'lib/validators'
 
 export default {
 	components: { Avatar, Prompt, ChangeAvatar, ChangeAdditionalFields, ConnectGravatar},

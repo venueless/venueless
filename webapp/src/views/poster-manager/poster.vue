@@ -89,7 +89,7 @@
 import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.js'
 import Quill from 'quill'
 import { mapGetters } from 'vuex'
-import { required} from 'buntpapier/src/vuelidate/validators'
+import { required } from 'lib/validators'
 import api from 'lib/api'
 import router from 'router'
 import Avatar from 'components/Avatar'
@@ -98,10 +98,9 @@ import UserSelect from 'components/UserSelect'
 import UploadUrlInput from 'components/UploadUrlInput'
 import RichTextEditor from 'components/RichTextEditor'
 import ExhibitorPreview from 'views/exhibitors/item'
-import { url } from 'vuelidate/lib/validators'
 
 if (typeof window !== 'undefined' && 'Worker' in window) {
-	pdfjs.GlobalWorkerOptions.workerPort = new Worker(new url('pdfjs-dist/legacy/build/pdf.worker.js', import.meta.url))
+	pdfjs.GlobalWorkerOptions.workerPort = new Worker(new Url('pdfjs-dist/legacy/build/pdf.worker.js', import.meta.url))
 }
 
 const Delta = Quill.import('delta')

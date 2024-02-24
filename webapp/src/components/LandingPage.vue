@@ -29,6 +29,7 @@
 				session(
 					v-for="session of nextSessions",
 					:session="session",
+					:now="now",
 					:faved="favs.includes(session.id)",
 					@fav="$store.dispatch('schedule/fav', $event)",
 					@unfav="$store.dispatch('schedule/unfav', $event)"
@@ -52,12 +53,11 @@ import { Session } from '@pretalx/schedule'
 import api from 'lib/api'
 import moment from 'lib/timetravelMoment'
 import Identicon from 'components/Identicon'
-import MarkdownContent from 'components/MarkdownContent'
 import RichTextContent from 'components/RichTextContent'
 import scheduleProvidesMixin from 'components/mixins/schedule-provides'
 
 export default {
-	components: { Identicon, MarkdownContent, RichTextContent, Session },
+	components: { Identicon, RichTextContent, Session },
 	mixins: [scheduleProvidesMixin],
 	props: {
 		module: Object

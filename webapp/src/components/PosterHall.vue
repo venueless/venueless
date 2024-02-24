@@ -47,7 +47,7 @@
 // TODO
 // - put categories through config key map
 
-import intersection from 'lodash/intersection'
+import { intersection } from 'lodash'
 import api from 'lib/api'
 import MenuDropdown from 'components/MenuDropdown'
 import RichTextContent from 'components/RichTextContent'
