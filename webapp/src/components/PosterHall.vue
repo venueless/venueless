@@ -3,13 +3,14 @@
 	template(v-if="posters")
 		.list-actions
 			bunt-input-outline-container#input-search
-				.search-field(slot-scope="{focus, blur}")
-					.icon.mdi.mdi-magnify
-					.applied-filter(v-for="filter of filters", :title="`${$t(`PosterHall:filter:field-${filter.field}`)}: ${filter.value}`")
-						.field {{ $t(`PosterHall:filter:field-${filter.field}`) }}:
-						.value {{ filter.label }}
-						bunt-icon-button(@click="removeFilter(filter)") close
-					input(ref="input", name="search", v-model="search", :placeholder="$t('PosterHall:input-search:placeholder')", @focus="focus", @blur="blur", autofocus, autocomplete="off")
+				template(#default="{focus, blur}")
+					.search-field
+						.icon.mdi.mdi-magnify
+						.applied-filter(v-for="filter of filters", :title="`${$t(`PosterHall:filter:field-${filter.field}`)}: ${filter.value}`")
+							.field {{ $t(`PosterHall:filter:field-${filter.field}`) }}:
+							.value {{ filter.label }}
+							bunt-icon-button(@click="removeFilter(filter)") close
+						input(ref="input", name="search", v-model="search", :placeholder="$t('PosterHall:input-search:placeholder')", @focus="focus", @blur="blur", autofocus, autocomplete="off")
 			menu-dropdown(v-model="showAddFilters", placement="bottom-end", @mousedown.native.stop="")
 				template(v-slot:button="{toggle}")
 					bunt-button(icon="filter-plus", @click="toggle") {{ $t('PosterHall:button-add-filter') }}

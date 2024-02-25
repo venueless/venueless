@@ -37,6 +37,7 @@
 		.details(v-if="socketCloseCode == 1006") {{ $t('App:error-code:1006') }}
 		.details(v-if="socketCloseCode") {{ $t('App:error-code:text') }}: {{ socketCloseCode }}
 	.fatal-error(v-if="fatalError") {{ fatalError.message }}
+#bunt-teleport-target
 </template>
 <script>
 import { mapState } from 'vuex'

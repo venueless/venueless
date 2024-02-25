@@ -1,6 +1,6 @@
 <template lang="pug">
 .c-upload-url-input
-	bunt-input(:value="value", :label="label", :name="name", :validation="validation", @input="update($event)")
+	bunt-input(:modelValue="modelValue", :label="label", :name="name", :validation="validation", @update:modelValue="update($event)")
 	bunt-progress-circular(v-if="uploading", size="small")
 	.file-selector(v-else)
 		bunt-icon-button upload
@@ -12,7 +12,7 @@ import api from 'lib/api'
 
 export default {
 	props: {
-		value: String,
+		modelValue: String,
 		label: String,
 		name: String,
 		validation: Object,
@@ -29,17 +29,18 @@ export default {
 	},
 	methods: {
 		update (val) {
-			this.$emit('input', val)
+			this.$emit('update:modelValue', val)
 		},
 		upload () {
 			var file = this.$refs.fileInput.files[0]
 
 			api.uploadFilePromise(file, file.name, this.uploadUrl).then(data => {
+				console.log(data)
 				if (data.error) {
 					alert(`Upload error: ${data.error}`) // Proper user-friendly messages
-					this.$emit('input', '')
+					this.$emit('update:modelValue', '')
 				} else {
-					this.$emit('input', data.url)
+					this.$emit('update:modelValue', data.url)
 				}
 				this.uploading = false
 			}).catch(error => {

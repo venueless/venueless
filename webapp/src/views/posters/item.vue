@@ -57,7 +57,7 @@
 	chat-user-card(v-if="selectedUser", ref="avatarCard", :user="selectedUser", @close="selectedUser = null")
 </template>
 <script>
-import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.js'
+import * as pdfjs from 'pdfjs-dist/webpack.mjs'
 import { createPopper } from '@popperjs/core'
 import api from 'lib/api'
 import { getIconByFileEnding } from 'lib/filetypes'
@@ -65,10 +65,6 @@ import Avatar from 'components/Avatar'
 import Chat from 'components/Chat'
 import ChatUserCard from 'components/ChatUserCard'
 import RichTextContent from 'components/RichTextContent'
-
-if (typeof window !== 'undefined' && 'Worker' in window) {
-	pdfjs.GlobalWorkerOptions.workerPort = new Worker(new url('pdfjs-dist/legacy/build/pdf.worker.js', import.meta.url))
-}
 
 export default {
 	components: { Avatar, Chat, ChatUserCard, RichTextContent },
