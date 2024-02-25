@@ -45,7 +45,7 @@ const Delta = Quill.import('delta')
 
 export default {
 	props: {
-		value: [Delta, Object],
+		modelValue: [Delta, Object],
 		label: String
 	},
 	data () {
@@ -78,7 +78,7 @@ export default {
 									api.uploadFilePromise(file, file.name).then(data => {
 										if (data.error) {
 											alert(`Upload error: ${data.error}`) // Proper user-friendly messages
-											this.$emit('input', '')
+											this.$emit('update:modelValue', '')
 										} else {
 											const range = this.quill.getSelection(true)
 											this.quill.updateContents(new Delta()
@@ -103,8 +103,8 @@ export default {
 			},
 			bounds: this.$refs.editor,
 		})
-		if (this.value) {
-			this.quill.setContents(this.value)
+		if (this.modelValue) {
+			this.quill.setContents(this.modelValue)
 		}
 		this.quill.on('selection-change', this.onSelectionchange)
 		this.quill.on('text-change', this.onTextchange)
@@ -115,7 +115,7 @@ export default {
 	},
 	methods: {
 		onTextchange (delta, oldContents, source) {
-			this.$emit('input', this.quill.getContents())
+			this.$emit('update:modelValue', this.quill.getContents())
 		},
 		onSelectionchange (range, oldRange, source) {
 			if (range === null && oldRange !== null) {

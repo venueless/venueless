@@ -5,14 +5,14 @@
 	bunt-progress-circular(size="huge", v-if="!error && !config")
 	.error(v-if="error") We could not fetch the current configuration.
 	bunt-tabs(v-if="config")
-		bunt-tab(header="Global", v-scrollbar.y="")
-			.permission-config
+		bunt-tab(header="Global")
+			scrollbars(y, key="global").permission-config
 				.info
 					h3 Roles assigned to traits globally
 					p Users receive the following roles if they have the required traits in their token/ticket. Global roles are valid for #[b all rooms].
 				trait-grants(:trait-grants="config.trait_grants", :config="config")
-		bunt-tab(header="Per Room", v-scrollbar.y="")
-			.permission-config
+		bunt-tab(header="Per Room")
+			scrollbars(y, key="per-room").permission-config
 				.info
 					h3 Roles assigned to traits #[i per room]
 					p Users receive the following roles if they have the required traits in their token/ticket. #[b Per room roles] only apply for the corresponding room and they are applied #[b in addition to global roles].
@@ -21,8 +21,8 @@
 				.room-traits(v-for="room of filteredRooms")
 					h4 {{ room.name }}
 					trait-grants(:trait-grants="room.trait_grants", :config="config", @click.stop="", @changed="roomChanged(room)")
-		bunt-tab(header="Roles", v-scrollbar.y="")
-			.permission-config
+		bunt-tab(header="Roles")
+			scrollbars(y, key="roles").permission-config
 				.info-wrapper
 					.info
 						h3 Roles
@@ -34,7 +34,7 @@
 						h4 {{ key }}
 						bunt-icon-button(@click.stop="deleteRole(key)") delete-outline
 					.role-config-permissions(v-if="expandedRoles.includes(key)", @click.stop="")
-						bunt-checkbox(v-for="p of config.available_permissions", :label="p", :value="val.includes(p)", name="p", @input="togglePermission(key, p, $event)")
+						bunt-checkbox(v-for="p of config.available_permissions", :label="p", :modelValue="val.includes(p)", name="p", @update:modelValue="togglePermission(key, p, $event)")
 				.role-add
 					.role-head
 						bunt-input(label="role name", v-model="newRoleName", name="newRoleName")
@@ -102,11 +102,11 @@ export default {
 			}
 		},
 		deleteRole (role) {
-			this.$delete(this.config.roles, role)
+			delete this.config.roles[role]
 		},
 		addRole () {
 			if (this.newRoleName) {
-				this.$set(this.config.roles, this.newRoleName, [])
+				this.config.roles[this.newRoleName] = []
 				this.expandedRoles.push(this.newRoleName)
 				this.newRoleName = ''
 			}
@@ -115,7 +115,7 @@ export default {
 			if (toggle) {
 				this.config.roles[role].push(perm)
 			} else {
-				this.$set(this.config.roles, role, this.config.roles[role].filter((i) => i !== perm))
+				this.config.roles[role] = this.config.roles[role].filter((i) => i !== perm)
 			}
 		},
 

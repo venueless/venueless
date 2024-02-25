@@ -72,7 +72,13 @@ export default {
 	// 	include: ['buntpapier > fuzzysearch']
 	// },
 	optimizeDeps: {
-		exclude: ['@pretalx/schedule']
+		exclude: ['pdfjs-dist', '@pretalx/schedule'],
+		esbuildOptions: {
+			target: 'esnext'
+		}
+	},
+	build: {
+		target: 'esnext'
 	},
 	define: {
 		ENV_DEVELOPMENT: process.env.NODE_ENV === 'development',

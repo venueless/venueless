@@ -5,6 +5,7 @@ prompt.c-create-chat-prompt(@close="$emit('close')")
 		p {{ $t('CreateChatPrompt:intro:text') }}
 		form(@submit.prevent="create")
 			bunt-select(name="type", :label="$t('CreateChatPrompt:type:label')", v-model="type", :options="types")
+				//- TODO
 				template(slot-scope="{ option }")
 					.mdi(:class="`mdi-${option.icon}`")
 					.label {{ option.label }}

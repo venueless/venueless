@@ -1,7 +1,7 @@
 import Vuex from 'vuex'
 import i18n from 'i18n'
 import jwtDecode from 'jwt-decode'
-import api from 'lib/api'
+import api, { initApi } from 'lib/api'
 import { doesTraitsMatchGrants } from 'lib/traitGrants'
 import announcement from './announcement'
 import chat from './chat'
@@ -89,7 +89,7 @@ export default new Vuex.Store({
 			state.inviteToken = inviteToken
 		},
 		connect ({state, dispatch, commit}) {
-			api.connect({token: state.token, clientId: state.clientId, inviteToken: state.inviteToken})
+			initApi({token: state.token, clientId: state.clientId, inviteToken: state.inviteToken, store: this})
 			api.on('joined', (serverState) => {
 				state.connected = true
 				state.socketCloseCode = null

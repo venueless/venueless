@@ -11,11 +11,11 @@
 			.ui-form-body
 				bunt-select(name="parent_room", v-model="poster.parent_room_id", :label="$t('poster-manager/poster:input-parent-room:label')", :options="rooms", option-label="name")
 				template(v-if="room")
-					bunt-input(name="title", v-model="poster.title", :label="$t('poster-manager/poster:input-title:label')", :validation="$v.poster.title")
+					bunt-input(name="title", v-model="poster.title", :label="$t('poster-manager/poster:input-title:label')", :validation="v$.poster.title")
 					rich-text-editor(v-model="poster.abstract", :label="$t('poster-manager/poster:input-abstract:label')")
 					bunt-select(name="category", v-model="poster.category", :options="posterModule.config.categories", :label="$t('poster-manager/poster:input-category:label')")
 					bunt-input(name="tags", v-model="tags", :label="$t('poster-manager/poster:input-tags:label')", hint="comma separated tag keys")
-					upload-url-input(name="poster-pdf", v-model="poster.poster_url", :label="$t('poster-manager/poster:input-poster-pdf:label')", @input="generatePosterPreview")
+					upload-url-input(name="poster-pdf", v-model="poster.poster_url", :label="$t('poster-manager/poster:input-poster-pdf:label')", @update:modelValue="generatePosterPreview")
 					img(:src="poster.poster_preview")
 					h2 {{ $t('poster-manager/poster:authors:headline') }}
 					.authors
@@ -27,14 +27,14 @@
 						.author(v-for="(author, index) of poster.authors.authors")
 							bunt-input.name(name="name", v-model="author.name", :label="$t('poster-manager/poster:authors:input-name:label')")
 							.orgs
-								bunt-checkbox.org(v-for="(org, index) of poster.authors.organizations", name="org", :value="author.orgs.includes(index)", @input="toggleAuthorOrg(author, index)")
+								bunt-checkbox.org(v-for="(org, index) of poster.authors.organizations", name="org", :modelValue="author.orgs.includes(index)", @update:modelValue="toggleAuthorOrg(author, index)")
 							bunt-icon-button(@click="poster.authors.authors.splice(index, 1)") delete-outline
 					bunt-button(@click="addAuthor") {{ $t('poster-manager/poster:btn-add-author') }}
 					h3 {{ $t('poster-manager/poster:organizations:headline') }}
 					.organizations
 						.organization(v-for="(organization, index) of poster.authors.organizations")
 							.index {{ index + 1 }}.
-							bunt-input(name="organization", :value="organization", @input="$set(poster.authors.organizations, index, $event)")
+							bunt-input(name="organization", :modelValue="organization", @update:modelValue="$set(poster.authors.organizations, index, $event)")
 							bunt-icon-button(@click="poster.authors.organizations.splice(index, 1)") delete-outline
 					bunt-button(@click="poster.authors.organizations.push('')") {{ $t('poster-manager/poster:btn-add-organization') }}
 					h2 {{ $t('poster-manager/poster:presenters:headline') }}
@@ -86,9 +86,10 @@
 // TODO
 // - better tag input
 
-import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.js'
+import * as pdfjs from 'pdfjs-dist/webpack.mjs'
 import Quill from 'quill'
 import { mapGetters } from 'vuex'
+import { useVuelidate } from '@vuelidate/core'
 import { required } from 'lib/validators'
 import api from 'lib/api'
 import router from 'router'
@@ -99,14 +100,11 @@ import UploadUrlInput from 'components/UploadUrlInput'
 import RichTextEditor from 'components/RichTextEditor'
 import ExhibitorPreview from 'views/exhibitors/item'
 
-if (typeof window !== 'undefined' && 'Worker' in window) {
-	pdfjs.GlobalWorkerOptions.workerPort = new Worker(new Url('pdfjs-dist/legacy/build/pdf.worker.js', import.meta.url))
-}
-
 const Delta = Quill.import('delta')
 
 export default {
 	components: { Avatar, ExhibitorPreview, Prompt, UploadUrlInput, UserSelect, RichTextEditor },
+	setup: () => ({ v$: useVuelidate()}),
 	props: {
 		create: Boolean,
 		posterId: String
@@ -177,6 +175,11 @@ export default {
 	},
 	methods: {
 		async generatePosterPreview () {
+			if (!this.poster.poster_url) {
+				this.poster.poster_preview = null
+				return
+			}
+			console.log('HEY', pdfjs.getDocument(this.poster.poster_url))
 			const pdf = await pdfjs.getDocument(this.poster.poster_url).promise
 			const page = await pdf.getPage(1)
 			const unscaledViewport = page.getViewport({scale: 1})
@@ -219,8 +222,8 @@ export default {
 			this.poster.presenters.splice(index, 1)
 		},
 		async save () {
-			this.$v.$touch()
-			if (this.$v.$invalid) return
+			this.v$.$touch()
+			if (this.v$.$invalid) return
 			this.saving = true
 			this.poster.tags = this.tags === '' ? [] : this.tags.split(',').map(tag => tag.trim())
 			let poster = Object.assign({}, this.poster)
