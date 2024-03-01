@@ -42,7 +42,7 @@
     "random-js": "^2.1.0",
     "register-service-worker": "^1.7.1",
     "roboto-fontface": "^0.10.0",
-    "sanitize-html": "2.4",
+    "sanitize-html": "2.12",
     "twemoji-emojis": "^14.1.0",
     "uuid": "^8.3.0",
     "vue": "^2.6.12",
