@@ -193,6 +193,7 @@ def get_world_config_for_user(world, user):
                 "iframe_blockers", {"default": {"enabled": False, "policy_url": None}}
             ),
             "onsite_traits": world.config.get("onsite_traits", []),
+            "vapid_public_key": world.vapid_public_key,
         },
         "permissions": list(permissions[world]),
         "rooms": [],

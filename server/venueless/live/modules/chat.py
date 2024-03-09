@@ -8,6 +8,7 @@ import emoji
 from channels.db import database_sync_to_async
 from sentry_sdk import configure_scope
 
+from venueless.core.models import User
 from venueless.core.permissions import Permission
 from venueless.core.services.chat import (
     ChatService,
@@ -25,6 +26,7 @@ from venueless.live.decorators import (
 )
 from venueless.live.exceptions import ConsumerException
 from venueless.live.modules.base import BaseModule
+from venueless.live.tasks import send_web_push
 from venueless.storage.tasks import retrieve_preview_information
 
 logger = logging.getLogger(__name__)
@@ -373,6 +375,36 @@ class ChatModule(BaseModule):
                     return
         await self.consumer.send_json(["chat.notification", body.get("data")])
 
+    async def _send_notification(self, user: User, event: dict, sender: User):
+        await self.consumer.channel_layer.group_send(
+            GROUP_USER.format(id=user),
+            {
+                "type": "chat.notification",
+                "data": {
+                    "event": event,
+                    "sender": self.consumer.user.serialize_public(
+                        trait_badges_map=self.consumer.world.config.get(
+                            "trait_badges_map"
+                        )
+                    ),
+                },
+            },
+        )
+        send_web_push.apply_async(
+            args=(
+                self.consumer.world.pk,
+                user.pk,
+                {
+                    "event": event,
+                    "sender": self.consumer.user.serialize_public(
+                        trait_badges_map=self.consumer.world.config.get(
+                            "trait_badges_map"
+                        )
+                    ),
+                },
+            )
+        )
+
     @command("send")
     @channel_action(
         room_permission_required=Permission.ROOM_CHAT_SEND,
@@ -485,20 +517,7 @@ class ChatModule(BaseModule):
                 users = [u for u in users if u != str(self.consumer.user.id)]
                 await self.service.store_notification(event["event_id"], users)
                 for user in users:
-                    await self.consumer.channel_layer.group_send(
-                        GROUP_USER.format(id=user),
-                        {
-                            "type": "chat.notification",
-                            "data": {
-                                "event": event,
-                                "sender": self.consumer.user.serialize_public(
-                                    trait_badges_map=self.consumer.world.config.get(
-                                        "trait_badges_map"
-                                    )
-                                ),
-                            },
-                        },
-                    )
+                    await self._send_notification(user, event, self.consumer.user)
 
             mentioned_users = set()
             if not body.get("replaces"):  # no notifications for edits:
