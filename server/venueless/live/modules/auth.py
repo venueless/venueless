@@ -8,7 +8,9 @@ import jwt
 from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.core.signing import dumps
+from django.core.validators import URLValidator
 from django.urls import reverse
 from sentry_sdk import configure_scope
 
@@ -266,6 +268,32 @@ class AuthModule(BaseModule):
         )
         await self.consumer.user.refresh_from_db_if_outdated(allowed_age=0)
         await ChatService(self.consumer.world).enforce_forced_joins(self.consumer.user)
+
+    @command("web_push.subscribe")
+    @require_world_permission(Permission.WORLD_VIEW)
+    async def web_push_subscribe(self, body):
+        sub = body.get("subscription", {})
+        try:
+            URLValidator()(sub.get("endpoint", "invalid"))
+            int(sub.get("expirationTime") or 0)
+            if any(
+                k
+                not in (
+                    "endpoint",
+                    "invalid",
+                    "expirationTime",
+                    "subscriptionId",
+                    "keys",
+                )
+                for k in sub.keys()
+            ):
+                raise ValidationError(code="invalid_input")
+        except (TypeError, ValidationError):
+            await self.consumer.send_error(code="invalid_input")
+        await database_sync_to_async(self.consumer.user.web_push_clients.create)(
+            subscription=sub
+        )
+        await self.consumer.send_success()
 
     @command("admin.update")
     @require_world_permission(Permission.WORLD_USERS_MANAGE)
