@@ -251,6 +251,30 @@ async def test_wrong_user_command():
 
 @pytest.mark.asyncio
 @pytest.mark.django_db
+async def test_register_web_push():
+    async with world_communicator() as c:
+        await c.send_json_to(["authenticate", {"client_id": "4"}])
+        response = await c.receive_json_from()
+        assert response[0] == "authenticated"
+
+        await c.send_json_to(
+            [
+                "user.web_push.subscribe",
+                123,
+                {
+                    "subscription": {
+                        "endpoint": "https://updates.push.services.mozilla.com/push/v1/gAA",
+                        "keys": {"auth": "k8J...", "p256dh": "BOr..."},
+                    }
+                },
+            ]
+        )
+        response = await c.receive_json_from()
+        assert response == ["success", 123, {}], response
+
+
+@pytest.mark.asyncio
+@pytest.mark.django_db
 async def test_auth_with_jwt_token_update_traits(world):
     config = world.config["JWT_secrets"][0]
     iat = datetime.datetime.utcnow()
