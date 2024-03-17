@@ -19,7 +19,7 @@
     "@splidejs/splide": "^4.1.2",
     "@vuelidate/core": "^2.0.3",
     "@vuelidate/validators": "^2.0.4",
-    "buntpapier": "^2.0.0-alpha.32",
+    "buntpapier": "^2.0.0-alpha.33",
     "color": "^4.0.0",
     "color-blend": "^3.0.0",
     "core-js": "^3.6.5",
