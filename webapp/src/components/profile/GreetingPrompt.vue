@@ -1,7 +1,7 @@
 <template lang="pug">
 prompt.c-profile-greeting-prompt(:allowCancel="false")
 	.content
-		connect-gravatar(v-if="showConnectGravatar", @change="setGravatar", @close="showConnectGravatar = false")
+		connect-gravatar(v-if="showConnectGravatar", @set-gravatar="setGravatar", @close="showConnectGravatar = false")
 		.step-connect-social(v-else-if="activeStep === 'connectSocial'")
 			h1 {{ $t('profile/GreetingPrompt:step-social:heading') }}
 			p {{ $t('profile/GreetingPrompt:step-social:text') }}
