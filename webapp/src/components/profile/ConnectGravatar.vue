@@ -21,6 +21,7 @@ export default {
 			gravatarError: null
 		}
 	},
+	emit: ['set-gravatar'],
 	methods: {
 		async connectGravatar () {
 			this.searchingGravatar = true
@@ -47,7 +48,7 @@ export default {
 				request.addEventListener('load', (event) => {
 					const response = JSON.parse(request.responseText)
 					output.avatar = {url: response.url}
-					this.$emit('change', output)
+					this.$emit('set-gravatar', output)
 				})
 			} catch (e) {
 				this.gravatarError = e
