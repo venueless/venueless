@@ -20,6 +20,7 @@ export default {
 		module: String,
 		collectTrace: Function,
 	},
+	emits: ['close'],
 	data () {
 		return {
 			loading: false,

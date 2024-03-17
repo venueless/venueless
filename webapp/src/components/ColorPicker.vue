@@ -11,7 +11,8 @@
 export default {
 	props: {
 		modelValue: String
-	}
+	},
+	emits: ['update:modelValue']
 }
 </script>
 <style lang="stylus">

@@ -21,6 +21,7 @@ export default {
 		traitGrants: Object,
 		config: Object
 	},
+	emits: ['changed'],
 	data () {
 		return {
 			newRole: null

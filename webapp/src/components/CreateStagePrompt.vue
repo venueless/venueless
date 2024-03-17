@@ -17,6 +17,7 @@ import { required, url } from 'lib/validators'
 
 export default {
 	components: { Prompt },
+	emits: ['close'],
 	setup: () => ({ v$: useVuelidate()}),
 	data () {
 		return {

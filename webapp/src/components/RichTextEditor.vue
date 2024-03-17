@@ -48,6 +48,7 @@ export default {
 		modelValue: [Delta, Object],
 		label: String
 	},
+	emits: ['update:modelValue'],
 	data () {
 		return {
 			quill: null,

@@ -50,6 +50,7 @@ import ConnectGravatar from './ConnectGravatar'
 
 export default {
 	components: { Prompt, ChangeAvatar, ChangeAdditionalFields, ConnectGravatar },
+	emits: ['close'],
 	setup: () => ({ v$: useVuelidate()}),
 	data () {
 		return {

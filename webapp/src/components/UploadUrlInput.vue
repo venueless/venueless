@@ -22,6 +22,7 @@ export default {
 			default: 'image/png, .png, image/jpg, .jpg, .jpeg, image/gif, .gif, application/pdf, .pdf, image/svg+xml, .svg, video/mp4, video/mpeg, .mp4, video/webm, audio/webm, .webm, audio/mp3, audio/mpeg, .mp3'
 		}
 	},
+	emits: ['update:modelValue'],
 	data () {
 		return {
 			uploading: false,

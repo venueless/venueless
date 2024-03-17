@@ -166,6 +166,7 @@ export default {
 			default: 'normal'
 		},
 	},
+	emits: ['hangup'],
 	data () {
 		return {
 			// State machines

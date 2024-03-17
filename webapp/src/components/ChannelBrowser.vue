@@ -25,6 +25,7 @@ import fuzzysearch from 'lib/fuzzysearch'
 
 export default {
 	components: { Prompt },
+	emits: ['close', 'createChannel'],
 	data () {
 		return {
 			search: ''

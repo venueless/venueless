@@ -32,6 +32,7 @@ export default {
 	props: {
 		poll: Object
 	},
+	emits: ['edit'],
 	inject: {
 		isManaging: {
 			default: false
