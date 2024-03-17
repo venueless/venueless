@@ -21,7 +21,7 @@ export default {
 			gravatarError: null
 		}
 	},
-	emit: ['set-gravatar'],
+	emit: ['close', 'set-gravatar'],
 	methods: {
 		async connectGravatar () {
 			this.searchingGravatar = true

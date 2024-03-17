@@ -58,6 +58,7 @@ export default {
 			default: true
 		}
 	},
+	emits: ['change'],
 	data () {
 		return {
 			userCardUser: null,

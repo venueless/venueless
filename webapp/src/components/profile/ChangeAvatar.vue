@@ -27,6 +27,7 @@ export default {
 		modelValue: Object,
 		profile: Object
 	},
+	emits: ['update:modelValue', 'blockSave'],
 	data () {
 		return {
 			identicon: null,

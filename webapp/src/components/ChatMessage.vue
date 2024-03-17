@@ -101,6 +101,7 @@ export default {
 			default: false
 		}
 	},
+	emits: ['showUserCard'],
 	data () {
 		return {
 			selected: false,
