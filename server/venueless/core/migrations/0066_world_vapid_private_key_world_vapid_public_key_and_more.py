@@ -10,8 +10,8 @@ def gen_keys(apps, schema_editor):
     for world in World.objects.all():
         vapid = Vapid02()
         vapid.generate_keys()
-        world.vapid_private_key = vapid.private_pem()
-        world.vapid_public_key = vapid.public_pem()
+        world.vapid_private_key = vapid.private_pem().decode()
+        world.vapid_public_key = vapid.public_pem().decode()
         world.save()
 
 

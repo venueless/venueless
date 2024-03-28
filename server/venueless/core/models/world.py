@@ -165,8 +165,8 @@ class World(VersionedModel):
         if not self.vapid_private_key:
             vapid = Vapid02()
             vapid.generate_keys()
-            self.vapid_private_key = vapid.private_pem()
-            self.vapid_public_key = vapid.public_pem()
+            self.vapid_private_key = vapid.private_pem().decode()
+            self.vapid_public_key = vapid.public_pem().decode()
         super().save(*args, **kwargs)
 
     def decode_token(self, token, allow_raise=False):
