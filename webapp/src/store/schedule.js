@@ -1,4 +1,3 @@
-import Vue from 'vue'
 import moment from 'lib/timetravelMoment'
 import api from 'lib/api'
 
@@ -124,9 +123,9 @@ export default {
 			let favs = rootState.user.client_state.schedule?.favs
 			if (!favs) {
 				favs = []
-				Vue.set(rootState.user.client_state, 'schedule', {
+				rootState.user.client_state.schedule = {
 					favs
-				})
+				}
 			}
 			if (!favs.includes(id)) {
 				favs.push(id)

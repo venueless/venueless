@@ -4,6 +4,8 @@
 	iframe-blocker(:src="url", allow="camera *; autoplay *; microphone *; fullscreen *; display-capture *", allowfullscreen, allowusermedia, @load="loaded")
 </template>
 <script>
+// TODO
+// - what does loaded do?
 import {mapState} from 'vuex'
 import IframeBlocker from './IframeBlocker'
 

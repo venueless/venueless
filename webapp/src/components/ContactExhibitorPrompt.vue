@@ -22,6 +22,7 @@ export default {
 	props: {
 		exhibitor: Object,
 	},
+	emits: ['close'],
 	data () {
 		return {
 			timer: 31,

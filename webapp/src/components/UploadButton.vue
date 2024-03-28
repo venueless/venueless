@@ -17,6 +17,7 @@ export default {
 	mixins: [
 		RippleInk
 	],
+	emits: ['change'],
 	props: {
 		accept: String,
 		multiple: Boolean,

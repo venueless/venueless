@@ -16,6 +16,7 @@ export default {
 			required: true
 		}
 	},
+	emits: ['edit', 'change'],
 	inject: {
 		isManaging: {
 			default: false

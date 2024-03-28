@@ -12,6 +12,7 @@ import UserSelect from 'components/UserSelect'
 
 export default {
 	components: { Prompt, UserSelect },
+	emits: ['close'],
 	data () {
 		return {
 			selectedUser: null

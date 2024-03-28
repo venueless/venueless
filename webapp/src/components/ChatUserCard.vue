@@ -13,8 +13,8 @@
 			.actions(v-if="user.id !== ownUser.id && user.id && !user.deleted")
 				bunt-button.btn-dm(v-if="hasPermission('world:chat.direct')", @click="openDM") {{ $t('UserAction:action.dm:label') }}
 				bunt-button.btn-call(v-if="hasPermission('world:chat.direct')", @click="startCall") {{ $t('UserAction:action.call:label') }}
-				menu-dropdown(v-model="showMoreActions", :blockBackground="false", @mousedown.native.stop="")
-					template(v-slot:button="{toggle}")
+				menu-dropdown(v-model="showMoreActions", :blockBackground="false", @mousedown.stop="")
+					template(#button="{toggle}")
 						bunt-icon-button(@click="toggle") dots-vertical
 					template(v-slot:menu)
 						.unblock(v-if="isBlocked", @click="userAction = 'unblock'") {{ $t('UserAction:action.unblock:label') }}
@@ -43,6 +43,7 @@ export default {
 	props: {
 		user: Object,
 	},
+	emits: ['close'],
 	data () {
 		return {
 			blockedUsers: null,

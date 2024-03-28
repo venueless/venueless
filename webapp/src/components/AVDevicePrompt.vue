@@ -16,7 +16,7 @@ import Prompt from 'components/Prompt'
 
 export default {
 	components: {Prompt},
-	props: {},
+	emits: ['close'],
 	data () {
 		return {
 			videoInput: localStorage.videoInput || '',

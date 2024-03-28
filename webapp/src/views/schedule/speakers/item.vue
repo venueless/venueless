@@ -19,6 +19,8 @@
 			)
 </template>
 <script>
+// BUG
+// - session link renders as "nulltalk"
 import { mapState, mapGetters } from 'vuex'
 import Identicon from 'components/Identicon'
 import MarkdownContent from 'components/MarkdownContent'

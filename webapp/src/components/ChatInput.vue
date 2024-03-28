@@ -50,6 +50,7 @@ export default {
 	props: {
 		message: Object // initialize with existing message to edit
 	},
+	emits: ['send'],
 	data () {
 		return {
 			files: [],
