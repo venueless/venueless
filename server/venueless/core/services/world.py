@@ -6,11 +6,13 @@ from contextlib import suppress
 import jwt
 from channels.db import database_sync_to_async
 from channels.layers import get_channel_layer
+from cryptography.hazmat.primitives import serialization
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Count, Max, OuterRef, Subquery
 from pytz import common_timezones
+from py_vapid import Vapid02, b64urlencode
 from rest_framework import serializers
 
 from venueless.core.models import AuditLog, Channel, Room, World
@@ -182,6 +184,13 @@ def get_room_config(room, permissions):
 
 def get_world_config_for_user(world, user):
     permissions = world.get_all_permissions(user)
+
+    vapid = Vapid02.from_pem(world.vapid_private_key.encode())
+    public_key = b64urlencode(vapid.public_key.public_bytes(
+        serialization.Encoding.X962,
+        serialization.PublicFormat.UncompressedPoint
+    ))
+
     result = {
         "world": {
             "id": str(world.id),
@@ -193,7 +202,7 @@ def get_world_config_for_user(world, user):
                 "iframe_blockers", {"default": {"enabled": False, "policy_url": None}}
             ),
             "onsite_traits": world.config.get("onsite_traits", []),
-            "vapid_public_key": world.vapid_public_key,
+            "vapid_public_key": public_key,
         },
         "permissions": list(permissions[world]),
         "rooms": [],
