@@ -46,6 +46,7 @@ class Migration(migrations.Migration):
                         verbose_name="ID",
                     ),
                 ),
+                ("endpoint", models.URLField(unique=True)),
                 ("subscription", models.JSONField()),
                 (
                     "user",

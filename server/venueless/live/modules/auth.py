@@ -15,7 +15,7 @@ from django.urls import reverse
 from sentry_sdk import configure_scope
 
 from venueless.core.models import User
-from venueless.core.models.auth import ShortToken
+from venueless.core.models.auth import ShortToken, WebPushClient
 from venueless.core.permissions import Permission
 from venueless.core.services.announcement import get_announcements
 from venueless.core.services.chat import ChatService
@@ -290,8 +290,9 @@ class AuthModule(BaseModule):
                 raise ValidationError(code="invalid_input")
         except (TypeError, ValidationError):
             await self.consumer.send_error(code="invalid_input")
-        await database_sync_to_async(self.consumer.user.web_push_clients.create)(
-            subscription=sub
+        await database_sync_to_async(WebPushClient.objects.update_or_create)(
+            endpoint=sub["endpoint"],
+            defaults=dict(user=self.consumer.user, subscription=sub),
         )
         await self.consumer.send_success()
 
