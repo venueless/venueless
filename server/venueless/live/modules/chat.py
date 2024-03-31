@@ -375,7 +375,7 @@ class ChatModule(BaseModule):
                     return
         await self.consumer.send_json(["chat.notification", body.get("data")])
 
-    async def _send_notification(self, user: User, event: dict, sender: User):
+    async def _send_notification(self, user: str, event: dict, sender: User):
         await self.consumer.channel_layer.group_send(
             GROUP_USER.format(id=user),
             {
@@ -393,7 +393,7 @@ class ChatModule(BaseModule):
         send_web_push.apply_async(
             args=(
                 self.consumer.world.pk,
-                user.pk,
+                user,
                 {
                     "event": event,
                     "sender": self.consumer.user.serialize_public(

@@ -12,8 +12,8 @@ logger = logging.getLogger(__name__)
 
 
 @app.task(base=WorldTask)
-def send_web_push(world: World, user_id: int, data: dict):
-    user = world.users.get(user_id)
+def send_web_push(world: World, user_id: str, data: dict):
+    user = world.user_set.get(pk=user_id)
     for client in user.web_push_clients.all():
         try:
             webpush(
