@@ -2,6 +2,7 @@ import path from 'path'
 import vue from '@vitejs/plugin-vue'
 import ReactivityTransform from '@vue-macros/reactivity-transform/vite'
 import { viteStaticCopy } from 'vite-plugin-static-copy'
+import { VitePWA } from 'vite-plugin-pwa'
 // import { visualizer } from 'rollup-plugin-visualizer'
 
 import BuntpapierStylus from 'buntpapier/stylus.js'
@@ -34,6 +35,20 @@ export default {
 					dest: 'emoji'
 				}
 			]
+		}),
+		VitePWA({
+			srcDir: "src",
+			filename: "service-worker.js",
+			strategies: "injectManifest",
+			injectRegister: false,
+			manifest: false,
+			injectManifest: {
+				injectionPoint: null,
+			},
+			registerType: 'autoUpdate',
+			devOptions: {
+				enabled: true
+			}
 		})
 	],
 	css: {
@@ -73,6 +88,7 @@ export default {
 	// },
 	optimizeDeps: {
 		exclude: ['pdfjs-dist', '@pretalx/schedule'],
+		// include: ['buntpapier'],
 		esbuildOptions: {
 			target: 'esnext'
 		}
