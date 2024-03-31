@@ -90,7 +90,7 @@ export default new Vuex.Store({
 		},
 		connect ({ state, dispatch, commit }) {
 			initApi({ token: state.token, clientId: state.clientId, inviteToken: state.inviteToken, store: this })
-			api.on('joined', (serverState) => {
+			api.on('joined', async (serverState) => {
 				state.connected = true
 				state.socketCloseCode = null
 				state.user = serverState['user.config']
@@ -113,6 +113,16 @@ export default new Vuex.Store({
 				// 	// TODO return after profile update?
 				// }
 				dispatch('schedule/fetch', { root: true })
+				const serviceWorker = await navigator.serviceWorker.ready
+				// if (await serviceWorker.pushManager.getSubscription()) return
+				const subscription = await serviceWorker.pushManager.subscribe({
+					userVisibleOnly: true,
+					applicationServerKey: state.world.vapid_public_key
+				})
+				// api.call('user.web_push.subscribe', {
+				// 	subscription: subscription.toJSON()
+				// })
+				console.log('subscribed', subscription)
 			})
 			api.on('closed', (code) => {
 				state.connected = false

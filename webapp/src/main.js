@@ -106,9 +106,17 @@ if (config.externalAuthUrl && !token) {
 }
 
 // remove all old service workers
-navigator.serviceWorker?.getRegistrations().then((registrations) => {
-	for (const registration of registrations) {
-		console.warn('Removed an old service worker')
-		registration.unregister()
-	}
-})
+// navigator.serviceWorker?.getRegistrations().then((registrations) => {
+// 	for (const registration of registrations) {
+// 		console.warn('Removed an old service worker')
+// 		registration.unregister()
+// 	}
+// })
+
+if ('serviceWorker' in navigator) {
+	const serviceWorker = await navigator.serviceWorker.register(
+		import.meta.env.MODE === 'production' ? '/service-worker.js' : '/dev-sw.js?dev-sw'
+	)
+	console.log(serviceWorker)
+	window.serviceWorker = serviceWorker
+}
