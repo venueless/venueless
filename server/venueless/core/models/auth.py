@@ -233,6 +233,7 @@ class WebPushClient(models.Model):
     user = models.ForeignKey(
         "User", related_name="web_push_clients", on_delete=models.CASCADE
     )
+    endpoint = models.URLField(unique=True)
     subscription = models.JSONField()
 
 
