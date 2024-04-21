@@ -115,13 +115,14 @@ export default new Vuex.Store({
 				dispatch('schedule/fetch', { root: true })
 				const serviceWorker = await navigator.serviceWorker.ready
 				// if (await serviceWorker.pushManager.getSubscription()) return
+				// TODO unsubscribe on error
 				const subscription = await serviceWorker.pushManager.subscribe({
 					userVisibleOnly: true,
 					applicationServerKey: state.world.vapid_public_key
 				})
-				// api.call('user.web_push.subscribe', {
-				// 	subscription: subscription.toJSON()
-				// })
+				api.call('user.web_push.subscribe', {
+					subscription: subscription.toJSON()
+				})
 				console.log('subscribed', subscription)
 			})
 			api.on('closed', (code) => {
