@@ -59,6 +59,7 @@ deploy:
   image:
     name: debian:12
   stage: deploy
+  before_script:
     - apt update -y && apt install -y openssh-client
     - eval $(ssh-agent -s)
     - chmod 400 "$SSH_PRIVATE_KEY"
