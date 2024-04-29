@@ -1,4 +1,6 @@
 py_style:
+  image:
+    name: python:3.11-bookworm
   stage: build
   script:
     - cd server
@@ -11,12 +13,12 @@ py_style:
     - isort -rc -c venueless tests
   interruptible: true
   allow_failure: true  # We check this in Github, and if it's urgent, we don't want to skip deployments because of this
-  tags:
-    - python3
 
 py_test:
   stage: build
   retry: 2
+  image:
+    name: python:3.11-bookworm
   services:
     - redis:latest
     - postgres:15
@@ -30,57 +32,56 @@ py_test:
     - VENUELESS_REDIS_HOST=redis VENUELESS_DB_TYPE=postgresql VENUELESS_DB_NAME=venueless VENUELESS_DB_USER=venueless VENUELESS_DB_PASS=venueless VENUELESS_DB_HOST=postgres py.test tests/ --reruns 3 --reruns-delay 1
   interruptible: true
   allow_failure: true  # We check this in Github, and if it's urgent, we don't want to skip deployments because of this
-  tags:
-    - python3
+  variables:
+    POSTGRES_DB: stayseeated
+    POSTGRES_USER: venueless
+    POSTGRES_PASSWORD: venueless
+    POSTGRES_HOST_AUTH_METHOD: trust
 
-variables:
-  POSTGRES_DB: stayseeated
-  POSTGRES_USER: venueless
-  POSTGRES_PASSWORD: venueless
-  POSTGRES_HOST_AUTH_METHOD: trust
-
-build_container:
+build:
   stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:v1.22.0-debug
+    entrypoint: [""]
   script:
     - echo $CI_COMMIT_SHA > release.txt
-    - docker build --build-arg=COMMIT=$(git rev-parse --short HEAD) -t venueless . 
-    - docker tag venueless docker.rami.io/venueless/venueless:$CI_COMMIT_REF_NAME
-  tags:
-    - docker
-    - venuelessbuild
-
-upload_container:
-  stage: upload
-  script:
-    - docker login -u ciuser -p $DOCKERPW docker.rami.io
-    - docker push docker.rami.io/venueless/venueless:$CI_COMMIT_REF_NAME
+    - mv $KANIKO_CONFIG /kaniko/.docker/config.json
+    - /kaniko/executor
+      --context "."
+      --dockerfile "./Dockerfile"
+      --build-arg=COMMIT=$CI_COMMIT_SHORT_SHA
+      --destination "docker.rami.io/venueless/venueless:$CI_COMMIT_REF_NAME"
   only:
     - prod
     - master
-  tags:
-    - docker
-    - venuelessbuild
 
 deploy:
+  image:
+    name: debian:12
   stage: deploy
+    - apt update -y && apt install -y openssh-client
+    - eval $(ssh-agent -s)
+    - chmod 400 "$SSH_PRIVATE_KEY"
+    - ssh-add "$SSH_PRIVATE_KEY"
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - cp "$SSH_KNOWN_HOSTS" ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
   script:
-    - ssh -o UserKnownHostsFile=/keys/known_hosts -i /keys/id_rsa deployer@venueless-web1.rami.io $CI_COMMIT_REF_NAME pull
-    - ssh -o UserKnownHostsFile=/keys/known_hosts -i /keys/id_rsa deployer@venueless-web2.rami.io $CI_COMMIT_REF_NAME pull
-    - ssh -o UserKnownHostsFile=/keys/known_hosts -i /keys/id_rsa deployer@venueless-web3.rami.io $CI_COMMIT_REF_NAME pull
-    - ssh -o UserKnownHostsFile=/keys/known_hosts -i /keys/id_rsa deployer@venueless-web4.rami.io $CI_COMMIT_REF_NAME pull
-    - ssh -o UserKnownHostsFile=/keys/known_hosts -i /keys/id_rsa deployer@venueless-web5.rami.io $CI_COMMIT_REF_NAME pull
-    - ssh -o UserKnownHostsFile=/keys/known_hosts -i /keys/id_rsa deployer@venueless-web1.rami.io $CI_COMMIT_REF_NAME upgrade
-    - ssh -o UserKnownHostsFile=/keys/known_hosts -i /keys/id_rsa deployer@venueless-web2.rami.io $CI_COMMIT_REF_NAME upgrade
-    - ssh -o UserKnownHostsFile=/keys/known_hosts -i /keys/id_rsa deployer@venueless-web3.rami.io $CI_COMMIT_REF_NAME upgrade
-    - ssh -o UserKnownHostsFile=/keys/known_hosts -i /keys/id_rsa deployer@venueless-web4.rami.io $CI_COMMIT_REF_NAME upgrade
-    - ssh -o UserKnownHostsFile=/keys/known_hosts -i /keys/id_rsa deployer@venueless-web5.rami.io $CI_COMMIT_REF_NAME upgrade
+    - ssh deployer@venueless-web1.rami.io $CI_COMMIT_REF_NAME pull
+    - ssh deployer@venueless-web2.rami.io $CI_COMMIT_REF_NAME pull
+    - ssh deployer@venueless-web3.rami.io $CI_COMMIT_REF_NAME pull
+    - ssh deployer@venueless-web4.rami.io $CI_COMMIT_REF_NAME pull
+    - ssh deployer@venueless-web5.rami.io $CI_COMMIT_REF_NAME pull
+    - ssh deployer@venueless-web1.rami.io $CI_COMMIT_REF_NAME upgrade
+    - ssh deployer@venueless-web2.rami.io $CI_COMMIT_REF_NAME upgrade
+    - ssh deployer@venueless-web3.rami.io $CI_COMMIT_REF_NAME upgrade
+    - ssh deployer@venueless-web4.rami.io $CI_COMMIT_REF_NAME upgrade
+    - ssh deployer@venueless-web5.rami.io $CI_COMMIT_REF_NAME upgrade
   only:
     - prod
     - master
-  tags:
-    - venuelessdeploy
 
 stages:
   - build
-  - upload
   - deploy
