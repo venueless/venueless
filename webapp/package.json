@@ -16,6 +16,7 @@
     "@mdi/font": "^5.5.55",
     "@popperjs/core": "^2.6.0",
     "@pretalx/schedule": "^2.0.0-alpha.2",
+    "@resvg/resvg-wasm": "^2.6.2",
     "@splidejs/splide": "^4.1.2",
     "@vuelidate/core": "^2.0.3",
     "@vuelidate/validators": "^2.0.4",
@@ -57,6 +58,7 @@
     "web-animations-js": "^2.3.2"
   },
   "devDependencies": {
+    "@vite-pwa/assets-generator": "^0.2.4",
     "@vitejs/plugin-vue": "^5.0.4",
     "@vue-macros/reactivity-transform": "^0.4.3",
     "i18next-parser": "^4.7.0",

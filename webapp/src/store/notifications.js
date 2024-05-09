@@ -87,22 +87,27 @@ export default {
 				}
 			}
 			// TODO set tag to handle multiple tabs
-			const desktopNotification = new Notification(title ?? '', {body, icon, tag})
-			if (state.settings.playSounds) {
-				const audio = new Audio('/notify.wav')
-				audio.play()
+			try {
+				const desktopNotification = new Notification(title ?? '', {body, icon, tag})
+				if (state.settings.playSounds) {
+					const audio = new Audio('/notify.wav')
+					audio.play()
+				}
+				desktopNotification.onclose = () => {
+					onClose?.(desktopNotification)
+					const index = state.desktopNotifications.indexOf(desktopNotification)
+					if (index) state.desktopNotifications.splice(index, 1)
+				}
+				desktopNotification.onclick = () => {
+					window.focus()
+					onClick?.(desktopNotification)
+				}
+				state.desktopNotifications.push(desktopNotification)
+				return desktopNotification
+			} catch (e) {
+				// ignore notifications not working on android. Doesn't seem to be a way to detect this without actively trying to show a notification
+				if (e.message !== 'Illegal constructor') throw e
 			}
-			desktopNotification.onclose = () => {
-				onClose?.(desktopNotification)
-				const index = state.desktopNotifications.indexOf(desktopNotification)
-				if (index) state.desktopNotifications.splice(index, 1)
-			}
-			desktopNotification.onclick = () => {
-				window.focus()
-				onClick?.(desktopNotification)
-			}
-			state.desktopNotifications.push(desktopNotification)
-			return desktopNotification
 		},
 		closeDesktopNotifications ({state}, fn) {
 			for (const desktopNotification of state.desktopNotifications) {

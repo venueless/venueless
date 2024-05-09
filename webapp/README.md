@@ -10,6 +10,11 @@ npm install
 npm start
 ```
 
+### Proxy the api server through the dev server
+```
+WITH_PROXY=true npm start
+```
+
 ### Compiles and minifies for production
 ```
 npm run build
