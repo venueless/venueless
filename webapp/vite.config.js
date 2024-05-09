@@ -22,7 +22,15 @@ const stylusOptions = {
 
 export default {
 	server: {
-		port: 8880
+		host: '0.0.0.0',
+		port: 8880,
+		proxy: process.env.WITH_PROXY ? {
+			'/api': 'http://localhost:8375',
+			'/ws': {
+				target: 'ws://localhost:8375',
+				ws: true,
+			},
+		} : null
 	},
 	plugins: [
 		vue(),
@@ -41,13 +49,42 @@ export default {
 			filename: "service-worker.js",
 			strategies: "injectManifest",
 			injectRegister: false,
-			manifest: false,
+			manifest: {
+				name: "Venueless",
+				short_name: "Venueless",
+				description: "Venueless is a virtual conference platform",
+				theme_color: "#673ab7",
+				icons: [
+					{
+						"src": "pwa-64x64.png",
+						"sizes": "64x64",
+						"type": "image/png"
+					},
+					{
+						"src": "pwa-192x192.png",
+						"sizes": "192x192",
+						"type": "image/png"
+					},
+					{
+						"src": "pwa-512x512.png",
+						"sizes": "512x512",
+						"type": "image/png"
+					},
+					{
+						"src": "maskable-icon-512x512.png",
+						"sizes": "512x512",
+						"type": "image/png",
+						"purpose": "maskable"
+					}
+				]
+			},
 			injectManifest: {
 				injectionPoint: null,
 			},
 			registerType: 'autoUpdate',
 			devOptions: {
-				enabled: true
+				enabled: true,
+				type: 'module'
 			}
 		})
 	],
@@ -87,7 +124,7 @@ export default {
 	// 	include: ['buntpapier > fuzzysearch']
 	// },
 	optimizeDeps: {
-		exclude: ['pdfjs-dist', '@pretalx/schedule'],
+		exclude: ['pdfjs-dist', '@pretalx/schedule', '@resvg/resvg-js', '@resvg/resvg-wasm'],
 		// include: ['buntpapier'],
 		esbuildOptions: {
 			target: 'esnext'
@@ -99,6 +136,8 @@ export default {
 	define: {
 		ENV_DEVELOPMENT: process.env.NODE_ENV === 'development',
 		RELEASE: `'${process.env.VENUELESS_COMMIT_SHA}'`,
-		BASE_URL: `'${process.env.BASE_URL || '/'}'`
+		BASE_URL: `'${process.env.BASE_URL || '/'}'`,
+		WITH_PROXY: process.env.WITH_PROXY,
+		global: 'globalThis'
 	}
 }

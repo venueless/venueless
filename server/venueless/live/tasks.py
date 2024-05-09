@@ -53,7 +53,7 @@ def send_web_push(world: World, user_id: str, data: dict):
 			# 			router.push({name: 'room', params: {roomId: rootState.rooms.find(room => room.modules.some(m => m.channel_id === channel.id)).id}})
 			# 	}
 			# }
-            # TODO handle WebPushException: Push failed: 410 Gone
+            # TODO handle WebPushException: Push failed: 410 Gone, 502
             webpush(
                 subscription_info=client.subscription,
                 data=json.dumps({
