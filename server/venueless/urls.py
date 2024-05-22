@@ -36,6 +36,7 @@ urlpatterns = (
         path("api/v1/", include((api_patterns, "api"), namespace="api")),
         path("healthcheck/", views.HealthcheckView.as_view()),
         path("manifest.json", views.ManifestView.as_view()),
+        path("manifest.webmanifest", views.ManifestView.as_view()),
         path("graphs/", include(graphs)),
         path("zoom/", include((zoom, "zoom"), namespace="zoom")),
         path("storage/", include((storage, "storage"), namespace="storage")),
