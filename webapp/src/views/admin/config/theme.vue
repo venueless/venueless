@@ -13,6 +13,7 @@
 				upload-url-input(name="logo_url", v-model="config.theme.logo.url", label="Logo", :validation="v$.config.theme.logo.url")
 				bunt-checkbox(name="logo_fit", v-model="config.theme.logo.fitToWidth", label="Fit logo to width")
 				upload-url-input(name="streamoffline_url", v-model="config.theme.streamOfflineImage", label="Stream offline image", :validation="v$.config.theme.streamOfflineImage")
+				upload-url-input(name="streamoffline_url", v-model="config.theme.webappIcon", label="Web app icon (PNG, square)", :validation="v$.config.theme.webappIcon")
 				bunt-select#select-identicon-style(name="identicon-style", v-model="config.theme.identicons.style", label="Identicon style", :options="identiconStyles")
 			.text-overwrites
 				.header
@@ -88,7 +89,10 @@ export default {
 				},
 				streamOfflineImage: {
 					url: url('must be a valid url')
-				}
+				},
+				webappIcon: {
+					url: url('must be a valid url')
+				},
 			},
 		}
 	},

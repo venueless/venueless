@@ -21,6 +21,7 @@ from django.views.generic import TemplateView
 from venueless.core.models import Feedback, World
 from venueless.core.models.auth import ShortToken
 from venueless.core.models.room import AnonymousInvite
+from venueless.storage.thumbnail import get_thumbnail
 
 
 class SourceCache:
@@ -42,27 +43,47 @@ sh = SourceCache()
 class ManifestView(View):
     def get(self, request, *args, **kwargs):
         world = get_object_or_404(World, domain=request.headers["Host"])
+        theme = world.config.get("theme", {})
         # TODO: Allow to parametrize colors and logos
+
+        icons = [
+            {"src": "pwa-64x64.png", "sizes": "64x64", "type": "image/png"},
+            {"src": "pwa-192x192.png", "sizes": "192x192", "type": "image/png"},
+            {"src": "pwa-512x512.png", "sizes": "512x512", "type": "image/png"},
+            {
+                "src": "maskable-icon-512x512.png",
+                "sizes": "512x512",
+                "type": "image/png",
+                "purpose": "maskable",
+            },
+        ]
+
+        if theme.get("webappIcon"):
+            try:
+                pwa_64 = get_thumbnail(world, theme.get("webappIcon"), 64, 64)
+                pwa_192 = get_thumbnail(world, theme.get("webappIcon"), 129, 129)
+                pwa_512 = get_thumbnail(world, theme.get("webappIcon"), 512, 512)
+                icons = [
+                    {"src": pwa_64, "sizes": "64x64", "type": "image/png"},
+                    {"src": pwa_192, "sizes": "192x192", "type": "image/png"},
+                    {"src": pwa_512, "sizes": "512x512", "type": "image/png"},
+                ]
+            except (ValueError, IOError):
+                pass
+
         source = {
             "name": world.title,
             "short_name": world.title,
-            "theme_color": "#180044",
-            "icons": [
-                {
-                    "src": "/venueless-logo.192.png",
-                    "type": "image/png",
-                    "sizes": "192x192",
-                },
-                {
-                    "src": "/venueless-logo.512.png",
-                    "type": "image/png",
-                    "sizes": "512x512",
-                },
-                {"src": "/venueless-logo.svg", "sizes": "192x192 512x512"},
-            ],
-            "start_url": ".",
+            # Used by browsers for top bar, so let's use sidebar color
+            "theme_color": theme.get("colors", {}).get("sidebar", "#180044"),
+            # Used by browsers only during loading
+            "background_color": theme.get("colors", {}).get("sidebar", "#180044"),
+            "icons": icons,
+            # UX properties
+            "start_url": "/",
             "display": "standalone",
-            "background_color": "#000000",
+            # langF
+            #
         }
         return JsonResponse(source)
 
