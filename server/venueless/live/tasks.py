@@ -1,6 +1,7 @@
 import json
 import logging
 
+from celery.exceptions import MaxRetriesExceededError
 from cryptography.hazmat.primitives import serialization
 from django.conf import settings
 from py_vapid import Vapid02, b64urlencode
@@ -13,8 +14,15 @@ from venueless.core.tasks import WorldTask
 logger = logging.getLogger(__name__)
 
 
-@app.task(base=WorldTask)
-def send_web_push(world: World, user_id: str, data: dict):
+@app.task(
+    base=WorldTask,
+    bind=True,
+    max_retries=8,
+    retry_backoff=True,
+    retry_backoff_max=300,
+    retry_jitter=True,
+)
+def send_web_push(self, world: World, user_id: str, data: dict):
     user = world.user_set.get(pk=user_id)
     for client in user.web_push_clients.all():
         try:
@@ -28,9 +36,6 @@ def send_web_push(world: World, user_id: str, data: dict):
             )
             channel = data["event"]["channel"]
             room = Channel.objects.get(id=channel).room
-            is_direct_message_channel = not room
-            # channel_name
-            # link
             if room:
                 channel_name = room.name
                 link = f"/rooms/{room.id}"
@@ -46,22 +51,9 @@ def send_web_push(world: World, user_id: str, data: dict):
                 channel_name = ", ".join(display_names)
                 link = f"/channels/{channel}"
 
-            # channel.members.filter(user => user.id !== rootState.user.id).map(user => user.profile.display_name).join(', ')
-            # print(f"Sending web push notification to client {client.pk} of user {user.pk} for channel {channelName}")
-            # {
-            # 	title: getters.channelName(channel),
-            # 	body: await contentToPlainText(body),
-            # 	tag: getters.channelName(channel),
-            # 	user: data.sender,
-            # 	// TODO onClose?
-            # 	onClick: () => {
-            # 		if (getters.isDirectMessageChannel(channel))
-            # 			router.push({name: 'channel', params: {channelId: channel.id}})
-            # 		else
-            # 			router.push({name: 'room', params: {roomId: rootState.rooms.find(room => room.modules.some(m => m.channel_id === channel.id)).id}})
-            # 	}
-            # }
-            # TODO handle WebPushException: Push failed: 410 Gone, 502
+            logger.debug(
+                f"Sending web push notification to client {client.pk} of user {user.pk} for channel {channel_name}"
+            )
             webpush(
                 subscription_info=client.subscription,
                 data=json.dumps(
@@ -81,3 +73,22 @@ def send_web_push(world: World, user_id: str, data: dict):
             logging.warning(
                 f"Could not send web push notification to client {client.pk} of user {user.pk}. Exception: {ex}"
             )
+            if ex.response:
+                if ex.response.status_code == 410:
+                    # push subscription expired or revoked, don't message again
+                    client.delete()
+                elif ex.response.status_code in (500, 502, 503, 504):
+                    # server-side issue, try again later
+                    try:
+                        self.retry()
+                    except MaxRetriesExceededError:
+                        pass
+                elif ex.response.status_code in (400, 413):
+                    raise  # let's make sure we see this in Sentry as it might be a bug on our end
+                elif ex.response.status_code == 429:
+                    # rate limited, try again later (even though that might cause just another storm of 429, let's
+                    # at least try)
+                    try:
+                        self.retry()
+                    except MaxRetriesExceededError:
+                        pass
