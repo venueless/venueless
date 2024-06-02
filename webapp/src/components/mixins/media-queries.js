@@ -35,8 +35,8 @@ const Plugin = {
 		}
 
 		const mq = reactive({
-			above: new Proxy({}, proxyHandler('min')),
-			below: new Proxy({}, proxyHandler('max'))
+			above: new Proxy(reactive({}), proxyHandler('min')),
+			below: new Proxy(reactive({}), proxyHandler('max'))
 		})
 		const updateMatches = function (object, direction) {
 			for (const key of Object.keys(object)) {
