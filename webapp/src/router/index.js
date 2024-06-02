@@ -117,6 +117,13 @@ const routes = [{
 		name: 'exhibitors',
 		component: () => import(/* webpackChunkName: "exhibitors" */ 'views/exhibitor-manager')
 	}, {
+		path: '/manage-exhibitors/create',
+		name: 'exhibitors:create-exhibitor',
+		component: () => import(/* webpackChunkName: "posters" */ 'views/exhibitor-manager/exhibitor'),
+		props: {
+			create: true
+		}
+	}, {
 		path: '/manage-exhibitors/:exhibitorId',
 		name: 'exhibitors:exhibitor',
 		component: () => import(/* webpackChunkName: "exhibitors" */ 'views/exhibitor-manager/exhibitor'),

@@ -148,6 +148,7 @@ export default {
 	components: { Avatar, ExhibitorPreview, Prompt, UploadUrlInput, UserSelect, RichTextEditor },
 	setup: () => ({ v$: useVuelidate()}),
 	props: {
+		create: Boolean,
 		exhibitorId: String
 	},
 	data () {
@@ -268,7 +269,7 @@ export default {
 	},
 	async created () {
 		try {
-			if (this.exhibitorId !== '') {
+			if (!this.create) {
 				this.exhibitor = (await api.call('exhibition.get', {exhibitor: this.exhibitorId})).exhibitor
 				this.exhibitor['downloadLinks'] = this.exhibitor.links.filter(l => l.category === 'download').sort((a, b) => a.sorting_priority - b.sorting_priority)
 				this.exhibitor['profileLinks'] = this.exhibitor.links.filter(l => l.category === 'profile').sort((a, b) => a.sorting_priority - b.sorting_priority)
@@ -401,7 +402,7 @@ export default {
 				staff: this.exhibitor.staff,
 				contact_enabled: this.exhibitor.contact_enabled,
 			})).exhibitor
-			if (this.exhibitorId === '') await router.push({name: 'exhibitors:exhibitor', params: {exhibitorId: exhibitor.id}})
+			if (this.create) await router.push({name: 'exhibitors:exhibitor', params: {exhibitorId: exhibitor.id}})
 			this.saving = false
 			// TODO error handling
 		},
