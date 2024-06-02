@@ -12,7 +12,7 @@
 			bunt-input(name="label", v-model="a.label", label="Label")
 			bunt-input(name="hls_url", v-model="a.hls_url", label="HLS URL")
 			bunt-icon-button(@click="deleteAlternativeStream(i)") delete-outline
-		bunt-button(@click="$set(modules['livestream.native'].config, 'alternatives', modules['livestream.native'].config.alternatives || []); modules['livestream.native'].config.alternatives.push({label: '', hls_url: ''})") Add alternative stream
+		bunt-button(@click="modules['livestream.native'].config.alternatives = modules['livestream.native'].config.alternatives || []; modules['livestream.native'].config.alternatives.push({label: '', hls_url: ''})") Add alternative stream
 	bunt-input(v-else-if="modules['livestream.youtube']", name="ytid", v-model="modules['livestream.youtube'].config.ytid", label="YouTube Video ID", :validation="v$.modules['livestream.youtube'].config.ytid")
 	bunt-input(v-else-if="modules['livestream.iframe']", name="iframe-player", v-model="modules['livestream.iframe'].config.url", label="Iframe player url", hint="iframe player should be autoplaying and support resizing to small sizes for background playing")
 	sidebar-addons(v-bind="$props")

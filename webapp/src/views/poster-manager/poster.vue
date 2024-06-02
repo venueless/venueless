@@ -34,7 +34,7 @@
 					.organizations
 						.organization(v-for="(organization, index) of poster.authors.organizations")
 							.index {{ index + 1 }}.
-							bunt-input(name="organization", :modelValue="organization", @update:modelValue="$set(poster.authors.organizations, index, $event)")
+							bunt-input(name="organization", :modelValue="organization", @update:modelValue="poster.authors.organizations[index] = $event")
 							bunt-icon-button(@click="poster.authors.organizations.splice(index, 1)") delete-outline
 					bunt-button(@click="poster.authors.organizations.push('')") {{ $t('poster-manager/poster:btn-add-organization') }}
 					h2 {{ $t('poster-manager/poster:presenters:headline') }}
