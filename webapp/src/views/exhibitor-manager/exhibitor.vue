@@ -25,9 +25,7 @@
 			bunt-select(v-model="exhibitor.size", :disabled="!hasPermission('world:rooms.create.exhibition')", :label="$t('Exhibitors:size:label')", name="size", :options="sizes", :validation="v$.exhibitor.size")
 			bunt-input(v-model="exhibitor.sorting_priority", :disabled="!hasPermission('world:rooms.create.exhibition')", :label="$t('Exhibitors:sorting-priority:label')", name="sortingPriority", :validation="v$.exhibitor.sorting_priority")
 			bunt-select(v-model="exhibitor.room_id", :disabled="!hasPermission('world:rooms.create.exhibition')", :label="$t('Exhibitors:room:label')", name="room", :options="rooms", option-label="name", :validation="v$.exhibitor.room_id")
-			bunt-select(v-model="exhibitor.highlighted_room_id", :disabled="!hasPermission('world:rooms.create.exhibition')", :label="$t('Exhibitors:highlighted-room:label')", name="highlighted_room", :options="all_rooms_or_none", option-label="name", :validation="v$.exhibitor.highlighted_room_id")
-				template(slot-scope="{ option }")
-					.label {{ option.name }}
+			bunt-select(v-model="exhibitor.highlighted_room_id", :disabled="!hasPermission('world:rooms.create.exhibition')", :label="$t('Exhibitors:highlighted-room:label')", name="highlighted_room", :options="allRoomsOrNone", option-label="name", :validation="v$.exhibitor.highlighted_room_id")
 			table.links
 				thead
 					tr
@@ -37,9 +35,9 @@
 				tbody
 					tr(v-for="(link, index) in exhibitor.social_media_links")
 						td
-							bunt-select(v-model="link.display_text", :label="$t('Exhibitors:social-link-text:label')", name="displayText", :options="supportedNetworks", :validation="v$.exhibitor.social_media_links.$each[index].display_text")
+							bunt-select(v-model="link.display_text", :label="$t('Exhibitors:social-link-text:label')", name="displayText", :options="supportedNetworks", :validation="v$.exhibitor.social_media_links[index].display_text")
 						td
-							bunt-input(:modelValue="link.url", :label="$t('Exhibitors:link-url:label')", @update:modelValue="set_social_media_link_url(index, $event)", name="url", :validation="v$.exhibitor.social_media_links.$each[index].url")
+							bunt-input(:modelValue="link.url", :label="$t('Exhibitors:link-url:label')", @update:modelValue="set_social_media_link_url(index, $event)", name="url", :validation="v$.exhibitor.social_media_links[index].url")
 						td.actions
 							bunt-icon-button(@click="remove_social_media_link(index)") delete-outline
 				tfoot
@@ -57,9 +55,9 @@
 				tbody
 					tr(v-for="(link, index) in exhibitor.profileLinks")
 						td
-							bunt-input(:modelValue="link.display_text", @update:modelValue="set_link_text(index, link.category, $event)", :label="$t('Exhibitors:link-text:label')", name="displayText", :validation="v$.exhibitor.profileLinks.$each[index].display_text")
+							bunt-input(:modelValue="link.display_text", @update:modelValue="set_link_text(index, link.category, $event)", :label="$t('Exhibitors:link-text:label')", name="displayText", :validation="v$.exhibitor.profileLinks[index].display_text")
 						td
-							bunt-input(:modelValue="link.url", @update:modelValue="set_link_url(index, link.category, $event)", :label="$t('Exhibitors:link-url:label')", name="url", :validation="v$.exhibitor.profileLinks.$each[index].url")
+							bunt-input(:modelValue="link.url", @update:modelValue="set_link_url(index, link.category, $event)", :label="$t('Exhibitors:link-url:label')", name="url", :validation="v$.exhibitor.profileLinks[index].url")
 						td.actions
 							bunt-icon-button(@click="remove_link(index, link.category)") delete-outline
 							bunt-icon-button(@click="up_link(index, link.category)") arrow-up-bold-outline
@@ -80,9 +78,9 @@
 				tbody
 					tr(v-for="(link, index) in exhibitor.downloadLinks")
 						td
-							bunt-input(v-model="link.display_text", :label="$t('Exhibitors:link-text:label')", name="displayText", :validation="v$.exhibitor.downloadLinks.$each[index].display_text")
+							bunt-input(v-model="link.display_text", :label="$t('Exhibitors:link-text:label')", name="displayText", :validation="v$.exhibitor.downloadLinks[index].display_text")
 						td
-							upload-url-input(v-model="link.url", :label="$t('Exhibitors:link-url:label')", name="url", :validation="v$.exhibitor.downloadLinks.$each[index].url")
+							upload-url-input(v-model="link.url", :label="$t('Exhibitors:link-url:label')", name="url", :validation="v$.exhibitor.downloadLinks[index].url")
 						td.actions
 							bunt-icon-button(@click="remove_link(index, link.category)") delete-outline
 							bunt-icon-button(@click="up_link(index, link.category)") arrow-up-bold-outline
@@ -142,7 +140,8 @@ import UploadUrlInput from 'components/UploadUrlInput'
 import RichTextEditor from 'components/RichTextEditor'
 import ExhibitorPreview from 'views/exhibitors/item'
 
-const absrelurl = (message) => helpers.withMessage(message, value => helpers.regex('absrelurl', /^(https?:\/\/|mailto:|\/)[^ ]+$/)(value))
+// TODO doesn't actually find invalid URLs, perhaps use `url` from validators instead
+const absrelurl = (message) => helpers.withMessage(message, value => helpers.regex(/^(https?:\/\/|mailto:|\/)[^ ]+$/)(value))
 
 export default {
 	components: { Avatar, ExhibitorPreview, Prompt, UploadUrlInput, UserSelect, RichTextEditor },
@@ -167,10 +166,11 @@ export default {
 	},
 	computed: {
 		...mapGetters(['hasPermission']),
-		all_rooms_or_none () {
-			const r = [{name: '', id: ''}]
-			r.push(...this.$store.state.rooms)
-			return r
+		allRoomsOrNone () {
+			return [
+				{name: '', id: ''},
+				...this.$store.state.rooms
+			]
 		},
 		rooms () {
 			return this.$store.state.rooms.filter(room => room.modules.filter(m => m.type === 'exhibition.native').length > 0)
@@ -192,7 +192,8 @@ export default {
 		}
 	},
 	validations () {
-		return {
+		if (!this.exhibitor) return {}
+		const rules = {
 			exhibitor: {
 				name: {
 					required: required(this.$t('Exhibitors:validation-name:required')),
@@ -226,46 +227,54 @@ export default {
 				sorting_priority: {
 					required: required(this.$t('Exhibitors:validation-sorting:required'))
 				},
-				social_media_links: {
-					$each: {
-						display_text: {
-							required: required(this.$t('Exhibitors:validation-social-links-display-text:required'))
-						},
-						url: {
-							required: required(this.$t('Exhibitors:validation-links-url:required')),
-							maxLength: maxLength(200, this.$t('Exhibitors:validation-url:maxLength')),
-							absrelurl: absrelurl(this.$t('Exhibitors:validation-links-url:required'))
-						}
-					}
+				social_media_links: {},
+				profileLinks: {},
+				downloadLinks: {},
+				}
+			}
+
+		for (const [index, link] of this.exhibitor.social_media_links.entries()) {
+			rules.exhibitor.social_media_links[index] = {
+				display_text: {
+					required: required(this.$t('Exhibitors:validation-social-links-display-text:required'))
 				},
-				profileLinks: {
-					$each: {
-						display_text: {
-							required: required(this.$t('Exhibitors:validation-links-display-text:required')),
-							maxLength: maxLength(300, this.$t('Exhibitors:validation-links-display-text:maxLength'))
-						},
-						url: {
-							required: required(this.$t('Exhibitors:validation-links-url:required')),
-							maxLength: maxLength(200, this.$t('Exhibitors:validation-url:maxLength')),
-							absrelurl: absrelurl(this.$t('Exhibitors:validation-links-url:required'))
-						}
-					}
-				},
-				downloadLinks: {
-					$each: {
-						display_text: {
-							required: required(this.$t('Exhibitors:validation-links-display-text:required')),
-							maxLength: maxLength(300, this.$t('Exhibitors:validation-links-display-text:maxLength'))
-						},
-						url: {
-							required: required(this.$t('Exhibitors:validation-links-url:required')),
-							maxLength: maxLength(200, this.$t('Exhibitors:validation-url:maxLength')),
-							absrelurl: absrelurl(this.$t('Exhibitors:validation-links-url:required'))
-						}
-					}
+				url: {
+					required: required(this.$t('Exhibitors:validation-links-url:required')),
+					maxLength: maxLength(200, this.$t('Exhibitors:validation-url:maxLength')),
+					absrelurl: absrelurl(this.$t('Exhibitors:validation-links-url:required'))
 				}
 			}
 		}
+
+		for (const [index, link] of this.exhibitor.profileLinks.entries()) {
+			rules.exhibitor.profileLinks[index] = {
+				display_text: {
+					required: required(this.$t('Exhibitors:validation-links-display-text:required')),
+					maxLength: maxLength(300, this.$t('Exhibitors:validation-links-display-text:maxLength'))
+				},
+				url: {
+					required: required(this.$t('Exhibitors:validation-links-url:required')),
+					maxLength: maxLength(200, this.$t('Exhibitors:validation-url:maxLength')),
+					absrelurl: absrelurl(this.$t('Exhibitors:validation-links-url:required'))
+				}
+			}
+		}
+
+		for (const [index, link] of this.exhibitor.downloadLinks.entries()) {
+			rules.exhibitor.downloadLinks[index] = {
+				display_text: {
+					required: required(this.$t('Exhibitors:validation-links-display-text:required')),
+					maxLength: maxLength(300, this.$t('Exhibitors:validation-links-display-text:maxLength'))
+				},
+				url: {
+					required: required(this.$t('Exhibitors:validation-links-url:required')),
+					maxLength: maxLength(200, this.$t('Exhibitors:validation-url:maxLength')),
+					absrelurl: absrelurl(this.$t('Exhibitors:validation-links-url:required'))
+				}
+			}
+		}
+
+		return rules
 	},
 	async created () {
 		try {
@@ -384,7 +393,7 @@ export default {
 			this.exhibitor.links = [...this.exhibitor.downloadLinks, ...this.exhibitor.profileLinks]
 
 			const exhibitor = (await api.call('exhibition.patch', {
-				id: this.exhibitorId,
+				id: this.exhibitor.id,
 				name: this.exhibitor.name,
 				tagline: this.exhibitor.tagline,
 				short_text: this.exhibitor.short_text,
