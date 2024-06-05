@@ -13,21 +13,22 @@
 			session(
 				v-for="session of sessions",
 				:session="session",
+				:now="now",
 				:faved="favs.includes(session.id)",
 				@fav="$store.dispatch('schedule/fav', $event)",
 				@unfav="$store.dispatch('schedule/unfav', $event)"
 			)
 </template>
 <script>
-// BUG
-// - session link renders as "nulltalk"
 import { mapState, mapGetters } from 'vuex'
 import Identicon from 'components/Identicon'
 import MarkdownContent from 'components/MarkdownContent'
 import { Session } from '@pretalx/schedule'
+import scheduleProvidesMixin from 'components/mixins/schedule-provides'
 
 export default {
 	components: { Identicon, MarkdownContent, Session },
+	mixins: [scheduleProvidesMixin],
 	props: {
 		speakerId: String
 	},
@@ -37,6 +38,7 @@ export default {
 		}
 	},
 	computed: {
+		...mapState(['now']),
 		...mapState('schedule', ['schedule']),
 		...mapGetters('schedule', ['sessionsLookup', 'favs']),
 		sessions () {
