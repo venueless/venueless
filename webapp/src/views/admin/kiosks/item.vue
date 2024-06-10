@@ -22,6 +22,7 @@
 				bunt-checkbox(name="show_pinned_poll", v-model="kiosk.profile.slides.pinned_poll_voting", label="Pinned poll voting QR code")
 				bunt-checkbox(name="show_pinned_question", v-model="kiosk.profile.slides.pinned_question", label="Pinned question")
 				bunt-checkbox(name="show_next_session", v-model="kiosk.profile.slides.next_session", label="Next session")
+				bunt-checkbox(name="show_current_session", v-model="kiosk.profile.slides.current_session", label="Current session")
 				bunt-checkbox(name="show_viewers", v-model="kiosk.profile.slides.viewers", label="Active viewers")
 		.ui-form-actions
 			bunt-button.btn-save(@click="save", :loading="saving", :error-message="saveError") Save
@@ -98,6 +99,7 @@ export default {
 				pinned_poll_voting: true,
 				pinned_question: true,
 				next_session: true,
+				current_session: false,
 				viewers: true,
 				reactions: true
 			})

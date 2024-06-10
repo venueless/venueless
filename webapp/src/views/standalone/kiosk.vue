@@ -10,6 +10,7 @@ import PollSlide from './Poll'
 import VoteSlide from './Vote'
 import QuestionSlide from './Question'
 import NextSessionSlide from './NextSession'
+import CurrentSessionSlide from './CurrentSession'
 import ViewersSlide from './Viewers'
 
 const SLIDES = [{
@@ -45,13 +46,25 @@ const SLIDES = [{
 		if (!this.isSlideEnabled('next_session')) return false
 		const currentSession = this.$store.getters['schedule/currentSessionPerRoom']?.[this.room.id]?.session
 		const nextSession = this.$store.getters['schedule/sessions']?.find(session => session.room === this.room && session.start.isAfter(this.now))
-		return !!nextSession && (!currentSession || currentSession.end.isBefore(moment().add(10, 'minutes')))
+		return !!nextSession && (!currentSession || !currentSession.id || currentSession.end.isBefore(moment().add(10, 'minutes')))
 	},
 	watch () {
 		return this.isSlideEnabled('next_session') && this.$store.getters['schedule/sessions']
 	},
 	priority: 1,
 	component: NextSessionSlide
+}, {
+	id: 'currentSession',
+	condition () {
+		if (!this.isSlideEnabled('current_session')) return false
+		const currentSession = this.$store.getters['schedule/currentSessionPerRoom']?.[this.room.id]?.session
+		return !!currentSession && currentSession.id // sessions without id are breaks
+	},
+	watch () {
+		return this.isSlideEnabled('current_session') && this.$store.getters['schedule/sessions']
+	},
+	priority: 1,
+	component: CurrentSessionSlide
 }, {
 	id: 'viewers',
 	condition () {
@@ -64,7 +77,7 @@ const SLIDES = [{
 	component: ViewersSlide
 }]
 
-const SLIDE_INTERVAL = 20000
+const SLIDE_INTERVAL = 2000
 
 export default {
 	props: {
