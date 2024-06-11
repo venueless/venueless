@@ -59,6 +59,7 @@ deploy:
   image:
     name: debian:12
   stage: deploy
+  resource_group: venueless_deploy
   before_script:
     - apt update -y && apt install -y openssh-client
     - eval $(ssh-agent -s)
