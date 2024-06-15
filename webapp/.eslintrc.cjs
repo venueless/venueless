@@ -31,6 +31,7 @@ module.exports = {
 		'vue/no-setup-props-destructure': 0,
 		'vue/multi-word-component-names': 0,
 		'vue/max-attributes-per-line': 0,
+		'vue/no-v-html': 0,
 		'vue/attribute-hyphenation': ['warn', 'never'],
 		'vue/v-on-event-hyphenation': ['warn', 'never'],
 		'import/first': 0, // does not work with multiple script tags
