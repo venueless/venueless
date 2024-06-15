@@ -23,9 +23,7 @@ import moment from 'moment'
 import moment2 from 'moment?timetraveling'
 import momentTimezone from 'moment-timezone'
 
-
 moment2.now = function () { return '2018-01-01T00:00:00Z' }
 console.log('moments', moment(), moment2(), momentTimezone())
-
 
 export default moment

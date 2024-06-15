@@ -4,13 +4,13 @@
 		.actions
 			h2 Rooms
 			bunt-link-button.btn-create(:to="{name: 'admin:rooms:new'}") Create a new room
-		bunt-input.search(name="search", placeholder="Search rooms", icon="search", v-model="search")
+		bunt-input.search(v-model="search", name="search", placeholder="Search rooms", icon="search")
 	.rooms-list
 		.header
 			.drag
 			.name Name
-		SlickList.tbody(v-if="filteredRooms", v-model:list="rooms", lockAxis="y", :useDragHandle="true", v-scrollbar.y="", @update:list="onListSort")
-			RoomListItem(v-for="(room, index) of filteredRooms" :index="index", :key="index", :room="room", :disabled="filteredRooms !== rooms")
+		SlickList.tbody(v-if="filteredRooms", v-model:list="rooms", v-scrollbar.y="", lockAxis="y", :useDragHandle="true", @update:list="onListSort")
+			RoomListItem(v-for="(room, index) of filteredRooms" :key="index", :index="index", :room="room", :disabled="filteredRooms !== rooms")
 		bunt-progress-circular(v-else, size="huge", :page="true")
 </template>
 <script>

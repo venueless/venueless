@@ -20,16 +20,16 @@
 				.actions
 					bunt-icon-button(@click="showUrlPopup('question')") presentation
 					menu-dropdown(v-if="hasPermission('room:question.moderate')", v-model="showingQuestionsMenu", strategy="fixed")
-						template(v-slot:button="{toggle}")
+						template(#button="{toggle}")
 							bunt-icon-button(@click="toggle") dots-vertical
-						template(v-slot:menu)
+						template(#menu)
 							.archive-all(@click="$store.dispatch('question/archiveAll')") {{ $t('Questions:moderator-actions:archive-all:label') }}
 			questions(:module="modules['question']")
 		panel.chat(v-if="modules['chat.native']")
 			.header
 				h3 Chat
 				bunt-icon-button(@click="showUrlPopup('chat')") presentation
-			chat(:room="room", :module="modules['chat.native']", mode="compact", :key="room.id")
+			chat(:key="room.id", :room="room", :module="modules['chat.native']", mode="compact")
 		panel.no-modules(v-if="Object.keys(modules).length === 1")
 			p No modules to manage in this room
 	.ui-background-blocker(v-if="showingPresentationUrlFor", @click="showingPresentationUrlFor = null")
@@ -50,9 +50,9 @@
 				.form-content
 					bunt-input-outline-container(name="poll-question", label="Question")
 						template(#default="{focus, blur}")
-							textarea(@focus="focus", @blur="blur", v-model="editedPoll.content")
+							textarea(v-model="editedPoll.content", @focus="focus", @blur="blur")
 					.option(v-for="(option, index) of editedPoll.options")
-						bunt-input(:name="`poll-option-${index}`", :label="`Option ${index + 1}`", v-model="option.content")
+						bunt-input(v-model="option.content", :name="`poll-option-${index}`", :label="`Option ${index + 1}`")
 						bunt-icon-button.btn-delete-poll-option(@click="editedPoll.options.splice(index, 1)") delete-outline
 					bunt-button#btn-add-poll-option(@click="editedPoll.options.push({content: ''})") Add Option
 				bunt-button#btn-submit-poll(@click="submitPoll") {{ editedPoll.id ? 'Save Poll' : 'Create Poll' }}
@@ -61,7 +61,7 @@
 // TODO
 // - handle video better (pause, completely cancel? preserve bandwidth?)
 
-import {mapGetters, mapState} from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import { createPopper } from '@popperjs/core'
 import DashboardLayout from 'components/dashboard-layout'
 import Panel from 'components/dashboard-layout/Panel'
@@ -76,12 +76,12 @@ import SchedulePanel from './ManagePanels/Schedule'
 export default {
 	name: 'RoomManager',
 	components: { Chat, DashboardLayout, MediaSourcePlaceholder, MenuDropdown, Panel, Polls, Prompt, Questions, SchedulePanel },
+	provide: {
+		isManaging: true
+	},
 	props: {
 		room: Object,
 		modules: Object
-	},
-	provide: {
-		isManaging: true
 	},
 	data () {
 		return {
@@ -103,7 +103,7 @@ export default {
 			createPopper(event.target, this.$refs.urlPopup, {
 				placement: 'bottom-end',
 				modifiers: [
-					{name: 'offset', options: {offset: [16, 12]}}
+					{ name: 'offset', options: { offset: [16, 12] } }
 				]
 			})
 		},
@@ -141,7 +141,7 @@ export default {
 		},
 		getPresentationUrl (type) {
 			console.log(type)
-			return window.location.origin + this.$router.resolve({name: `standalone:${type}`}).href + '#token=' + this.token
+			return window.location.origin + this.$router.resolve({ name: `standalone:${type}` }).href + '#token=' + this.token
 		},
 		copyUrl () {
 			this.$refs.urlInput.$refs.input.select()

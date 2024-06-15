@@ -32,9 +32,9 @@ export function nativeToOps (string) {
 	return string.split(splitEmojiRegex).map(match => {
 		if (emojiRegex.test(match)) {
 			// slightly wasteful to test for emoji again
-			return {insert: {emoji: match}}
+			return { insert: { emoji: match } }
 		} else {
-			return {insert: match}
+			return { insert: match }
 		}
 	})
 }
@@ -66,7 +66,7 @@ export function nativeToStyle (unicodeEmoji) {
 		src = require('twemoji-emojis/vendor/svg/2753.svg')
 	}
 
-	return {'background-image': `url(${src})`}
+	return { 'background-image': `url(${src})` }
 }
 
 export function markdownEmoji (md) {

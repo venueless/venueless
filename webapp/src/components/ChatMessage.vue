@@ -1,7 +1,7 @@
 <template lang="pug">
 .c-chat-message(:class="[mode, {selected, readonly, 'system-message': isSystemMessage, 'merge-with-previous-message': mergeWithPreviousMessage, 'merge-with-next-message': mergeWithNextMessage, 'sender-deleted': sender.deleted}]")
 	.avatar-column(v-if="message.event_type !== 'channel.poll'")
-		avatar(v-if="!mergeWithPreviousMessage", :user="sender", :size="avatarSize", @click.native="$emit('showUserCard', $event, sender, 'right-start')", ref="avatar")
+		avatar(v-if="!mergeWithPreviousMessage", ref="avatar", :user="sender", :size="avatarSize", @click.native="$emit('showUserCard', $event, sender, 'right-start')")
 		.timestamp(v-if="mergeWithPreviousMessage") {{ shortTimestamp }}
 	template(v-if="message.event_type === 'channel.message'")
 		.content-wrapper
@@ -33,7 +33,7 @@
 				.reaction(v-for="users, emoji of message.reactions", :class="{'reacted-by-me': users.includes(user.id)}", @click="toggleReaction(emoji, users)", @pointerenter="initReactionTooltip($event, {emoji, users})", @pointerleave="reactionTooltip = null")
 					span.emoji(:style="nativeEmojiToStyle(emoji)")
 					.count {{ users.length }}
-				emoji-picker-button(@selected="addReaction", strategy="fixed", placement="top-start", :offset="[0, 3]", icon-style="plus")
+				emoji-picker-button(strategy="fixed", placement="top-start", :offset="[0, 3]", iconStyle="plus", @selected="addReaction")
 				.reaction-tooltip(v-if="reactionTooltip", ref="reactionTooltip")
 					.arrow(data-popper-arrow="")
 					.emoji-wrapper
@@ -43,11 +43,11 @@
 						|  reacted with
 						span.emoji-text  {{ getEmojiDataFromNative(reactionTooltip.emoji).short_names[0] }}
 		.actions(v-if="!readonly")
-			emoji-picker-button(@selected="addReaction", strategy="fixed", placement="bottom-end", :offset="[36, 3]", icon-style="plus")
+			emoji-picker-button(strategy="fixed", placement="bottom-end", :offset="[36, 3]", iconStyle="plus", @selected="addReaction")
 			menu-dropdown(v-if="(hasPermission('room:chat.moderate') || message.sender === user.id)", v-model="selected", placement="bottom-end", strategy="fixed", :offset="[0, 3]")
-				template(v-slot:button="{toggle}")
+				template(#button="{toggle}")
 					bunt-icon-button(@click="toggle") dots-vertical
-				template(v-slot:menu)
+				template(#menu)
 					.edit-message(v-if="message.sender === user.id && message.content.type !== 'call'", @click="startEditingMessage") {{ $t('ChatMessage:message-edit:label') }}
 					.delete-message(@click="selected = false, showDeletePrompt = true") {{ $t('ChatMessage:message-delete:label') }}
 	template(v-else-if="message.event_type === 'channel.member'")
@@ -129,7 +129,7 @@ export default {
 			return 28
 		},
 		sender () {
-			return this.usersLookup[this.message.sender] || {id: this.message.sender, badges: {}}
+			return this.usersLookup[this.message.sender] || { id: this.message.sender, badges: {} }
 		},
 		senderDisplayName () {
 			return getUserName(this.sender)
@@ -160,19 +160,19 @@ export default {
 	methods: {
 		getUserName,
 		addReaction (emoji) {
-			this.$store.dispatch('chat/addReaction', {message: this.message, reaction: emoji.native})
+			this.$store.dispatch('chat/addReaction', { message: this.message, reaction: emoji.native })
 		},
 		toggleReaction (emoji, users) {
 			if (users.includes(this.user.id)) {
 				if (users.length === 1) {
 					this.reactionTooltip = null
 				}
-				this.$store.dispatch('chat/removeReaction', {message: this.message, reaction: emoji})
+				this.$store.dispatch('chat/removeReaction', { message: this.message, reaction: emoji })
 			} else {
-				this.$store.dispatch('chat/addReaction', {message: this.message, reaction: emoji})
+				this.$store.dispatch('chat/addReaction', { message: this.message, reaction: emoji })
 			}
 		},
-		async initReactionTooltip (event, {emoji, users}) {
+		async initReactionTooltip (event, { emoji, users }) {
 			this.reactionTooltip = {
 				emoji,
 				// TODO 'and you'
@@ -183,8 +183,8 @@ export default {
 				placement: 'top',
 				strategy: 'fixed',
 				modifiers: [
-					{name: 'offset', options: {offset: [0, 8]}},
-					{name: 'arrow', options: {padding: 4}}
+					{ name: 'offset', options: { offset: [0, 8] } },
+					{ name: 'arrow', options: { padding: 4 } }
 				],
 			})
 		},
@@ -194,7 +194,7 @@ export default {
 		},
 		editMessage (content) {
 			this.editing = false
-			this.$store.dispatch('chat/editMessage', {message: this.message, content})
+			this.$store.dispatch('chat/editMessage', { message: this.message, content })
 		},
 		deleteMessage () {
 			this.$store.dispatch('chat/deleteMessage', this.message)

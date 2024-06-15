@@ -39,35 +39,35 @@ export default {
 		},
 	},
 	actions: {
-		startRequesting ({state, commit, dispatch}, {room}) {
+		startRequesting ({ state, commit, dispatch }, { room }) {
 			commit('setRoom', room)
 			commit('setError', null)
 			commit('setLoading', true)
 			dispatch('request')
 		},
-		async request ({state, dispatch}) {
-			const result = await api.call('roulette.start', {room: state.room.id})
+		async request ({ state, dispatch }) {
+			const result = await api.call('roulette.start', { room: state.room.id })
 			if (result.status === 'wait' && !state.callId) {
 				state.requestTimer = window.setTimeout(() => dispatch('request'), 15000)
 				state.recentPairs = state.recent_pairs
 			} else if (result.status === 'match') {
-				dispatch('startCall', {callId: result.call_id})
+				dispatch('startCall', { callId: result.call_id })
 			}
 		},
-		async stopRequesting ({state, commit}) {
+		async stopRequesting ({ state, commit }) {
 			commit('setError', null)
 			commit('setLoading', false)
 			if (state.requestTimer) {
 				window.clearTimeout(state.requestTimer)
 			}
-			await api.call('roulette.stop', {room: state.room.id})
+			await api.call('roulette.stop', { room: state.room.id })
 		},
-		async startCall ({state, commit}, {callId}) {
+		async startCall ({ state, commit }, { callId }) {
 			commit('setError', null)
 			commit('setLoading', true)
 			try {
 				commit('setCallId', callId)
-				const data = await api.call('januscall.roulette_url', {call_id: callId})
+				const data = await api.call('januscall.roulette_url', { call_id: callId })
 				commit('setJanusParameters', data)
 				commit('setLoading', false)
 			} catch (e) {
@@ -75,28 +75,28 @@ export default {
 				commit('setLoading', false)
 			}
 		},
-		async reconnect ({state, commit}) {
+		async reconnect ({ state, commit }) {
 			if (state.callId) {
-				await api.call('roulette.reconnect', {call_id: state.callId})
+				await api.call('roulette.reconnect', { call_id: state.callId })
 			}
 		},
-		async stopCall ({state, commit}) {
+		async stopCall ({ state, commit }) {
 			const callId = state.callId
-			commit('setJanusParameters', {callId: null, server: null, token: null, iceServers: null, roomId: null, sessionId: null})
+			commit('setJanusParameters', { callId: null, server: null, token: null, iceServers: null, roomId: null, sessionId: null })
 			commit('setCallId', null)
 			if (callId) {
-				await api.call('roulette.hangup', {call_id: callId})
+				await api.call('roulette.hangup', { call_id: callId })
 			}
 		},
-		'api::roulette.hangup' ({state, commit}, payload) {
+		'api::roulette.hangup' ({ state, commit }, payload) {
 			commit('setCallId', null)
-			commit('setJanusParameters', {callId: null, server: null, token: null, iceServers: null, roomId: null, sessionId: null})
+			commit('setJanusParameters', { callId: null, server: null, token: null, iceServers: null, roomId: null, sessionId: null })
 		},
-		'api::roulette.match_found' ({state, dispatch}, payload) {
+		'api::roulette.match_found' ({ state, dispatch }, payload) {
 			if (state.requestTimer) {
 				window.clearTimeout(state.requestTimer)
 			}
-			dispatch('startCall', {callId: payload.call_id})
+			dispatch('startCall', { callId: payload.call_id })
 		},
 	}
 }

@@ -13,7 +13,7 @@
 					.mdi(:class="`mdi-${getIconByFileEnding(resource)}`")
 					.filename {{ description }}
 		.speakers(v-if="talk.speakers.length > 0")
-			.header {{ $t('schedule/talks/item:speakers:header', {count: talk.speakers.length})}}
+			.header {{ $t('schedule/talks/item:speakers:header', {count: talk.speakers.length}) }}
 			.speakers-list
 				.speaker(v-for="speaker of talk.speakers")
 					img.avatar(v-if="speaker.avatar", :src="speaker.avatar")
@@ -30,7 +30,7 @@ import MarkdownContent from 'components/MarkdownContent'
 import { getIconByFileEnding } from 'lib/filetypes'
 
 export default {
-	components: {MarkdownContent},
+	components: { MarkdownContent },
 	props: {
 		talkId: String
 	},

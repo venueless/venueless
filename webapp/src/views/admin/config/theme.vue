@@ -3,17 +3,17 @@
 	.ui-page-header
 		h1 Theme Config
 	scrollbars(y)
-		bunt-progress-circular(size="huge", v-if="!error && !config")
+		bunt-progress-circular(v-if="!error && !config", size="huge")
 		.error(v-if="error") We could not fetch the current configuration.
 		template(v-if="config")
 			.ui-form-body
-				color-picker(name="colors_primary", v-model="config.theme.colors.primary", label="Primary color", :validation="v$.config.theme.colors.primary")
-				color-picker(name="colors_sidebar", v-model="config.theme.colors.sidebar", label="Sidebar color", :validation="v$.config.theme.colors.sidebar")
-				color-picker(name="colors_bbb_background", v-model="config.theme.colors.bbb_background", label="BBB background color", :validation="v$.config.theme.colors.bbb_background")
-				upload-url-input(name="logo_url", v-model="config.theme.logo.url", label="Logo", :validation="v$.config.theme.logo.url")
-				bunt-checkbox(name="logo_fit", v-model="config.theme.logo.fitToWidth", label="Fit logo to width")
-				upload-url-input(name="streamoffline_url", v-model="config.theme.streamOfflineImage", label="Stream offline image", :validation="v$.config.theme.streamOfflineImage")
-				bunt-select#select-identicon-style(name="identicon-style", v-model="config.theme.identicons.style", label="Identicon style", :options="identiconStyles")
+				color-picker(v-model="config.theme.colors.primary", name="colors_primary", label="Primary color", :validation="v$.config.theme.colors.primary")
+				color-picker(v-model="config.theme.colors.sidebar", name="colors_sidebar", label="Sidebar color", :validation="v$.config.theme.colors.sidebar")
+				color-picker(v-model="config.theme.colors.bbb_background", name="colors_bbb_background", label="BBB background color", :validation="v$.config.theme.colors.bbb_background")
+				upload-url-input(v-model="config.theme.logo.url", name="logo_url", label="Logo", :validation="v$.config.theme.logo.url")
+				bunt-checkbox(v-model="config.theme.logo.fitToWidth", name="logo_fit", label="Fit logo to width")
+				upload-url-input(v-model="config.theme.streamOfflineImage", name="streamoffline_url", label="Stream offline image", :validation="v$.config.theme.streamOfflineImage")
+				bunt-select#select-identicon-style(v-model="config.theme.identicons.style", name="identicon-style", label="Identicon style", :options="identiconStyles")
 			.text-overwrites
 				.header
 					div Original
@@ -24,7 +24,7 @@
 						.value {{ val }}
 					bunt-input(v-model="config.theme.textOverwrites[key]", :name="key")
 	.ui-form-actions
-		bunt-button.btn-save(@click="save", :loading="saving", :error-message="error") Save
+		bunt-button.btn-save(:loading="saving", :errorMessage="error", @click="save") Save
 		.errors {{ validationErrors.join(', ') }}
 </template>
 <script>
@@ -41,7 +41,7 @@ import { renderers as identiconRenderers } from 'lib/identicons'
 export default {
 	components: { ColorPicker, UploadUrlInput },
 	mixins: [ValidationErrorsMixin],
-	setup: () => ({ v$: useVuelidate()}),
+	setup: () => ({ v$: useVuelidate() }),
 	data () {
 		return {
 			// We do not use the global config object since we cannot rely on it being up to date (theme is only updated
@@ -98,10 +98,10 @@ export default {
 			this.config = await api.call('world.config.get')
 
 			// Enforce some defaults
-			this.config.theme = {logo: {}, colors: {}, streamOfflineImage: null, textOverwrites: {}, ...this.config.theme}
-			this.config.theme.colors = {...DEFAULT_COLORS, ...this.config.theme.colors}
-			this.config.theme.logo = {...DEFAULT_LOGO, ...this.config.theme.logo}
-			this.config.theme.identicons = {...DEFAULT_IDENTICONS, ...this.config.theme.identicons}
+			this.config.theme = { logo: {}, colors: {}, streamOfflineImage: null, textOverwrites: {}, ...this.config.theme }
+			this.config.theme.colors = { ...DEFAULT_COLORS, ...this.config.theme.colors }
+			this.config.theme.logo = { ...DEFAULT_LOGO, ...this.config.theme.logo }
+			this.config.theme.identicons = { ...DEFAULT_IDENTICONS, ...this.config.theme.identicons }
 		} catch (error) {
 			this.error = error
 			console.log(error)
@@ -120,7 +120,7 @@ export default {
 			}
 
 			this.saving = true
-			await api.call('world.config.patch', {theme: this.config.theme})
+			await api.call('world.config.patch', { theme: this.config.theme })
 			this.saving = false
 			// TODO error handling
 

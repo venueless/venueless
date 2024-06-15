@@ -3,15 +3,15 @@
 	.scroll-wrapper(v-scrollbar.y="")
 		.ui-form-body
 			.generic-settings
-				bunt-input(name="name", v-model="config.name", label="Name", :validation="v$.config.name")
-				bunt-input(name="description", v-model="config.description", label="Description")
-				bunt-input(name="sorting_priority", v-model="config.sorting_priority", label="Sorting priority", :validation="v$.config.sorting_priority")
+				bunt-input(v-model="config.name", name="name", label="Name", :validation="v$.config.name")
+				bunt-input(v-model="config.description", name="description", label="Description")
+				bunt-input(v-model="config.sorting_priority", name="sorting_priority", label="Sorting priority", :validation="v$.config.sorting_priority")
 				template(v-if="inferredType")
-					bunt-input(v-if="inferredType.id === 'stage' || inferredType.id === 'channel.bbb'", name="pretalx_id", v-model="config.pretalx_id", label="pretalx ID", :validation="v$.config.pretalx_id")
-					bunt-checkbox(v-if="inferredType.id === 'channel-text'", name="force_join", v-model="config.force_join", label="Force join on login (use for non-volatile, text-based chats only!!)")
-			component.stage-settings(ref="settings", v-if="inferredType && typeComponents[inferredType.id]", :is="typeComponents[inferredType.id]", :config="config", :modules="modules")
+					bunt-input(v-if="inferredType.id === 'stage' || inferredType.id === 'channel.bbb'", v-model="config.pretalx_id", name="pretalx_id", label="pretalx ID", :validation="v$.config.pretalx_id")
+					bunt-checkbox(v-if="inferredType.id === 'channel-text'", v-model="config.force_join", name="force_join", label="Force join on login (use for non-volatile, text-based chats only!!)")
+			component.stage-settings(:is="typeComponents[inferredType.id]", v-if="inferredType && typeComponents[inferredType.id]", ref="settings", :config="config", :modules="modules")
 	.ui-form-actions
-		bunt-button.btn-save(@click="save", :loading="saving", :error-message="error") {{ creating ? 'create' : 'save' }}
+		bunt-button.btn-save(:loading="saving", :errorMessage="error", @click="save") {{ creating ? 'create' : 'save' }}
 		.errors {{ validationErrors.join(', ') }}
 </template>
 <script>
@@ -35,7 +35,6 @@ import PageLanding from './types-edit/page-landing'
 export default {
 	components: { Prompt },
 	mixins: [ValidationErrorsMixin],
-	setup: () => ({ v$: useVuelidate()}),
 	props: {
 		config: {
 			type: Object,
@@ -46,6 +45,7 @@ export default {
 			default: false
 		}
 	},
+	setup: () => ({ v$: useVuelidate() }),
 	data () {
 		return {
 			typeComponents: markRaw({
@@ -119,7 +119,7 @@ export default {
 				})
 				this.saving = false
 				if (this.creating) {
-					this.$router.push({name: 'admin:rooms:item', params: {roomId}})
+					this.$router.push({ name: 'admin:rooms:item', params: { roomId } })
 				}
 			} catch (error) {
 				console.error(error)

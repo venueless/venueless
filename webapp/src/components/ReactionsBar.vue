@@ -22,7 +22,7 @@ export default {
 	computed: {
 		availableReactions () {
 			const emoji = ['👏', '❤️', '👍', '🤣', '😮']
-			return emoji.map(e => ({emoji: e, style: nativeEmojiToStyle(e)}))
+			return emoji.map(e => ({ emoji: e, style: nativeEmojiToStyle(e) }))
 		}
 	},
 	methods: {

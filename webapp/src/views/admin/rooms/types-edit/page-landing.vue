@@ -3,8 +3,8 @@
 	upload-url-input(v-model="modules['page.landing'].config.header_image", label="Header image", name="header-image")
 	upload-url-input(v-model="modules['page.landing'].config.header_background_image", label="Header background image", name="header-background-image")
 	bunt-input(v-model="modules['page.landing'].config.header_background_color", label="Header background color", name="headerbackgroundcolor")
-	bunt-select(v-model="modules['page.landing'].config.sponsor_room_id", label="Sponsor Source Room", name="sponsor-room", :options="sponsorRooms", option-label="name")
-	rich-text-editor(label="Main content", v-model="modules['page.landing'].config.main_content")
+	bunt-select(v-model="modules['page.landing'].config.sponsor_room_id", label="Sponsor Source Room", name="sponsor-room", :options="sponsorRooms", optionLabel="name")
+	rich-text-editor(v-model="modules['page.landing'].config.main_content", label="Main content")
 </template>
 <script>
 import RichTextEditor from 'components/RichTextEditor'

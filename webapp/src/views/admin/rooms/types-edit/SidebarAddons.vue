@@ -1,12 +1,12 @@
 <template lang="pug">
 .c-sidebar-addons
 	h2 Sidebar addons
-	bunt-switch(name="enable-chat", v-model="hasChat", label="Enable Chat")
-	bunt-switch(name="enable-qa", v-model="hasQuestions", label="Enable Q&A")
+	bunt-switch(v-model="hasChat", name="enable-chat", label="Enable Chat")
+	bunt-switch(v-model="hasQuestions", name="enable-qa", label="Enable Q&A")
 	template(v-if="hasQuestions")
 		bunt-checkbox(v-model="modules['question'].config.active", label="Active", name="active")
 		bunt-checkbox(v-model="modules['question'].config.requires_moderation", label="Questions require moderation", name="requires_moderation")
-	bunt-switch(v-if="$features.enabled('polls')", name="enable-polls", v-model="hasPolls", label="Enable Polls")
+	bunt-switch(v-if="$features.enabled('polls')", v-model="hasPolls", name="enable-polls", label="Enable Polls")
 </template>
 <script>
 import mixin from './mixin'
@@ -24,7 +24,7 @@ export default {
 			},
 			set (value) {
 				if (value) {
-					this.addModule('chat.native', {volatile: true})
+					this.addModule('chat.native', { volatile: true })
 				} else {
 					this.removeModule('chat.native')
 				}

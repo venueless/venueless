@@ -1,7 +1,7 @@
 <template lang="pug">
 .c-roulette
 	.call(v-if="server")
-		janus-videoroom(:server="server", :token="token", :iceServers="iceServers", :sessionId="sessionId", :roomId="roomId", size="normal", :automute="false", :key="`janus-videoroom-${roomId}`", @hangup="stopCall")
+		janus-videoroom(:key="`janus-videoroom-${roomId}`", :server="server", :token="token", :iceServers="iceServers", :sessionId="sessionId", :roomId="roomId", size="normal", :automute="false", @hangup="stopCall")
 	.status(v-else-if="loading && !callId")
 		div {{ $t('Roulette:waiting:text') }}
 		.detail {{ $t('Roulette:waiting-' + (recentPairs > 10 ? 'many' : (recentPairs > 0 ? 'few' : 'empty')) + ':text') }}
@@ -17,7 +17,7 @@
 				.bar(:style="'width: ' + soundBarWidth + '%'")
 		.error(v-if="videoError") {{ videoError }}
 	.next
-		bunt-button.btn-next(@click="findNewCall", :disabled="!videoReady", :error-message="error", :loading="loading") {{ $t('Roulette:btn-start:label') }}
+		bunt-button.btn-next(:disabled="!videoReady", :errorMessage="error", :loading="loading", @click="findNewCall") {{ $t('Roulette:btn-start:label') }}
 	transition(name="prompt")
 		a-v-device-prompt(v-if="showDevicePrompt", @close="showDevicePrompt = false; startVideo()")
 
@@ -26,10 +26,10 @@
 import AVDevicePrompt from 'components/AVDevicePrompt'
 import JanusVideoroom from 'components/janus/JanusVideoroom'
 import SoundMeter from 'lib/webrtc/soundmeter'
-import {mapActions, mapMutations, mapState} from 'vuex'
+import { mapActions, mapMutations, mapState } from 'vuex'
 
 export default {
-	components: {AVDevicePrompt, JanusVideoroom},
+	components: { AVDevicePrompt, JanusVideoroom },
 	props: {
 		room: {
 			type: Object,
@@ -76,7 +76,7 @@ export default {
 	mounted () {
 		this.startVideo()
 	},
-	destroyed () {
+	unmounted () {
 		if (this.soundMeter) {
 			this.soundMeter.context.close()
 		}
@@ -104,13 +104,13 @@ export default {
 				window.clearInterval(this.soundMeterInterval)
 			}
 			this.stopCall()
-			this.startRequesting({room: this.room})
+			this.startRequesting({ room: this.room })
 			this.hasPreviousCall = true
 		},
 		startVideo () {
 			const constraints = {
-				audio: {deviceId: localStorage.audioInput ? {exact: localStorage.audioInput} : undefined},
-				video: {deviceId: localStorage.videoInput ? {exact: localStorage.videoInput} : undefined},
+				audio: { deviceId: localStorage.audioInput ? { exact: localStorage.audioInput } : undefined },
+				video: { deviceId: localStorage.videoInput ? { exact: localStorage.videoInput } : undefined },
 			}
 			navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
 				this.stream = stream

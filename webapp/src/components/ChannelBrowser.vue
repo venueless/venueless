@@ -1,10 +1,10 @@
 <template lang="pug">
-prompt.c-channel-browser(@close="$emit('close')", :scrollable="false")
+prompt.c-channel-browser(:scrollable="false", @close="$emit('close')")
 	.content
 		h2 {{ $t('ChannelBrowser:headline:text') }}
 		p {{ $t('ChannelBrowser:intro:text') }}
-			a(href="#", @click="$emit('createChannel')", v-if="hasPermission('world:rooms.create.chat')")  {{ $t('ChannelBrowser:create:label') }}
-		bunt-input(icon="search", name="search", :placeholder="$t('ChannelBrowser:search:placeholder')", v-model="search")
+			a(v-if="hasPermission('world:rooms.create.chat')", href="#", @click="$emit('createChannel')")  {{ $t('ChannelBrowser:create:label') }}
+		bunt-input(v-model="search", icon="search", name="search", :placeholder="$t('ChannelBrowser:search:placeholder')")
 		scrollbars.channels(y)
 			router-link.channel(v-for="channel of searchedChannels", :to="{name: 'room', params: {roomId: channel.room.id}}", @click.native="$emit('close')")
 				.channel-info
@@ -19,7 +19,7 @@ prompt.c-channel-browser(@close="$emit('close')", :scrollable="false")
 			.no-results(v-if="search && searchedChannels.length === 0") {{ $t('ChannelBrowser:search:empty') }}
 </template>
 <script>
-import {mapGetters, mapState} from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import Prompt from 'components/Prompt'
 import fuzzysearch from 'lib/fuzzysearch'
 
@@ -38,7 +38,7 @@ export default {
 		channels () {
 			return this.rooms
 				.filter(room => room.modules.length === 1 && room.modules[0].type === 'chat.native')
-				.map(room => ({room, channelJoined: this.joinedChannels.some(channel => channel.id === room.modules[0].channel_id)}))
+				.map(room => ({ room, channelJoined: this.joinedChannels.some(channel => channel.id === room.modules[0].channel_id) }))
 		},
 		searchedChannels () {
 			if (!this.search) return this.channels

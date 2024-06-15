@@ -9,7 +9,7 @@
 			.title {{ $localize(session.title) }}
 			.speakers {{ session.speakers ? session.speakers.map(s => s.name).join(', ') : '' }}
 		.room-content(v-if="modules['question'] || modules['poll']", :class="unreadTabsClasses")
-			bunt-tabs(v-if="(!!modules['question'] + !!modules['poll']) > 1 && activeSidebarTab", :active-tab="activeSidebarTab")
+			bunt-tabs(v-if="(!!modules['question'] + !!modules['poll']) > 1 && activeSidebarTab", :activeTab="activeSidebarTab")
 				bunt-tab(v-if="modules['poll']", id="polls", :header="$t('Room:sidebar:tabs-header:polls')", @selected="activeSidebarTab = 'polls'")
 				bunt-tab(v-if="modules['question']", id="questions", :header="$t('Room:sidebar:tabs-header:questions')", @selected="activeSidebarTab = 'questions'")
 				bunt-tab(v-if="sessions", id="schedule", :header="$t('standalone/Anonymous:tabs-header:schedule')", @selected="activeSidebarTab = 'schedule'")

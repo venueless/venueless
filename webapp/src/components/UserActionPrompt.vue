@@ -1,5 +1,5 @@
 <template lang="pug">
-prompt.c-user-action-prompt(@close="$emit('close')", :class="[`action-${action}`]")
+prompt.c-user-action-prompt(:class="[`action-${action}`]", @close="$emit('close')")
 	.content
 		h2(v-if="success") {{ $t(`UserActionPrompt:action.${actionLabel}:confirmation`) }}
 		h2(v-else) {{ $t(`UserActionPrompt:action.${actionLabel}:question`) }}
@@ -11,7 +11,7 @@ prompt.c-user-action-prompt(@close="$emit('close')", :class="[`action-${action}`
 		.explanation {{ $t(`UserActionPrompt:action.${actionLabel}:explanation`) }}
 		.actions
 			bunt-button.btn-cancel(v-if="!success", @click="$emit('close')") {{ $t(`Prompt:cancel:label`) }}
-			bunt-button.btn-action(@click="takeAction", :loading="loading", :error-message="error") {{ $t(`UserActionPrompt:action.${actionLabel}:execute:label`) }}
+			bunt-button.btn-action(:loading="loading", :errorMessage="error", @click="takeAction") {{ $t(`UserActionPrompt:action.${actionLabel}:execute:label`) }}
 </template>
 <script>
 import Prompt from 'components/Prompt'
@@ -55,9 +55,9 @@ export default {
 					reactivate: this.user.moderation_state === 'banned' ? 'unbanned' : 'unsilenced'
 				}
 				if (this.action === 'block') {
-					await this.$store.dispatch('chat/blockUser', {user: this.user})
+					await this.$store.dispatch('chat/blockUser', { user: this.user })
 				} else {
-					await this.$store.dispatch('chat/moderateUser', {action: this.action, user: this.user})
+					await this.$store.dispatch('chat/moderateUser', { action: this.action, user: this.user })
 				}
 				this.success = successLabels[this.action]
 				setTimeout(() => this.$emit('close'), this.closeDelay)

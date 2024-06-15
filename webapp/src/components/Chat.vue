@@ -2,17 +2,17 @@
 .c-chat(:class="[mode]")
 	template(v-if="channel")
 		.main-chat
-			scrollbars.timeline(y, ref="timeline", @scroll="timelineScrolled", v-resize-observer="onResize", @resize="onResize")
+			scrollbars.timeline(ref="timeline", v-resize-observer="onResize", y, @scroll="timelineScrolled", @resize="onResize")
 				infinite-scroll(v-if="syncedScroll", :loading="fetchingMessages", @load="fetchMessages")
 					div
-				chat-message(v-for="(message, index) of filteredTimeline", :message="message", :previousMessage="filteredTimeline[index - 1]", :nextMessage="filteredTimeline[index + 1]", :mode="mode", :key="message.event_id", @showUserCard="showUserCard")
+				chat-message(v-for="(message, index) of filteredTimeline", :key="message.event_id", :message="message", :previousMessage="filteredTimeline[index - 1]", :nextMessage="filteredTimeline[index + 1]", :mode="mode", @showUserCard="showUserCard")
 			.warning(v-if="mergedWarning")
 				.content
 					ChatContent(:content="$t('Chat:warning:missed-users', {count: mergedWarning.missed_users.length, missedUsers: mergedWarning.missed_users})", @clickMention="showUserCard")
 				bunt-icon-button(@click="$store.dispatch('chat/dismissWarnings')") close
 			.chat-input
 				.no-permission(v-if="room && !room.permissions.includes('room:chat.join')") {{ $t('Chat:permission-block:room:chat.join') }}
-				bunt-button(v-else-if="!activeJoinedChannel", @click="join", :tooltip="$t('Chat:join-button:tooltip')") {{ $t('Chat:join-button:label') }}
+				bunt-button(v-else-if="!activeJoinedChannel", :tooltip="$t('Chat:join-button:tooltip')", @click="join") {{ $t('Chat:join-button:label') }}
 				.no-permission(v-else-if="room && !room.permissions.includes('room:chat.send')") {{ $t('Chat:permission-block:room:chat.send') }}
 				chat-input(v-else, @send="send")
 		.user-list(v-if="mode === 'standalone' && showUserlist && $mq.above['m']")
@@ -103,7 +103,7 @@ export default {
 		connected (value) {
 			if (value) {
 				// resubscribe
-				this.$store.dispatch('chat/subscribe', {channel: this.module.channel_id, config: this.module.config})
+				this.$store.dispatch('chat/subscribe', { channel: this.module.channel_id, config: this.module.config })
 			}
 		},
 		async filteredTimeline () {
@@ -116,9 +116,9 @@ export default {
 		}
 	},
 	created () {
-		this.$store.dispatch('chat/subscribe', {channel: this.module.channel_id, config: this.module.config})
+		this.$store.dispatch('chat/subscribe', { channel: this.module.channel_id, config: this.module.config })
 	},
-	beforeDestroy () {
+	beforeUnmount () {
 		this.$store.dispatch('chat/unsubscribe')
 	},
 	methods: {
@@ -141,7 +141,7 @@ export default {
 			this.$store.dispatch('chat/join')
 		},
 		send (content) {
-			this.$store.dispatch('chat/sendMessage', {content})
+			this.$store.dispatch('chat/sendMessage', { content })
 		},
 		async showUserCard (event, user, placement = 'left-start') {
 			console.log(user.id)

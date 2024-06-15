@@ -99,7 +99,7 @@ export default {
 		// TODO make this configurable?
 		const sponsorRoom = this.rooms.find(r => r.id === this.module.config.sponsor_room_id)
 		if (!sponsorRoom) return
-		this.sponsors = (await api.call('exhibition.list', {room: sponsorRoom.id})).exhibitors
+		this.sponsors = (await api.call('exhibition.list', { room: sponsorRoom.id })).exhibitors
 		await this.$nextTick()
 		const splide = new Splide(this.$refs.sponsors, {
 			type: 'loop',
@@ -119,7 +119,7 @@ export default {
 		})
 
 		splide.on('click', (slide) => {
-			this.$router.push({name: 'exhibitor', params: {exhibitorId: this.sponsors[slide.slideIndex].id}})
+			this.$router.push({ name: 'exhibitor', params: { exhibitorId: this.sponsors[slide.slideIndex].id } })
 		})
 
 		splide.mount()

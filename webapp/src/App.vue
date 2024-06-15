@@ -1,5 +1,5 @@
 <template lang="pug">
-.v-app(:class="{'has-background-room': backgroundRoom, 'override-sidebar-collapse': overrideSidebarCollapse}", :style="[browserhackStyle, mediaConstraintsStyle]", :key="`${userLocale}-${userTimezone}`")
+.v-app(:key="`${userLocale}-${userTimezone}`", :class="{'has-background-room': backgroundRoom, 'override-sidebar-collapse': overrideSidebarCollapse}", :style="[browserhackStyle, mediaConstraintsStyle]")
 	.fatal-connection-error(v-if="fatalConnectionError")
 		template(v-if="fatalConnectionError.code === 'world.unknown_world'")
 			.mdi.mdi-help-circle
@@ -27,7 +27,7 @@
 		template(v-for="mediaSource of stableMediaSources")
 			media-source(v-if="mediaSource", v-bind="mediaSource", :ref="(el) => mediaSourceRefs[mediaSource.type] = el")
 		#media-source-iframes
-		notifications(:has-background-media="!!backgroundRoom")
+		notifications(:hasBackgroundMedia="!!backgroundRoom")
 		.disconnected-warning(v-if="!connected") {{ $t('App:disconnected-warning:text') }}
 		transition(name="prompt")
 			greeting-prompt(v-if="!user.profile.greeted")
@@ -197,7 +197,7 @@ export default {
 		window.addEventListener('resize', this.onResize)
 		window.addEventListener('focus', this.onFocus, true)
 	},
-	destroyed () {
+	unmounted () {
 		window.removeEventListener('resize', this.onResize)
 		window.removeEventListener('focus', this.onFocus)
 	},

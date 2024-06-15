@@ -14,22 +14,22 @@
 				bunt-input(v-model="time_start", label="Start of day", name="time_start", :validation="v$.time_start")
 			div
 				bunt-input(v-model="time_end", label="End of day", name="time_end", :validation="v$.time_end")
-		bunt-button.btn-generate(@click="generateSummary", :error="task == 'summary' && error") Generate PDF
-		bunt-button.btn-secondary(@click="generateRoomviews", :error="task == 'roomviews' && error") Room activity (XLSX)
-		bunt-button.btn-secondary(v-if="world.pretalx", @click="generateSessionviews", :error="task == 'sessionviews' && error") Session activity (XLSX)
-		bunt-button.btn-secondary(@click="generateViews", :error="task == 'views' && error") Raw tracking data (XLSX)
+		bunt-button.btn-generate(:error="task == 'summary' && error", @click="generateSummary") Generate PDF
+		bunt-button.btn-secondary(:error="task == 'roomviews' && error", @click="generateRoomviews") Room activity (XLSX)
+		bunt-button.btn-secondary(v-if="world.pretalx", :error="task == 'sessionviews' && error", @click="generateSessionviews") Session activity (XLSX)
+		bunt-button.btn-secondary(:error="task == 'views' && error", @click="generateViews") Raw tracking data (XLSX)
 		h3 Attendee list
-		bunt-button.btn-generate(@click="run('attendee_list', {})", :error="task == 'attendee_list' && error") Generate XLSX for event
-		bunt-button.btn-generate(@click="run('attendee_session_list', {})", :error="task == 'attendee_session_list' && error") Generate XLSX per session
+		bunt-button.btn-generate(:error="task == 'attendee_list' && error", @click="run('attendee_list', {})") Generate XLSX for event
+		bunt-button.btn-generate(:error="task == 'attendee_session_list' && error", @click="run('attendee_session_list', {})") Generate XLSX per session
 		h3 Chat history
-		bunt-select(v-model="channel", label="Room", name="channel", :options="channels", option-label="name")
-		bunt-button.btn-generate(@click="run('chat_history', {channel})", :disabled="!channel", :error="task == 'chat_history' && error") Generate XLSX
+		bunt-select(v-model="channel", label="Room", name="channel", :options="channels", optionLabel="name")
+		bunt-button.btn-generate(:disabled="!channel", :error="task == 'chat_history' && error", @click="run('chat_history', {channel})") Generate XLSX
 		h3 Questions
-		bunt-select(v-model="questionRoom", label="Room", name="questionRoom", :options="questionRooms", option-label="name")
-		bunt-button.btn-generate(@click="run('question_history', {room: questionRoom})", :disabled="!questionRoom", :error="task == 'question_history' && error") Generate XLSX
+		bunt-select(v-model="questionRoom", label="Room", name="questionRoom", :options="questionRooms", optionLabel="name")
+		bunt-button.btn-generate(:disabled="!questionRoom", :error="task == 'question_history' && error", @click="run('question_history', {room: questionRoom})") Generate XLSX
 		h3 Polls
-		bunt-select(v-model="pollRoom", label="Room", name="pollRoom", :options="pollRooms", option-label="name")
-		bunt-button.btn-generate(@click="run('poll_history', {room: pollRoom})", :disabled="!pollRoom", :error="task == 'poll_history' && error") Generate XLSX
+		bunt-select(v-model="pollRoom", label="Room", name="pollRoom", :options="pollRooms", optionLabel="name")
+		bunt-button.btn-generate(:disabled="!pollRoom", :error="task == 'poll_history' && error", @click="run('poll_history', {room: pollRoom})") Generate XLSX
 	transition(name="prompt")
 		prompt.report-result-prompt(v-if="running || result", @close="clear")
 			.content
@@ -45,7 +45,7 @@ import { useVuelidate } from '@vuelidate/core'
 import { mapState } from 'vuex'
 import api from 'lib/api'
 import moment from 'lib/timetravelMoment'
-import {helpers, required} from '@vuelidate/validators'
+import { helpers, required } from '@vuelidate/validators'
 import Prompt from 'components/Prompt'
 
 const day = helpers.regex(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/)
@@ -53,7 +53,7 @@ const time = helpers.regex(/^[0-9]{2}:[0-9]{2}$/)
 
 export default {
 	components: { Prompt },
-	setup: () => ({ v$: useVuelidate()}),
+	setup: () => ({ v$: useVuelidate() }),
 	data () {
 		return {
 			day_start: moment().format('YYYY-MM-DD'),
@@ -112,7 +112,7 @@ export default {
 			required,
 		},
 	},
-	destroyed () {
+	unmounted () {
 		window.clearTimeout(this.timeout)
 	},
 	methods: {

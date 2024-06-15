@@ -13,9 +13,9 @@
 		template(v-else-if="!isManaging")
 			bunt-button#btn-ask-question(v-if="hasPermission('room:question.ask')", @click="question = ''; showAskingForm = true") {{ $t('Questions:ask-question-button:label') }}
 			//- v-else ?
-	.questions(v-if="questions && module.config.active", :class="{'can-vote': hasPermission('room:question.vote')}", v-scrollbar.y="")
+	.questions(v-if="questions && module.config.active", v-scrollbar.y="", :class="{'can-vote': hasPermission('room:question.vote')}")
 		.empty-placeholder(v-if="sortedQuestions.length === 0") {{ $t('Questions:empty-placeholder') }}
-		question(v-for="question of sortedQuestions", :question="question", :key="question.id")
+		question(v-for="question of sortedQuestions", :key="question.id", :question="question")
 </template>
 <script>
 import { mapState, mapGetters } from 'vuex'
@@ -23,6 +23,11 @@ import Question from './Question'
 
 export default {
 	components: { Question },
+	inject: {
+		isManaging: {
+			default: false
+		}
+	},
 	props: {
 		module: {
 			type: Object,
@@ -30,11 +35,6 @@ export default {
 		}
 	},
 	emits: ['change'],
-	inject: {
-		isManaging: {
-			default: false
-		}
-	},
 	data () {
 		return {
 			question: '',

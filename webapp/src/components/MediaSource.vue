@@ -8,9 +8,9 @@
 				.room-name(v-else="call") {{ $t('MediaSource:call:label') }}
 			.global-placeholder
 			bunt-icon-button(@click.prevent.stop="$emit('close')") close
-	livestream(v-if="room && module.type === 'livestream.native'", ref="livestream", :room="room", :module="module", :size="background ? 'tiny' : 'normal'", :key="`livestream-${room.id}`")
-	janus-call(v-else-if="room && module.type === 'call.janus'", ref="janus", :room="room", :module="module", :background="background", :size="background ? 'tiny' : 'normal'", :key="`janus-${room.id}`")
-	janus-channel-call(v-else-if="call", ref="janus", :call="call", :background="background", :size="background ? 'tiny' : 'normal'", :key="`call-${call.id}`", @close="$emit('close')")
+	livestream(v-if="room && module.type === 'livestream.native'", ref="livestream", :key="`livestream-${room.id}`", :room="room", :module="module", :size="background ? 'tiny' : 'normal'")
+	janus-call(v-else-if="room && module.type === 'call.janus'", ref="janus", :key="`janus-${room.id}`", :room="room", :module="module", :background="background", :size="background ? 'tiny' : 'normal'")
+	janus-channel-call(v-else-if="call", ref="janus", :key="`call-${call.id}`", :call="call", :background="background", :size="background ? 'tiny' : 'normal'", @close="$emit('close')")
 	.iframe-error(v-if="iframeError") {{ $t('MediaSource:iframe-error:text') }}
 </template>
 <script>
@@ -74,11 +74,11 @@ export default {
 		}
 		this.initializeIframe()
 	},
-	beforeDestroy () {
+	beforeUnmount () {
 		this.iframe?.remove()
 		if (api.socketState !== 'open') return
 		// TODO move to store?
-		if (this.room) api.call('room.leave', {room: this.room.id})
+		if (this.room) api.call('room.leave', { room: this.room.id })
 	},
 	methods: {
 		async initializeIframe () {
@@ -87,12 +87,12 @@ export default {
 				let hideIfBackground = false
 				switch (this.module.type) {
 					case 'call.bigbluebutton': {
-						({url: iframeUrl} = await api.call('bbb.room_url', {room: this.room.id}))
+						({ url: iframeUrl } = await api.call('bbb.room_url', { room: this.room.id }))
 						hideIfBackground = true
 						break
 					}
 					case 'call.zoom': {
-						({url: iframeUrl} = await api.call('zoom.room_url', {room: this.room.id}))
+						({ url: iframeUrl } = await api.call('zoom.room_url', { room: this.room.id }))
 						hideIfBackground = true
 						break
 					}

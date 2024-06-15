@@ -9,14 +9,14 @@
 					img.preview(:src="`https://picsum.photos/64?v=${index}`")
 					.info
 						.title {{ $localize(session.title) }}
-						.speakers(v-if="session.speakers") {{ session.speakers.map(s => s.name).join(', ')}}
+						.speakers(v-if="session.speakers") {{ session.speakers.map(s => s.name).join(', ') }}
 					.time {{ formatTime(session.start) }}-{{ formatTime(session.end) }}
 			.selected-session(v-if="selectedSession")
 				img.preview(:src="`https://picsum.photos/64`")
 				h3 DETAIL VIEW HERE
 				.info
 					.title {{ $localize(selectedSession.title) }}
-					.speakers(v-if="selectedSession.speakers") {{ selectedSession.speakers.map(s => s.name).join(', ')}}
+					.speakers(v-if="selectedSession.speakers") {{ selectedSession.speakers.map(s => s.name).join(', ') }}
 				.time {{ formatTime(selectedSession.start) }}-{{ formatTime(selectedSession.end) }}
 				bunt-button#btn-change(@click="change") change to
 </template>
@@ -48,7 +48,7 @@ export default {
 			return value.format('HH:mm')
 		},
 		change () {
-			this.$store.dispatch('updateRoomSchedule', {room: this.room, schedule_data: {session: this.selectedSession.id}})
+			this.$store.dispatch('updateRoomSchedule', { room: this.room, schedule_data: { session: this.selectedSession.id } })
 			this.$emit('close')
 		}
 	}

@@ -3,12 +3,12 @@
 	.ui-page-header
 		h1 Event Config
 	scrollbars(y)
-		bunt-progress-circular(size="huge", v-if="!config && !error")
+		bunt-progress-circular(v-if="!config && !error", size="huge")
 		.error(v-if="error") We could not fetch the current configuration.
 		.ui-form-body(v-if="config")
 			h2 System details
 			bunt-input(v-model="config.title", label="Title", name="title", :validation="v$.config.title")
-			bunt-select(v-model="config.locale", label="Language", name="locale", :options="locales", option-value="code", option-label="nativeLabel")
+			bunt-select(v-model="config.locale", label="Language", name="locale", :options="locales", optionValue="code", optionLabel="nativeLabel")
 			bunt-select(v-model="config.dateLocale", label="Date locale", name="dateLocale", :options="momentLocales")
 			bunt-input(v-model="config.timezone", label="Time zone", name="timezone", :validation="v$.config.timezone")
 			bunt-input(v-model="config.connection_limit", label="Connection limit", name="connection_limit", hint="Set to 0 to allow unlimited connections per user", :validation="v$.config.connection_limit")
@@ -32,10 +32,10 @@
 			h2 Settings for stages
 			bunt-input-outline-container(label="hls.js config", :class="{error: v$.hlsConfig.$invalid}")
 				template(#default="{focus, blur}")
-					textarea(@focus="focus", @blur="blur", v-model="hlsConfig")
+					textarea(v-model="hlsConfig", @focus="focus", @blur="blur")
 			.json-error-message {{ v$.hlsConfig.isJson.$message }}
 	.ui-form-actions
-		bunt-button.btn-save(@click="save", :loading="saving", :error-message="error") Save
+		bunt-button.btn-save(:loading="saving", :errorMessage="error", @click="save") Save
 		.errors {{ validationErrors.join(', ') }}
 </template>
 <script>
@@ -60,7 +60,7 @@ const momentLocaleSet = [
 
 export default {
 	mixins: [ValidationErrorsMixin],
-	setup: () => ({ v$: useVuelidate()}),
+	setup: () => ({ v$: useVuelidate() }),
 	data () {
 		return {
 			config: null,

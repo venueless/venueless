@@ -108,7 +108,7 @@ export default {
 		}
 	},
 	actions: {
-		async fetch ({state, getters}) {
+		async fetch ({ state, getters }) {
 			// TODO error handling
 			if (!getters.pretalxScheduleUrl) return
 			// const version = await (await fetch(`${getters.pretalxApiBaseUrl}/schedules/`)).json()
@@ -119,7 +119,7 @@ export default {
 				state.errorLoading = error
 			}
 		},
-		async fav ({state, dispatch, rootState}, id) {
+		async fav ({ state, dispatch, rootState }, id) {
 			let favs = rootState.user.client_state.schedule?.favs
 			if (!favs) {
 				favs = []
@@ -132,18 +132,18 @@ export default {
 				await dispatch('saveFavs', favs)
 			}
 		},
-		async unfav ({state, dispatch, rootState}, id) {
+		async unfav ({ state, dispatch, rootState }, id) {
 			let favs = rootState.user.client_state.schedule?.favs
 			if (!favs) return
 			rootState.user.client_state.schedule.favs = favs = favs.filter(fav => fav !== id)
 			await dispatch('saveFavs', favs)
 		},
-		async saveFavs ({rootState}, favs) {
+		async saveFavs ({ rootState }, favs) {
 			await api.call('user.update', {
 				client_state: {
 					...rootState.user.client_state,
 					schedule: {
-						favs: favs
+						favs
 					}
 				}
 			})

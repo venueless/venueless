@@ -5,10 +5,10 @@
 		h1 New kiosk
 	.scroll-wrapper(v-scrollbar.y="")
 		.ui-form-body
-			bunt-input(name="name", v-model="profile.display_name", label="Name", :validation="v$.profile.display_name")
-			bunt-select(v-model="profile.room_id", label="Room", name="room", :options="rooms", option-label="name", :validation="v$.profile.room_id")
+			bunt-input(v-model="profile.display_name", name="name", label="Name", :validation="v$.profile.display_name")
+			bunt-select(v-model="profile.room_id", label="Room", name="room", :options="rooms", optionLabel="name", :validation="v$.profile.room_id")
 	.ui-form-actions
-		bunt-button.btn-save(@click="save", :loading="saving", :error-message="error") create
+		bunt-button.btn-save(:loading="saving", :errorMessage="error", @click="save") create
 		.errors {{ validationErrors.join(', ') }}
 </template>
 <script>
@@ -21,7 +21,7 @@ import ValidationErrorsMixin from 'components/mixins/validation-errors'
 export default {
 	components: {},
 	mixins: [ValidationErrorsMixin],
-	setup: () => ({ v$: useVuelidate()}),
+	setup: () => ({ v$: useVuelidate() }),
 	data () {
 		return {
 			profile: {
@@ -56,7 +56,7 @@ export default {
 				const response = await api.call('user.kiosk.create', {
 					profile: this.profile
 				})
-				this.$router.replace({name: 'admin:kiosks:item', params: {kioskId: response.user}})
+				this.$router.replace({ name: 'admin:kiosks:item', params: { kioskId: response.user } })
 			} catch (e) {
 				this.error = e.message
 			} finally {

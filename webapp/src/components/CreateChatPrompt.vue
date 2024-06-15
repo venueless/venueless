@@ -4,19 +4,19 @@ prompt.c-create-chat-prompt(@close="$emit('close')")
 		h1 {{ $t('CreateChatPrompt:headline:text') }}
 		p {{ $t('CreateChatPrompt:intro:text') }}
 		form(@submit.prevent="create")
-			bunt-select(name="type", :label="$t('CreateChatPrompt:type:label')", v-model="type", :options="types", dropdownClass="dropdown-menu-create-chat-prompt")
+			bunt-select(v-model="type", name="type", :label="$t('CreateChatPrompt:type:label')", :options="types", dropdownClass="dropdown-menu-create-chat-prompt")
 				//- TODO
 				template(#default="{ option }")
 					.mdi(:class="`mdi-${option.icon}`")
 					.label {{ option.label }}
-			bunt-input(name="name", :label="$t('CreateChatPrompt:name:label')", :icon="selectedType.icon", :placeholder="$t('CreateChatPrompt:name:placeholder')", v-model="name")
+			bunt-input(v-model="name", name="name", :label="$t('CreateChatPrompt:name:label')", :icon="selectedType.icon", :placeholder="$t('CreateChatPrompt:name:placeholder')")
 			bunt-input-outline-container(:label="$t('CreateChatPrompt:description:label')")
 				template(#default="{focus, blur}")
 					textarea(v-model="description", @focus="focus", @blur="blur")
 			bunt-button(type="submit", :loading="loading") {{ $t('CreateChatPrompt:submit:label') }}
 </template>
 <script>
-import {mapGetters} from 'vuex'
+import { mapGetters } from 'vuex'
 import Prompt from 'components/Prompt'
 
 export default {
@@ -79,7 +79,7 @@ export default {
 			})
 			// TODO error handling
 			this.loading = false
-			this.$router.push({name: 'room', params: {roomId: room}})
+			this.$router.push({ name: 'room', params: { roomId: room } })
 			this.$emit('close')
 		}
 	}

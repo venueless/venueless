@@ -3,8 +3,8 @@ prompt.c-create-room-prompt(@close="$emit('close')")
 	.content
 		h1 {{ $t('CreateRoomPrompt:headline:text') }}
 		form(@submit.prevent="create")
-			bunt-input(name="name", :label="$t('CreateRoomPrompt:name:label')", :placeholder="$t('CreateRoomPrompt:name:placeholder')", v-model="name", :validation="v$.name")
-			bunt-button(type="submit", :loading="loading", :error-message="error") {{ $t('CreateRoomPrompt:submit:label') }}
+			bunt-input(v-model="name", name="name", :label="$t('CreateRoomPrompt:name:label')", :placeholder="$t('CreateRoomPrompt:name:placeholder')", :validation="v$.name")
+			bunt-button(type="submit", :loading="loading", :errorMessage="error") {{ $t('CreateRoomPrompt:submit:label') }}
 </template>
 <script>
 import { useVuelidate } from '@vuelidate/core'
@@ -14,7 +14,7 @@ import { required } from 'lib/validators'
 export default {
 	components: { Prompt },
 	emits: ['close'],
-	setup: () => ({ v$: useVuelidate()}),
+	setup: () => ({ v$: useVuelidate() }),
 	data () {
 		return {
 			name: '',
@@ -44,7 +44,7 @@ export default {
 					modules: []
 				}))
 				this.loading = false
-				this.$router.push({name: 'admin:room', params: {editRoomId: room}})
+				this.$router.push({ name: 'admin:room', params: { editRoomId: room } })
 				this.$emit('close')
 			} catch (error) {
 				console.log(error)

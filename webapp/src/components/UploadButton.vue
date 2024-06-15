@@ -1,12 +1,12 @@
 <template lang="pug">
 .c-upload-button
-	label(:for="id", :class="buttonClass", v-tooltip="tooltipOptions || {text: _tooltip, placement: tooltipPlacement, fixed: tooltipFixed}")
+	label(v-tooltip="tooltipOptions || {text: _tooltip, placement: tooltipPlacement, fixed: tooltipFixed}", :for="id", :class="buttonClass")
 		i.bunt-icon.mdi(v-if="iconClass", :class="iconClass")
 		.bunt-button-content
 			.bunt-button-text
 				slot
 		ripple-ink
-	input(:id="id", type="file", @change="$emit('change', $event)", :accept="accept" :multiple="multiple")
+	input(:id="id", type="file", :accept="accept", :multiple="multiple" @change="$emit('change', $event)")
 </template>
 <script>
 import { v4 as uuid } from 'uuid'
@@ -17,7 +17,6 @@ export default {
 	mixins: [
 		RippleInk
 	],
-	emits: ['change'],
 	props: {
 		accept: String,
 		multiple: Boolean,
@@ -33,6 +32,7 @@ export default {
 		},
 		tooltipOptions: Object
 	},
+	emits: ['change'],
 	data () {
 		return {
 			id: 'file-input' + uuid() // we need to generate a unique id for label "for" to work with multiple existing upload inputs

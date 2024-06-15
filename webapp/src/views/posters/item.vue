@@ -1,7 +1,7 @@
 <template lang="pug">
 .v-poster
 	template(v-if="poster")
-		bunt-tabs(v-if="$mq.below['1200px']", :active-tab="activeTab")
+		bunt-tabs(v-if="$mq.below['1200px']", :activeTab="activeTab")
 			bunt-tab(id="info", :header="$t('posters/item:tabs:info:header')", @selected="activeTab = 'info'")
 			bunt-tab(id="poster", :header="$t('posters/item:tabs:poster:header')", @selected="activeTab = 'poster'")
 			bunt-tab(id="chat", :header="$t('posters/item:tabs:presentation:header')", @selected="activeTab = 'chat'")
@@ -120,7 +120,7 @@ export default {
 		}
 	},
 	async created () {
-		this.poster = await api.call('poster.get', {poster: this.posterId})
+		this.poster = await api.call('poster.get', { poster: this.posterId })
 		this.renderPdf()
 	},
 	methods: {
@@ -132,8 +132,8 @@ export default {
 				const canvasRect = canvas.getBoundingClientRect()
 				const pdf = await pdfjs.getDocument(this.poster.poster_url).promise
 				const page = await pdf.getPage(1)
-				const unscaledViewport = page.getViewport({scale: 1})
-				const viewport = page.getViewport({scale: canvasRect.width / unscaledViewport.width})
+				const unscaledViewport = page.getViewport({ scale: 1 })
+				const viewport = page.getViewport({ scale: canvasRect.width / unscaledViewport.width })
 				canvas.height = viewport.height
 				canvas.width = viewport.width
 				await page.render({
@@ -148,11 +148,11 @@ export default {
 		async like () {
 			// TODO error handling
 			if (this.poster.has_voted) {
-				await api.call('poster.unvote', {poster: this.poster.id})
+				await api.call('poster.unvote', { poster: this.poster.id })
 				this.poster.votes--
 				this.poster.has_voted = false
 			} else {
-				await api.call('poster.vote', {poster: this.poster.id})
+				await api.call('poster.vote', { poster: this.poster.id })
 				this.poster.votes++
 				this.poster.has_voted = true
 			}

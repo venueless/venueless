@@ -2,27 +2,27 @@
 .c-permissionconfig
 	.ui-page-header
 		h1 Permission Config
-	bunt-progress-circular(size="huge", v-if="!error && !config")
+	bunt-progress-circular(v-if="!error && !config", size="huge")
 	.error(v-if="error") We could not fetch the current configuration.
 	bunt-tabs(v-if="config")
 		bunt-tab(header="Global")
-			scrollbars(y, key="global").permission-config
+			scrollbars(key="global", y).permission-config
 				.info
 					h3 Roles assigned to traits globally
 					p Users receive the following roles if they have the required traits in their token/ticket. Global roles are valid for #[b all rooms].
-				trait-grants(:trait-grants="config.trait_grants", :config="config")
+				trait-grants(:traitGrants="config.trait_grants", :config="config")
 		bunt-tab(header="Per Room")
-			scrollbars(y, key="per-room").permission-config
+			scrollbars(key="per-room", y).permission-config
 				.info
 					h3 Roles assigned to traits #[i per room]
 					p Users receive the following roles if they have the required traits in their token/ticket. #[b Per room roles] only apply for the corresponding room and they are applied #[b in addition to global roles].
 				.searchbox
-					bunt-input.search(name="search", placeholder="Search rooms", icon="search", v-model="search")
+					bunt-input.search(v-model="search", name="search", placeholder="Search rooms", icon="search")
 				.room-traits(v-for="room of filteredRooms")
 					h4 {{ room.name }}
-					trait-grants(:trait-grants="room.trait_grants", :config="config", @click.stop="", @changed="roomChanged(room)")
+					trait-grants(:traitGrants="room.trait_grants", :config="config", @click.stop="", @changed="roomChanged(room)")
 		bunt-tab(header="Roles")
-			scrollbars(y, key="roles").permission-config
+			scrollbars(key="roles", y).permission-config
 				.info-wrapper
 					.info
 						h3 Roles
@@ -37,16 +37,16 @@
 						bunt-checkbox(v-for="p of config.available_permissions", :label="p", :modelValue="val.includes(p)", name="p", @update:modelValue="togglePermission(key, p, $event)")
 				.role-add
 					.role-head
-						bunt-input(label="role name", v-model="newRoleName", name="newRoleName")
-						bunt-button.btn-add-role(@click="addRole", :disabled="!newRoleName || newRoleName in config.roles") Add new role
+						bunt-input(v-model="newRoleName", label="role name", name="newRoleName")
+						bunt-button.btn-add-role(:disabled="!newRoleName || newRoleName in config.roles", @click="addRole") Add new role
 		bunt-tab(header="On-site")
 			.permission-config
 				.ui-form-body
 					h3 Traits enabling on-site behaviour
 					p Users with the following traits will be treated as on-site attendees. This currently only disables stream autoplaying by default.
-					bunt-input.onsite-traits(name="onsite-traits", label="On-site Traits", v-model="onsiteTraits")
+					bunt-input.onsite-traits(v-model="onsiteTraits", name="onsite-traits", label="On-site Traits")
 	.ui-form-actions
-		bunt-button.btn-save(@click="save", :loading="saving", :error-message="error") Save
+		bunt-button.btn-save(:loading="saving", :errorMessage="error", @click="save") Save
 </template>
 <script>
 import api from 'lib/api'

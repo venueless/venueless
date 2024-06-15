@@ -2,14 +2,14 @@
 .c-scheduleconfig
 	.ui-page-header
 	scrollbars(y)
-		bunt-progress-circular(size="huge", v-if="!error && !config")
+		bunt-progress-circular(v-if="!error && !config", size="huge")
 		.error(v-if="error") We could not fetch the current configuration.
 		.ui-form-body(v-if="config")
-			bunt-select(name="source", label="Schedule source", v-model="source", :options="sourceOptions")
+			bunt-select(v-model="source", name="source", label="Schedule source", :options="sourceOptions")
 			template(v-if="source === 'pretalx'")
 				p To use pretalx for your event, enter the domain of the pretalx server you use and the short form name of your event. We'll then pull in the schedule automatically and keep it updated. You must be using pretalx version 2 or later.
-				bunt-input(name="domain", label="pretalx domain", v-model="config.pretalx.domain", placeholder="e.g. https://pretalx.com/", hint="must have the format https://…/", :validation="v$.config.pretalx.domain")
-				bunt-input(name="event", label="pretalx event slug", v-model="config.pretalx.event", placeholder="e.g. democon")
+				bunt-input(v-model="config.pretalx.domain", name="domain", label="pretalx domain", placeholder="e.g. https://pretalx.com/", hint="must have the format https://…/", :validation="v$.config.pretalx.domain")
+				bunt-input(v-model="config.pretalx.event", name="event", label="pretalx event slug", placeholder="e.g. democon")
 				h2 Pretalx Connection
 				template(v-if="config.pretalx.connected")
 					p Your pretalx instance has successfully connected to venueless.
@@ -28,18 +28,18 @@
 					bunt-button#btn-pretalx-connect(:disabled="!isPretalxPluginInstalled", :loading="connecting", @click="startPretalxConnect") {{ !config.pretalx.connected ? 'Connect to pretalx' : 'Reconnect to pretalx' }}
 			template(v-else-if="source === 'url'")
 				p To automatically load the schedule from an external system, enter an URL here. Note that the URL must be a JSON file compliant with the pretalx schedule widget API version 2.
-				bunt-input(name="url", label="JSON URL", v-model="config.pretalx.url", placeholder="e.g. https://website.com/event.json", :validation="v$.config.pretalx.url")
+				bunt-input(v-model="config.pretalx.url", name="url", label="JSON URL", placeholder="e.g. https://website.com/event.json", :validation="v$.config.pretalx.url")
 			template(v-else-if="source === 'file'")
 				p If you don't use pretalx, you can upload your schedule as a Microsoft Excel file (XLSX) with a specific setup.
 				p
 					a(href="/schedule_ex_en.xlsx", target="_blank") Download English sample file
 					| {{ " / " }}
 					a(href="/schedule_ex_de.xlsx", target="_blank") Download German sample file
-				upload-url-input(name="schedule-file", v-model="config.pretalx.url", label="Schedule file", :upload-url="uploadUrl", accept="application/vnd.ms-excel, .xlsx", :validation="v$.config.pretalx.url")
+				upload-url-input(v-model="config.pretalx.url", name="schedule-file", label="Schedule file", :uploadUrl="uploadUrl", accept="application/vnd.ms-excel, .xlsx", :validation="v$.config.pretalx.url")
 			template(v-else-if="source === 'conftool'")
 				p conftool is controlled by the main conftool settings.
 	.ui-form-actions
-		bunt-button.btn-save(@click="save", :loading="saving", :error-message="error") Save
+		bunt-button.btn-save(:loading="saving", :errorMessage="error", @click="save") Save
 		.errors {{ validationErrors.join(', ') }}
 </template>
 <script>
@@ -57,7 +57,7 @@ import ValidationErrorsMixin from 'components/mixins/validation-errors'
 export default {
 	components: { UploadUrlInput },
 	mixins: [ValidationErrorsMixin],
-	setup: () => ({ v$: useVuelidate()}),
+	setup: () => ({ v$: useVuelidate() }),
 	data () {
 		return {
 			uploadUrl: config.api.scheduleImport,
@@ -72,13 +72,13 @@ export default {
 	computed: {
 		sourceOptions () {
 			const sourceOptions = [
-				{id: null, label: 'No Schedule'},
-				{id: 'pretalx', label: 'Pretalx'},
-				{id: 'file', label: 'File Upload'},
-				{id: 'url', label: 'External URL'},
+				{ id: null, label: 'No Schedule' },
+				{ id: 'pretalx', label: 'Pretalx' },
+				{ id: 'file', label: 'File Upload' },
+				{ id: 'url', label: 'External URL' },
 			]
 			if (this.$features.enabled('conftool')) {
-				sourceOptions.push({id: 'conftool', label: 'Conftool'})
+				sourceOptions.push({ id: 'conftool', label: 'Conftool' })
 			}
 			return sourceOptions
 		},
@@ -199,7 +199,7 @@ export default {
 			// save pretalx config first
 			if (!await this.save()) return
 			this.connecting = true
-			const {results: [token]} = await api.call('world.tokens.generate', {
+			const { results: [token] } = await api.call('world.tokens.generate', {
 				number: 1,
 				days: 365,
 				traits: ['schedule-update'],
@@ -212,7 +212,7 @@ export default {
 			this.v$.$touch()
 			if (this.v$.$invalid) return false
 			this.saving = true
-			await api.call('world.config.patch', {pretalx: this.config.pretalx})
+			await api.call('world.config.patch', { pretalx: this.config.pretalx })
 			// TODO error handling
 			this.saving = false
 			return true

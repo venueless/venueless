@@ -3,12 +3,12 @@
 	.inputs
 		bunt-button.btn-randomize(@click="changeIdenticon") {{ $t('profile/ChangeAvatar:button-randomize:label') }}
 		span {{ $t('profile/ChangeAvatar:or') }}
-		upload-button.btn-upload(@change="fileSelected", accept="image/png, image/jpg, .png, .jpg, .jpeg") {{ $t('profile/ChangeAvatar:button-upload:label') }}
+		upload-button.btn-upload(accept="image/png, image/jpg, .png, .jpg, .jpeg", @change="fileSelected") {{ $t('profile/ChangeAvatar:button-upload:label') }}
 	.image-wrapper
 		.file-error(v-if="fileError")
 			.mdi.mdi-alert-octagon
 			.message {{ fileError }}
-		cropper(v-else-if="avatarImage", ref="cropper", class="cropper", :stencil-component="$options.components.CircleStencil", :src="avatarImage", :stencil-props="{aspectRatio: '1/1'}", :size-restrictions-algorithm="pixelsRestrictions")
+		cropper(v-else-if="avatarImage", ref="cropper", class="cropper", :stencilComponent="$options.components.CircleStencil", :src="avatarImage", :stencilProps="{aspectRatio: '1/1'}", :sizeRestrictionsAlgorithm="pixelsRestrictions")
 		identicon(v-else, :user="identiconUser", @click="changeIdenticon")
 </template>
 <script>
@@ -90,19 +90,19 @@ export default {
 				img.src = event.target.result
 			}
 		},
-		pixelsRestrictions ({minWidth, minHeight, maxWidth, maxHeight, imageWidth, imageHeight}) {
+		pixelsRestrictions ({ minWidth, minHeight, maxWidth, maxHeight, imageWidth, imageHeight }) {
 			return {
 				minWidth: Math.max(128, minWidth),
 				minHeight: Math.max(128, minHeight),
-				maxWidth: maxWidth,
-				maxHeight: maxHeight,
+				maxWidth,
+				maxHeight,
 			}
 		},
 		update () {
 			return new Promise((resolve, reject) => {
 				const { canvas } = this.$refs.cropper?.getResult() || {}
 				if (!canvas) {
-					this.$emit('update:modelValue', {identicon: this.identicon})
+					this.$emit('update:modelValue', { identicon: this.identicon })
 					return resolve()
 				}
 				if (!this.changedImage) return resolve()
@@ -111,7 +111,7 @@ export default {
 					const request = api.uploadFile(blob, 'avatar.png', null, MAX_AVATAR_SIZE, MAX_AVATAR_SIZE)
 					request.addEventListener('load', (event) => {
 						const response = JSON.parse(request.responseText)
-						this.$emit('update:modelValue', {url: response.url})
+						this.$emit('update:modelValue', { url: response.url })
 						resolve()
 					})
 				}, 'image/png') // TODO use original mimetype

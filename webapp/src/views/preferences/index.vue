@@ -7,21 +7,21 @@
 			.avatar-wrapper
 				avatar(:user="{profile}", :size="128")
 				bunt-button#btn-change-avatar(@click="showChangeAvatar = true") {{ $t('preferences/index:btn-change-avatar:label') }}
-			bunt-input.display-name(name="displayName", :label="$t('profile/GreetingPrompt:displayname:label')", v-model.trim="profile.display_name", :validation="v$.profile.display_name")
+			bunt-input.display-name(v-model.trim="profile.display_name", name="displayName", :label="$t('profile/GreetingPrompt:displayname:label')", :validation="v$.profile.display_name")
 			change-additional-fields(v-model="profile.fields")
 			template(v-if="languages")
 				h2 {{ $t('preferences/index:interface-language:header') }}
-				bunt-select#select-interface-language(name="interface-language", v-model="interfaceLanguage", :options="languages", option-value="code", option-label="nativeLabel")
+				bunt-select#select-interface-language(v-model="interfaceLanguage", name="interface-language", :options="languages", optionValue="code", optionLabel="nativeLabel")
 			h2 {{ $t('preferences/index:notifications:header') }}
 			p {{ $t('preferences/index:notifications:description') }}
 			bunt-button#btn-enable-desktop-notifications(v-if="notificationPermission === 'default'", icon="bell", @click="$store.dispatch('notifications/askForPermission')") {{ $t('preferences/index:btn-enable-desktop-notifications:label') }}
 			.notification-permission-denied(v-else-if="notificationPermission === 'denied'") {{ $t('preferences/index:notification-permission-denied-warning') }}
 			template(v-else)
-				bunt-switch(name="notificationSettings.notify", :label="$t('preferences/index:switch-enable-desktop-notifications:label')", v-model="notificationSettings.notify")
-				bunt-switch(name="notificationSettings.playSounds", :label="$t('preferences/index:switch-enable-desktop-notification-sound:label')", v-model="notificationSettings.playSounds")
+				bunt-switch(v-model="notificationSettings.notify", name="notificationSettings.notify", :label="$t('preferences/index:switch-enable-desktop-notifications:label')")
+				bunt-switch(v-model="notificationSettings.playSounds", name="notificationSettings.playSounds", :label="$t('preferences/index:switch-enable-desktop-notification-sound:label')")
 			h2 {{ $t('preferences/index:autoplay:header') }}
 			p {{ $t('preferences/index:autoplay:description') }}
-			bunt-switch(name="autoplay", v-model="autoplay", :label="$t('preferences/index:switch-autoplay:label')")
+			bunt-switch(v-model="autoplay", name="autoplay", :label="$t('preferences/index:switch-autoplay:label')")
 	.ui-form-actions
 		bunt-button#btn-save(:disabled="v$.$invalid && v$.$dirty", :loading="saving", @click="save") {{ $t('preferences/index:btn-save:label') }}
 	transition(name="prompt")
@@ -47,8 +47,8 @@ import ConnectGravatar from 'components/profile/ConnectGravatar'
 import { required } from 'lib/validators'
 
 export default {
-	components: { Avatar, Prompt, ChangeAvatar, ChangeAdditionalFields, ConnectGravatar},
-	setup: () => ({ v$: useVuelidate()}),
+	components: { Avatar, Prompt, ChangeAvatar, ChangeAdditionalFields, ConnectGravatar },
+	setup: () => ({ v$: useVuelidate() }),
 	data () {
 		return {
 			profile: null,
@@ -91,7 +91,7 @@ export default {
 		async uploadAvatar () {
 			this.savingAvatar = true
 			await this.$refs.avatar.update()
-			await this.$store.dispatch('updateUser', {profile: Object.assign({}, this.user.profile, {avatar: this.profile.avatar})})
+			await this.$store.dispatch('updateUser', { profile: Object.assign({}, this.user.profile, { avatar: this.profile.avatar }) })
 			this.showChangeAvatar = false
 			this.savingAvatar = false
 		},
@@ -99,7 +99,7 @@ export default {
 			this.v$.$touch()
 			if (this.v$.$invalid) return
 			this.saving = true
-			await this.$store.dispatch('updateUser', {profile: this.profile})
+			await this.$store.dispatch('updateUser', { profile: this.profile })
 			this.$store.dispatch('notifications/updateSettings', this.notificationSettings)
 			this.$store.dispatch('setAutoplay', this.autoplay)
 			localStorage.userLanguage = this.interfaceLanguage

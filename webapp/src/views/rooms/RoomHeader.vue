@@ -21,7 +21,7 @@
 <script>
 // TODO
 // better ellipsing for room name + session title on small screens
-import {mapGetters, mapState} from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import { inferRoomType } from 'lib/room-types'
 import RecordingsPrompt from 'components/RecordingsPrompt'
 import QRCodePrompt from 'components/QRCodePrompt'

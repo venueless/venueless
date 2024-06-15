@@ -8,7 +8,7 @@
 				bunt-button.btn-dm(v-if="!user.deleted", @click="openDM") message
 				bunt-button.btn-call(v-if="!user.deleted", @click="startCall") call
 				bunt-button.btn-reactivate(v-if="user.moderation_state", @click="userAction = 'reactivate'")
-					| {{ user.moderation_state === 'banned' ? 'unban' : 'unsilence'}}
+					| {{ user.moderation_state === 'banned' ? 'unban' : 'unsilence' }}
 				bunt-button.btn-delete(v-if="!user.deleted", @click="userAction = 'delete'") {{ $t('UserAction:action.delete:label') }}
 				bunt-button.btn-ban(v-if="!user.deleted && user.moderation_state !== 'banned'", @click="userAction = 'ban'") ban
 				bunt-button.btn-silence(v-if="!user.deleted && !user.moderation_state", @click="userAction = 'silence'") silence
@@ -17,8 +17,8 @@
 		scrollbars.user-info(y)
 			.avatar-wrapper
 				avatar(:user="user", :size="128")
-				bunt-button#btn-change-avatar(@click="showChangeAvatar = true", v-if="edit") {{ $t('preferences/index:btn-change-avatar:label') }}
-			bunt-input.display-name(name="displayName", :label="$t('profile/GreetingPrompt:displayname:label')", v-model.trim="user.profile.display_name", :validation="v$.user.profile.display_name", :disabled="!edit")
+				bunt-button#btn-change-avatar(v-if="edit", @click="showChangeAvatar = true") {{ $t('preferences/index:btn-change-avatar:label') }}
+			bunt-input.display-name(v-model.trim="user.profile.display_name", name="displayName", :label="$t('profile/GreetingPrompt:displayname:label')", :validation="v$.user.profile.display_name", :disabled="!edit")
 			bunt-input(name="id", label="ID", :modelValue="user.id", :disabled="true")
 			bunt-input(name="token_id", label="External ID", :modelValue="user.token_id", :disabled="true")
 			bunt-input(name="mod_state", label="Moderation state", :modelValue="user.moderation_state || '-'", :disabled="true")
@@ -47,10 +47,10 @@ import { required } from 'lib/validators'
 
 export default {
 	components: { Avatar, Prompt, UserActionPrompt, ChangeAdditionalFields, ChangeAvatar },
-	setup: () => ({ v$: useVuelidate()}),
 	props: {
 		userId: String
 	},
+	setup: () => ({ v$: useVuelidate() }),
 	data () {
 		return {
 			user: null,
@@ -77,25 +77,25 @@ export default {
 		}),
 	},
 	async created () {
-		this.user = await api.call('user.fetch', {id: this.userId})
+		this.user = await api.call('user.fetch', { id: this.userId })
 	},
 	methods: {
 		async openDM () {
 			// TODO loading indicator
-			await this.$store.dispatch('chat/openDirectMessage', {users: [this.user]})
+			await this.$store.dispatch('chat/openDirectMessage', { users: [this.user] })
 		},
 		async startCall () {
-			const channel = await this.$store.dispatch('chat/openDirectMessage', {users: [this.user]})
-			await this.$store.dispatch('chat/startCall', {channel})
+			const channel = await this.$store.dispatch('chat/openDirectMessage', { users: [this.user] })
+			await this.$store.dispatch('chat/startCall', { channel })
 		},
 		async completedUserAction () {
 			this.userAction = null
-			this.user = await api.call('user.fetch', {id: this.userId})
+			this.user = await api.call('user.fetch', { id: this.userId })
 		},
 		async uploadAvatar () {
 			this.savingAvatar = true
 			await this.$refs.avatar.update()
-			await this.$store.dispatch('adminUpdateUser', {profile: Object.assign({}, this.user.profile, {avatar: this.user.profile.avatar}), id: this.user.id})
+			await this.$store.dispatch('adminUpdateUser', { profile: Object.assign({}, this.user.profile, { avatar: this.user.profile.avatar }), id: this.user.id })
 			this.showChangeAvatar = false
 			this.savingAvatar = false
 			this.edit = false
@@ -104,7 +104,7 @@ export default {
 			this.v$.$touch()
 			if (this.v$.$invalid) return
 			this.saving = true
-			await this.$store.dispatch('adminUpdateUser', {profile: this.user.profile, id: this.user.id})
+			await this.$store.dispatch('adminUpdateUser', { profile: this.user.profile, id: this.user.id })
 			this.saving = false
 			this.edit = false
 		}

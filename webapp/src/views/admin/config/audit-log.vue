@@ -2,14 +2,14 @@
 .c-auditlog
 	.ui-page-header
 		h1 Audit Log
-	bunt-input.search(name="search", placeholder="Search log", icon="search", v-model="search")
+	bunt-input.search(v-model="search", name="search", placeholder="Search log", icon="search")
 	.auditlog-list
 		.header
 			.timestamp Timestamp
 			.user User
 			.type Action type
 			.data Data
-		RecycleScroller.tbody.bunt-scrollbar(v-if="filteredEntries", :items="filteredEntries", :item-size="48", v-slot="{item: entry}", v-scrollbar.y="")
+		RecycleScroller.tbody.bunt-scrollbar(v-if="filteredEntries", v-slot="{item: entry}", v-scrollbar.y="", :items="filteredEntries", :itemSize="48")
 			div.logentry.table-row(@click.prevent="detailsPrompt = entry")
 				.timestamp {{ moment(entry.timestamp).format('L LT') }}
 				.user

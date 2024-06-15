@@ -6,7 +6,7 @@
 		.domain {{ domain }}
 		.toc(v-if="config.policy_url") By showing this external content you accept their #[a(:href="config.policy_url") terms and conditions].
 		bunt-button#btn-show(@click="showOnce") Show external content
-		bunt-checkbox(name="remember", v-model="remember") Remember my choice
+		bunt-checkbox(v-model="remember", name="remember") Remember my choice
 </template>
 <script>
 import store from 'store'

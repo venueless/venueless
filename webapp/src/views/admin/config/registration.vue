@@ -3,17 +3,17 @@
 	.ui-page-header
 		h1 User Profile
 	scrollbars(y)
-		bunt-progress-circular(size="huge", v-if="!error && !config")
+		bunt-progress-circular(v-if="!error && !config", size="huge")
 		.error(v-if="error") We could not fetch the current configuration.
 		bunt-tabs(v-if="config")
 			bunt-tab(header="Social Connections")
-				scrollbars(y, key="social").ui-form-body
+				scrollbars(key="social", y).ui-form-body
 					p Let users connect to the following social networks when they first visit your event. Connecting to a social network fills the user's profile with data available from the social connection, like name, avatar and link to the social network profile.
-					bunt-checkbox(name="social-twitter", v-model="socialTwitter") Twitter
-					bunt-checkbox(name="social-linkedin", v-model="socialLinkedIn") LinkedIn
-					bunt-checkbox(name="social-gravatar", v-model="socialGravatar") Gravatar
+					bunt-checkbox(v-model="socialTwitter", name="social-twitter") Twitter
+					bunt-checkbox(v-model="socialLinkedIn", name="social-linkedin") LinkedIn
+					bunt-checkbox(v-model="socialGravatar", name="social-gravatar") Gravatar
 			bunt-tab(header="Additional Fields")
-				scrollbars(v-if="config", y, key="additional-fields").additional-fields-form
+				scrollbars(v-if="config", key="additional-fields", y).additional-fields-form
 					// TODO REORDER
 					table.additional-fields
 							thead
@@ -36,7 +36,7 @@
 									td
 										bunt-input(v-if="field.type === 'select'", v-model="field.choices", label="Choices (comma seperated)", name="choices")
 										bunt-select.link-network(v-if="field.type === 'link'", v-model="field.network", label="Link Type", name="link-type", :options="socialNetworks", dropdownClass="dropdown-menu-registrations-link-network")
-											template(v-slot="{ option }")
+											template(#default="{ option }")
 												.mdi(:class="`mdi-${option}`")
 												.label {{ option }}
 									td
@@ -53,7 +53,7 @@
 									td
 									td
 	.ui-form-actions
-		bunt-button.btn-save(@click="save", :loading="saving", :error-message="error") Save
+		bunt-button.btn-save(:loading="saving", :errorMessage="error", @click="save") Save
 </template>
 <script>
 import api from 'lib/api'
@@ -113,7 +113,7 @@ export default {
 	},
 	methods: {
 		addField () {
-			this.config.profile_fields.push({id: uuid(), label: '', type: 'text', searchable: false})
+			this.config.profile_fields.push({ id: uuid(), label: '', type: 'text', searchable: false })
 		},
 		removeField (field) {
 			delete this.config.profile_fields[field]

@@ -36,7 +36,7 @@ export default {
 			state.dismissedAnnouncements.push(announcement.id)
 			localStorage.setItem('dismissedAnnouncements', JSON.stringify(state.dismissedAnnouncements))
 		},
-		async 'api::announcement.created_or_updated' ({state}, announcement) {
+		async 'api::announcement.created_or_updated' ({ state }, announcement) {
 			const existingAnnouncement = state.rawAnnouncements.find(a => a.id === announcement.id)
 			if (existingAnnouncement) {
 				for (let [key, value] of Object.entries(announcement)) {

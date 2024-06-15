@@ -2,7 +2,7 @@
 scrollbars.c-exhibitor(y)
 	.content-wrapper(v-if="exhibitor")
 		.content
-			img.banner(:src="exhibitor.banner_detail", v-if="exhibitor.banner_detail && !bannerIsVideo && !bannerIsFrame")
+			img.banner(v-if="exhibitor.banner_detail && !bannerIsVideo && !bannerIsFrame", :src="exhibitor.banner_detail")
 			.iframe-banner(v-else-if="bannerIsFrame")
 				iframe(:src="bannerVideoSource", allowfullscreen, allow="fullscreen")
 			.video-banner(v-else-if="bannerIsVideo")
@@ -16,7 +16,7 @@ scrollbars.c-exhibitor(y)
 					.filename {{ link.display_text }}
 		.sidebar
 			.header
-				img.logo(:src="exhibitor.logo", v-if="exhibitor.logo")
+				img.logo(v-if="exhibitor.logo", :src="exhibitor.logo")
 				.heading
 					h2.name {{ exhibitor.name }}
 					h3.tagline(v-if="exhibitor.tagline") {{ exhibitor.tagline }}
@@ -29,7 +29,7 @@ scrollbars.c-exhibitor(y)
 				bunt-button(@click="joinRoom") {{ $t('Exhibition:room-button:label') }}
 			template(v-if="exhibitor.staff.length > 0")
 				.contact(v-if="hasPermission('world:exhibition.contact') && exhibitor.contact_enabled")
-					bunt-button(@click="showContactPrompt = true", :tooltip="$t('Exhibition:contact-button:tooltip')") {{ $t('Exhibition:contact-button:label') }}
+					bunt-button(:tooltip="$t('Exhibition:contact-button:tooltip')", @click="showContactPrompt = true") {{ $t('Exhibition:contact-button:label') }}
 				.staff
 					h3 {{ $t("Exhibitor:staff-headline:text") }}
 					.user(v-for="user in exhibitor.staff", @click="showUserCard($event, user)")
@@ -38,7 +38,7 @@ scrollbars.c-exhibitor(y)
 	bunt-progress-circular(v-else, size="huge", :page="true")
 	chat-user-card(v-if="selectedUser", ref="avatarCard", :user="selectedUser", @close="selectedUser = null")
 	transition(name="prompt")
-		contact-exhibitor-prompt(v-if="showContactPrompt", @close="showContactPrompt = false", :exhibitor="exhibitor")
+		contact-exhibitor-prompt(v-if="showContactPrompt", :exhibitor="exhibitor", @close="showContactPrompt = false")
 </template>
 <script>
 // TODO
@@ -106,7 +106,7 @@ export default {
 	},
 	async created () {
 		if (this.exhibitor) return
-		this.exhibitorApi = (await api.call('exhibition.get', {exhibitor: this.exhibitorId})).exhibitor
+		this.exhibitorApi = (await api.call('exhibition.get', { exhibitor: this.exhibitorId })).exhibitor
 	},
 	methods: {
 		prettifyUrl (link) {
@@ -118,7 +118,7 @@ export default {
 			}
 		},
 		joinRoom () {
-			this.$router.push({name: 'room', params: {roomId: this.exhibitor.highlighted_room_id}})
+			this.$router.push({ name: 'room', params: { roomId: this.exhibitor.highlighted_room_id } })
 		},
 		async showUserCard (event, user) {
 			this.selectedUser = user

@@ -109,20 +109,19 @@ function nextSlide () {
 }
 
 for (const slide of SLIDES) {
-		if (slide.watch) {
-			watch(slide.watch, () => {
-				if (slide.condition()) {
-					activeSlide = slide
-				} else {
-					nextSlide()
-				}
-			})
-		}
+	if (slide.watch) {
+		watch(slide.watch, () => {
+			if (slide.condition()) {
+				activeSlide = slide
+			} else {
+				nextSlide()
+			}
+		})
 	}
+}
 
 onMounted(() => {
 	nextSlide()
-	
 })
 
 </script>

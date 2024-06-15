@@ -11,7 +11,7 @@ export default [{
 	presenters: [{
 		id: 'eeb3dc26-8fe7-4564-96f9-36fa30ec6150',
 		profile: {
-			avatar: {identicon: '17743ee3-6659-4757-824e-9982a1457814'},
+			avatar: { identicon: '17743ee3-6659-4757-824e-9982a1457814' },
 			display_name: 'Presenter McPresentface'
 		}
 	}],
@@ -33,7 +33,7 @@ export default [{
 	presenters: [{
 		id: 'eeb3dc26-8fe7-4564-96f9-36fa30ec6150',
 		profile: {
-			avatar: {identicon: '17743ee3-6659-4757-824e-9982a1457814'},
+			avatar: { identicon: '17743ee3-6659-4757-824e-9982a1457814' },
 			display_name: 'Presenter McPresentface'
 		}
 	}],
@@ -54,7 +54,7 @@ export default [{
 	presenters: [{
 		id: 'eeb3dc26-8fe7-4564-96f9-36fa30ec6150',
 		profile: {
-			avatar: {identicon: '17743ee3-6659-4757-824e-9982a1457814'},
+			avatar: { identicon: '17743ee3-6659-4757-824e-9982a1457814' },
 			display_name: 'Presenter McPresentface'
 		}
 	}],

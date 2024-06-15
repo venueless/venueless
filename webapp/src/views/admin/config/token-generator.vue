@@ -5,11 +5,11 @@
 	scrollbars(y).ui-form-body
 		bunt-input(v-model="number", label="Number", name="number", :validation="v$.number")
 		bunt-input(v-model="days", label="Days", name="days", :validation="v$.days")
-		bunt-input(label="Traits (comma-separated)", @update:modelValue="set_traits($event)", name="t", :modelValue="traits ? traits.join(', ') : ''")
-		bunt-button.btn-generate(@click="save", :loading="saving") Generate
+		bunt-input(label="Traits (comma-separated)", name="t", :modelValue="traits ? traits.join(', ') : ''", @update:modelValue="set_traits($event)")
+		bunt-button.btn-generate(:loading="saving", @click="save") Generate
 		bunt-input-outline-container(label="Result")
 			template(#default="{focus, blur}")
-				textarea(@focus="focus", @blur="blur", v-model="result")
+				textarea(v-model="result", @focus="focus", @blur="blur")
 </template>
 <script>
 import { useVuelidate } from '@vuelidate/core'
@@ -18,7 +18,7 @@ import api from 'lib/api'
 import { DEFAULT_COLORS, DEFAULT_LOGO } from 'theme'
 
 export default {
-	setup: () => ({ v$: useVuelidate()}),
+	setup: () => ({ v$: useVuelidate() }),
 	data () {
 		return {
 			traits: [],
@@ -44,9 +44,9 @@ export default {
 			this.config = await api.call('world.config.get')
 
 			// Enforce some defaults
-			this.config.theme = {logo: {}, colors: {}, streamOfflineImage: null, textOverwrites: {}, ...this.config.theme}
-			this.config.theme.colors = {...DEFAULT_COLORS, ...this.config.theme.colors}
-			this.config.theme.logo = {...DEFAULT_LOGO, ...this.config.theme.logo}
+			this.config.theme = { logo: {}, colors: {}, streamOfflineImage: null, textOverwrites: {}, ...this.config.theme }
+			this.config.theme.colors = { ...DEFAULT_COLORS, ...this.config.theme.colors }
+			this.config.theme.logo = { ...DEFAULT_LOGO, ...this.config.theme.logo }
 		} catch (error) {
 			this.error = error
 			console.log(error)

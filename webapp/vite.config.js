@@ -11,7 +11,7 @@ const stylusOptions = {
 		path.resolve(__dirname, './src/styles'),
 		'node_modules'
 	],
-	use: [BuntpapierStylus({implicit: false})],
+	use: [BuntpapierStylus({ implicit: false })],
 	imports: [
 		'buntpapier/buntpapier/index.styl',
 		path.resolve(__dirname, 'src/styles/variables.styl'),
@@ -23,7 +23,7 @@ export default {
 	server: {
 		port: 8880
 	},
-	plugins:[
+	plugins: [
 		vue(),
 		ReactivityTransform(),
 		// globbing thousands of emojis absolutely wrecks vite, let's just static copy them, they likely won't change

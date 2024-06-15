@@ -14,7 +14,6 @@ import Avatar from 'components/Avatar'
 
 export default {
 	components: { Avatar },
-	emits: ['toggleSidebar'],
 	props: {
 		showActions: {
 			type: Boolean,
@@ -25,6 +24,7 @@ export default {
 			default: false
 		}
 	},
+	emits: ['toggleSidebar'],
 	data () {
 		return {
 			theme

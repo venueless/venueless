@@ -6,11 +6,11 @@
 		.actions
 	.trait-grant(v-for="(val, key) of traitGrants")
 		.role {{ key }}
-		bunt-input.traits(name="trait-grant", :modelValue="getTraitGrants(val)", @update:modelValue="setTraitGrants(key, $event)", placeholder="(everyone)")
+		bunt-input.traits(name="trait-grant", :modelValue="getTraitGrants(val)", placeholder="(everyone)", @update:modelValue="setTraitGrants(key, $event)")
 		.actions
 			bunt-icon-button(@click="removeTraitGrant(key)") delete-outline
 	.add-role
-		bunt-select(name="remainingRoles", label="New role", :options="remainingRoles", v-model="newRole")
+		bunt-select(v-model="newRole", name="remainingRoles", label="New role", :options="remainingRoles")
 		bunt-button.btn-add-role(@click="addTraitGrant") Add role
 </template>
 <script>

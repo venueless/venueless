@@ -5,8 +5,8 @@ import WebSocketClient from './WebSocketClient'
 let api = null
 export { api as default }
 
-export function initApi ({store, token, clientId, inviteToken}) {
-	api = new WebSocketClient(`${config.api.socket}`, {token, clientId, inviteToken})
+export function initApi ({ store, token, clientId, inviteToken }) {
+	api = new WebSocketClient(`${config.api.socket}`, { token, clientId, inviteToken })
 	api.connect()
 
 	api.on('closed', () => {
@@ -32,7 +32,7 @@ export function initApi ({store, token, clientId, inviteToken}) {
 		}
 	})
 
-	api.on('log', ({direction, data}) => {
+	api.on('log', ({ direction, data }) => {
 		const payload = JSON.parse(data)
 		const action = payload.shift()
 		let correlationId
@@ -69,13 +69,14 @@ export function initApi ({store, token, clientId, inviteToken}) {
 		request.send(data)
 		return request
 	}
-	
+
 	// TODO unify, rename, progress support
 	api.uploadFilePromise = function (file, filename, url) {
 		url = url || config.api.upload
 		const data = new FormData()
 		data.append('file', file, filename)
-		const authHeader = api._config.token ? `Bearer ${api._config.token}`
+		const authHeader = api._config.token
+			? `Bearer ${api._config.token}`
 			: (api._config.clientId ? `Client ${api._config.clientId}` : null)
 		return fetch(url, {
 			method: 'POST',
@@ -98,7 +99,7 @@ export function initApi ({store, token, clientId, inviteToken}) {
 // 	console.log('CONNECT')
 // 	Object.assign(api, new WebSocketClient(`${config.api.socket}`, {token, clientId, inviteToken}))
 // 	WebSocketClient.prototype.connect.call(api)
-	
+
 // }
 
 // if (import.meta.hot) {
@@ -114,4 +115,3 @@ export function initApi ({store, token, clientId, inviteToken}) {
 //     console.log('NNNL', newModule)
 //   })
 // }
-

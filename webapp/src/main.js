@@ -25,14 +25,14 @@ import { emojiPlugin } from 'lib/emoji'
 import features from 'features'
 import config from 'config'
 
-async function init ({token, inviteToken}) {
+async function init ({ token, inviteToken }) {
 	const app = createApp(RouterView)
 	app.use(store)
 	app.use(router)
 	app.use(Buntpapier)
 	app.use(VueVirtualScroller)
-	app.component('scrollbars', Scrollbars)
-	app.component('link-icon-button', LinkIconButton)
+	app.component('Scrollbars', Scrollbars)
+	app.component('LinkIconButton', LinkIconButton)
 	app.use(MediaQueries)
 	app.use(emojiPlugin)
 	app.use(dynamicLineClamp)
@@ -55,17 +55,17 @@ async function init ({token, inviteToken}) {
 	if (token) {
 		localStorage.token = token
 		router.replace(location.pathname)
-		store.dispatch('login', {token})
+		store.dispatch('login', { token })
 	} else if (localStorage.token) {
-		store.dispatch('login', {token: localStorage.token})
+		store.dispatch('login', { token: localStorage.token })
 	} else if (inviteToken && anonymousRoomId) {
 		const clientId = uuid()
 		localStorage[`clientId:room:${anonymousRoomId}`] = clientId
 		router.replace(location.pathname)
-		store.dispatch('login', {clientId, inviteToken})
+		store.dispatch('login', { clientId, inviteToken })
 	} else if (anonymousRoomId && localStorage[`clientId:room:${anonymousRoomId}`]) {
 		const clientId = localStorage[`clientId:room:${anonymousRoomId}`]
-		store.dispatch('login', {clientId})
+		store.dispatch('login', { clientId })
 	} else {
 		console.warn('no token found, login in anonymously')
 		let clientId = localStorage.clientId
@@ -73,12 +73,12 @@ async function init ({token, inviteToken}) {
 			clientId = uuid()
 			localStorage.clientId = clientId
 		}
-		store.dispatch('login', {clientId})
+		store.dispatch('login', { clientId })
 	}
 	if (store.state.token && jwtDecode(store.state.token).traits.includes('-kiosk')) {
-		store.watch(state => state.user, ({profile}) => {
-			router.replace({name: 'standalone:kiosk', params: {roomId: profile.room_id}})
-		}, {deep: true})
+		store.watch(state => state.user, ({ profile }) => {
+			router.replace({ name: 'standalone:kiosk', params: { roomId: profile.room_id } })
+		}, { deep: true })
 	}
 	store.dispatch('connect')
 
@@ -104,7 +104,7 @@ const inviteToken = hashParams.get('invite')
 if (config.externalAuthUrl && !token) {
 	window.location = config.externalAuthUrl
 } else {
-	init({token, inviteToken})
+	init({ token, inviteToken })
 }
 
 // remove all old service workers

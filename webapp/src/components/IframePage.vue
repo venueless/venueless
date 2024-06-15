@@ -1,12 +1,12 @@
 <template lang="pug">
 .c-iframe-page
-	bunt-progress-circular(size="huge", :page="true", v-if="loading")
+	bunt-progress-circular(v-if="loading", size="huge", :page="true")
 	iframe-blocker(:src="url", allow="camera *; autoplay *; microphone *; fullscreen *; display-capture *", allowfullscreen, allowusermedia, @load="loaded")
 </template>
 <script>
 // TODO
 // - what does loaded do?
-import {mapState} from 'vuex'
+import { mapState } from 'vuex'
 import IframeBlocker from './IframeBlocker'
 
 export default {
@@ -35,7 +35,7 @@ export default {
 	mounted () {
 		window.addEventListener('message', this.onMessage)
 	},
-	beforeDestroy () {
+	beforeUnmount () {
 		window.removeEventListener('message', this.onMessage)
 	},
 	methods: {

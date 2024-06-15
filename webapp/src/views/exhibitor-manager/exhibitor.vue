@@ -9,7 +9,7 @@
 				.button-group
 					bunt-button(:class="{enabled: !showPreview}", @click="showPreview = false") edit
 					bunt-button(:class="{enabled: showPreview}", @click="showPreview = true") preview
-				bunt-button.btn-save(@click="save", :loading="saving") {{ $t('Exhibitors:save:label') }}
+				bunt-button.btn-save(:loading="saving", @click="save") {{ $t('Exhibitors:save:label') }}
 		exhibitor-preview(v-show="showPreview", :exhibitorProp="exhibitor")
 		.main-form(v-show="!showPreview", v-scrollbar.y="")
 			bunt-input(v-model="exhibitor.name", :disabled="!hasPermission('world:rooms.create.exhibition')", :label="$t('Exhibitors:name:label')", name="name", :validation="v$.exhibitor.name")
@@ -17,15 +17,15 @@
 			bunt-input(v-model="exhibitor.short_text", :label="$t('Exhibitors:short-text:label')", name="shortText", :validation="v$.exhibitor.shortText")
 			bunt-input-outline-container(v-if="exhibitor.text_legacy", :label="$t('Exhibitors:text:label')")
 				template(#default="{focus, blur}")
-					textarea(@focus="focus", @blur="blur", v-model="exhibitor.text_legacy")
+					textarea(v-model="exhibitor.text_legacy", @focus="focus", @blur="blur")
 			rich-text-editor(v-else, v-model="exhibitor.text_content")
 			upload-url-input(v-model="exhibitor.logo", :label="$t('Exhibitors:logo:label')", name="logo", :validation="v$.exhibitor.logo")
 			upload-url-input(v-model="exhibitor.banner_list", :label="$t('Exhibitors:banner-list:label')", name="bannerList", :validation="v$.exhibitor.banner_list")
 			upload-url-input(v-model="exhibitor.banner_detail", :label="$t('Exhibitors:banner-detail:label')", name="bannerDetail", :validation="v$.exhibitor.banner_detail")
 			bunt-select(v-model="exhibitor.size", :disabled="!hasPermission('world:rooms.create.exhibition')", :label="$t('Exhibitors:size:label')", name="size", :options="sizes", :validation="v$.exhibitor.size")
 			bunt-input(v-model="exhibitor.sorting_priority", :disabled="!hasPermission('world:rooms.create.exhibition')", :label="$t('Exhibitors:sorting-priority:label')", name="sortingPriority", :validation="v$.exhibitor.sorting_priority")
-			bunt-select(v-model="exhibitor.room_id", :disabled="!hasPermission('world:rooms.create.exhibition')", :label="$t('Exhibitors:room:label')", name="room", :options="rooms", option-label="name", :validation="v$.exhibitor.room_id")
-			bunt-select(v-model="exhibitor.highlighted_room_id", :disabled="!hasPermission('world:rooms.create.exhibition')", :label="$t('Exhibitors:highlighted-room:label')", name="highlighted_room", :options="allRoomsOrNone", option-label="name", :validation="v$.exhibitor.highlighted_room_id")
+			bunt-select(v-model="exhibitor.room_id", :disabled="!hasPermission('world:rooms.create.exhibition')", :label="$t('Exhibitors:room:label')", name="room", :options="rooms", optionLabel="name", :validation="v$.exhibitor.room_id")
+			bunt-select(v-model="exhibitor.highlighted_room_id", :disabled="!hasPermission('world:rooms.create.exhibition')", :label="$t('Exhibitors:highlighted-room:label')", name="highlighted_room", :options="allRoomsOrNone", optionLabel="name", :validation="v$.exhibitor.highlighted_room_id")
 			table.links
 				thead
 					tr
@@ -37,7 +37,7 @@
 						td
 							bunt-select(v-model="link.display_text", :label="$t('Exhibitors:social-link-text:label')", name="displayText", :options="supportedNetworks", :validation="v$.exhibitor.social_media_links[index].display_text")
 						td
-							bunt-input(:modelValue="link.url", :label="$t('Exhibitors:link-url:label')", @update:modelValue="set_social_media_link_url(index, $event)", name="url", :validation="v$.exhibitor.social_media_links[index].url")
+							bunt-input(:modelValue="link.url", :label="$t('Exhibitors:link-url:label')", name="url", :validation="v$.exhibitor.social_media_links[index].url", @update:modelValue="set_social_media_link_url(index, $event)")
 						td.actions
 							bunt-icon-button(@click="remove_social_media_link(index)") delete-outline
 				tfoot
@@ -55,9 +55,9 @@
 				tbody
 					tr(v-for="(link, index) in exhibitor.profileLinks")
 						td
-							bunt-input(:modelValue="link.display_text", @update:modelValue="set_link_text(index, link.category, $event)", :label="$t('Exhibitors:link-text:label')", name="displayText", :validation="v$.exhibitor.profileLinks[index].display_text")
+							bunt-input(:modelValue="link.display_text", :label="$t('Exhibitors:link-text:label')", name="displayText", :validation="v$.exhibitor.profileLinks[index].display_text", @update:modelValue="set_link_text(index, link.category, $event)")
 						td
-							bunt-input(:modelValue="link.url", @update:modelValue="set_link_url(index, link.category, $event)", :label="$t('Exhibitors:link-url:label')", name="url", :validation="v$.exhibitor.profileLinks[index].url")
+							bunt-input(:modelValue="link.url", :label="$t('Exhibitors:link-url:label')", name="url", :validation="v$.exhibitor.profileLinks[index].url", @update:modelValue="set_link_url(index, link.category, $event)")
 						td.actions
 							bunt-icon-button(@click="remove_link(index, link.category)") delete-outline
 							bunt-icon-button(@click="up_link(index, link.category)") arrow-up-bold-outline
@@ -119,12 +119,12 @@
 			.content
 				p {{ $t('DeletePrompt:confirm:text') }}
 				.name {{ exhibitor.name }}
-				bunt-input(name="exhibitorName", :label="$t('Exhibitors:name:label')", v-model="deletingExhibitorName")
-				bunt-button.room(icon="delete", :disabled="deletingExhibitorName !== exhibitor.name", @click="deleteExhibitor", :loading="deleting", :error-message="deleteError") {{ $t('Exhibitors:delete:label') }}
+				bunt-input(v-model="deletingExhibitorName", name="exhibitorName", :label="$t('Exhibitors:name:label')")
+				bunt-button.room(icon="delete", :disabled="deletingExhibitorName !== exhibitor.name", :loading="deleting", :errorMessage="deleteError", @click="deleteExhibitor") {{ $t('Exhibitors:delete:label') }}
 	prompt.add-staff-prompt(v-if="showStaffPrompt", :scrollable="false", @close="showStaffPrompt=false")
 		.content
 			h1 {{ $t('Exhibitors:add-staff:text') }}
-			user-select(:button-label="$t('Exhibitors:add-staff:label')", @selected="add_staff")
+			user-select(:buttonLabel="$t('Exhibitors:add-staff:label')", @selected="add_staff")
 </template>
 <script>
 import { mapGetters } from 'vuex'
@@ -145,11 +145,11 @@ const absrelurl = (message) => helpers.withMessage(message, value => helpers.reg
 
 export default {
 	components: { Avatar, ExhibitorPreview, Prompt, UploadUrlInput, UserSelect, RichTextEditor },
-	setup: () => ({ v$: useVuelidate()}),
 	props: {
 		create: Boolean,
 		exhibitorId: String
 	},
+	setup: () => ({ v$: useVuelidate() }),
 	data () {
 		return {
 			exhibitor: null,
@@ -168,7 +168,7 @@ export default {
 		...mapGetters(['hasPermission']),
 		allRoomsOrNone () {
 			return [
-				{name: '', id: ''},
+				{ name: '', id: '' },
 				...this.$store.state.rooms
 			]
 		},
@@ -230,8 +230,8 @@ export default {
 				social_media_links: {},
 				profileLinks: {},
 				downloadLinks: {},
-				}
 			}
+		}
 
 		for (const [index, link] of this.exhibitor.social_media_links.entries()) {
 			rules.exhibitor.social_media_links[index] = {
@@ -279,9 +279,9 @@ export default {
 	async created () {
 		try {
 			if (!this.create) {
-				this.exhibitor = (await api.call('exhibition.get', {exhibitor: this.exhibitorId})).exhibitor
-				this.exhibitor['downloadLinks'] = this.exhibitor.links.filter(l => l.category === 'download').sort((a, b) => a.sorting_priority - b.sorting_priority)
-				this.exhibitor['profileLinks'] = this.exhibitor.links.filter(l => l.category === 'profile').sort((a, b) => a.sorting_priority - b.sorting_priority)
+				this.exhibitor = (await api.call('exhibition.get', { exhibitor: this.exhibitorId })).exhibitor
+				this.exhibitor.downloadLinks = this.exhibitor.links.filter(l => l.category === 'download').sort((a, b) => a.sorting_priority - b.sorting_priority)
+				this.exhibitor.profileLinks = this.exhibitor.links.filter(l => l.category === 'profile').sort((a, b) => a.sorting_priority - b.sorting_priority)
 			} else {
 				this.exhibitor = {
 					id: '',
@@ -301,8 +301,8 @@ export default {
 					staff: [],
 					contact_enabled: true,
 				}
-				this.exhibitor['downloadLinks'] = []
-				this.exhibitor['profileLinks'] = []
+				this.exhibitor.downloadLinks = []
+				this.exhibitor.profileLinks = []
 			}
 		} catch (error) {
 			this.error = error
@@ -314,7 +314,7 @@ export default {
 			delete this.exhibitor.social_media_links[link]
 		},
 		add_social_media_link () {
-			this.exhibitor.social_media_links.push({display_text: '', url: ''})
+			this.exhibitor.social_media_links.push({ display_text: '', url: '' })
 		},
 		set_social_media_link_text (index, displayText) {
 			this.exhibitor.social_media_links[index].display_text = displayText
@@ -331,9 +331,9 @@ export default {
 		},
 		add_link (category) {
 			if (category === 'profile') {
-				this.exhibitor.profileLinks.push({display_text: '', url: '', category: category, sorting_priority: 0})
+				this.exhibitor.profileLinks.push({ display_text: '', url: '', category, sorting_priority: 0 })
 			} else if (category === 'download') {
-				this.exhibitor.downloadLinks.push({display_text: '', url: '', category: category, sorting_priority: 0})
+				this.exhibitor.downloadLinks.push({ display_text: '', url: '', category, sorting_priority: 0 })
 			}
 		},
 		up_link (index, category) {
@@ -411,7 +411,7 @@ export default {
 				staff: this.exhibitor.staff,
 				contact_enabled: this.exhibitor.contact_enabled,
 			})).exhibitor
-			if (this.create) await router.push({name: 'exhibitors:exhibitor', params: {exhibitorId: exhibitor.id}})
+			if (this.create) await router.push({ name: 'exhibitors:exhibitor', params: { exhibitorId: exhibitor.id } })
 			this.saving = false
 			// TODO error handling
 		},
@@ -419,8 +419,8 @@ export default {
 			this.deleting = true
 			this.deleteError = null
 			try {
-				await api.call('exhibition.delete', {exhibitor: this.exhibitorId})
-				this.$router.replace({name: 'exhibitors'})
+				await api.call('exhibition.delete', { exhibitor: this.exhibitorId })
+				this.$router.replace({ name: 'exhibitors' })
 			} catch (error) {
 				this.deleteError = this.$t(`error:${error.code}`)
 			}

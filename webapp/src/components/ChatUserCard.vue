@@ -1,11 +1,11 @@
 <template lang="pug">
 .c-chat-user-card
 	.ui-background-blocker(v-if="!userAction", @click="$emit('close')")
-	.user-card(v-if="!userAction", :class="{deleted: user.deleted}", ref="card", @mousedown="showMoreActions=false")
+	.user-card(v-if="!userAction", ref="card", :class="{deleted: user.deleted}", @mousedown="showMoreActions=false")
 		scrollbars(y)
 			avatar(:user="user", :size="128")
 			.name
-				.online-status(v-if="!user.deleted", :class="onlineStatus ? 'online' : (onlineStatus === false ? 'offline' : 'unknown')", v-tooltip="onlineStatus ? $t('UserAction:state.online:tooltip') : (onlineStatus === false ? $t('UserAction:state.offline:tooltip') : '')")
+				.online-status(v-if="!user.deleted", v-tooltip="onlineStatus ? $t('UserAction:state.online:tooltip') : (onlineStatus === false ? $t('UserAction:state.offline:tooltip') : '')", :class="onlineStatus ? 'online' : (onlineStatus === false ? 'offline' : 'unknown')")
 				| {{ getUserName(user) }}
 				.ui-badge(v-for="badge in user.badges") {{ badge }}
 			ProfileFields(:user="user")
@@ -16,7 +16,7 @@
 				menu-dropdown(v-model="showMoreActions", :blockBackground="false", @mousedown.stop="")
 					template(#button="{toggle}")
 						bunt-icon-button(@click="toggle") dots-vertical
-					template(v-slot:menu)
+					template(#menu)
 						.unblock(v-if="isBlocked", @click="userAction = 'unblock'") {{ $t('UserAction:action.unblock:label') }}
 						.block(v-else, @click="userAction = 'block'") {{ $t('UserAction:action.block:label') }}
 						template(v-if="hasPermission('room:chat.moderate') && user.id !== ownUser.id")
@@ -75,18 +75,18 @@ export default {
 		}
 	},
 	async created () {
-		this.onlineStatus = (await api.call('user.online_status', {ids: [this.user.id]}))[this.user.id]
+		this.onlineStatus = (await api.call('user.online_status', { ids: [this.user.id] }))[this.user.id]
 		this.blockedUsers = (await api.call('user.list.blocked')).users
 	},
 	methods: {
 		getUserName,
 		async openDM () {
 			// TODO loading indicator
-			await this.$store.dispatch('chat/openDirectMessage', {users: [this.user]})
+			await this.$store.dispatch('chat/openDirectMessage', { users: [this.user] })
 		},
 		async startCall () {
-			const channel = await this.$store.dispatch('chat/openDirectMessage', {users: [this.user]})
-			await this.$store.dispatch('chat/startCall', {channel})
+			const channel = await this.$store.dispatch('chat/openDirectMessage', { users: [this.user] })
+			await this.$store.dispatch('chat/startCall', { channel })
 		}
 	}
 }
