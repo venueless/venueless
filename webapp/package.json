@@ -6,8 +6,9 @@
   "scripts": {
     "start": "vite",
     "build": "vite build",
-    "lint": "vue-cli-service lint",
-    "lint:nofix": "vue-cli-service lint --no-fix",
+    "lint": "npm run lint:eslint",
+    "lint:eslint": "eslint . --ext .js,.ts,.vue",
+    "lint:eslint:fix": "eslint . --ext .js,.ts,.vue --fix",
     "i18n:report": "vue-i18n-extract report -v './src/**/*.?(js|vue)' -l './src/locales/*.js'",
     "i18n:extract": "npx i18next-parser 'src/**/*.vue' -c i18next-parser.config.js",
     "analyze": "ANALYZE=true npm run build"
@@ -59,11 +60,19 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",
     "@vue-macros/reactivity-transform": "^0.4.3",
+    "@vue/eslint-config-typescript": "^13.0.0",
+    "@vue/language-plugin-pug": "^2.0.21",
+    "eslint": "^8.57.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-vue": "^9.26.0",
+    "eslint-plugin-vue-pug": "^0.6.2",
     "i18next-parser": "^4.7.0",
     "modernizr": "^3.11.3",
     "modernizr-loader": "^1.0.1",
     "pug": "^3.0.0",
     "sass": "^1.71.1",
+    "stylelint-config-standard": "^36.0.0",
+    "stylelint-plugin-stylus": "^1.0.0",
     "stylus": "^0.55.0",
     "vite": "^5.1.3",
     "vite-plugin-static-copy": "^1.0.1"
