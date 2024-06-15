@@ -34,6 +34,7 @@ bunt-input-outline-container.c-chat-input
 // - parse ascii emoticons ;)
 // - parse colon emoji :+1:
 // - add scrollbar when overflowing parent
+import { markRaw } from 'vue'
 import api from 'lib/api'
 import Quill from 'quill'
 import 'lib/quill/emoji'
@@ -71,7 +72,7 @@ export default {
 		}
 	},
 	mounted () {
-		this.quill = new Quill(this.$refs.editor, {
+		this.quill = markRaw(new Quill(this.$refs.editor, {
 			debug: ENV_DEVELOPMENT ? 'info' : 'warn',
 			placeholder: this.$t('ChatInput:input:placeholder'),
 			formats: ['emoji', 'mention'],
@@ -101,9 +102,8 @@ export default {
 					}
 				}
 			}
-		})
+		}))
 		this.quill.on('editor-change', this.onEditorChange)
-		this.quill.on('selection-change', this.onSelectionChange)
 		// TODO paste
 		if (this.message) {
 			this.quill.setContents(nativeToOps(this.message.content?.body))
@@ -281,6 +281,8 @@ export default {
 	&.bunt-input-outline-container
 		padding: 8px 60px 6px 36px
 	.ql-editor
+		padding: 0
+		min-height: 0
 		font-size: 16px
 		&.ql-blank::before
 			font-style: normal

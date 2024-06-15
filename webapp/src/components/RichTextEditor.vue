@@ -34,6 +34,7 @@ bunt-input-outline-container.c-rich-text-editor(ref="outline", :label="label")
 </template>
 <script>
 /* global ENV_DEVELOPMENT */
+import { markRaw } from 'vue'
 import Quill from 'quill'
 import BuntTheme from 'lib/quill/BuntTheme'
 import VideoResponsive from 'lib/quill/VideoResponsive'
@@ -60,7 +61,7 @@ export default {
 		Quill.register('themes/bunt', BuntTheme, false)
 		Quill.register(VideoResponsive)
 		Quill.register(fullWidthFormat)
-		this.quill = new Quill(this.$refs.editor, {
+		this.quill = markRaw(new Quill(this.$refs.editor, {
 			debug: ENV_DEVELOPMENT ? 'info' : 'warn',
 			theme: 'bunt',
 			modules: {
@@ -103,8 +104,8 @@ export default {
 				}
 			},
 			bounds: this.$refs.editor,
-		})
-		if (this.modelValue) {
+		}))
+		if (this.modelValue && this.modelValue.ops.length > 0) {
 			this.quill.setContents(this.modelValue)
 		}
 		this.quill.on('selection-change', this.onSelectionchange)
@@ -161,6 +162,8 @@ export default {
 			background: #f0f0f0
 		.ql-active .bunt-icon
 			color: var(--clr-primary)
+	.ql-editor
+		min-height: 46px
 	.ql-hidden
 		display: none
 	.ql-tooltip  /* based on https://github.com/quilljs/quill/blob/develop/assets/snow/tooltip.styl */
