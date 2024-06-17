@@ -133,7 +133,7 @@ class AppView(View):
             "<title>[^<]*</title>",
             f"<title>{world.title}</title>",
             source,
-            re.IGNORECASE | re.MULTILINE,
+            flags=re.IGNORECASE | re.MULTILINE,
         )
         source = source.replace(
             "<body>",

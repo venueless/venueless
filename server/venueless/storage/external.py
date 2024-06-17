@@ -61,6 +61,7 @@ def retrieve_url(url):
     if response.status_code == 200:
         return response
 
+
 def fetch_preview_data(url, world):
     """
     Fetches data from an external URL, and handles social media tags or their fallbacks,

@@ -367,6 +367,7 @@ def _config_serializer(world, *args, **kwargs):
     bbb_defaults = world.config.get("bbb_defaults", {})
     bbb_defaults.pop("secret", None)  # Protect secret legacy contents
     return WorldConfigSerializer(
+        *args,
         instance={
             "theme": world.config.get("theme", {}),
             "title": world.title,
@@ -391,7 +392,6 @@ def _config_serializer(world, *args, **kwargs):
                 "iframe_blockers", {"default": {"enabled": False, "policy_url": None}}
             ),
         },
-        *args,
         **kwargs,
     )
 

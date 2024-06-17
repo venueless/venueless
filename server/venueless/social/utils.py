@@ -35,7 +35,7 @@ def update_user_profile_from_social(
                 public=True,
             )
             sf.file.save(f"avatar.{ext}", c)
-        except:
+        except Exception:
             logging.exception("Could not download avatar")
         else:
             user.profile["avatar"] = {
