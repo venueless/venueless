@@ -79,6 +79,7 @@ Experimental Features
 * muxdata
 * zoom
 * janus
+* digitalsamba
 * page.landing
 * iframe-player
 * polls

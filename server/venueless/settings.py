@@ -216,6 +216,16 @@ ZOOM_SECRET = os.getenv(
     "VENUELESS_ZOOM_SECRET", config.get("zoom", "secret", fallback="")
 )
 
+DIGITALSAMBA_DOMAIN = os.getenv(
+    "VENUELESS_DIGITALSAMBA_DOMAIN", config.get("digitalsamba", "domain", fallback="")
+)
+DIGITALSAMBA_TEAM = os.getenv(
+    "VENUELESS_DIGITALSAMBA_TEAM", config.get("digitalsamba", "team", fallback="")
+)
+DIGITALSAMBA_KEY = os.getenv(
+    "VENUELESS_DIGITALSAMBA_KEY", config.get("digitalsamba", "key", fallback="")
+)
+
 # Use with ?control_token= to access /control
 CONTROL_SECRET = os.getenv(
     "VENUELESS_CONTROL_SECRET", config.get("control", "secret", fallback="")

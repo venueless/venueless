@@ -14,6 +14,7 @@
     "analyze": "ANALYZE=true npm run build"
   },
   "dependencies": {
+    "@digitalsamba/embedded-sdk": "0.0.40",
     "@mdi/font": "^5.5.55",
     "@popperjs/core": "^2.6.0",
     "@pretalx/schedule": "^2.0.0-alpha.2",
