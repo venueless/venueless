@@ -5,6 +5,7 @@ router-link.bunt-icon-button(v-tooltip="tooltipOptions || {text: tooltip, placem
 	ripple-ink(v-if!="!noInk && !disabled")
 </template>
 <script>
+// TODO dead?
 import RippleInk from 'buntpapier/src/mixins/ripple-ink'
 import iconHelper from 'buntpapier/src/helpers/icon'
 

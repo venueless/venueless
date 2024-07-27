@@ -9,7 +9,6 @@ import { v4 as uuid } from 'uuid'
 import moment from 'lib/timetravelMoment' // init timetravel before anything else to avoid module loading race conditions
 import router from 'router'
 import store from 'store'
-import LinkIconButton from 'components/link-icon-button'
 import Scrollbars from 'components/Scrollbars'
 import MediaQueries from 'components/mixins/media-queries'
 import dynamicLineClamp from './components/directives/dynamic-line-clamp'
@@ -32,7 +31,6 @@ async function init ({ token, inviteToken }) {
 	app.use(Buntpapier)
 	app.use(VueVirtualScroller)
 	app.component('Scrollbars', Scrollbars)
-	app.component('LinkIconButton', LinkIconButton)
 	app.use(MediaQueries)
 	app.use(emojiPlugin)
 	app.use(dynamicLineClamp)
