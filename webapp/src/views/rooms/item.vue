@@ -65,7 +65,7 @@ export default {
 	},
 	computed: {
 		unreadTabsClasses () {
-			return Object.entries(this.unreadTabs).filter(([tab, value]) => value).map(([tab]) => `tab-${tab}-unread`)
+			return Object.entries(this.unreadTabs).filter(([, value]) => value).map(([tab]) => `tab-${tab}-unread`)
 		}
 	},
 	watch: {

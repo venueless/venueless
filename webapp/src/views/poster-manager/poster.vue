@@ -39,7 +39,7 @@
 					bunt-button(@click="poster.authors.organizations.push('')") {{ $t('poster-manager/poster:btn-add-organization') }}
 					h2 {{ $t('poster-manager/poster:presenters:headline') }}
 					.presenters
-						.presenter(v-for="(presenter, index) in poster.presenters")
+						.presenter(v-for="presenter in poster.presenters")
 							.user
 								avatar(:user="presenter", :size="36")
 								span.display-name {{ presenter.profile.display_name }}

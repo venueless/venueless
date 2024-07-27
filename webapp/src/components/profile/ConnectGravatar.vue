@@ -45,7 +45,7 @@ export default {
 				}
 				const imageBlob = await (await fetch(avatarUrl)).blob()
 				const request = api.uploadFile(imageBlob, 'avatar.png')
-				request.addEventListener('load', (event) => {
+				request.addEventListener('load', () => {
 					const response = JSON.parse(request.responseText)
 					output.avatar = { url: response.url }
 					this.$emit('set-gravatar', output)

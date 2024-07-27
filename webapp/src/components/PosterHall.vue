@@ -11,7 +11,7 @@
 							.value {{ filter.label }}
 							bunt-icon-button(@click="removeFilter(filter)") close
 						input(ref="input", v-model="search", name="search", :placeholder="$t('PosterHall:input-search:placeholder')", autofocus, autocomplete="off", @focus="focus", @blur="blur")
-			menu-dropdown(v-model="showAddFilters", placement="bottom-end", @mousedown.native.stop="")
+			menu-dropdown(v-model="showAddFilters", placement="bottom-end", @mousedown.stop="")
 				template(#button="{toggle}")
 					bunt-button(icon="filter-plus", @click="toggle") {{ $t('PosterHall:button-add-filter') }}
 				template(#menu)
@@ -124,7 +124,7 @@ export default {
 				categorizedPosters[poster.category || ''].push(poster)
 			}
 			// remove empty categories
-			return Object.fromEntries(Object.entries(categorizedPosters).filter(([key, value]) => value.length > 0))
+			return Object.fromEntries(Object.entries(categorizedPosters).filter(([, value]) => value.length > 0))
 		},
 		categories () {
 			return Object.entries(this.categorizedFilteredPosters).map(([key, value]) => {

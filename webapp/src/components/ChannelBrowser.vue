@@ -6,7 +6,7 @@ prompt.c-channel-browser(:scrollable="false", @close="$emit('close')")
 			a(v-if="hasPermission('world:rooms.create.chat')", href="#", @click="$emit('createChannel')")  {{ $t('ChannelBrowser:create:label') }}
 		bunt-input(v-model="search", icon="search", name="search", :placeholder="$t('ChannelBrowser:search:placeholder')")
 		scrollbars.channels(y)
-			router-link.channel(v-for="channel of searchedChannels", :to="{name: 'room', params: {roomId: channel.room.id}}", @click.native="$emit('close')")
+			router-link.channel(v-for="channel of searchedChannels", :to="{name: 'room', params: {roomId: channel.room.id}}", @click="$emit('close')")
 				.channel-info
 					.name {{ channel.room.name }}
 					.description {{ channel.room.description }}

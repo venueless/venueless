@@ -5,7 +5,7 @@
 			.description
 				.hint {{ $t('MediaSource:room:hint') }}
 				.room-name(v-if="room") {{ room.name }}
-				.room-name(v-else="call") {{ $t('MediaSource:call:label') }}
+				.room-name(v-else-if="call") {{ $t('MediaSource:call:label') }}
 			.global-placeholder
 			bunt-icon-button(@click.prevent.stop="$emit('close')") close
 	livestream(v-if="room && module.type === 'livestream.native'", ref="livestream", :key="`livestream-${room.id}`", :room="room", :module="module", :size="background ? 'tiny' : 'normal'")

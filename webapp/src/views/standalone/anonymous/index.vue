@@ -65,7 +65,7 @@ export default {
 			return Object.keys(this.user.profile).length === 0
 		},
 		unreadTabsClasses () {
-			return Object.entries(this.unreadTabs).filter(([tab, value]) => value).map(([tab]) => `tab-${tab}-unread`)
+			return Object.entries(this.unreadTabs).filter(([, value]) => value).map(([tab]) => `tab-${tab}-unread`)
 		},
 		session () {
 			return this.currentSessionPerRoom?.[this.room.id]?.session

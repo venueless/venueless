@@ -67,7 +67,7 @@ export default {
 				this.$store.dispatch('roulette/reconnect')
 			}
 		},
-		server (value) {
+		server () {
 			if (!this.server && !this.callId && !this.loading) {
 				this.startVideo()
 			}

@@ -126,7 +126,7 @@ export default {
 			this.syncedScroll = false
 			this.$store.dispatch('chat/fetchMessages')
 		},
-		timelineScrolled (event) {
+		timelineScrolled () {
 			const scrollEl = this.$refs.timeline.contentRef
 			this.scrollPosition = scrollEl.scrollHeight - scrollEl.scrollTop - scrollEl.clientHeight
 		},

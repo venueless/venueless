@@ -25,11 +25,11 @@ const Plugin = {
 		}
 		const proxyHandler = function (direction) {
 			return {
-				get (target, property, receiver) {
+				get (target, property, ...args) {
 					if (typeof property !== 'symbol' && !property.startsWith('__v')) {
 						target[property] = match(property, direction)
 					}
-					return Reflect.get(...arguments)
+					return Reflect.get(target, property, ...args)
 				}
 			}
 		}
