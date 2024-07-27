@@ -310,8 +310,8 @@ export default {
 		}
 	},
 	methods: {
-		remove_social_media_link (link) {
-			delete this.exhibitor.social_media_links[link]
+		remove_social_media_link (index) {
+			this.exhibitor.social_media_links.splice(index, 1)
 		},
 		add_social_media_link () {
 			this.exhibitor.social_media_links.push({ display_text: '', url: '' })
@@ -324,9 +324,9 @@ export default {
 		},
 		remove_link (index, category) {
 			if (category === 'profile') {
-				delete this.exhibitor.profileLinks[index]
+				this.exhibitor.profileLinks.splice(index, 1)
 			} else if (category === 'download') {
-				delete this.exhibitor.downloadLinks[index]
+				this.exhibitor.downloadLinks.splice(index, 1)
 			}
 		},
 		add_link (category) {
@@ -380,8 +380,8 @@ export default {
 			this.exhibitor.staff = this.exhibitor.staff.filter((user, index) => this.exhibitor.staff.indexOf(user) === index)
 			this.showStaffPrompt = false
 		},
-		remove_staff (user) {
-			delete this.exhibitor.staff[user]
+		remove_staff (index) {
+			this.exhibitor.staff.splice(index, 1)
 		},
 		async save () {
 			this.v$.$touch()
