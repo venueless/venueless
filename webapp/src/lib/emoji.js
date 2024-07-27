@@ -75,7 +75,7 @@ export function markdownEmoji (md) {
 		let lastPos = 0
 		const tokens = []
 
-		text.replace(emojiRegex, function (match, offset, src) {
+		text.replace(emojiRegex, function (match, offset) {
 			// Add new tokens to pending list
 			if (offset > lastPos) {
 				token = new Token('text', '', 0)

@@ -119,7 +119,7 @@ export default {
 				state.errorLoading = error
 			}
 		},
-		async fav ({ state, dispatch, rootState }, id) {
+		async fav ({ dispatch, rootState }, id) {
 			let favs = rootState.user.client_state.schedule?.favs
 			if (!favs) {
 				favs = []
@@ -132,7 +132,7 @@ export default {
 				await dispatch('saveFavs', favs)
 			}
 		},
-		async unfav ({ state, dispatch, rootState }, id) {
+		async unfav ({ dispatch, rootState }, id) {
 			let favs = rootState.user.client_state.schedule?.favs
 			if (!favs) return
 			rootState.user.client_state.schedule.favs = favs = favs.filter(fav => fav !== id)

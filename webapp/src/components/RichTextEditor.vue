@@ -116,10 +116,10 @@ export default {
 		this.quill.off('text-change', this.onTextchange)
 	},
 	methods: {
-		onTextchange (delta, oldContents, source) {
+		onTextchange () {
 			this.$emit('update:modelValue', this.quill.getContents())
 		},
-		onSelectionchange (range, oldRange, source) {
+		onSelectionchange (range, oldRange) {
 			if (range === null && oldRange !== null) {
 				this.$refs.outline.blur()
 			} else if (range !== null && oldRange === null) {

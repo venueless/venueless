@@ -152,7 +152,7 @@ export default new Vuex.Store({
 			delete update.id
 			dispatch('chat/updateUser', { id: userId, update })
 		},
-		async createRoom ({ state }, room) {
+		async createRoom (_, room) {
 			return await api.call('room.create', room)
 		},
 		async changeRoom ({ state, dispatch }, room) {
@@ -170,7 +170,7 @@ export default new Vuex.Store({
 			if (!state.activeRoom || !state.connected) return
 			await api.call('room.react', { room: state.activeRoom.id, reaction })
 		},
-		async updateRoomSchedule ({ state }, { room, schedule_data }) {
+		async updateRoomSchedule (_, { room, schedule_data }) {
 			return await api.call('room.schedule', { room: room.id, schedule_data })
 		},
 		async updateUserLocale ({ state }, locale) {
@@ -206,16 +206,16 @@ export default new Vuex.Store({
 			if (state.activeRoom.id !== room) return
 			state.reactions = reactions
 		},
-		'api::world.updated' ({ state, commit, dispatch }, { world, rooms, permissions }) {
+		'api::world.updated' ({ state, commit }, { world, rooms, permissions }) {
 			state.world = world
 			state.permission = permissions
 			commit('updateRooms', rooms)
 		},
-		'api::world.schedule.updated' ({ state, commit, dispatch }, pretalx) {
+		'api::world.schedule.updated' ({ state, dispatch }, pretalx) {
 			state.world.pretalx = pretalx
 			dispatch('schedule/fetch', { root: true })
 		},
-		'api::world.user_count_change' ({ state, commit, dispatch }, { room, users }) {
+		'api::world.user_count_change' ({ state, commit }, { room, users }) {
 			room = state.rooms.find(r => r.id === room)
 			room.users = users
 			commit('updateRooms', state.rooms)

@@ -79,7 +79,6 @@ import { getUserName } from 'lib/profile'
 import Avatar from 'components/Avatar'
 import ChatContent from 'components/ChatContent'
 import ChatInput from 'components/ChatInput'
-import ChatUserCard from 'components/ChatUserCard'
 import EmojiPickerButton from 'components/EmojiPickerButton'
 import MenuDropdown from 'components/MenuDropdown'
 import Prompt from 'components/Prompt'
@@ -90,7 +89,7 @@ const TIME_FORMAT = 'LT'
 
 export default {
 	name: 'ChatMessage',
-	components: { Avatar, ChatContent, ChatInput, ChatUserCard, EmojiPickerButton, MenuDropdown, Prompt, Poll },
+	components: { Avatar, ChatContent, ChatInput, EmojiPickerButton, MenuDropdown, Prompt, Poll },
 	props: {
 		message: Object,
 		previousMessage: Object,

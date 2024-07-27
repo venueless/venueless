@@ -24,21 +24,21 @@ export default {
 			// add own question to the list since we're not getting a broadcast for own questions waiting in mod queue
 			state.questions.push(result.question)
 		},
-		async vote ({ state, rootState }, question) {
+		async vote ({ rootState }, question) {
 			await api.call('question.vote', { room: rootState.activeRoom.id, id: question.id, vote: !question.voted })
 			question.voted = !question.voted
 		},
-		approveQuestion ({ state, rootState }, question) {
+		approveQuestion ({ rootState }, question) {
 			return api.call('question.update', { room: rootState.activeRoom.id, id: question.id, state: 'visible' })
 			// update handled in create_or_update
 			// TODO error handling
 		},
-		archiveQuestion ({ state, rootState }, question) {
+		archiveQuestion ({ rootState }, question) {
 			return api.call('question.update', { room: rootState.activeRoom.id, id: question.id, state: 'archived', is_pinned: false })
 			// update handled in create_or_update
 			// TODO error handling
 		},
-		unarchiveQuestion ({ state, rootState }, question) {
+		unarchiveQuestion ({ rootState }, question) {
 			return api.call('question.update', { room: rootState.activeRoom.id, id: question.id, state: 'visible' })
 			// update handled in create_or_update
 			// TODO error handling
@@ -49,19 +49,19 @@ export default {
 				api.call('question.update', { room: rootState.activeRoom.id, id: question.id, state: 'archived', is_pinned: false })
 			}
 		},
-		deleteQuestion ({ state, rootState }, question) {
+		deleteQuestion ({ rootState }, question) {
 			return api.call('question.delete', { room: rootState.activeRoom.id, id: question.id })
 			// update handled in api::question.deleted
 			// TODO error handling
 		},
-		pinQuestion ({ state, rootState }, question) {
+		pinQuestion ({ rootState }, question) {
 			return api.call('question.pin', { room: rootState.activeRoom.id, id: question.id })
 		},
 		// redirect per question menu unpin to global unpin
 		unpinQuestion ({ dispatch }) {
 			return dispatch('unpinAllQuestions')
 		},
-		unpinAllQuestions ({ state, rootState }) {
+		unpinAllQuestions ({ rootState }) {
 			return api.call('question.unpin', { room: rootState.activeRoom.id })
 		},
 		'api::question.created_or_updated' ({ state }, { question }) {

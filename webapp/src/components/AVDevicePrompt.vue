@@ -96,7 +96,7 @@ export default {
 				this.$refs.video.muted = 'muted'
 				// Refresh button list in case labels have become available
 				return navigator.mediaDevices.enumerateDevices()
-			}).catch((e) => {
+			}).catch(() => {
 				// todo
 				// possibly "overconstrained" (camera doesn't exist)
 			})

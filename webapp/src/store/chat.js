@@ -207,7 +207,7 @@ export default {
 			}
 			// user.moderation_state = postStates[action]
 		},
-		async blockUser ({ state }, { user }) {
+		async blockUser (_, { user }) {
 			await api.call('user.block', { id: user.id })
 		},
 		async openDirectMessage ({ state }, { users, hide }) {
@@ -232,7 +232,7 @@ export default {
 			const index = state.joinedChannels.findIndex(c => c.id === channelId)
 			if (index > -1) state.joinedChannels.splice(index, 1)
 		},
-		async startCall ({ state, dispatch }, { channel }) {
+		async startCall ({ dispatch }, { channel }) {
 			const { event } = await api.call('chat.send', {
 				channel: channel.id,
 				event_type: 'channel.message',
@@ -340,14 +340,14 @@ export default {
 				// TODO passively close desktop notifications
 			}
 		},
-		'api::chat.unread_pointers' ({ state, rootState, getters, dispatch }, unreadPointers) {
+		'api::chat.unread_pointers' ({ state }, unreadPointers) {
 			for (const [channelId, pointer] of Object.entries(unreadPointers)) {
 				const channel = state.joinedChannels.find(c => c.id === channelId)
 				if (!channel) continue
 				channel.unread_pointer = pointer
 			}
 		},
-		'api::chat.notification_counts' ({ state, rootState, getters, dispatch }, notificationCounts) {
+		'api::chat.notification_counts' ({ state }, notificationCounts) {
 			state.notificationCounts = notificationCounts
 		},
 		async 'api::chat.notification' ({ state, rootState, getters, dispatch }, data) {

@@ -39,7 +39,7 @@ export default {
 		},
 	},
 	actions: {
-		startRequesting ({ state, commit, dispatch }, { room }) {
+		startRequesting ({ commit, dispatch }, { room }) {
 			commit('setRoom', room)
 			commit('setError', null)
 			commit('setLoading', true)
@@ -62,7 +62,7 @@ export default {
 			}
 			await api.call('roulette.stop', { room: state.room.id })
 		},
-		async startCall ({ state, commit }, { callId }) {
+		async startCall ({ commit }, { callId }) {
 			commit('setError', null)
 			commit('setLoading', true)
 			try {
@@ -75,7 +75,7 @@ export default {
 				commit('setLoading', false)
 			}
 		},
-		async reconnect ({ state, commit }) {
+		async reconnect ({ state }) {
 			if (state.callId) {
 				await api.call('roulette.reconnect', { call_id: state.callId })
 			}
@@ -88,7 +88,7 @@ export default {
 				await api.call('roulette.hangup', { call_id: callId })
 			}
 		},
-		'api::roulette.hangup' ({ state, commit }, payload) {
+		'api::roulette.hangup' ({ commit }) {
 			commit('setCallId', null)
 			commit('setJanusParameters', { callId: null, server: null, token: null, iceServers: null, roomId: null, sessionId: null })
 		},

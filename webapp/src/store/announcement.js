@@ -18,7 +18,7 @@ export default {
 				})
 			})
 		},
-		visibleAnnouncements (state, getters, rootState) {
+		visibleAnnouncements (state, getters) {
 			return getters.announcements.filter(announcement => announcement.state === 'active' && !announcement.expired && !state.dismissedAnnouncements.includes(announcement.id))
 		}
 	},

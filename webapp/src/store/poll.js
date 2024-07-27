@@ -18,41 +18,41 @@ export default {
 				state.polls = await api.call('poll.list', { room: room.id })
 			}
 		},
-		createPoll ({ state, rootState }, { content, options }) {
+		createPoll ({ rootState }, { content, options }) {
 			// enumerate poll options order attributes
 			options.forEach((option, index) => option.order = index + 1)
 			return api.call('poll.create', { room: rootState.activeRoom.id, content, options })
 		},
-		updatePoll ({ state, rootState }, { poll, update }) {
+		updatePoll ({ rootState }, { poll, update }) {
 			return api.call('poll.update', { room: rootState.activeRoom.id, id: poll.id, ...update })
 			// update handled in create_or_update
 			// TODO error handling
 		},
-		async vote ({ state, rootState }, { poll, option }) {
+		async vote ({ rootState }, { poll, option }) {
 			await api.call('poll.vote', { room: rootState.activeRoom.id, id: poll.id, options: [option.id] })
 			poll.answers = [option.id]
 		},
-		openPoll ({ state, rootState }, poll) {
+		openPoll ({ rootState }, poll) {
 			return api.call('poll.update', { room: rootState.activeRoom.id, id: poll.id, state: 'open' })
 			// update handled in create_or_update
 			// TODO error handling
 		},
-		closePoll ({ state, rootState }, poll) {
+		closePoll ({ rootState }, poll) {
 			return api.call('poll.update', { room: rootState.activeRoom.id, id: poll.id, state: 'closed' })
 			// update handled in create_or_update
 			// TODO error handling
 		},
-		redraftPoll ({ state, rootState }, poll) {
+		redraftPoll ({ rootState }, poll) {
 			return api.call('poll.update', { room: rootState.activeRoom.id, id: poll.id, state: 'draft' })
 			// update handled in create_or_update
 			// TODO error handling
 		},
-		archivePoll ({ state, rootState }, poll) {
+		archivePoll ({ rootState }, poll) {
 			return api.call('poll.update', { room: rootState.activeRoom.id, id: poll.id, state: 'archived', is_pinned: false })
 			// update handled in create_or_update
 			// TODO error handling
 		},
-		unarchivePoll ({ state, rootState }, poll) {
+		unarchivePoll ({ rootState }, poll) {
 			return api.call('poll.update', { room: rootState.activeRoom.id, id: poll.id, state: 'open' })
 			// update handled in create_or_update
 			// TODO error handling
@@ -63,19 +63,19 @@ export default {
 				api.call('poll.update', { room: rootState.activeRoom.id, id: poll.id, state: 'archived', is_pinned: false })
 			}
 		},
-		deletePoll ({ state, rootState }, poll) {
+		deletePoll ({ rootState }, poll) {
 			return api.call('poll.delete', { room: rootState.activeRoom.id, id: poll.id })
 			// update handled in api::poll.deleted
 			// TODO error handling
 		},
-		pinPoll ({ state, rootState }, poll) {
+		pinPoll ({ rootState }, poll) {
 			return api.call('poll.pin', { room: rootState.activeRoom.id, id: poll.id })
 		},
 		// redirect per poll menu unpin to global unpin
 		unpinPoll ({ dispatch }) {
 			return dispatch('unpinAllPolls')
 		},
-		unpinAllPolls ({ state, rootState }) {
+		unpinAllPolls ({ rootState }) {
 			return api.call('poll.unpin', { room: rootState.activeRoom.id })
 		},
 		'api::poll.created_or_updated' ({ state }, { poll }) {

@@ -1,3 +1,4 @@
+/* global BASE_URL */
 import { createRouter, createWebHistory } from 'vue-router'
 import App from '~/App'
 import RoomHeader from 'views/rooms/RoomHeader'

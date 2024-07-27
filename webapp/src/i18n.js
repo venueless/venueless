@@ -37,7 +37,7 @@ export async function init (app) {
 		// dynamic locale loader using webpack chunks
 		.use({
 			type: 'backend',
-			init (services, backendOptions, i18nextOptions) {},
+			init () {},
 			async read (language, namespace, callback) {
 				try {
 					const locale = await import(/* webpackChunkName: "locale-[request]" */ `./locales/${language}.json`)
@@ -51,7 +51,7 @@ export async function init (app) {
 		.use({
 			type: 'postProcessor',
 			name: 'themeOverwrites',
-			process (value, key, options, translator) {
+			process (value, key) {
 				return config.theme?.textOverwrites?.[key[0]] ?? value
 			}
 		})

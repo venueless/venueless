@@ -28,7 +28,7 @@
 						h3 Roles
 						p List of roles which can be assigned to users globally or per room via token/ticket traits. Each role can give a user certain permissions. Total permissions are computed from the sum of permissions from all granted roles. Permissions can #[b NOT] be subtracted by a role if granted by another role.
 					.collapse-actions
-				.role-definition(v-for="(val, key, index) of config.roles", @click="toggleRole(key)")
+				.role-definition(v-for="(val, key) of config.roles", @click="toggleRole(key)")
 					.role-head
 						bunt-icon-button.chevron {{ expandedRoles.includes(key) ? 'chevron-up' : 'chevron-down' }}
 						h4 {{ key }}

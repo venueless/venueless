@@ -67,7 +67,7 @@ export default {
 				policy_url: defaultEntry?.policy_url ?? ''
 			}]
 			this.iframeDomains.push(...Object.entries(this.config.iframe_blockers)
-				.filter(([domain, domainConfig]) => domain !== 'default')
+				.filter(([domain,]) => domain !== 'default')
 				.map(([domain, { enabled, policy_url }]) => ({
 					domain,
 					enabled,

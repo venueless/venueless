@@ -89,7 +89,7 @@ export default {
 				this.shiftPressed = false
 			}
 		},
-		modifyToShowUntil (duration, event) {
+		modifyToShowUntil (duration) {
 			// TODO document the shift
 			if (!this.announcement.show_until) this.announcement.show_until = moment().startOf('minute')
 			this.announcement.show_until = moment(this.announcement.show_until[this.shiftPressed ? 'subtract' : 'add'](duration))

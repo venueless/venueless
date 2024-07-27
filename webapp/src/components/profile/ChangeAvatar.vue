@@ -90,7 +90,7 @@ export default {
 				img.src = event.target.result
 			}
 		},
-		pixelsRestrictions ({ minWidth, minHeight, maxWidth, maxHeight, imageWidth, imageHeight }) {
+		pixelsRestrictions ({ minWidth, minHeight, maxWidth, maxHeight }) {
 			return {
 				minWidth: Math.max(128, minWidth),
 				minHeight: Math.max(128, minHeight),
@@ -99,7 +99,7 @@ export default {
 			}
 		},
 		update () {
-			return new Promise((resolve, reject) => {
+			return new Promise((resolve) => {
 				const { canvas } = this.$refs.cropper?.getResult() || {}
 				if (!canvas) {
 					this.$emit('update:modelValue', { identicon: this.identicon })
@@ -109,7 +109,7 @@ export default {
 
 				canvas.toBlob(blob => {
 					const request = api.uploadFile(blob, 'avatar.png', null, MAX_AVATAR_SIZE, MAX_AVATAR_SIZE)
-					request.addEventListener('load', (event) => {
+					request.addEventListener('load', () => {
 						const response = JSON.parse(request.responseText)
 						this.$emit('update:modelValue', { url: response.url })
 						resolve()

@@ -193,12 +193,12 @@ class WebSocketClient extends EventEmitter {
 		}
 	}
 
-	_handleReload (message) {
+	_handleReload () {
 		this.close()
 		location.reload()
 	}
 
-	_handlePong (message) {
+	_handlePong () {
 		this.emit('pong')
 		this._pingState.latestPong = Date.now()
 	}

@@ -48,7 +48,7 @@ export default {
 		})
 	},
 	methods: {
-		async toggle (event) {
+		async toggle () {
 			if (this.showEmojiPicker) {
 				this.showEmojiPicker = false
 				return

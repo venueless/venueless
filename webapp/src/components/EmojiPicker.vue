@@ -17,7 +17,7 @@ export default {
 			onSelect: this.$emit.bind(this, 'selected'),
 			title: 'Emoji',
 			showPreview: true,
-			backgroundImageFn (set, sheetSize) {
+			backgroundImageFn () {
 				return emojiSheet
 			}
 		})
