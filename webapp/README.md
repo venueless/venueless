@@ -2,7 +2,7 @@
 
 ## Project setup
 ```
-npm install
+npm ci
 ```
 
 ### Compiles and hot-reloads for development
@@ -27,8 +27,8 @@ npm run i18n:report
 
 ## Folder structure
 ```
+┣━━ index.html: template for the static html file
 ┣━━ public: static files
-┃   ┣━━ index.html: template for the static html file
 ┣━━ src: all the code
 ┃   ┣━━ assets: referenced files
 ┃   ┣━━ components: reusable vue components
