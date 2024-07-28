@@ -22,10 +22,10 @@ jobs:
         key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-node-
-    - name: Use Node.js 14
-      uses: actions/setup-node@v1
+    - name: Use Node.js 20
+      uses: actions/setup-node@v4
       with:
-        node-version: 14
+        node-version: 20
     - name: Install dependencies
       run: npm ci
       working-directory: ./webapp
@@ -43,13 +43,13 @@ jobs:
         key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-node-
-    - name: Use Node.js 14
-      uses: actions/setup-node@v1
+    - name: Use Node.js 20
+      uses: actions/setup-node@v4
       with:
-        node-version: 14
+        node-version: 20
     - name: Install dependencies
       run: npm ci
       working-directory: ./webapp
     - name: Lint webapp
-      run: npm run lint:nofix
+      run: npm run lint
       working-directory: ./webapp
