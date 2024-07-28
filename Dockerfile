@@ -49,6 +49,7 @@ COPY webapp/*.json /venueless/webapp/
 COPY webapp/*.html /venueless/webapp/
 COPY webapp/src/ /venueless/webapp/src/
 COPY webapp/public/ /venueless/webapp/public/
+COPY webapp/build/ /venueless/webapp/build/
 
 RUN cd /venueless/webapp && \
     npm ci && \
