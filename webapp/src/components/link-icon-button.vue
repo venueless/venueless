@@ -6,6 +6,7 @@ router-link.bunt-icon-button(v-tooltip="tooltipOptions || {text: tooltip, placem
 </template>
 <script>
 // TODO dead?
+/* eslint-disable */
 import RippleInk from 'buntpapier/src/mixins/ripple-ink'
 import iconHelper from 'buntpapier/src/helpers/icon'
 

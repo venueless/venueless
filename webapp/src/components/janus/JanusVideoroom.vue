@@ -28,7 +28,7 @@
 			.mute-indicator(v-if="knownMuteState")
 				.bunt-icon.mdi.mdi-microphone-off
 
-		.peer.feed(v-for="(f, idx) in feeds", :key="f.rfid", :style="{width: layout.width, height: layout.height}")
+		.peer.feed(v-for="f in feeds", :key="f.rfid", :style="{width: layout.width, height: layout.height}")
 			.video-container(v-show="f.rfattached", :id="'janus_' + f.rfid", :style="{boxShadow: size != 'tiny' ? `0 0 0px 4px ${primaryColor.alpha(soundLevels[f.rfid] * 20)}` : 'none'}")
 				video(ref="peerVideo", autoplay, playsinline)
 			.subscribing-state(v-if="!f.rfattached")
@@ -445,7 +445,7 @@ export default {
 							}
 							// todo: show local stream instead of remote Stream
 						},
-						slowLink: (uplink) => {
+						slowLink: () => {
 							log('venueless', 'info', 'slowlink on screenshare')
 						},
 						oncleanup: () => {
@@ -665,7 +665,7 @@ export default {
 						'Janus says this WebRTC PeerConnection (feed #' + remoteFeed.rfid + ') is ' + (on ? 'up' : 'down') +
 						' now')
 				},
-				slowLink: (uplink) => {
+				slowLink: () => {
 					log('venueless', 'info', 'slowLink on subscriber')
 					this.downstreamSlowLinkCount++
 				},
@@ -839,7 +839,7 @@ export default {
 							}
 						}
 					},
-					slowLink: (uplink) => {
+					slowLink: () => {
 						this.upstreamSlowLinkCount++
 						if (this.upstreamSlowLinkCount > 2) {
 							const newUpstreamBitrate = Math.max(this.upstreamBitrate / 2, MIN_BITRATE)

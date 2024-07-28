@@ -37,7 +37,7 @@
 			.mute-indicator(v-if="knownMuteState")
 				.bunt-icon.mdi.mdi-microphone-off
 
-		.peer.feed(v-for="(f, idx) in sortedFeeds", :key="f.rfid", :style="{width: layout.width, height: layout.height}")
+		.peer.feed(v-for="f in sortedFeeds", :key="f.rfid", :style="{width: layout.width, height: layout.height}")
 			.video-container(:id="'janus_' + f.rfid", :style="{boxShadow: size != 'tiny' ? `0 0 0px 4px ${primaryColor.alpha(f.participant && !f.participant.muted && talkingParticipants.includes(f.rfid) ? 255 : 0)}` : 'none'}")
 				video(v-show="f.rfattached", ref="peerVideo", autoplay, playsinline)
 			.subscribing-state(v-if="!f.rfattached")
@@ -465,7 +465,7 @@ export default {
 							}
 							// todo: show local stream instead of remote Stream
 						},
-						slowLink: (uplink) => {
+						slowLink: () => {
 							log('venueless', 'info', 'slowlink on screenshare')
 						},
 						oncleanup: () => {
@@ -704,7 +704,7 @@ export default {
 						'Janus says this WebRTC PeerConnection (feed #' + remoteFeed.rfid + ') is ' + (on ? 'up' : 'down') +
 						' now')
 				},
-				slowLink: (uplink) => {
+				slowLink: () => {
 					log('venueless', 'info', 'slowLink on subscriber')
 					this.downstreamSlowLinkCount++
 				},
@@ -865,7 +865,7 @@ export default {
 							this.audioPluginHandle.handleRemoteJsep({ jsep })
 						}
 					},
-					slowLink: (uplink) => {
+					slowLink: () => {
 						this.upstreamSlowLinkCount++
 						if (this.upstreamSlowLinkCount > 2 && this.videoRequested) {
 							const newUpstreamBitrate = Math.max(this.upstreamBitrate / 2, MIN_BITRATE)
@@ -886,7 +886,7 @@ export default {
 							}
 						}
 					},
-					onlocalstream: (stream) => {
+					onlocalstream: () => {
 						// Ignore our own audio stream, we don't want an echo, let's just confirm that it's there
 						if (this.audioPluginHandle.webrtcStuff.pc.iceConnectionState !== 'completed' &&
 							this.audioPluginHandle.webrtcStuff.pc.iceConnectionState !== 'connected') {
@@ -1054,7 +1054,7 @@ export default {
 							}
 						}
 					},
-					slowLink: (uplink) => {
+					slowLink: () => {
 						this.upstreamSlowLinkCount++
 						if (this.upstreamSlowLinkCount > 2) {
 							const newUpstreamBitrate = Math.max(this.upstreamBitrate / 2, MIN_BITRATE)

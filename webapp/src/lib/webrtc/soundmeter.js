@@ -21,6 +21,7 @@ function SoundMeter (context) {
 	this.slow = 0.0
 	this.clip = 0.0
 	this.script = context.createScriptProcessor(2048, 1, 1)
+	// eslint-disable-next-line @typescript-eslint/no-this-alias
 	const that = this
 	this.script.onaudioprocess = function (event) {
 		const input = event.inputBuffer.getChannelData(0)

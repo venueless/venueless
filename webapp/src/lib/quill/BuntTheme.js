@@ -9,6 +9,7 @@ const LinkBlot = Quill.import('formats/link')
 // This is based on the "snow" theme from quill, but optimized to work with buntpapier
 class BuntTheme extends BaseTheme {
 	extendToolbar (toolbar) {
+		// eslint-disable-next-line @typescript-eslint/no-use-before-define
 		this.tooltip = new BuntTooltip(this.quill, this.options.bounds)
 		if (toolbar.container.querySelector('.ql-link')) {
 			this.quill.keyboard.addBinding({ key: 'K', shortKey: true }, function (range, context) {

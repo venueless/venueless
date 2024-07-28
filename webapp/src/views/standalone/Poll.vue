@@ -8,10 +8,8 @@
 </template>
 <script>
 import { mapGetters } from 'vuex'
-import Avatar from 'components/Avatar'
 
 export default {
-	components: { Avatar },
 	props: {
 		room: Object
 	},

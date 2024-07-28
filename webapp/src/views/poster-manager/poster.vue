@@ -98,12 +98,11 @@ import Prompt from 'components/Prompt'
 import UserSelect from 'components/UserSelect'
 import UploadUrlInput from 'components/UploadUrlInput'
 import RichTextEditor from 'components/RichTextEditor'
-import ExhibitorPreview from 'views/exhibitors/item'
 
 const Delta = Quill.import('delta')
 
 export default {
-	components: { Avatar, ExhibitorPreview, Prompt, UploadUrlInput, UserSelect, RichTextEditor },
+	components: { Avatar, Prompt, UploadUrlInput, UserSelect, RichTextEditor },
 	props: {
 		create: Boolean,
 		posterId: String

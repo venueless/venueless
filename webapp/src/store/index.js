@@ -223,6 +223,7 @@ export default new Vuex.Store({
 		'api::room.schedule' ({ state }, { room, schedule_data }) {
 			room = state.rooms.find(r => r.id === room)
 			if (!room) return
+			// eslint-disable-next-line camelcase
 			room.schedule_data = schedule_data
 		},
 		'api::user.updated' ({ state, dispatch }, update) {

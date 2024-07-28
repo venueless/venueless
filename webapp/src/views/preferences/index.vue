@@ -43,11 +43,10 @@ import Avatar from 'components/Avatar'
 import Prompt from 'components/Prompt'
 import ChangeAvatar from 'components/profile/ChangeAvatar'
 import ChangeAdditionalFields from 'components/profile/ChangeAdditionalFields'
-import ConnectGravatar from 'components/profile/ConnectGravatar'
 import { required } from 'lib/validators'
 
 export default {
-	components: { Avatar, Prompt, ChangeAvatar, ChangeAdditionalFields, ConnectGravatar },
+	components: { Avatar, Prompt, ChangeAvatar, ChangeAdditionalFields },
 	setup: () => ({ v$: useVuelidate() }),
 	data () {
 		return {

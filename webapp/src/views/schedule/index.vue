@@ -40,11 +40,10 @@
 import { mapState, mapGetters } from 'vuex'
 import { LinearSchedule, GridSchedule } from '@pretalx/schedule'
 import moment from 'lib/timetravelMoment'
-import TimezoneChanger from 'components/TimezoneChanger'
 import scheduleProvidesMixin from 'components/mixins/schedule-provides'
 
 export default {
-	components: { LinearSchedule, GridSchedule, TimezoneChanger },
+	components: { LinearSchedule, GridSchedule },
 	mixins: [scheduleProvidesMixin],
 	data () {
 		return {

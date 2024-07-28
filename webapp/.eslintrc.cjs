@@ -20,6 +20,7 @@ module.exports = {
 		indent: [2, 'tab', { SwitchCase: 1 }],
 		'no-tabs': 0,
 		'comma-dangle': 0,
+		camelcase: ['error', { properties: 'never', ignoreDestructuring: true }],
 		curly: 0,
 		quotes: ['error', 'single', { allowTemplateLiterals: true }], // not really ideal, but "avoidEscape" only allows double quotes
 		'no-return-assign': 0,

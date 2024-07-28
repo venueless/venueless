@@ -106,6 +106,7 @@ export default {
 			} else {
 				const { announcement } = await api.call('announcement.create', this.announcement)
 				// TODO not really best practice
+				// eslint-disable-next-line vue/no-mutating-props
 				this.announcements.push(announcement)
 				this.$router.push({ name: 'admin:announcements:item', params: { announcementId: announcement.id } })
 				this.announcement = Object.assign({}, announcement)

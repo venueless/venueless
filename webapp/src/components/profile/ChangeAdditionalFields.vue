@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-mutating-props -->
 <template lang="pug">
 .c-additional-fields
 	template(v-for="field of fields")

@@ -22,6 +22,7 @@ import UploadButton from 'components/UploadButton'
 const MAX_AVATAR_SIZE = 128
 
 export default {
+	// eslint-disable-next-line vue/no-unused-components
 	components: { Cropper, CircleStencil, Identicon, UploadButton },
 	props: {
 		modelValue: Object,

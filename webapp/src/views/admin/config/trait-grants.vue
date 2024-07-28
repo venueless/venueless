@@ -45,15 +45,18 @@ export default {
 		},
 		setTraitGrants (role, traits) {
 			if (typeof this.traitGrants[role] !== 'undefined') {
+				// eslint-disable-next-line vue/no-mutating-props
 				this.traitGrants[role] = parseTraitGrants(traits)
 			}
 			this.$emit('changed')
 		},
 		removeTraitGrant (role) {
+			// eslint-disable-next-line vue/no-mutating-props
 			delete this.traitGrants[role]
 			this.$emit('changed')
 		},
 		addTraitGrant () {
+			// eslint-disable-next-line vue/no-mutating-props
 			this.traitGrants[this.newRole] = []
 			this.newRole = null
 			this.$emit('changed')

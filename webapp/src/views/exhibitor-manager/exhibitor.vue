@@ -233,7 +233,7 @@ export default {
 			}
 		}
 
-		for (const [index, link] of this.exhibitor.social_media_links.entries()) {
+		for (const [index] of this.exhibitor.social_media_links.entries()) {
 			rules.exhibitor.social_media_links[index] = {
 				display_text: {
 					required: required(this.$t('Exhibitors:validation-social-links-display-text:required'))
@@ -246,7 +246,7 @@ export default {
 			}
 		}
 
-		for (const [index, link] of this.exhibitor.profileLinks.entries()) {
+		for (const [index] of this.exhibitor.profileLinks.entries()) {
 			rules.exhibitor.profileLinks[index] = {
 				display_text: {
 					required: required(this.$t('Exhibitors:validation-links-display-text:required')),
@@ -260,7 +260,7 @@ export default {
 			}
 		}
 
-		for (const [index, link] of this.exhibitor.downloadLinks.entries()) {
+		for (const [index] of this.exhibitor.downloadLinks.entries()) {
 			rules.exhibitor.downloadLinks[index] = {
 				display_text: {
 					required: required(this.$t('Exhibitors:validation-links-display-text:required')),
