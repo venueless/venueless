@@ -1,5 +1,5 @@
 <template lang="pug">
-.c-livestream(:class="[`size-${size}`, {playing, buffering, seeking, automuted, muted, 'is-offline': offline, 'choosing-level': showLevelChooser, 'choosing-captions': showCaptionsChooser, 'choosing-source': showSourceChooser}]", v-resize-observer="onResize")
+.c-livestream(v-resize-observer="onResize", :class="[`size-${size}`, {playing, buffering, seeking, automuted, muted, 'is-offline': offline, 'choosing-level': showLevelChooser, 'choosing-captions': showCaptionsChooser, 'choosing-source': showSourceChooser}]")
 	.video-container(ref="videocontainer")
 		video(ref="video", style="width:100%;height:100%", @playing="playingVideo", @pause="pausingVideo", @volumechange="onVolumechange")
 		.offline(v-if="offline")
@@ -12,7 +12,7 @@
 			.big-button.mdi.mdi-play(v-if="!offline && !playing")
 			bunt-progress-circular(v-if="(buffering || seeking) && !offline", size="huge")
 			.bottom-controls(@click.stop="")
-				.progress-hover(v-if="!offline && seekable", ref="progress", @pointerdown="onProgressPointerdown", @pointermove="onProgressPointermove", @pointerup="onProgressPointerup", @pointercancel="onProgressPointerup", :style="progressStyles.play")
+				.progress-hover(v-if="!offline && seekable", ref="progress", :style="progressStyles.play", @pointerdown="onProgressPointerdown", @pointermove="onProgressPointermove", @pointerup="onProgressPointerup", @pointercancel="onProgressPointerup")
 					.progress
 						.load-progress(v-for="load of progressStyles.load", :style="load")
 						.play-progress
@@ -26,16 +26,16 @@
 				bunt-icon-button(v-else-if="!offline && module.config.subtitle_url", @click="openExternalSubtitles") closed-caption-outline
 				bunt-icon-button(v-if="!offline", @click="showLevelChooser = !showLevelChooser") {{ levelIcon }}
 				bunt-icon-button(v-if="!offline", @click="toggleVolume") {{ muted || volume === 0 ? 'volume_off' : 'volume_high' }}
-				input.volume-slider(v-if="!offline", type="range", step="any", min="0", max="1", aria-label="Volume", :value="volume", @input="onVolumeSlider", :style="{'--volume': volume}")
+				input.volume-slider(v-if="!offline", type="range", step="any", min="0", max="1", aria-label="Volume", :value="volume", :style="{'--volume': volume}", @input="onVolumeSlider")
 				bunt-icon-button(v-if="!offline", @click="toggleFullscreen") {{ fullscreen ? 'fullscreen-exit' : 'fullscreen' }}
 			.source-chooser(v-if="showSourceChooser", @click.stop="")
-				.source(@click="chooseSource(null)", :class="{chosen: !chosenAlternative}") {{ $t('Livestream:default-source:text') }}
+				.source(:class="{chosen: !chosenAlternative}", @click="chooseSource(null)") {{ $t('Livestream:default-source:text') }}
 				.source(v-for="a in module.config.alternatives", :class="{chosen: a.label === chosenAlternative}", @click="chooseSource(a)") {{ a.label }}
 			.caption-chooser(v-if="showCaptionsChooser", @click.stop="")
-				.track(@click="chooseTextTrack(null)", :class="{chosen: !textTracks.some(t => t.mode === 'showing')}") {{ $t('Livestream:captions-off:text') }}
+				.track(:class="{chosen: !textTracks.some(t => t.mode === 'showing')}", @click="chooseTextTrack(null)") {{ $t('Livestream:captions-off:text') }}
 				.track(v-for="track of textTracks", :class="{chosen: track.mode === 'showing'}", @click="chooseTextTrack(track)") {{ track.label }}
 			.level-chooser(v-if="showLevelChooser", @click.stop="")
-				.level(@click="chooseLevel(null)", :class="{chosen: !manualLevel}") Auto
+				.level(:class="{chosen: !manualLevel}", @click="chooseLevel(null)") Auto
 				.level(v-for="level of levels", :class="{chosen: level === manualLevel, auto: level === autoLevel}", @click="chooseLevel(level)") {{ level.height + 'p' }}
 </template>
 <script>
@@ -176,7 +176,7 @@ export default {
 		this.$refs.video.textTracks.addEventListener('removetrack', this.onTextTracksChanged)
 		this.initializePlayer()
 	},
-	beforeDestroy () {
+	beforeUnmount () {
 		this.player?.destroy()
 		document.removeEventListener('fullscreenchange', this.onFullscreenchange)
 		this.$refs.video.textTracks.removeEventListener('addtrack', this.onTextTracksChanged)
@@ -217,7 +217,7 @@ export default {
 				})
 				player.on(Hls.Events.MANIFEST_PARSED, async (event, data) => {
 					if (data.levels[0].height) {
-						this.levels = data.levels.map((level, index) => ({...level, index})).sort((a, b) => b.height - a.height)
+						this.levels = data.levels.map((level, index) => ({ ...level, index })).sort((a, b) => b.height - a.height)
 					}
 					start()
 					started = true

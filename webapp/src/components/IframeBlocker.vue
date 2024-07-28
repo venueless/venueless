@@ -1,12 +1,12 @@
 <template lang="pug">
 .c-iframe-blocker
-	iframe(v-if="showIframe", :src="src", v-bind="$attrs", v-on="$listeners")
+	iframe(v-if="showIframe", :src="src", v-bind="$attrs")
 	.consent-blocker(v-else)
 		.warning This content is hosted by a third party on
 		.domain {{ domain }}
 		.toc(v-if="config.policy_url") By showing this external content you accept their #[a(:href="config.policy_url") terms and conditions].
 		bunt-button#btn-show(@click="showOnce") Show external content
-		bunt-checkbox(name="remember", v-model="remember") Remember my choice
+		bunt-checkbox(v-model="remember", name="remember") Remember my choice
 </template>
 <script>
 import store from 'store'
@@ -28,7 +28,6 @@ export default {
 			return new URL(this.src).host
 		},
 		config () {
-			console.log(store.state.world.iframe_blockers, this.domain)
 			for (const [domain, domainConfig] of Object.entries(store.state.world.iframe_blockers)) {
 				if (this.domain === domain || this.domain.endsWith('.' + domain)) return domainConfig
 			}

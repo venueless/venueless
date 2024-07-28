@@ -1,10 +1,6 @@
-<template lang="pug">
-.v-standalone-kiosk
-	transition(name="kiosk")
-		.slide(v-if="activeSlide", :key="activeSlide.id")
-			component(:is="activeSlide.component", :room="room")
-</template>
-<script>
+<script setup>
+import { watch, onMounted } from 'vue'
+import { useStore } from 'vuex'
 import moment from 'lib/timetravelMoment'
 import PollSlide from './Poll'
 import VoteSlide from './Vote'
@@ -13,120 +9,128 @@ import NextSessionSlide from './NextSession'
 import CurrentSessionSlide from './CurrentSession'
 import ViewersSlide from './Viewers'
 
+const { room, config } = defineProps({
+	room: Object,
+	config: Object
+})
+
+const store = useStore()
+
+const SLIDE_INTERVAL = ENV_DEVELOPMENT ? 2000 : 20000
+
+function isSlideEnabled (slide) {
+	return !config.slides || config.slides[slide] !== false
+}
+
 const SLIDES = [{
 	id: 'poll',
 	condition () {
-		return this.isSlideEnabled('pinned_poll') && !!this.$store.getters['poll/pinnedPoll']
+		return isSlideEnabled('pinned_poll') && !!store.getters['poll/pinnedPoll']
 	},
 	watch () {
-		return this.isSlideEnabled('pinned_poll') && this.$store.getters['poll/pinnedPoll']
+		return isSlideEnabled('pinned_poll') && store.getters['poll/pinnedPoll']
 	},
 	priority: 10,
 	component: PollSlide
 }, {
 	id: 'vote',
 	condition () {
-		return this.isSlideEnabled('pinned_poll_voting') && !!this.$store.getters['poll/pinnedPoll']
+		return isSlideEnabled('pinned_poll_voting') && !!store.getters['poll/pinnedPoll']
 	},
 	priority: 10,
 	component: VoteSlide
 }, {
 	id: 'question',
 	condition () {
-		return this.isSlideEnabled('pinned_question') && !!this.$store.getters['question/pinnedQuestion']
+		return isSlideEnabled('pinned_question') && !!store.getters['question/pinnedQuestion']
 	},
 	watch () {
-		return this.isSlideEnabled('pinned_question') && this.$store.getters['question/pinnedQuestion']
+		return isSlideEnabled('pinned_question') && store.getters['question/pinnedQuestion']
 	},
 	priority: 10,
 	component: QuestionSlide
 }, {
 	id: 'nextSession',
 	condition () {
-		if (!this.isSlideEnabled('next_session')) return false
-		const currentSession = this.$store.getters['schedule/currentSessionPerRoom']?.[this.room.id]?.session
-		const nextSession = this.$store.getters['schedule/sessions']?.find(session => session.room === this.room && session.start.isAfter(this.now))
+		if (!isSlideEnabled('next_session')) return false
+		const currentSession = store.getters['schedule/currentSessionPerRoom']?.[room.id]?.session
+		const nextSession = store.getters['schedule/sessions']?.find(session => session.room === room && session.start.isAfter(store.state.now))
 		return !!nextSession && (!currentSession || !currentSession.id || currentSession.end.isBefore(moment().add(10, 'minutes')))
 	},
 	watch () {
-		return this.isSlideEnabled('next_session') && this.$store.getters['schedule/sessions']
+		return isSlideEnabled('next_session') && store.getters['schedule/sessions']
 	},
 	priority: 1,
 	component: NextSessionSlide
 }, {
 	id: 'currentSession',
 	condition () {
-		if (!this.isSlideEnabled('current_session')) return false
-		const currentSession = this.$store.getters['schedule/currentSessionPerRoom']?.[this.room.id]?.session
+		if (!isSlideEnabled('current_session')) return false
+		const currentSession = store.getters['schedule/currentSessionPerRoom']?.[room.id]?.session
 		return !!currentSession && currentSession.id // sessions without id are breaks
 	},
 	watch () {
-		return this.isSlideEnabled('current_session') && this.$store.getters['schedule/sessions']
+		return isSlideEnabled('current_session') && store.getters['schedule/sessions']
 	},
 	priority: 1,
 	component: CurrentSessionSlide
 }, {
 	id: 'viewers',
 	condition () {
-		return this.isSlideEnabled('viewers') && this.$store.state.roomViewers?.length > 0
+		return isSlideEnabled('viewers') && store.state.roomViewers?.length > 0
 	},
 	watch () {
-		return this.isSlideEnabled('viewers') && this.$store.state.roomViewers
+		return isSlideEnabled('viewers') && store.state.roomViewers
 	},
 	priority: 1,
 	component: ViewersSlide
 }]
 
-const SLIDE_INTERVAL = 20000
+let activeSlide = $shallowRef(SLIDES[0])
 
-export default {
-	props: {
-		room: Object,
-		config: Object
-	},
-	data () {
-		return {
-			activeSlide: SLIDES[0],
-		}
-	},
-	mounted () {
-		this.nextSlide()
-		for (const slide of SLIDES) {
-			if (slide.watch) {
-				this.$watch(slide.watch.bind(this), () => {
-					if (slide.condition.call(this)) {
-						this.activeSlide = slide
-					} else {
-						this.nextSlide()
-					}
-				})
+let slideTimer
+
+function nextSlide () {
+	if (slideTimer) clearTimeout(slideTimer)
+	let index = SLIDES.indexOf(activeSlide)
+	const stoppingIndex = Math.max(0, index)
+	let newSlide
+	do {
+		index++
+		if (index >= SLIDES.length) index = 0
+		const slide = SLIDES[index]
+		if (
+			slide.priority > (newSlide?.priority ?? 0) &&
+			slide.condition()
+		) newSlide = SLIDES[index]
+	} while (index !== stoppingIndex)
+	activeSlide = newSlide
+	slideTimer = setTimeout(nextSlide, SLIDE_INTERVAL)
+}
+
+for (const slide of SLIDES) {
+	if (slide.watch) {
+		watch(slide.watch, () => {
+			if (slide.condition()) {
+				activeSlide = slide
+			} else {
+				nextSlide()
 			}
-		}
-	},
-	methods: {
-		isSlideEnabled (slide) {
-			return !this.config.slides || this.config.slides[slide] !== false
-		},
-		nextSlide () {
-			if (this.slideTimer) clearTimeout(this.slideTimer)
-			let index = SLIDES.indexOf(this.activeSlide)
-			const stoppingIndex = Math.max(0, index)
-			let nextSlide
-			do {
-				index++
-				if (index >= SLIDES.length) index = 0
-				const slide = SLIDES[index]
-				if (
-					slide.priority > (nextSlide?.priority ?? 0) &&
-					slide.condition.call(this)
-				) nextSlide = SLIDES[index]
-			} while (index !== stoppingIndex)
-			this.activeSlide = nextSlide
-			this.slideTimer = setTimeout(this.nextSlide.bind(this), SLIDE_INTERVAL)
-		}
+		})
 	}
 }
+
+onMounted(() => {
+	nextSlide()
+})
+
 </script>
+<template lang="pug">
+.v-standalone-kiosk
+	transition(name="kiosk")
+		.slide(v-if="activeSlide", :key="activeSlide.id")
+			component(:is="activeSlide.component", :room="room")
+</template>
 <style lang="stylus">
 .v-standalone-kiosk
 	display: flex
@@ -140,7 +144,7 @@ export default {
 		position: absolute
 		&.kiosk-enter-active, &.kiosk-leave-active
 			transition: translate 1s
-		&.kiosk-enter
+		&.kiosk-enter-from
 			translate: -100vw 0
 		&.kiosk-leave-to
 			translate: 100vw 0

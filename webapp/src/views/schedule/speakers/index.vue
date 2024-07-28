@@ -13,7 +13,7 @@
 					p.biography {{ speaker.biography }}
 					.sessions(v-if="speaker.sessions.length && speaker.sessions.some(s => s)")
 						h2 {{ $t('schedule/speakers/index:speaker-sessions:header') }}:
-						.session(v-for="session of speaker.sessions", v-if="session")
+						.session(v-for="session of speaker.sessions")
 							.title {{ session.title }}
 </template>
 <script>

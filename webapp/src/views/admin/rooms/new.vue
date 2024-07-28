@@ -48,7 +48,7 @@ export default {
 				sorting_priority: '',
 				pretalx_id: '',
 				force_join: false,
-				module_config: [{type: this.chosenType.startingModule, config: {}}],
+				module_config: [{ type: this.chosenType.startingModule, config: {} }],
 			}
 		}
 	}

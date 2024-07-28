@@ -7,19 +7,19 @@ bunt-input-outline-container.c-rich-text-editor(ref="outline", :label="label")
 			bunt-icon-button.ql-underline(v-tooltip="$t('RichTextEditor:underline:tooltip')") format-underline
 			bunt-icon-button.ql-strike(v-tooltip="$t('RichTextEditor:strike:tooltip')") format-strikethrough-variant
 		.buttongroup
-			bunt-icon-button.ql-header(value="1", v-tooltip="$t('RichTextEditor:h1:tooltip')") format-header-1
-			bunt-icon-button.ql-header(value="2", v-tooltip="$t('RichTextEditor:h2:tooltip')") format-header-2
-			bunt-icon-button.ql-header(value="3", v-tooltip="$t('RichTextEditor:h3:tooltip')") format-header-3
-			bunt-icon-button.ql-header(value="4", v-tooltip="$t('RichTextEditor:h4:tooltip')") format-header-4
+			bunt-icon-button.ql-header(v-tooltip="$t('RichTextEditor:h1:tooltip')", value="1") format-header-1
+			bunt-icon-button.ql-header(v-tooltip="$t('RichTextEditor:h2:tooltip')", value="2") format-header-2
+			bunt-icon-button.ql-header(v-tooltip="$t('RichTextEditor:h3:tooltip')", value="3") format-header-3
+			bunt-icon-button.ql-header(v-tooltip="$t('RichTextEditor:h4:tooltip')", value="4") format-header-4
 			bunt-icon-button.ql-blockquote(v-tooltip="$t('RichTextEditor:blockquote:tooltip')") format-quote-open
 			bunt-icon-button.ql-code-block(v-tooltip="$t('RichTextEditor:code:tooltip')") code-tags
 		.buttongroup
-			bunt-icon-button.ql-list(value="ordered", v-tooltip="$t('RichTextEditor:list-ordered:tooltip')") format-list-numbered
-			bunt-icon-button.ql-list(value="bullet", v-tooltip="$t('RichTextEditor:list-bullet:tooltip')") format-list-bulleted
+			bunt-icon-button.ql-list(v-tooltip="$t('RichTextEditor:list-ordered:tooltip')", value="ordered") format-list-numbered
+			bunt-icon-button.ql-list(v-tooltip="$t('RichTextEditor:list-bullet:tooltip')", value="bullet") format-list-bulleted
 		.buttongroup
-			bunt-icon-button.ql-align(value="", v-tooltip="$t('RichTextEditor:align-left:tooltip')") format-align-left
-			bunt-icon-button.ql-align(value="center", v-tooltip="$t('RichTextEditor:align-center:tooltip')") format-align-center
-			bunt-icon-button.ql-align(value="right", v-tooltip="$t('RichTextEditor:align-right:tooltip')") format-align-right
+			bunt-icon-button.ql-align(v-tooltip="$t('RichTextEditor:align-left:tooltip')", value="") format-align-left
+			bunt-icon-button.ql-align(v-tooltip="$t('RichTextEditor:align-center:tooltip')", value="center") format-align-center
+			bunt-icon-button.ql-align(v-tooltip="$t('RichTextEditor:align-right:tooltip')", value="right") format-align-right
 			bunt-icon-button.ql-full-width(v-tooltip="$t('RichTextEditor:full-width:tooltip')") arrow-expand-horizontal
 		.buttongroup
 			bunt-icon-button.ql-link(v-tooltip="$t('RichTextEditor:link:tooltip')") link-variant
@@ -34,6 +34,7 @@ bunt-input-outline-container.c-rich-text-editor(ref="outline", :label="label")
 </template>
 <script>
 /* global ENV_DEVELOPMENT */
+import { markRaw } from 'vue'
 import Quill from 'quill'
 import BuntTheme from 'lib/quill/BuntTheme'
 import VideoResponsive from 'lib/quill/VideoResponsive'
@@ -45,9 +46,10 @@ const Delta = Quill.import('delta')
 
 export default {
 	props: {
-		value: [Delta, Object],
+		modelValue: [Delta, Object],
 		label: String
 	},
+	emits: ['update:modelValue'],
 	data () {
 		return {
 			quill: null,
@@ -59,7 +61,7 @@ export default {
 		Quill.register('themes/bunt', BuntTheme, false)
 		Quill.register(VideoResponsive)
 		Quill.register(fullWidthFormat)
-		this.quill = new Quill(this.$refs.editor, {
+		this.quill = markRaw(new Quill(this.$refs.editor, {
 			debug: ENV_DEVELOPMENT ? 'info' : 'warn',
 			theme: 'bunt',
 			modules: {
@@ -78,7 +80,7 @@ export default {
 									api.uploadFilePromise(file, file.name).then(data => {
 										if (data.error) {
 											alert(`Upload error: ${data.error}`) // Proper user-friendly messages
-											this.$emit('input', '')
+											this.$emit('update:modelValue', '')
 										} else {
 											const range = this.quill.getSelection(true)
 											this.quill.updateContents(new Delta()
@@ -102,22 +104,22 @@ export default {
 				}
 			},
 			bounds: this.$refs.editor,
-		})
-		if (this.value) {
-			this.quill.setContents(this.value)
+		}))
+		if (this.modelValue && this.modelValue.ops.length > 0) {
+			this.quill.setContents(this.modelValue)
 		}
 		this.quill.on('selection-change', this.onSelectionchange)
 		this.quill.on('text-change', this.onTextchange)
 	},
-	destroyed () {
+	unmounted () {
 		this.quill.off('selection-change', this.onSelectionchange)
 		this.quill.off('text-change', this.onTextchange)
 	},
 	methods: {
-		onTextchange (delta, oldContents, source) {
-			this.$emit('input', this.quill.getContents())
+		onTextchange () {
+			this.$emit('update:modelValue', this.quill.getContents())
 		},
-		onSelectionchange (range, oldRange, source) {
+		onSelectionchange (range, oldRange) {
 			if (range === null && oldRange !== null) {
 				this.$refs.outline.blur()
 			} else if (range !== null && oldRange === null) {
@@ -160,6 +162,8 @@ export default {
 			background: #f0f0f0
 		.ql-active .bunt-icon
 			color: var(--clr-primary)
+	.ql-editor
+		min-height: 46px
 	.ql-hidden
 		display: none
 	.ql-tooltip  /* based on https://github.com/quilljs/quill/blob/develop/assets/snow/tooltip.styl */

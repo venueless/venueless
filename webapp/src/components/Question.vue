@@ -1,16 +1,16 @@
 <template lang="pug">
 .c-question(:class="{queued: question.state === 'mod_queue', 'has-voted': question.voted, pinned: question.is_pinned, archived: question.state === 'archived', managing: isManaging}")
 	.moderation-block(v-if="question.state === 'mod_queue'")
-		bunt-icon-button(:disabled="!isManaging", :tooltip="isManaging ? $t('Question:moderation-approve-button:label') : $t('Question:attendee-awaiting-approval:label')", tooltip-placement="right", :tooltip-fixed="true", @click="doAction('approve')") {{ isManaging ? 'eye-check' : 'eye-off' }}
+		bunt-icon-button(:disabled="!isManaging", :tooltip="isManaging ? $t('Question:moderation-approve-button:label') : $t('Question:attendee-awaiting-approval:label')", tooltipPlacement="right", :tooltipFixed="true", @click="doAction('approve')") {{ isManaging ? 'eye-check' : 'eye-off' }}
 	.votes(v-else, @click="vote")
 		.mdi.mdi-menu-up.upvote(v-if="!isManaging")
 		.vote-count {{ question.score }}
 		| {{ $t('Question:vote-count:label') }}
 	.content {{ question.content }}
 	menu-dropdown(v-if="isManaging && hasPermission('room:question.moderate')", v-model="showModerationMenu", strategy="fixed")
-		template(v-slot:button="{toggle}")
+		template(#button="{toggle}")
 			bunt-icon-button#btn-menu-toggle(@click="toggle") dots-vertical
-		template(v-slot:menu)
+		template(#menu)
 			.approve-question(v-if="question.state === 'mod_queue'", @click="doAction('approve')") {{ $t('Question:moderation-menu:approve-question:label') }}
 			.pin-question(v-if="question.state === 'visible' && !question.is_pinned", @click="doAction('pin')") {{ $t('Question:moderation-menu:pin-question:label') }}
 			.unpin-question(v-if="question.state === 'visible' && question.is_pinned", @click="doAction('unpin')") {{ $t('Question:moderation-menu:unpin-question:label') }}
@@ -24,13 +24,13 @@ import MenuDropdown from 'components/MenuDropdown'
 
 export default {
 	components: { MenuDropdown },
-	props: {
-		question: Object
-	},
 	inject: {
 		isManaging: {
 			default: false
 		}
+	},
+	props: {
+		question: Object
 	},
 	data () {
 		return {

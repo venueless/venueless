@@ -1,7 +1,7 @@
 // TODO
 // - icon button hover background on dark bg
 import Color from 'color'
-import kebabCase from 'lodash/kebabCase'
+import { kebabCase } from 'lodash'
 import config from 'config'
 
 import { normal as normalBlend } from 'color-blend'
@@ -40,11 +40,11 @@ const firstReadable = function (colors, background = '#FFF', threshold = 4.5) {
 	return best
 }
 
-const CLR_PRIMARY_TEXT = {LIGHT: Color('rgba(0, 0, 0, .87)'), DARK: Color('rgba(255, 255, 255, 1)')}
-const CLR_SECONDARY_TEXT = {LIGHT: Color('rgba(0, 0, 0, .54)'), DARK: Color('rgba(255, 255, 255, .7)')}
-const CLR_SECONDARY_TEXT_FALLBACK = {LIGHT: Color('rgba(0, 0, 0, .74)'), DARK: Color('rgba(255, 255, 255, .9)')}
-const CLR_DISABLED_TEXT = {LIGHT: Color('rgba(0, 0, 0, .38)'), DARK: Color('rgba(255, 255, 255, .5)')}
-const CLR_DIVIDERS = {LIGHT: Color('rgba(255, 255, 255, .63)'), DARK: Color('rgba(255, 255, 255, .63)')}
+const CLR_PRIMARY_TEXT = { LIGHT: Color('rgba(0, 0, 0, .87)'), DARK: Color('rgba(255, 255, 255, 1)') }
+const CLR_SECONDARY_TEXT = { LIGHT: Color('rgba(0, 0, 0, .54)'), DARK: Color('rgba(255, 255, 255, .7)') }
+const CLR_SECONDARY_TEXT_FALLBACK = { LIGHT: Color('rgba(0, 0, 0, .74)'), DARK: Color('rgba(255, 255, 255, .9)') }
+const CLR_DISABLED_TEXT = { LIGHT: Color('rgba(0, 0, 0, .38)'), DARK: Color('rgba(255, 255, 255, .5)') }
+const CLR_DIVIDERS = { LIGHT: Color('rgba(255, 255, 255, .63)'), DARK: Color('rgba(255, 255, 255, .63)') }
 
 const DEFAULT_COLORS = {
 	primary: '#673ab7',
@@ -115,4 +115,10 @@ export { themeVariables, colors, DEFAULT_COLORS, DEFAULT_LOGO, DEFAULT_IDENTICON
 
 export function computeForegroundColor (bgColor) {
 	return firstReadable([CLR_PRIMARY_TEXT.LIGHT, CLR_PRIMARY_TEXT.DARK], bgColor)
+}
+
+const root = document.documentElement
+
+for (const [key, value] of Object.entries(themeVariables)) {
+	root.style.setProperty(key, value)
 }

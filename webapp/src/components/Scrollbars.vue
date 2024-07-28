@@ -1,210 +1,207 @@
-<template lang="pug">
-.c-scrollbars
-	.scroll-content(ref="content", @scroll="onScroll")
-		slot
-	template(v-for="dim of Object.keys(dimensions)")
-		div(:class="[`scrollbar-rail-${dim}`, {active: draggingDimension === dim}]", @pointerdown="onPointerdown(dim, $event)")
-			.scrollbar-thumb(:ref="`thumb-${dim}`", :style="thumbStyles[dim]")
-</template>
-<script>
-import ResizeObserver from 'resize-observer-polyfill'
+<script setup lang="ts">
+import { nextTick, onBeforeUnmount, onMounted } from 'vue'
 
-export default {
-	components: {},
-	props: {
-		y: Boolean,
-		x: Boolean
-	},
-	data () {
-		return {
-			dimensions: null,
-			draggingDimension: null,
-			draggingOffset: null
-		}
-	},
-	computed: {
-		thumbStyles () {
-			const thumbStyles = {}
-			if (this.dimensions?.x) {
-				thumbStyles.x = {
-					width: this.dimensions.x.thumbLength + 'px',
-					left: this.dimensions.x.thumbPosition + 'px'
-				}
-				if (this.dimensions.x.visibleRatio >= 1) {
-					thumbStyles.x.display = 'none'
-				}
-			}
-			if (this.dimensions?.y) {
-				const direction = this.dimensions.y.direction === 'reverse' ? 'bottom' : 'top'
-				thumbStyles.y = {
-					height: this.dimensions.y.thumbLength + 'px',
-					[direction]: this.dimensions.y.thumbPosition + 'px'
-				}
-				if (this.dimensions.y.visibleRatio >= 1) {
-					thumbStyles.y.display = 'none'
-				}
-			}
-			return thumbStyles
-		}
-	},
-	created () {
-		const dimensions = {}
-		if (this.x) {
-			dimensions.x = {
-				visibleRatio: null,
-				thumbLength: null,
-				thumbPosition: null
-			}
-		}
-		if (this.y) {
-			dimensions.y = {
-				visibleRatio: null,
-				thumbLength: null,
-				thumbPosition: null,
-				direction: null
-			}
-		}
-		this.dimensions = dimensions
-	},
-	async mounted () {
-		await this.$nextTick()
-		// setting direction once should be good enough
-		if (this.dimensions.y) {
-			const contentStyle = window.getComputedStyle(this.$refs.content)
-			if (contentStyle.flexDirection.endsWith('reverse')) {
-				this.dimensions.y.direction = 'reverse'
-			}
-		}
-		this.computeDimensions()
-		this.computeThumbPositions()
-		this.resizeObserver = new ResizeObserver(this.onResize)
-		this.resizeObserver.observe(this.$refs.content)
-		for (const el of this.$refs.content.children) {
-			this.resizeObserver.observe(el)
-		}
-		this.mutationObserver = new MutationObserver((records) => {
-			for (const record of records) {
-				for (const addedNode of record.addedNodes) {
-					if (addedNode.nodeType !== Node.ELEMENT_NODE) continue
-					this.resizeObserver.observe(addedNode)
-				}
-				for (const removedNode of record.removedNodes) {
-					if (removedNode.nodeType !== Node.ELEMENT_NODE) continue
-					this.resizeObserver.unobserve(removedNode)
-				}
-			}
-			this.onResize()
-		})
-		this.mutationObserver.observe(this.$refs.content, {
-			childList: true
-		})
-	},
-	beforeDestroy () {
-		this.resizeObserver.disconnect()
-		this.mutationObserver.disconnect()
-	},
-	methods: {
-		scrollTop (y) {
-			this.$refs.content.scrollTop = y
-		},
-		onScroll (event) {
-			this.$emit('scroll', event)
-			this.computeThumbPositions()
-		},
-		onResize () {
-			this.computeDimensions()
-			this.computeThumbPositions()
-			this.$emit('resize')
-		},
-		onPointerdown (dimension, $event) {
-			const el = this.$refs[`thumb-${dimension}`][0]
-			event.stopPropagation()
-			el.setPointerCapture(event.pointerId)
-			this.draggingDimension = dimension
-			this.draggingOffset = event[`offset${dimension.toUpperCase()}`]
-			// TODO cancel
-			el.addEventListener('pointermove', this.onPointermove)
-			el.addEventListener('pointerup', this.onPointerup)
-		},
-		onPointermove () {
-			if (this.draggingDimension === 'x') {
-				const maxX = this.$refs.content.clientWidth - this.dimensions.x.thumbLength
-				const newPosition = event.clientX - this.$refs.content.getBoundingClientRect().left - this.draggingOffset
-				this.dimensions.x.thumbPosition = Math.min(Math.max(0, newPosition), maxX)
-				this.$refs.content.scrollLeft = this.dimensions.x.thumbPosition / maxX * (this.$refs.content.scrollWidth - this.$refs.content.clientWidth)
-			}
+const {
+	x,
+	y
+} = defineProps({
+	x: Boolean,
+	y: Boolean
+})
 
-			if (this.draggingDimension === 'y') {
-				const maxY = this.$refs.content.clientHeight - this.dimensions.y.thumbLength
-				if (this.dimensions.y.direction === 'reverse') {
-					const newPosition = this.$refs.content.clientHeight - (event.clientY - this.$refs.content.getBoundingClientRect().top + (this.dimensions.y.thumbLength - this.draggingOffset))
-					this.dimensions.y.thumbPosition = Math.min(Math.max(0, newPosition), maxY)
-					this.$refs.content.scrollTop = -1 * this.dimensions.y.thumbPosition / maxY * (this.$refs.content.scrollHeight - this.$refs.content.clientHeight)
-				} else {
-					const newPosition = event.clientY - this.$refs.content.getBoundingClientRect().top - this.draggingOffset
-					this.dimensions.y.thumbPosition = Math.min(Math.max(0, newPosition), maxY)
-					this.$refs.content.scrollTop = this.dimensions.y.thumbPosition / maxY * (this.$refs.content.scrollHeight - this.$refs.content.clientHeight)
-				}
-			}
-		},
-		onPointerup (event) {
-			const dimension = this.draggingDimension
-			const el = this.$refs[`thumb-${dimension}`][0]
-			this.draggingDimension = null
-			el.releasePointerCapture(event.pointerId)
-			el.removeEventListener('pointermove', this.onPointermove)
-			el.removeEventListener('pointerup', this.onPointerup)
-		},
-		computeDimensions () {
-			if (this.dimensions.x) {
-				this.dimensions.x.visibleRatio = this.$refs.content.clientWidth / this.$refs.content.scrollWidth
-				this.dimensions.x.thumbLength = this.$refs.content.clientWidth * this.dimensions.x.visibleRatio
-			}
-			if (this.dimensions.y) {
-				this.dimensions.y.visibleRatio = this.$refs.content.clientHeight / this.$refs.content.scrollHeight
-				this.dimensions.y.thumbLength = this.$refs.content.clientHeight * this.dimensions.y.visibleRatio
-			}
-		},
-		computeThumbPositions () {
-			if (this.dimensions.x) {
-				this.dimensions.x.thumbPosition = this.$refs.content.scrollLeft / (this.$refs.content.scrollWidth - this.$refs.content.clientWidth) * (this.$refs.content.clientWidth - this.dimensions.x.thumbLength)
-			}
-			if (this.dimensions.y) {
-				if (this.dimensions.y.direction === 'reverse') {
-					this.dimensions.y.thumbPosition = -1 * this.$refs.content.scrollTop / (this.$refs.content.scrollHeight - this.$refs.content.clientHeight) * (this.$refs.content.clientHeight - this.dimensions.y.thumbLength)
-				} else {
-					this.dimensions.y.thumbPosition = this.$refs.content.scrollTop / (this.$refs.content.scrollHeight - this.$refs.content.clientHeight) * (this.$refs.content.clientHeight - this.dimensions.y.thumbLength)
-				}
-			}
-		},
-		updateThumb (dimension) {
-			const state = this[dimension]
-			if (!state) return
-			if (state.visibleRatio >= 1) {
-				state.thumbEl.style.display = 'none'
-			} else {
-				state.thumbEl.style.display = null
-				if (dimension === 'x') {
-					state.railEl.style.width = state.railLength + 'px'
-					state.thumbEl.style.width = state.thumbLength + 'px'
-					state.thumbEl.style.left = state.thumbPosition + 'px'
-				} else if (dimension === 'y') {
-					state.railEl.style.height = state.railLength + 'px'
-					state.thumbEl.style.height = state.thumbLength + 'px'
-					state.thumbEl.style.top = state.thumbPosition + 'px'
-				}
-			}
+const emit = defineEmits(['resize', 'scroll'])
+
+const dimensions = $ref<{x?, y?}>({})
+let draggingDimension = $ref(null)
+let draggingOffset = $ref(null)
+
+const thumbStyles = $computed(() => {
+	const thumbStyles : {x?, y?} = {}
+	if (dimensions?.x) {
+		thumbStyles.x = {
+			width: dimensions.x.thumbLength + 'px',
+			left: dimensions.x.thumbPosition + 'px'
+		}
+		if (dimensions.x.visibleRatio >= 1) {
+			thumbStyles.x.display = 'none'
+		}
+	}
+	if (dimensions?.y) {
+		const direction = dimensions.y.direction === 'reverse' ? 'bottom' : 'top'
+		thumbStyles.y = {
+			height: dimensions.y.thumbLength + 'px',
+			[direction]: dimensions.y.thumbPosition + 'px'
+		}
+		if (dimensions.y.visibleRatio >= 1) {
+			thumbStyles.y.display = 'none'
+		}
+	}
+	return thumbStyles
+})
+
+const thumbRefs = $ref({})
+const contentRef = $ref(null)
+
+// TODO expose
+const scrollTop = (y) => {
+	contentRef.scrollTop = y
+}
+
+if (x) {
+	dimensions.x = {
+		visibleRatio: null,
+		thumbLength: null,
+		thumbPosition: null
+	}
+}
+if (y) {
+	dimensions.y = {
+		visibleRatio: null,
+		thumbLength: null,
+		thumbPosition: null,
+		direction: null
+	}
+}
+
+function computeDimensions () {
+	if (dimensions.x) {
+		dimensions.x.visibleRatio = contentRef.clientWidth / contentRef.scrollWidth
+		dimensions.x.thumbLength = contentRef.clientWidth * dimensions.x.visibleRatio
+	}
+	if (dimensions.y) {
+		dimensions.y.visibleRatio = contentRef.clientHeight / contentRef.scrollHeight
+		dimensions.y.thumbLength = contentRef.clientHeight * dimensions.y.visibleRatio
+	}
+}
+
+function computeThumbPositions () {
+	if (dimensions.x) {
+		dimensions.x.thumbPosition = contentRef.scrollLeft / (contentRef.scrollWidth - contentRef.clientWidth) * (contentRef.clientWidth - dimensions.x.thumbLength)
+	}
+	if (dimensions.y) {
+		if (dimensions.y.direction === 'reverse') {
+			dimensions.y.thumbPosition = -1 * contentRef.scrollTop / (contentRef.scrollHeight - contentRef.clientHeight) * (contentRef.clientHeight - dimensions.y.thumbLength)
+		} else {
+			dimensions.y.thumbPosition = contentRef.scrollTop / (contentRef.scrollHeight - contentRef.clientHeight) * (contentRef.clientHeight - dimensions.y.thumbLength)
 		}
 	}
 }
+
+function handleResize () {
+	computeDimensions()
+	computeThumbPositions()
+	emit('resize')
+}
+
+const resizeObserver = new ResizeObserver(handleResize)
+const mutationObserver = new MutationObserver((records) => {
+	for (const record of records) {
+		for (const addedNode of record.addedNodes) {
+			if (addedNode.nodeType !== Node.ELEMENT_NODE) continue
+			resizeObserver.observe(addedNode as Element)
+		}
+		for (const removedNode of record.removedNodes) {
+			if (removedNode.nodeType !== Node.ELEMENT_NODE) continue
+			resizeObserver.unobserve(removedNode as Element)
+		}
+	}
+	handleResize()
+})
+
+onMounted(async () => {
+	await nextTick()
+	// setting direction once should be good enough
+	if (dimensions.y) {
+		const contentStyle = getComputedStyle(contentRef)
+		if (contentStyle.flexDirection.endsWith('reverse')) {
+			dimensions.y.direction = 'reverse'
+		}
+	}
+	computeDimensions()
+	computeThumbPositions()
+
+	resizeObserver.observe(contentRef)
+	for (const el of contentRef.children) {
+		resizeObserver.observe(el)
+	}
+	mutationObserver.observe(contentRef, {
+		childList: true
+	})
+})
+
+onBeforeUnmount(() => {
+	resizeObserver.disconnect()
+	mutationObserver.disconnect()
+})
+
+function handleScroll (event) {
+	emit('scroll', event)
+	computeThumbPositions()
+}
+
+function handlePointerdown (dimension, event) {
+	const el = thumbRefs[dimension]
+	event.stopPropagation()
+	el.setPointerCapture(event.pointerId)
+	draggingDimension = dimension
+	draggingOffset = event[`offset${dimension.toUpperCase()}`]
+	// TODO cancel
+	el.addEventListener('pointermove', handlePointermove)
+	el.addEventListener('pointerup', handlePointerup)
+}
+
+function handlePointermove (event) {
+	if (draggingDimension === 'x') {
+		const maxX = contentRef.clientWidth - dimensions.x.thumbLength
+		const newPosition = event.clientX - contentRef.getBoundingClientRect().left - draggingOffset
+		dimensions.x.thumbPosition = Math.min(Math.max(0, newPosition), maxX)
+		contentRef.scrollLeft = dimensions.x.thumbPosition / maxX * (contentRef.scrollWidth - contentRef.clientWidth)
+	}
+
+	if (draggingDimension === 'y') {
+		const maxY = contentRef.clientHeight - dimensions.y.thumbLength
+		if (dimensions.y.direction === 'reverse') {
+			const newPosition = contentRef.clientHeight - (event.clientY - contentRef.getBoundingClientRect().top + (dimensions.y.thumbLength - draggingOffset))
+			dimensions.y.thumbPosition = Math.min(Math.max(0, newPosition), maxY)
+			contentRef.scrollTop = -1 * dimensions.y.thumbPosition / maxY * (contentRef.scrollHeight - contentRef.clientHeight)
+		} else {
+			const newPosition = event.clientY - contentRef.getBoundingClientRect().top - draggingOffset
+			dimensions.y.thumbPosition = Math.min(Math.max(0, newPosition), maxY)
+			contentRef.scrollTop = dimensions.y.thumbPosition / maxY * (contentRef.scrollHeight - contentRef.clientHeight)
+		}
+	}
+}
+
+function handlePointerup (event) {
+	const dimension = draggingDimension
+	const el = thumbRefs[dimension]
+	draggingDimension = null
+	el.releasePointerCapture(event.pointerId)
+	el.removeEventListener('pointermove', handlePointermove)
+	el.removeEventListener('pointerup', handlePointerup)
+}
+
+defineExpose({
+	scrollTop,
+	contentRef: $$(contentRef)
+})
+
 </script>
-<style lang="stylus">
-$rail-width = 15px
-$thumb-width = 6px
-$thumb-width-hovered = 12px
+<template lang="pug">
+.c-scrollbars
+	.scroll-content(ref="contentRef", @scroll="handleScroll")
+		slot
+	template(v-for="dim of Object.keys(dimensions)", :key="dim")
+		div(:class="[`scrollbar-rail-${dim}`, {active: draggingDimension === dim}]", @pointerdown="handlePointerdown(dim, $event)")
+			.scrollbar-thumb(:ref="el => { thumbRefs[dim] = el }", :style="thumbStyles[dim]")
+</template>
+<style lang="sass">
+$rail-width: 15px
+$thumb-width: 6px
+$thumb-width-hovered: 12px
 
 .c-scrollbars
-	display: flex;
+	display: flex
 	flex-direction: column
 	position: relative
 	box-sizing: border-box
@@ -233,10 +230,10 @@ $thumb-width-hovered = 12px
 
 	.scrollbar-thumb
 		position: absolute
-		background-color: $clr-blue-grey-600
+		background-color: var(--clr-blue-grey-600)
 		opacity: .2
 		border-radius: $thumb-width
-		transition: height .3s $material-easing, width .3s $material-easing, opacity .3s $material-easing
+		transition: height .3s var(--material-easing), width .3s var(--material-easing), opacity .3s var(--material-easing)
 
 	.scrollbar-rail-x
 		height: $rail-width

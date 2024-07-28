@@ -18,8 +18,8 @@
 				p This action #[b CANNOT] be undone. This will permanently delete the room
 				.room-name {{ config.name }}
 				p Please type in the name of the room to confirm.
-				bunt-input(name="deletingRoomName", label="Room name", v-model="deletingRoomName", @keypress.enter="deleteRoom")
-				bunt-button.delete-room(icon="delete", :disabled="deletingRoomName !== config.name", @click="deleteRoom", :loading="deleting", :error-message="deleteError") delete this room
+				bunt-input(v-model="deletingRoomName", name="deletingRoomName", label="Room name", @keypress.enter="deleteRoom")
+				bunt-button.delete-room(icon="delete", :disabled="deletingRoomName !== config.name", :loading="deleting", :errorMessage="deleteError", @click="deleteRoom") delete this room
 </template>
 <script>
 import api from 'lib/api'
@@ -50,7 +50,7 @@ export default {
 	},
 	async created () {
 		try {
-			this.config = await api.call('room.config.get', {room: this.roomId})
+			this.config = await api.call('room.config.get', { room: this.roomId })
 		} catch (error) {
 			this.error = error
 			console.error(error)
@@ -62,8 +62,8 @@ export default {
 			this.deleting = true
 			this.deleteError = null
 			try {
-				await api.call('room.delete', {room: this.config.id})
-				this.$router.replace({name: 'admin:rooms:index'})
+				await api.call('room.delete', { room: this.config.id })
+				this.$router.replace({ name: 'admin:rooms:index' })
 			} catch (error) {
 				this.deleteError = this.$t(`error:${error.code}`)
 			}

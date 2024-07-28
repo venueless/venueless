@@ -6,8 +6,8 @@
 		.header
 			.exhibitor-label {{ $t("Exhibitors:exhibitor:label") }}
 			.actions
-					bunt-button.btn-create(v-if="hasPermission('world:rooms.create.exhibition')", @click="$router.push({name: 'exhibitors:exhibitor', params: {exhibitorId: ''}})") {{ $t('Exhibitors:create:label') }}
-		RecycleScroller.tbody.bunt-scrollbar(v-if="exhibitors", :items="exhibitors", :item-size="48", v-slot="{item: exhibitor}", v-scrollbar.y="")
+					bunt-button.btn-create(v-if="hasPermission('world:rooms.create.exhibition')", @click="$router.push({name: 'exhibitors:create-exhibitor'})") {{ $t('Exhibitors:create:label') }}
+		RecycleScroller.tbody.bunt-scrollbar(v-if="exhibitors", v-slot="{item: exhibitor}", v-scrollbar.y="", :items="exhibitors", :itemSize="48")
 			router-link.exhibitor(:to="{name: 'exhibitors:exhibitor', params: {exhibitorId: exhibitor.id}}").table-row
 				.name {{ exhibitor.name }}
 		bunt-progress-circular(v-else, size="huge", :page="true")
@@ -37,7 +37,7 @@ export default {
 }
 </script>
 <style lang="stylus">
-@import '~styles/flex-table'
+@import 'flex-table'
 
 .c-exhibitors
 	display flex

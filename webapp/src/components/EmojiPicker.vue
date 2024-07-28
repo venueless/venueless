@@ -9,12 +9,7 @@ import { NimblePicker } from 'emoji-mart'
 import emojiSheet from 'emoji-datasource-twitter/img/twitter/sheets-256/64.png'
 
 export default {
-	components: {},
-	data () {
-		return {
-		}
-	},
-	computed: {},
+	emits: ['selected'],
 	mounted () {
 		const picker = h(NimblePicker, {
 			set: 'twitter',
@@ -22,7 +17,7 @@ export default {
 			onSelect: this.$emit.bind(this, 'selected'),
 			title: 'Emoji',
 			showPreview: true,
-			backgroundImageFn (set, sheetSize) {
+			backgroundImageFn () {
 				return emojiSheet
 			}
 		})

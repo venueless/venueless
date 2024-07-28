@@ -2,10 +2,10 @@
 form.c-connect-gravatar(@submit.prevent="connectGravatar")
 	h1 {{ $t('profile/ConnectGravatar:headline') }}
 	p {{ $t('profile/ConnectGravatar:text') }}
-	bunt-input(name="gravatar", :label="$t('profile/ConnectGravatar:gravatar-email:label')", v-model="email")
+	bunt-input(v-model="email", name="gravatar", :label="$t('profile/ConnectGravatar:gravatar-email:label')")
 	.actions
 		bunt-button#btn-cancel(@click="$emit('close')") {{ $t('Prompt:cancel:label') }}
-		bunt-button#btn-connect-gravatar(@click="connectGravatar", :loading="searchingGravatar", :error="gravatarError") {{ $t('profile/ConnectGravatar:gravatar-connect:label') }}
+		bunt-button#btn-connect-gravatar(:loading="searchingGravatar", :error="gravatarError", @click="connectGravatar") {{ $t('profile/ConnectGravatar:gravatar-connect:label') }}
 </template>
 <script>
 import api from 'lib/api'
@@ -21,6 +21,7 @@ export default {
 			gravatarError: null
 		}
 	},
+	emit: ['close', 'set-gravatar'],
 	methods: {
 		async connectGravatar () {
 			this.searchingGravatar = true
@@ -44,10 +45,10 @@ export default {
 				}
 				const imageBlob = await (await fetch(avatarUrl)).blob()
 				const request = api.uploadFile(imageBlob, 'avatar.png')
-				request.addEventListener('load', (event) => {
+				request.addEventListener('load', () => {
 					const response = JSON.parse(request.responseText)
-					output.avatar = {url: response.url}
-					this.$emit('change', output)
+					output.avatar = { url: response.url }
+					this.$emit('set-gravatar', output)
 				})
 			} catch (e) {
 				this.gravatarError = e

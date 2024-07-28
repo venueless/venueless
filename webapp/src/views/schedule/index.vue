@@ -4,10 +4,11 @@
 		//- .timezone-control
 		//- 	p timezone:
 		//- 	timezone-changer
-		bunt-tabs.days(v-if="days && days.length > 1", :active-tab="currentDay.toISOString()", ref="tabs", v-scrollbar.x="")
+		bunt-tabs.days(v-if="days && days.length > 1", ref="tabs", v-scrollbar.x="", :activeTab="currentDay.toISOString()")
 			bunt-tab(v-for="day in days", :id="day.toISOString()", :header="moment(day).format('dddd DD. MMMM')", @selected="changeDay(day)")
 		.scroll-parent(ref="scrollParent", v-scrollbar.x.y="")
-			grid-schedule(v-if="$mq.above['m']",
+			grid-schedule(
+				v-if="$mq.above['m']",
 				:sessions="sessions",
 				:rooms="rooms",
 				:currentDay="currentDay",
@@ -18,7 +19,8 @@
 				@fav="$store.dispatch('schedule/fav', $event)",
 				@unfav="$store.dispatch('schedule/unfav', $event)"
 			)
-			linear-schedule(v-else,
+			linear-schedule(
+				v-else,
 				:sessions="sessions",
 				:rooms="rooms",
 				:currentDay="currentDay",
@@ -36,7 +38,7 @@
 </template>
 <script>
 import { mapState, mapGetters } from 'vuex'
-import { LinearSchedule, GridSchedule} from '@pretalx/schedule'
+import { LinearSchedule, GridSchedule } from '@pretalx/schedule'
 import moment from 'lib/timetravelMoment'
 import TimezoneChanger from 'components/TimezoneChanger'
 import scheduleProvidesMixin from 'components/mixins/schedule-provides'

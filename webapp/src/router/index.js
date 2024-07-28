@@ -1,6 +1,6 @@
-import Vue from 'vue'
-import VueRouter from 'vue-router'
-import App from 'App'
+/* global BASE_URL */
+import { createRouter, createWebHistory } from 'vue-router'
+import App from '~/App'
 import RoomHeader from 'views/rooms/RoomHeader'
 import Room from 'views/rooms/item'
 import RoomManager from 'views/rooms/manage'
@@ -12,8 +12,6 @@ import Speaker from 'views/schedule/speakers/item'
 import Exhibitor from 'views/exhibitors/item'
 import ContactRequests from 'views/contact-requests'
 import Preferences from 'views/preferences'
-
-Vue.use(VueRouter)
 
 const routes = [{
 	path: '/standalone/:roomId',
@@ -119,6 +117,13 @@ const routes = [{
 		path: '/manage-exhibitors',
 		name: 'exhibitors',
 		component: () => import(/* webpackChunkName: "exhibitors" */ 'views/exhibitor-manager')
+	}, {
+		path: '/manage-exhibitors/create',
+		name: 'exhibitors:create-exhibitor',
+		component: () => import(/* webpackChunkName: "posters" */ 'views/exhibitor-manager/exhibitor'),
+		props: {
+			create: true
+		}
 	}, {
 		path: '/manage-exhibitors/:exhibitorId',
 		name: 'exhibitors:exhibitor',
@@ -232,9 +237,8 @@ const routes = [{
 	}]
 }]
 
-const router = new VueRouter({
-	mode: 'history',
-	base: process.env.BASE_URL,
+const router = createRouter({
+	history: createWebHistory(BASE_URL),
 	routes
 })
 

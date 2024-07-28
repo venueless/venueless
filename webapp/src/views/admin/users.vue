@@ -2,7 +2,7 @@
 .c-admin-users
 	.header
 		h2 Users
-		bunt-input.search(name="search", placeholder="Search users", icon="search", v-model="search")
+		bunt-input.search(v-model="search", name="search", placeholder="Search users", icon="search")
 	.users-list
 		.header
 			.avatar
@@ -11,7 +11,7 @@
 			.name Name
 			.state State
 			.actions
-		RecycleScroller.tbody.bunt-scrollbar(v-if="filteredUsers", :items="filteredUsers", :item-size="48", v-slot="{item: user}", v-scrollbar.y="")
+		RecycleScroller.tbody.bunt-scrollbar(v-if="filteredUsers", v-slot="{item: user}", v-scrollbar.y="", :items="filteredUsers", :itemSize="48")
 			router-link(:to="{name: 'admin:user', params: {userId: user.id}}", :class="{error: user.error, updating: user.updating}").user.table-row
 				avatar.avatar(:user="user", :size="32")
 				.id(:title="user.id") {{ user.id }}
@@ -25,24 +25,24 @@
 					bunt-button.btn-open-dm(@click="$store.dispatch('chat/openDirectMessage', {users: [user]})") message
 					bunt-button.btn-reactivate(
 						v-if="user.moderation_state",
+						:key="`${user.id}-reactivate`",
 						:loading="user.updating === 'reactivate'",
-						:error-message="(user.error && user.error.action === 'reactivate') ? user.error.message : null",
-						tooltipPlacement="left",
-						@click="doAction(user, 'reactivate', null)", :key="`${user.id}-reactivate`")
-						| {{ user.moderation_state === 'banned' ? 'unban' : 'unsilence'}}
+						:errorMessage="(user.error && user.error.action === 'reactivate') ? user.error.message : null",
+						tooltipPlacement="left", @click="doAction(user, 'reactivate', null)")
+						| {{ user.moderation_state === 'banned' ? 'unban' : 'unsilence' }}
 					bunt-button.btn-ban(
 						v-if="user.moderation_state !== 'banned'",
+						:key="`${user.id}-ban`",
 						:loading="user.updating === 'ban'",
-						:error-message="(user.error && user.error.action === 'ban') ? user.error.message : null",
-						tooltipPlacement="left",
-						@click="doAction(user, 'ban', 'banned')", :key="`${user.id}-ban`")
+						:errorMessage="(user.error && user.error.action === 'ban') ? user.error.message : null",
+						tooltipPlacement="left", @click="doAction(user, 'ban', 'banned')")
 						| ban
 					bunt-button.btn-silence(
 						v-if="!user.moderation_state",
+						:key="`${user.id}-silence`",
 						:loading="user.updating === 'silence'",
-						:error-message="(user.error && user.error.action === 'silence') ? user.error.message : null",
-						tooltipPlacement="left",
-						@click="doAction(user, 'silence', 'silenced')", :key="`${user.id}-silence`")
+						:errorMessage="(user.error && user.error.action === 'silence') ? user.error.message : null",
+						tooltipPlacement="left", @click="doAction(user, 'silence', 'silenced')")
 						| silence
 		bunt-progress-circular(v-else, size="huge", :page="true")
 </template>
@@ -87,7 +87,7 @@ export default {
 			user.updating = action
 			user.error = null
 			try {
-				await api.call(`user.${action}`, {id: user.id})
+				await api.call(`user.${action}`, { id: user.id })
 				user.moderation_state = postState
 			} catch (error) {
 				user.error = {
@@ -101,7 +101,7 @@ export default {
 }
 </script>
 <style lang="stylus">
-@import '~styles/flex-table'
+@import 'flex-table'
 
 .c-admin-users
 	display: flex

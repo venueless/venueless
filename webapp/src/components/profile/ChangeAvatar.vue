@@ -1,19 +1,20 @@
 <template lang="pug">
-.c-change-avatar(v-if="value")
+.c-change-avatar(v-if="modelValue")
 	.inputs
 		bunt-button.btn-randomize(@click="changeIdenticon") {{ $t('profile/ChangeAvatar:button-randomize:label') }}
 		span {{ $t('profile/ChangeAvatar:or') }}
-		upload-button.btn-upload(@change="fileSelected", accept="image/png, image/jpg, .png, .jpg, .jpeg") {{ $t('profile/ChangeAvatar:button-upload:label') }}
+		upload-button.btn-upload(accept="image/png, image/jpg, .png, .jpg, .jpeg", @change="fileSelected") {{ $t('profile/ChangeAvatar:button-upload:label') }}
 	.image-wrapper
 		.file-error(v-if="fileError")
 			.mdi.mdi-alert-octagon
 			.message {{ fileError }}
-		cropper(v-else-if="avatarImage", ref="cropper", classname="cropper", stencil-component="circle-stencil", :src="avatarImage", :stencil-props="{aspectRatio: '1/1'}", :restrictions="pixelsRestrictions")
-		identicon(v-else, :user="identiconUser", @click.native="changeIdenticon")
+		cropper(v-else-if="avatarImage", ref="cropper", class="cropper", :stencilComponent="$options.components.CircleStencil", :src="avatarImage", :stencilProps="{aspectRatio: '1/1'}", :sizeRestrictionsAlgorithm="pixelsRestrictions")
+		identicon(v-else, :user="identiconUser", @click="changeIdenticon")
 </template>
 <script>
 import { v4 as uuid } from 'uuid'
 import { Cropper, CircleStencil } from 'vue-advanced-cropper'
+import 'vue-advanced-cropper/dist/style.css'
 import api from 'lib/api'
 import Identicon from 'components/Identicon'
 import UploadButton from 'components/UploadButton'
@@ -23,9 +24,10 @@ const MAX_AVATAR_SIZE = 128
 export default {
 	components: { Cropper, CircleStencil, Identicon, UploadButton },
 	props: {
-		value: Object,
+		modelValue: Object,
 		profile: Object
 	},
+	emits: ['update:modelValue', 'blockSave'],
 	data () {
 		return {
 			identicon: null,
@@ -47,13 +49,13 @@ export default {
 		}
 	},
 	created () {
-		if (!this.value) {
-			this.$emit('input', {})
+		if (!this.modelValue) {
+			this.$emit('update:modelValue', {})
 			this.identicon = uuid()
-		} else if (this.value.url) {
-			this.avatarImage = this.value.url
-		} else if (this.value.identicon) {
-			this.identicon = this.value.identicon
+		} else if (this.modelValue.url) {
+			this.avatarImage = this.modelValue.url
+		} else if (this.modelValue.identicon) {
+			this.identicon = this.modelValue.identicon
 		}
 	},
 	methods: {
@@ -72,7 +74,7 @@ export default {
 			const avatarFile = event.target.files[0]
 			const reader = new FileReader()
 			reader.readAsDataURL(avatarFile)
-			event.target.value = ''
+			event.target.modelValue = ''
 			reader.onload = event => {
 				if (event.target.readyState !== FileReader.DONE) return
 				const img = new Image()
@@ -88,28 +90,28 @@ export default {
 				img.src = event.target.result
 			}
 		},
-		pixelsRestrictions ({minWidth, minHeight, maxWidth, maxHeight, imageWidth, imageHeight}) {
+		pixelsRestrictions ({ minWidth, minHeight, maxWidth, maxHeight }) {
 			return {
 				minWidth: Math.max(128, minWidth),
 				minHeight: Math.max(128, minHeight),
-				maxWidth: maxWidth,
-				maxHeight: maxHeight,
+				maxWidth,
+				maxHeight,
 			}
 		},
 		update () {
-			return new Promise((resolve, reject) => {
+			return new Promise((resolve) => {
 				const { canvas } = this.$refs.cropper?.getResult() || {}
 				if (!canvas) {
-					this.$emit('input', {identicon: this.identicon})
+					this.$emit('update:modelValue', { identicon: this.identicon })
 					return resolve()
 				}
 				if (!this.changedImage) return resolve()
 
 				canvas.toBlob(blob => {
 					const request = api.uploadFile(blob, 'avatar.png', null, MAX_AVATAR_SIZE, MAX_AVATAR_SIZE)
-					request.addEventListener('load', (event) => {
+					request.addEventListener('load', () => {
 						const response = JSON.parse(request.responseText)
-						this.$emit('input', {url: response.url})
+						this.$emit('update:modelValue', { url: response.url })
 						resolve()
 					})
 				}, 'image/png') // TODO use original mimetype

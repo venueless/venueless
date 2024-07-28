@@ -1,9 +1,9 @@
 <template lang="pug">
 .c-user-search
 	.combobox(@keyup.enter.prevent="select(selectedIndex)", @keydown.down.prevent="selectNext()", @keydown.up.prevent="selectPrev()")
-		bunt-input(type="search", name="search", :placeholder="placeholder", v-model="search")
+		bunt-input(v-model="search", type="search", name="search", :placeholder="placeholder")
 		ul.list(v-scrollbar.y="")
-			li.list__item(v-for="(user, index) in list", @click="select(index)", :class="{'selected': index == selectedIndex, 'inactive': user.inactive}")
+			li.list__item(v-for="(user, index) in list", :class="{'selected': index == selectedIndex, 'inactive': user.inactive}", @click="select(index)")
 				avatar(:user="user", :size="48")
 				span.display-name
 					| {{ user ? user.profile.display_name : '' }}
@@ -24,6 +24,7 @@ export default {
 	props: {
 		placeholder: String
 	},
+	emits: ['selected'],
 	data () {
 		return {
 			search: '',
@@ -38,7 +39,7 @@ export default {
 	watch: {
 		page: async function () {
 			this.loading = true
-			const newPage = (await api.call('user.list.search', {search_term: this.search, page: this.page, include_banned: false}))
+			const newPage = (await api.call('user.list.search', { search_term: this.search, page: this.page, include_banned: false }))
 			this.lastPage = newPage.isLastPage
 			this.list.push(...newPage.results)
 			this.loading = false
@@ -49,14 +50,14 @@ export default {
 	},
 	async created () {
 		this.loading = true
-		this.list = (await api.call('user.list.search', {search_term: this.search, page: this.page, include_banned: false})).results
+		this.list = (await api.call('user.list.search', { search_term: this.search, page: this.page, include_banned: false })).results
 		this.loading = false
 	},
 	methods: {
 		updateList: async function () {
 			this.loading = true
 			this.page = 1
-			this.list = (await api.call('user.list.search', {search_term: this.search, page: this.page, include_banned: false})).results
+			this.list = (await api.call('user.list.search', { search_term: this.search, page: this.page, include_banned: false })).results
 			this.loading = false
 		},
 		select: function (index) {

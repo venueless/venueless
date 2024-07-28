@@ -1,4 +1,4 @@
-<script>
+import { h as createElement } from 'vue'
 import MarkdownIt from 'markdown-it'
 import store from 'store'
 import { markdownEmoji } from 'lib/emoji'
@@ -41,33 +41,24 @@ const generateHTML = function (input) {
 	return markdownIt.renderInline(input)
 }
 
-export default {
-	functional: true,
-	props: {
-		content: String
-	},
-	render (createElement, ctx) {
-		const parts = ctx.props.content.split(mentionRegex)
-		const content = parts.map(string => {
-			if (string.match(mentionRegex)) {
-				const user = ctx.parent.$store.state.chat.usersLookup[string.slice(1)]
-				if (user) {
-					return {user}
-				}
+export default function (props, { emit }) {
+	const parts = props.content.split(mentionRegex)
+	const content = parts.map(string => {
+		if (string.match(mentionRegex)) {
+			const user = store.state.chat.usersLookup[string.slice(1)]
+			if (user) {
+				return { user }
 			}
-			return {html: generateHTML(string)}
-		})
-		return content.map(part => {
-			if (part.user) {
-				return createElement('span', {
-					class: 'mention',
-					on: {
-						click: (event) => ctx.listeners.clickMention(event, part.user, 'top-start')
-					}
-				}, getUserName(part.user))
-			}
-			return createElement('span', {domProps: {innerHTML: part.html}})
-		})
-	}
+		}
+		return { html: generateHTML(string) }
+	})
+	return content.map(part => {
+		if (part.user) {
+			return createElement('span', {
+				class: 'mention',
+				onClick: (event) => emit('clickMention', event, part.user, 'top-start')
+			}, getUserName(part.user))
+		}
+		return createElement('span', { innerHTML: part.html })
+	})
 }
-</script>

@@ -1,7 +1,7 @@
 <template lang="pug">
 .v-presentation-chat
-	template(v-for="(message, index) of filteredTimeline")
-		chat-message(:message="message", :nextMessage="filteredTimeline[index + 1]", mode="compact", :readonly="true", :key="message.event_id")
+	template(v-for="(message, index) of filteredTimeline", :key="message.event_id")
+		chat-message(:message="message", :nextMessage="filteredTimeline[index + 1]", mode="compact", :readonly="true")
 </template>
 <script>
 import { mapState } from 'vuex'
@@ -22,7 +22,7 @@ export default {
 		},
 	},
 	created () {
-		this.$store.dispatch('chat/subscribe', {channel: this.module.channel_id, config: this.module.config})
+		this.$store.dispatch('chat/subscribe', { channel: this.module.channel_id, config: this.module.config })
 	}
 }
 </script>

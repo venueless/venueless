@@ -1,6 +1,6 @@
 <template lang="pug">
 .c-polls
-	.polls(v-if="polls && module.config.active", :class="{'can-vote': hasPermission('room:poll.vote')}", v-scrollbar.y="")
+	.polls(v-if="polls && module.config.active", v-scrollbar.y="", :class="{'can-vote': hasPermission('room:poll.vote')}")
 		.empty-placeholder(v-if="sortedPolls.length === 0") {{ $t('Poll:empty-placeholder') }}
 		poll(v-for="poll of sortedPolls", :poll="poll", @edit="$emit('edit', poll)")
 </template>
@@ -10,17 +10,18 @@ import Poll from './Poll'
 
 export default {
 	components: { Poll },
+	inject: {
+		isManaging: {
+			default: false
+		}
+	},
 	props: {
 		module: {
 			type: Object,
 			required: true
 		}
 	},
-	inject: {
-		isManaging: {
-			default: false
-		}
-	},
+	emits: ['edit', 'change'],
 	data () {
 		return {
 			hasLoaded: false

@@ -16,11 +16,11 @@ export default {
 		await this.$nextTick()
 		this.$store.commit('reportMediaSourcePlaceholderRect', this.$el.getBoundingClientRect())
 	},
-	beforeDestroy () {
+	beforeUnmount () {
 		this.$store.commit('reportMediaSourcePlaceholderRect', null)
 	},
 	methods: {
-		onResize ([{contentRect}]) {
+		onResize ([{ contentRect }]) {
 			this.$store.commit('reportMediaSourcePlaceholderRect', contentRect)
 		}
 	}

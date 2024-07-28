@@ -35,6 +35,7 @@ export default {
 			default: () => ([-3, 8])
 		}
 	},
+	emits: ['selected'],
 	data () {
 		return {
 			showEmojiPicker: false
@@ -47,7 +48,7 @@ export default {
 		})
 	},
 	methods: {
-		async toggle (event) {
+		async toggle () {
 			if (this.showEmojiPicker) {
 				this.showEmojiPicker = false
 				return

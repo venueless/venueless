@@ -3,7 +3,7 @@
 	.ui-page-header
 		h1 Theme Config
 	scrollbars(y)
-		bunt-progress-circular(size="huge", v-if="!error && !config")
+		bunt-progress-circular(v-if="!error && !config", size="huge")
 		.error(v-if="error") We could not fetch the current configuration.
 		template(v-if="config")
 			.ui-form-body
@@ -16,24 +16,26 @@
 					.policy-link Privacy policy link
 					.actions
 				.iframe-domain(v-for="iframeDomain of iframeDomains")
-					bunt-checkbox.enabled(name="enabled", v-model="iframeDomain.enabled")
+					bunt-checkbox.enabled(v-model="iframeDomain.enabled", name="enabled")
 					div.domain(v-if="iframeDomain.domain === 'default'") default
-					bunt-input.domain(v-else, name="domain", v-model="iframeDomain.domain", placeholder="example.com")
-					bunt-input.policy-link(name="policy-link", v-model="iframeDomain.policy_url", placeholder="https://example.com/privacy")
+					bunt-input.domain(v-else, v-model="iframeDomain.domain", name="domain", placeholder="example.com")
+					bunt-input.policy-link(v-model="iframeDomain.policy_url", name="policy-link", placeholder="https://example.com/privacy")
 					.actions
 						bunt-icon-button(v-if="iframeDomain.domain !== 'default'", @click="removeIframeDomain(iframeDomain)") delete-outline
 				bunt-button.btn-add-domain(@click="addIframeDomain") Add domain
 	.ui-form-actions
-		bunt-button.btn-save(@click="save", :loading="saving", :error-message="error") Save
+		bunt-button.btn-save(:loading="saving", :errorMessage="error", @click="save") Save
 		.errors {{ validationErrors.join(', ') }}
 </template>
 <script>
+import { useVuelidate } from '@vuelidate/core'
 import api from 'lib/api'
 import ValidationErrorsMixin from 'components/mixins/validation-errors'
 
 export default {
 	components: { },
 	mixins: [ValidationErrorsMixin],
+	setup: () => ({ v$: useVuelidate() }),
 	data () {
 		return {
 			// We do not use the global config object since we cannot rely on it being up to date (theme is only updated
@@ -65,8 +67,8 @@ export default {
 				policy_url: defaultEntry?.policy_url ?? ''
 			}]
 			this.iframeDomains.push(...Object.entries(this.config.iframe_blockers)
-				.filter(([domain, domainConfig]) => domain !== 'default')
-				.map(([domain, {enabled, policy_url}]) => ({
+				.filter(([domain,]) => domain !== 'default')
+				.map(([domain, { enabled, policy_url }]) => ({
 					domain,
 					enabled,
 					policy_url
@@ -80,10 +82,10 @@ export default {
 	},
 	methods: {
 		async save () {
-			this.$v.$touch()
-			if (this.$v.$invalid) return
+			this.v$.$touch()
+			if (this.v$.$invalid) return
 
-			const iframeBlockers = Object.fromEntries(this.iframeDomains.map(({domain, enabled, policy_url}) => [
+			const iframeBlockers = Object.fromEntries(this.iframeDomains.map(({ domain, enabled, policy_url }) => [
 				domain,
 				{
 					enabled,
@@ -92,7 +94,7 @@ export default {
 			]))
 
 			this.saving = true
-			await api.call('world.config.patch', {iframe_blockers: iframeBlockers})
+			await api.call('world.config.patch', { iframe_blockers: iframeBlockers })
 			this.saving = false
 			// TODO error handling
 		},

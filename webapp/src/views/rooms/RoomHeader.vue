@@ -16,12 +16,12 @@
 	router-view(:room="room", :modules="modules")
 	transition(name="prompt")
 		recordings-prompt(v-if="showRecordingsPrompt", :room="room", @close="showRecordingsPrompt = false")
-		QRCodePrompt(v-if="showQRCodePrompt", :room="room", @close="showQRCodePrompt = false")
+		QRCodePrompt(v-else-if="showQRCodePrompt", :room="room", @close="showQRCodePrompt = false")
 </template>
 <script>
 // TODO
 // better ellipsing for room name + session title on small screens
-import {mapGetters, mapState} from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import { inferRoomType } from 'lib/room-types'
 import RecordingsPrompt from 'components/RecordingsPrompt'
 import QRCodePrompt from 'components/QRCodePrompt'

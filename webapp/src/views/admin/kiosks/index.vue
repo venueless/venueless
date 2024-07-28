@@ -4,7 +4,7 @@
 		.actions
 			h2 Kiosks
 			bunt-link-button.btn-create(:to="{name: 'admin:kiosks:new'}") Create a new kiosk
-		bunt-input.search(name="search", placeholder="Search kiosks", icon="search", v-model="search")
+		bunt-input.search(v-model="search", name="search", placeholder="Search kiosks", icon="search")
 	.kiosks-list
 		.header
 			.name Name
@@ -37,12 +37,12 @@ export default {
 		}
 	},
 	async created () {
-		this.kiosks = (await api.call('user.list', {type: 'kiosk'})).results
+		this.kiosks = (await api.call('user.list', { type: 'kiosk' })).results
 	}
 }
 </script>
 <style lang="stylus">
-@import '~styles/flex-table'
+@import 'flex-table'
 
 .c-admin-kiosk
 	display: flex

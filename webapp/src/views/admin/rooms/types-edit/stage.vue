@@ -1,28 +1,29 @@
 <template lang="pug">
 .c-stage-settings
 	h2 Stream
-	bunt-select(name="stream-source", v-model="streamSource", :options="STREAM_SOURCE_OPTIONS", label="Stream source")
+	bunt-select(v-model="streamSource", name="stream-source", :options="STREAM_SOURCE_OPTIONS", label="Stream source")
 	template(v-if="modules['livestream.native']")
-		bunt-input(name="url", v-model="modules['livestream.native'].config.hls_url", label="HLS URL")
-		upload-url-input(name="streamOfflineImage", v-model="modules['livestream.native'].config.streamOfflineImage", label="Stream offline image")
-		bunt-input(name="muxenvkey", v-if="$features.enabled('muxdata')", v-model="modules['livestream.native'].config.mux_env_key", label="MUX data environment key")
-		bunt-input(name="subtitle_url", v-model="modules['livestream.native'].config.subtitle_url", label="URL for external subtitles")
+		bunt-input(v-model="modules['livestream.native'].config.hls_url", name="url", label="HLS URL")
+		upload-url-input(v-model="modules['livestream.native'].config.streamOfflineImage", name="streamOfflineImage", label="Stream offline image")
+		bunt-input(v-if="$features.enabled('muxdata')", v-model="modules['livestream.native'].config.mux_env_key", name="muxenvkey", label="MUX data environment key")
+		bunt-input(v-model="modules['livestream.native'].config.subtitle_url", name="subtitle_url", label="URL for external subtitles")
 		h4 Alternative Streams
 		.alternative(v-for="(a, i) in (modules['livestream.native'].config.alternatives || [])")
-			bunt-input(name="label", v-model="a.label", label="Label")
-			bunt-input(name="hls_url", v-model="a.hls_url", label="HLS URL")
+			bunt-input(v-model="a.label", name="label", label="Label")
+			bunt-input(v-model="a.hls_url", name="hls_url", label="HLS URL")
 			bunt-icon-button(@click="deleteAlternativeStream(i)") delete-outline
-		bunt-button(@click="$set(modules['livestream.native'].config, 'alternatives', modules['livestream.native'].config.alternatives || []); modules['livestream.native'].config.alternatives.push({label: '', hls_url: ''})") Add alternative stream
-	bunt-input(v-else-if="modules['livestream.youtube']", name="ytid", v-model="modules['livestream.youtube'].config.ytid", label="YouTube Video ID", :validation="$v.modules['livestream.youtube'].config.ytid")
-	bunt-input(v-else-if="modules['livestream.iframe']", name="iframe-player", v-model="modules['livestream.iframe'].config.url", label="Iframe player url", hint="iframe player should be autoplaying and support resizing to small sizes for background playing")
+		bunt-button(@click="modules['livestream.native'].config.alternatives = modules['livestream.native'].config.alternatives || []; modules['livestream.native'].config.alternatives.push({label: '', hls_url: ''})") Add alternative stream
+	bunt-input(v-else-if="modules['livestream.youtube']", v-model="modules['livestream.youtube'].config.ytid", name="ytid", label="YouTube Video ID", :validation="v$.modules['livestream.youtube'].config.ytid")
+	bunt-input(v-else-if="modules['livestream.iframe']", v-model="modules['livestream.iframe'].config.url", name="iframe-player", label="Iframe player url", hint="iframe player should be autoplaying and support resizing to small sizes for background playing")
 	sidebar-addons(v-bind="$props")
 </template>
 <script>
+import { useVuelidate } from '@vuelidate/core'
 import features from 'features'
 import UploadUrlInput from 'components/UploadUrlInput'
 import mixin from './mixin'
 import SidebarAddons from './SidebarAddons'
-import {youtubeid} from 'lib/validators'
+import { youtubeid } from 'lib/validators'
 
 const STREAM_SOURCE_OPTIONS = [
 	{ id: 'hls', label: 'HLS', module: 'livestream.native' },
@@ -36,6 +37,7 @@ if (features.enabled('iframe-player')) {
 export default {
 	components: { UploadUrlInput, SidebarAddons },
 	mixins: [mixin],
+	setup: () => ({ v$: useVuelidate() }),
 	data () {
 		return {
 			STREAM_SOURCE_OPTIONS,

@@ -6,7 +6,7 @@
 import JanusVideoroom from 'components/janus/JanusVideoroom'
 
 export default {
-	components: {JanusVideoroom},
+	components: { JanusVideoroom },
 	props: {
 		call: {
 			type: Object,
@@ -18,6 +18,7 @@ export default {
 		},
 		background: Boolean
 	},
+	emits: ['close'],
 	data () {
 		return {
 			server: null,

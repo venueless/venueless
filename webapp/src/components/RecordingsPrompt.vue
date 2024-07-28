@@ -25,6 +25,7 @@ export default {
 	props: {
 		room: Object
 	},
+	emits: ['close'],
 	data () {
 		return {
 			recordings: null,
@@ -34,7 +35,7 @@ export default {
 	computed: {},
 	async created () {
 		try {
-			this.recordings = (await api.call('bbb.recordings', {room: this.room.id}, {timeout: 150000})).results
+			this.recordings = (await api.call('bbb.recordings', { room: this.room.id }, { timeout: 150000 })).results
 			this.error = null
 		} catch (error) {
 			this.error = error
@@ -43,7 +44,7 @@ export default {
 		}
 	},
 	methods: {
-		moment: moment
+		moment
 	}
 }
 </script>

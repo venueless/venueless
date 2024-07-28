@@ -9,15 +9,16 @@
 				bunt-button#btn-progress-state(v-if="announcement.state !== 'archived'", :loading="settingState", @click="progressState") {{ announcement.state === 'draft' ? 'activate' : 'archive' }}
 	scrollbars(y)
 		bunt-input-outline-container(label="Text", name="text")
-			textarea.text(slot-scope="{focus, blur}", @focus="focus", @blur="blur", v-model="announcement.text", :disabled="announcement.state !== 'draft'")
-		bunt-input.floating-label(name="show-until", label="Show Until", type="datetime-local", v-model="plainShowUntil", :disabled="announcement.state !== 'draft'")
+			template(#default="{focus, blur}")
+				textarea.text(v-model="announcement.text", :disabled="announcement.state !== 'draft'", @focus="focus", @blur="blur")
+		bunt-input.floating-label(v-model="plainShowUntil", name="show-until", label="Show Until", type="datetime-local", :disabled="announcement.state !== 'draft'")
 		.button-group
-			bunt-button(:class="{selected: !announcement.show_until}", @click="clearShowUntil", :disabled="announcement.state !== 'draft'") forever
-			bunt-button(@click="modifyToShowUntil({minutes: 10})", :disabled="announcement.state !== 'draft'") {{showUntilModifyOperator}}10min
-			bunt-button(@click="modifyToShowUntil({minutes: 30})", :disabled="announcement.state !== 'draft'") {{showUntilModifyOperator}}30min
-			bunt-button(@click="modifyToShowUntil({hours: 1})", :disabled="announcement.state !== 'draft'") {{showUntilModifyOperator}}1h
-			bunt-button(@click="modifyToShowUntil({hours: 24})", :disabled="announcement.state !== 'draft'") {{showUntilModifyOperator}}24h
-		bunt-button#btn-save(:loading="saving", @click="save", :disabled="announcement.state !== 'draft'") {{ !announcement.id ? 'create' : 'save' }}
+			bunt-button(:class="{selected: !announcement.show_until}", :disabled="announcement.state !== 'draft'", @click="clearShowUntil") forever
+			bunt-button(:disabled="announcement.state !== 'draft'", @click="modifyToShowUntil({minutes: 10})") {{ showUntilModifyOperator }}10min
+			bunt-button(:disabled="announcement.state !== 'draft'", @click="modifyToShowUntil({minutes: 30})") {{ showUntilModifyOperator }}30min
+			bunt-button(:disabled="announcement.state !== 'draft'", @click="modifyToShowUntil({hours: 1})") {{ showUntilModifyOperator }}1h
+			bunt-button(:disabled="announcement.state !== 'draft'", @click="modifyToShowUntil({hours: 24})") {{ showUntilModifyOperator }}24h
+		bunt-button#btn-save(:loading="saving", :disabled="announcement.state !== 'draft'", @click="save") {{ !announcement.id ? 'create' : 'save' }}
 </template>
 <script>
 // TODO
@@ -73,7 +74,7 @@ export default {
 		document.addEventListener('keydown', this.onGlobalKeyDown)
 		document.addEventListener('keyup', this.onGlobalKeyUp)
 	},
-	beforeDestroy () {
+	beforeUnmount () {
 		document.removeEventListener('keydown', this.onGlobalKeyDown)
 		document.removeEventListener('keyup', this.onGlobalKeyUp)
 	},
@@ -88,7 +89,7 @@ export default {
 				this.shiftPressed = false
 			}
 		},
-		modifyToShowUntil (duration, event) {
+		modifyToShowUntil (duration) {
 			// TODO document the shift
 			if (!this.announcement.show_until) this.announcement.show_until = moment().startOf('minute')
 			this.announcement.show_until = moment(this.announcement.show_until[this.shiftPressed ? 'subtract' : 'add'](duration))
@@ -106,7 +107,7 @@ export default {
 				const { announcement } = await api.call('announcement.create', this.announcement)
 				// TODO not really best practice
 				this.announcements.push(announcement)
-				this.$router.push({ name: 'admin:announcements:item', params: {announcementId: announcement.id}})
+				this.$router.push({ name: 'admin:announcements:item', params: { announcementId: announcement.id } })
 				this.announcement = Object.assign({}, announcement)
 				this.announcement.show_until = this.announcement.show_until ? moment(this.announcement.show_until) : null
 			}

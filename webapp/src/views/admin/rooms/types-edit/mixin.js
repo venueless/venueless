@@ -13,7 +13,7 @@ export default {
 		addModule (type, config) {
 			if (this.modules[type]) return
 			this.config.module_config.push({
-				type: type,
+				type,
 				config: config || {}
 			})
 		},

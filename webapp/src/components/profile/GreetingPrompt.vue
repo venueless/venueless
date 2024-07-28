@@ -1,7 +1,7 @@
 <template lang="pug">
 prompt.c-profile-greeting-prompt(:allowCancel="false")
 	.content
-		connect-gravatar(v-if="showConnectGravatar", @change="setGravatar", @close="showConnectGravatar = false")
+		connect-gravatar(v-if="showConnectGravatar", @set-gravatar="setGravatar", @close="showConnectGravatar = false")
 		.step-connect-social(v-else-if="activeStep === 'connectSocial'")
 			h1 {{ $t('profile/GreetingPrompt:step-social:heading') }}
 			p {{ $t('profile/GreetingPrompt:step-social:text') }}
@@ -24,7 +24,7 @@ prompt.c-profile-greeting-prompt(:allowCancel="false")
 			template(v-else)
 				h1 {{ $t('profile/GreetingPrompt:step-display-name~as-first-step:heading') }}
 				p {{ $t('profile/GreetingPrompt:step-display-name~as-first-step:text') }}
-			bunt-input.display-name(name="displayName", :label="$t('profile/GreetingPrompt:displayname:label')", v-model.trim="profile.display_name", :validation="$v.profile.display_name")
+			bunt-input.display-name(v-model.trim="profile.display_name", name="displayName", :label="$t('profile/GreetingPrompt:displayname:label')", :validation="v$.profile.display_name")
 		.step-avatar(v-else-if="activeStep === 'avatar'")
 			h1 {{ $t('profile/GreetingPrompt:step-avatar:heading') }}
 			p {{ $t('profile/GreetingPrompt:step-avatar:text') }}
@@ -35,12 +35,13 @@ prompt.c-profile-greeting-prompt(:allowCancel="false")
 			change-additional-fields(v-model="profile.fields")
 		.actions(v-if="activeStep !== 'connectSocial' && !showConnectGravatar")
 			bunt-button#btn-back(v-if="previousStep", @click="activeStep = previousStep") {{ $t('profile/GreetingPrompt:button-back:label') }}
-			bunt-button#btn-continue(v-if="nextStep", :class="{invalid: $v.$invalid && $v.$dirty}", :disabled="blockSave || $v.$invalid && $v.$dirty", :loading="processingStep", :key="activeStep", @click="toNextStep") {{ $t('profile/GreetingPrompt:button-continue:label') }}
+			bunt-button#btn-continue(v-if="nextStep", :key="activeStep", :class="{invalid: v$.$invalid && v$.$dirty}", :disabled="blockSave || v$.$invalid && v$.$dirty", :loading="processingStep", @click="toNextStep") {{ $t('profile/GreetingPrompt:button-continue:label') }}
 			bunt-button#btn-finish(v-else, :loading="saving", :disabled="blockSave", @click="update") {{ $t('profile/GreetingPrompt:button-finish:label') }}
 </template>
 <script>
+import { useVuelidate } from '@vuelidate/core'
 import { mapState } from 'vuex'
-import { required } from 'buntpapier/src/vuelidate/validators'
+import { required } from 'lib/validators'
 import api from 'lib/api'
 import Prompt from 'components/Prompt'
 import ChangeAvatar from './ChangeAvatar'
@@ -49,6 +50,8 @@ import ConnectGravatar from './ConnectGravatar'
 
 export default {
 	components: { Prompt, ChangeAvatar, ChangeAdditionalFields, ConnectGravatar },
+	emits: ['close'],
+	setup: () => ({ v$: useVuelidate() }),
 	data () {
 		return {
 			activeStep: null,
@@ -102,8 +105,8 @@ export default {
 	},
 	methods: {
 		async toNextStep () {
-			this.$v.$touch()
-			if (this.$v.$invalid) return
+			this.v$.$touch()
+			if (this.v$.$invalid) return
 			if (this.$refs.step?.update) {
 				this.processingStep = true
 				await this.$refs.step.update()
@@ -124,14 +127,14 @@ export default {
 			this.activeStep = this.nextStep
 		},
 		async update () {
-			this.$v.$touch()
-			if (this.$v.$invalid) return
+			this.v$.$touch()
+			if (this.v$.$invalid) return
 			this.saving = true
 			if (this.$refs.step?.update) {
 				await this.$refs.step.update()
 			}
 			this.profile.greeted = true // override even if explicitly set to false by server
-			await this.$store.dispatch('updateUser', {profile: this.profile})
+			await this.$store.dispatch('updateUser', { profile: this.profile })
 			// TODO error handling
 			this.$emit('close')
 		}

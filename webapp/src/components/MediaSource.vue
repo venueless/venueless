@@ -5,18 +5,18 @@
 			.description
 				.hint {{ $t('MediaSource:room:hint') }}
 				.room-name(v-if="room") {{ room.name }}
-				.room-name(v-else="call") {{ $t('MediaSource:call:label') }}
+				.room-name(v-else-if="call") {{ $t('MediaSource:call:label') }}
 			.global-placeholder
 			bunt-icon-button(@click.prevent.stop="$emit('close')") close
-	livestream(v-if="room && module.type === 'livestream.native'", ref="livestream", :room="room", :module="module", :size="background ? 'tiny' : 'normal'", :key="`livestream-${room.id}`")
-	janus-call(v-else-if="room && module.type === 'call.janus'", ref="janus", :room="room", :module="module", :background="background", :size="background ? 'tiny' : 'normal'", :key="`janus-${room.id}`")
-	janus-channel-call(v-else-if="call", ref="janus", :call="call", :background="background", :size="background ? 'tiny' : 'normal'", :key="`call-${call.id}`", @close="$emit('close')")
+	livestream(v-if="room && module.type === 'livestream.native'", ref="livestream", :key="`livestream-${room.id}`", :room="room", :module="module", :size="background ? 'tiny' : 'normal'")
+	janus-call(v-else-if="room && module.type === 'call.janus'", ref="janus", :key="`janus-${room.id}`", :room="room", :module="module", :background="background", :size="background ? 'tiny' : 'normal'")
+	janus-channel-call(v-else-if="call", ref="janus", :key="`call-${call.id}`", :call="call", :background="background", :size="background ? 'tiny' : 'normal'", @close="$emit('close')")
 	.iframe-error(v-if="iframeError") {{ $t('MediaSource:iframe-error:text') }}
 </template>
 <script>
 // TODO functional component?
 import { mapState, mapGetters } from 'vuex'
-import isEqual from 'lodash/isEqual'
+import { isEqual } from 'lodash'
 import api from 'lib/api'
 import JanusCall from 'components/JanusCall'
 import JanusChannelCall from 'components/JanusChannelCall'
@@ -32,6 +32,7 @@ export default {
 			default: false
 		}
 	},
+	emits: ['close'],
 	data () {
 		return {
 			iframeError: null
@@ -73,11 +74,11 @@ export default {
 		}
 		this.initializeIframe()
 	},
-	beforeDestroy () {
+	beforeUnmount () {
 		this.iframe?.remove()
 		if (api.socketState !== 'open') return
 		// TODO move to store?
-		if (this.room) api.call('room.leave', {room: this.room.id})
+		if (this.room) api.call('room.leave', { room: this.room.id })
 	},
 	methods: {
 		async initializeIframe () {
@@ -86,12 +87,12 @@ export default {
 				let hideIfBackground = false
 				switch (this.module.type) {
 					case 'call.bigbluebutton': {
-						({url: iframeUrl} = await api.call('bbb.room_url', {room: this.room.id}))
+						({ url: iframeUrl } = await api.call('bbb.room_url', { room: this.room.id }))
 						hideIfBackground = true
 						break
 					}
 					case 'call.zoom': {
-						({url: iframeUrl} = await api.call('zoom.room_url', {room: this.room.id}))
+						({ url: iframeUrl } = await api.call('zoom.room_url', { room: this.room.id }))
 						hideIfBackground = true
 						break
 					}
@@ -191,7 +192,7 @@ export default {
 		transition: transform .3s ease
 	// .background-room-enter-active
 	// 	transition-delay: .1s
-	.background-room-enter, .background-room-leave-to
+	.background-room-enter-from, .background-room-leave-to
 		transform: translate(calc(-1 * var(--chatbar-width)), 52px)
 .c-media-source .c-livestream, .c-media-source .c-januscall, .c-media-source .c-januschannelcall, iframe.iframe-media-source
 	position: fixed

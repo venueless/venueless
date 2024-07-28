@@ -35,7 +35,7 @@ export default {
 	actions: {
 		// sets state from browser permission and localStorage
 		// TODO prevent switching of settings at app load
-		pollExternals ({state, dispatch}) {
+		pollExternals ({ state }) {
 			state.permission = notificationsSupported && Notification.permission
 			state.permissionPromptDismissed = !!localStorage.notificationPermissionPromptDismissed
 			const settings = loadSettings()
@@ -43,7 +43,7 @@ export default {
 				state.settings = settings
 			}
 		},
-		async askForPermission ({state, dispatch}) {
+		async askForPermission ({ state, dispatch }) {
 			if (!notificationsSupported) return
 			state.askingPermission = true
 			let permission
@@ -57,15 +57,15 @@ export default {
 			state.askingPermission = false
 			dispatch('dismissPermissionPrompt')
 		},
-		dismissPermissionPrompt ({state}) {
+		dismissPermissionPrompt ({ state }) {
 			state.permissionPromptDismissed = true
 			localStorage.notificationPermissionPromptDismissed = true
 		},
-		updateSettings ({state}, settings) {
+		updateSettings ({ state }, settings) {
 			state.settings = Object.assign({}, state.settings, settings)
 			localStorage.notificationSettings = JSON.stringify(state.settings)
 		},
-		async createDesktopNotification ({state, getters}, {title, body, tag, user, icon, onClose, onClick}) {
+		async createDesktopNotification ({ state, getters }, { title, body, tag, user, icon, onClose, onClick }) {
 			if (!getters.shouldNotify || document.hasFocus()) return // don't show desktop notification when we have focus
 			if (user) {
 				if (user.profile?.avatar?.url) {
@@ -87,7 +87,7 @@ export default {
 				}
 			}
 			// TODO set tag to handle multiple tabs
-			const desktopNotification = new Notification(title ?? '', {body, icon, tag})
+			const desktopNotification = new Notification(title ?? '', { body, icon, tag })
 			if (state.settings.playSounds) {
 				const audio = new Audio('/notify.wav')
 				audio.play()
@@ -104,13 +104,13 @@ export default {
 			state.desktopNotifications.push(desktopNotification)
 			return desktopNotification
 		},
-		closeDesktopNotifications ({state}, fn) {
+		closeDesktopNotifications ({ state }, fn) {
 			for (const desktopNotification of state.desktopNotifications) {
 				if (fn(desktopNotification)) desktopNotification.close()
 			}
 			state.desktopNotifications = state.desktopNotifications.filter(n => !fn(n))
 		},
-		clearDesktopNotifications ({state}) {
+		clearDesktopNotifications ({ state }) {
 			for (const desktopNotification of state.desktopNotifications) {
 				desktopNotification.close()
 			}

@@ -103,5 +103,5 @@ export function inferType (config) {
 
 // TODO clean up with `inferType` function
 export function inferRoomType (room) {
-	return inferType({module_config: room.modules})
+	return inferType({ module_config: room.modules })
 }

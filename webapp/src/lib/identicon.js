@@ -21,13 +21,13 @@ export function getIdenticonSVG (id) {
 		const mod = Math.abs(hash + 1) % 4
 		switch (mod) {
 			case 1:
-				return {class: 'circle'}
+				return { class: 'circle' }
 			case 2:
-				return {class: 'triangle', path: 'M 0 0 L 0 1 L 1 1z', transform: 'scale(0.7 0.7) translate(0.6 -0.15)'}
+				return { class: 'triangle', path: 'M 0 0 L 0 1 L 1 1z', transform: 'scale(0.7 0.7) translate(0.6 -0.15)' }
 			case 3:
-				return {class: 'oval', path: 'M 0 1 Q .2 .2 1 0 Q .8 .8 0 1z', transform: 'scale(0.7 0.7) translate(0.3 0.1)'}
+				return { class: 'oval', path: 'M 0 1 Q .2 .2 1 0 Q .8 .8 0 1z', transform: 'scale(0.7 0.7) translate(0.3 0.1)' }
 			default:
-				return {class: 'square', path: 'M 0 0 L 0 1 L 1 1 L 1 0z', transform: 'scale(0.5 0.5) translate(0.75 0.2)'}
+				return { class: 'square', path: 'M 0 0 L 0 1 L 1 1 L 1 0z', transform: 'scale(0.5 0.5) translate(0.75 0.2)' }
 		}
 	}
 	const shape = {
@@ -52,22 +52,22 @@ export function getIdenticonSVG (id) {
 	}
 
 	const blocks = [{
-		pos: {x: 0, y: 0},
+		pos: { x: 0, y: 0 },
 		paths: [
-			{d: createBlock(hash % 3), color: primaryColor},
-			{d: createBlock(hash % 5), color: accentColor}
+			{ d: createBlock(hash % 3), color: primaryColor },
+			{ d: createBlock(hash % 5), color: accentColor }
 		]
 	}, {
-		pos: {x: 0, y: 1},
+		pos: { x: 0, y: 1 },
 		paths: [
-			{d: createBlock(hash % 4), color: accentColor},
-			{d: createBlock(hash % 3), color: primaryColor}
+			{ d: createBlock(hash % 4), color: accentColor },
+			{ d: createBlock(hash % 3), color: primaryColor }
 		]
 	}, {
-		pos: {x: 1, y: 1},
+		pos: { x: 1, y: 1 },
 		paths: [
-			{d: createBlock(hash % 7), color: accentColor},
-			{d: createBlock(hash % 8), color: primaryColor}
+			{ d: createBlock(hash % 7), color: accentColor },
+			{ d: createBlock(hash % 8), color: primaryColor }
 		]
 	}]
 

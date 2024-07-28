@@ -1,40 +1,47 @@
 /* globals ENV_DEVELOPMENT */
-import { withParams, req } from 'vuelidate/lib/validators/common'
-import { helpers, url as _url, integer as _integer } from 'vuelidate/lib/validators'
+import {
+	helpers,
+	required as _required,
+	maxLength as _maxLength,
+	minLength as _minLength,
+	email as _email,
+	integer as _integer,
+	maxValue as _maxValue,
+	minValue as _minValue,
+	url as _url
+} from '@vuelidate/validators/dist/raw.mjs'
 
-const required = message => withParams({message}, req)
-const integer = message => withParams({message}, _integer)
-
-const color = message => withParams({message}, helpers.regex('color', /^#([a-zA-Z0-9]{3}|[a-zA-Z0-9]{6})$/))
+export const required = message => helpers.withMessage(message, _required)
+export const email = message => helpers.withMessage(message, _email)
+export const maxLength = (length, message) => helpers.withMessage(message, _maxLength(length))
+export const minLength = (length, message) => helpers.withMessage(message, _minLength(length))
+export const integer = message => helpers.withMessage(message, _integer)
+export const maxValue = (maxVal, message) => helpers.withMessage(message, _maxValue(maxVal))
+export const minValue = (minVal, message) => helpers.withMessage(message, _minValue(minVal))
+export const color = message => helpers.withMessage(message, helpers.regex(/^#([a-zA-Z0-9]{3}|[a-zA-Z0-9]{6})$/))
 
 // The strictest regex for YouTube video IDs is probably [0-9A-Za-z_-]{10}[048AEIMQUYcgkosw]
 // as per https://webapps.stackexchange.com/questions/54443/format-for-id-of-youtube-video
 // but let's not count on YouTube not changing their format. Our main goal here is to prevent
 // users from entering full URLs.
-const youtubeid = message => withParams({message}, helpers.regex('youtubeid', /^[0-9A-Za-z_-]{5,}$/))
+export const youtubeid = message => helpers.withMessage(message, helpers.regex(/^[0-9A-Za-z_-]{5,}$/))
 
-const relative = helpers.regex('relative', /^\/.*$/)
-const devurl = helpers.regex('devurl', /^http:\/\/localhost.*$/) // vuelidate does not allow localhost
-const url = message => withParams({message}, (value) => (!helpers.req(value) || _url(value) || relative(value) || (ENV_DEVELOPMENT && devurl(value))))
+const relative = helpers.regex(/^\/.*$/)
+const devurl = helpers.regex(/^http:\/\/localhost.*$/) // vuelidate does not allow localhost
 
-const isJson = () => withParams((addParams) => {
-	return value => {
-		if (!value || value.length === 0) return true
+export const url = message => helpers.withMessage(message, (value) => (!helpers.req(value) || _url(value) || relative(value) || (ENV_DEVELOPMENT && devurl(value))))
+
+export const isJson = () => {
+	return helpers.withMessage(({ $response }) => $response?.message, value => {
+		if (!value || value.length === 0) return { $valid: true }
 		try {
 			JSON.parse(value)
-			return true
+			return { $valid: true }
 		} catch (exception) {
-			addParams({message: exception.message})
+			return {
+				$valid: false,
+				message: exception.message
+			}
 		}
-		return false
-	}
-})
-
-export {
-	required,
-	integer,
-	color,
-	url,
-	youtubeid,
-	isJson
+	})
 }

@@ -3,18 +3,22 @@ prompt.c-create-stage-prompt(@close="$emit('close')")
 	.content
 		h1 {{ $t('CreateStagePrompt:headline:text') }}
 		form(@submit.prevent="create")
-			bunt-input(name="name", :label="$t('CreateStagePrompt:name:label')", icon="theater", :placeholder="$t('CreateStagePrompt:name:placeholder')", v-model="name", :validation="$v.name")
-			bunt-input(name="url", :label="$t('CreateStagePrompt:url:label')", icon="link", placeholder="https://example.com/stream.m3u8", v-model="url", :validation="$v.url")
+			bunt-input(v-model="name", name="name", :label="$t('CreateStagePrompt:name:label')", icon="theater", :placeholder="$t('CreateStagePrompt:name:placeholder')", :validation="v$.name")
+			bunt-input(v-model="url", name="url", :label="$t('CreateStagePrompt:url:label')", icon="link", placeholder="https://example.com/stream.m3u8", :validation="v$.url")
 			bunt-input-outline-container(:label="$t('CreateChatPrompt:description:label')")
-				textarea(v-model="description", slot-scope="{focus, blur}", @focus="focus", @blur="blur")
-			bunt-button(type="submit", :loading="loading", :error-message="error") {{ $t('CreateStagePrompt:submit:label') }}
+				template(#default="{focus, blur}")
+					textarea(v-model="description", @focus="focus", @blur="blur")
+			bunt-button(type="submit", :loading="loading", :errorMessage="error") {{ $t('CreateStagePrompt:submit:label') }}
 </template>
 <script>
+import { useVuelidate } from '@vuelidate/core'
 import Prompt from 'components/Prompt'
 import { required, url } from 'lib/validators'
 
 export default {
 	components: { Prompt },
+	emits: ['close'],
+	setup: () => ({ v$: useVuelidate() }),
 	data () {
 		return {
 			name: '',
@@ -36,8 +40,8 @@ export default {
 	methods: {
 		async create () {
 			this.error = null
-			this.$v.$touch()
-			if (this.$v.$invalid) return
+			this.v$.$touch()
+			if (this.v$.$invalid) return
 
 			this.loading = true
 			const modules = []
@@ -61,7 +65,7 @@ export default {
 					modules
 				}))
 				this.loading = false
-				this.$router.push({name: 'room', params: {roomId: room}})
+				this.$router.push({ name: 'room', params: { roomId: room } })
 				this.$emit('close')
 			} catch (error) {
 				console.log(error)

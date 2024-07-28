@@ -1,15 +1,14 @@
 /* global ENV_DEVELOPMENT */
 import config from 'config'
-import store from 'store'
 import WebSocketClient from './WebSocketClient'
 
-const api = Object.create(WebSocketClient.prototype)
-api.connect = function ({token, clientId, inviteToken}) {
-	if (api._socket) {
-		api.close()
-	}
-	Object.assign(api, WebSocketClient.call(api, `${config.api.socket}`, {token, clientId, inviteToken}))
-	WebSocketClient.prototype.connect.call(api)
+let api = null
+export { api as default }
+
+export function initApi ({ store, token, clientId, inviteToken }) {
+	api = new WebSocketClient(`${config.api.socket}`, { token, clientId, inviteToken })
+	api.connect()
+
 	api.on('closed', () => {
 		console.warn('socket closed')
 	})
@@ -33,7 +32,7 @@ api.connect = function ({token, clientId, inviteToken}) {
 		}
 	})
 
-	api.on('log', ({direction, data}) => {
+	api.on('log', ({ direction, data }) => {
 		const payload = JSON.parse(data)
 		const action = payload.shift()
 		let correlationId
@@ -52,43 +51,67 @@ api.connect = function ({token, clientId, inviteToken}) {
 			)
 		}
 	})
-}
 
-api.uploadFile = function (file, filename, url, width, height) {
-	url = url || config.api.upload
-	const data = new FormData()
-	data.append('file', file, filename)
-	if (width) data.append('width', width)
-	if (height) data.append('height', height)
-	const request = new XMLHttpRequest()
-	request.open('POST', url)
-	request.setRequestHeader('Accept', 'application/json')
-	if (api._config.token) {
-		request.setRequestHeader('Authorization', `Bearer ${api._config.token}`)
-	} else if (api._config.clientId) {
-		request.setRequestHeader('Authorization', `Client ${api._config.clientId}`)
-	}
-	request.send(data)
-	return request
-}
-
-// TODO unify, rename, progress support
-api.uploadFilePromise = function (file, filename, url) {
-	url = url || config.api.upload
-	const data = new FormData()
-	data.append('file', file, filename)
-	const authHeader = api._config.token ? `Bearer ${api._config.token}`
-		: (api._config.clientId ? `Client ${api._config.clientId}` : null)
-	return fetch(url, {
-		method: 'POST',
-		body: data,
-		headers: {
-			Accept: 'application/json',
-			Authorization: authHeader
+	api.uploadFile = function (file, filename, url, width, height) {
+		url = url || config.api.upload
+		const data = new FormData()
+		data.append('file', file, filename)
+		if (width) data.append('width', width)
+		if (height) data.append('height', height)
+		const request = new XMLHttpRequest()
+		request.open('POST', url)
+		request.setRequestHeader('Accept', 'application/json')
+		if (api._config.token) {
+			request.setRequestHeader('Authorization', `Bearer ${api._config.token}`)
+		} else if (api._config.clientId) {
+			request.setRequestHeader('Authorization', `Client ${api._config.clientId}`)
 		}
-	}).then(response => response.json())
+		request.send(data)
+		return request
+	}
+
+	// TODO unify, rename, progress support
+	api.uploadFilePromise = function (file, filename, url) {
+		url = url || config.api.upload
+		const data = new FormData()
+		data.append('file', file, filename)
+		const authHeader = api._config.token
+			? `Bearer ${api._config.token}`
+			: (api._config.clientId ? `Client ${api._config.clientId}` : null)
+		return fetch(url, {
+			method: 'POST',
+			body: data,
+			headers: {
+				Accept: 'application/json',
+				Authorization: authHeader
+			}
+		}).then(response => response.json())
+	}
+
+	window.api = api
 }
 
-window.api = api
+// const api = Object.create(WebSocketClient.prototype)
+// api.connect = function ({token, clientId, inviteToken}) {
+// 	if (api._socket) {
+// 		api.close()
+// 	}
+// 	console.log('CONNECT')
+// 	Object.assign(api, new WebSocketClient(`${config.api.socket}`, {token, clientId, inviteToken}))
+// 	WebSocketClient.prototype.connect.call(api)
 
-export default api
+// }
+
+// if (import.meta.hot) {
+//   import.meta.hot.on('vite:beforeUpdate', (event) => {
+// 		console.log('vite:beforeUpdate', event)
+// 	})
+// }
+
+// if (import.meta.hot) {
+// 	import.meta.hot.data.api = api
+// 	import.meta.hot.decline()
+//   import.meta.hot.accept((newModule) => {
+//     console.log('NNNL', newModule)
+//   })
+// }

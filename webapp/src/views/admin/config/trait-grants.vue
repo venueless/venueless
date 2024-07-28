@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-mutating-props -->
 <template lang="pug">
 .c-trait-grants
 	.header
@@ -6,11 +7,11 @@
 		.actions
 	.trait-grant(v-for="(val, key) of traitGrants")
 		.role {{ key }}
-		bunt-input.traits(name="trait-grant", :value="getTraitGrants(val)", @input="setTraitGrants(key, $event)", placeholder="(everyone)")
+		bunt-input.traits(name="trait-grant", :modelValue="getTraitGrants(val)", placeholder="(everyone)", @update:modelValue="setTraitGrants(key, $event)")
 		.actions
 			bunt-icon-button(@click="removeTraitGrant(key)") delete-outline
 	.add-role
-		bunt-select(name="remainingRoles", label="New role", :options="remainingRoles", v-model="newRole")
+		bunt-select(v-model="newRole", name="remainingRoles", label="New role", :options="remainingRoles")
 		bunt-button.btn-add-role(@click="addTraitGrant") Add role
 </template>
 <script>
@@ -21,6 +22,7 @@ export default {
 		traitGrants: Object,
 		config: Object
 	},
+	emits: ['changed'],
 	data () {
 		return {
 			newRole: null
@@ -43,16 +45,16 @@ export default {
 		},
 		setTraitGrants (role, traits) {
 			if (typeof this.traitGrants[role] !== 'undefined') {
-				this.$set(this.traitGrants, role, parseTraitGrants(traits))
+				this.traitGrants[role] = parseTraitGrants(traits)
 			}
 			this.$emit('changed')
 		},
 		removeTraitGrant (role) {
-			this.$delete(this.traitGrants, role)
+			delete this.traitGrants[role]
 			this.$emit('changed')
 		},
 		addTraitGrant () {
-			this.$set(this.traitGrants, this.newRole, [])
+			this.traitGrants[this.newRole] = []
 			this.newRole = null
 			this.$emit('changed')
 		}

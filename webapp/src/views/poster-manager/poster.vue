@@ -9,13 +9,13 @@
 				bunt-button.btn-delete-poster(v-if="!create", @click="showDeletePrompt = true") delete
 		scrollbars(y)
 			.ui-form-body
-				bunt-select(name="parent_room", v-model="poster.parent_room_id", :label="$t('poster-manager/poster:input-parent-room:label')", :options="rooms", option-label="name")
+				bunt-select(v-model="poster.parent_room_id", name="parent_room", :label="$t('poster-manager/poster:input-parent-room:label')", :options="rooms", optionLabel="name")
 				template(v-if="room")
-					bunt-input(name="title", v-model="poster.title", :label="$t('poster-manager/poster:input-title:label')", :validation="$v.poster.title")
+					bunt-input(v-model="poster.title", name="title", :label="$t('poster-manager/poster:input-title:label')", :validation="v$.poster.title")
 					rich-text-editor(v-model="poster.abstract", :label="$t('poster-manager/poster:input-abstract:label')")
-					bunt-select(name="category", v-model="poster.category", :options="posterModule.config.categories", :label="$t('poster-manager/poster:input-category:label')")
-					bunt-input(name="tags", v-model="tags", :label="$t('poster-manager/poster:input-tags:label')", hint="comma separated tag keys")
-					upload-url-input(name="poster-pdf", v-model="poster.poster_url", :label="$t('poster-manager/poster:input-poster-pdf:label')", @input="generatePosterPreview")
+					bunt-select(v-model="poster.category", name="category", :options="posterModule.config.categories", :label="$t('poster-manager/poster:input-category:label')")
+					bunt-input(v-model="tags", name="tags", :label="$t('poster-manager/poster:input-tags:label')", hint="comma separated tag keys")
+					upload-url-input(v-model="poster.poster_url", name="poster-pdf", :label="$t('poster-manager/poster:input-poster-pdf:label')", @update:modelValue="generatePosterPreview")
 					img(:src="poster.poster_preview")
 					h2 {{ $t('poster-manager/poster:authors:headline') }}
 					.authors
@@ -25,29 +25,29 @@
 								.org(v-for="(org, index) of poster.authors.organizations") {{ index + 1 }}.
 							.button-placeholder
 						.author(v-for="(author, index) of poster.authors.authors")
-							bunt-input.name(name="name", v-model="author.name", :label="$t('poster-manager/poster:authors:input-name:label')")
+							bunt-input.name(v-model="author.name", name="name", :label="$t('poster-manager/poster:authors:input-name:label')")
 							.orgs
-								bunt-checkbox.org(v-for="(org, index) of poster.authors.organizations", name="org", :value="author.orgs.includes(index)", @input="toggleAuthorOrg(author, index)")
+								bunt-checkbox.org(v-for="(org, index) of poster.authors.organizations", name="org", :modelValue="author.orgs.includes(index)", @update:modelValue="toggleAuthorOrg(author, index)")
 							bunt-icon-button(@click="poster.authors.authors.splice(index, 1)") delete-outline
 					bunt-button(@click="addAuthor") {{ $t('poster-manager/poster:btn-add-author') }}
 					h3 {{ $t('poster-manager/poster:organizations:headline') }}
 					.organizations
 						.organization(v-for="(organization, index) of poster.authors.organizations")
 							.index {{ index + 1 }}.
-							bunt-input(name="organization", :value="organization", @input="$set(poster.authors.organizations, index, $event)")
+							bunt-input(name="organization", :modelValue="organization", @update:modelValue="poster.authors.organizations[index] = $event")
 							bunt-icon-button(@click="poster.authors.organizations.splice(index, 1)") delete-outline
 					bunt-button(@click="poster.authors.organizations.push('')") {{ $t('poster-manager/poster:btn-add-organization') }}
 					h2 {{ $t('poster-manager/poster:presenters:headline') }}
 					.presenters
-						.presenter(v-for="(presenter, index) in poster.presenters")
+						.presenter(v-for="presenter in poster.presenters")
 							.user
 								avatar(:user="presenter", :size="36")
 								span.display-name {{ presenter.profile.display_name }}
 							td.actions
 								bunt-icon-button(v-if="hasPermission('world:rooms.create.exhibition')", @click="removePresenter(presenter)") delete-outline
 					bunt-button(@click="showPresenterPrompt = true") {{ $t('poster-manager/poster:btn-add-presenter') }}
-					bunt-select(name="presentation-room", v-model="poster.presentation_room_id", :disabled="!hasPermission('world:rooms.create.poster')", :label="$t('poster-manager/poster:input-presentation-room:label')",  :options="presentationRoomOptions", option-label="name")
-					bunt-input(name="schedule-session", v-model="poster.schedule_session", :label="$t('poster-manager/poster:input-schedule-session:label')")
+					bunt-select(v-model="poster.presentation_room_id", name="presentation-room", :disabled="!hasPermission('world:rooms.create.poster')", :label="$t('poster-manager/poster:input-presentation-room:label')", :options="presentationRoomOptions", optionLabel="name")
+					bunt-input(v-model="poster.schedule_session", name="schedule-session", :label="$t('poster-manager/poster:input-schedule-session:label')")
 					h2 {{ $t('poster-manager/poster:files:headline') }}
 					.links(v-for="(link, index) in poster.links")
 						.header
@@ -55,22 +55,22 @@
 							.url {{ $t('poster-manager/poster:files:header:url') }}
 							//- .actions
 						.link
-							bunt-input.label(name="display-text", v-model="link.display_text")
-							upload-url-input.url(name="url", v-model="link.url")
+							bunt-input.label(v-model="link.display_text", name="display-text")
+							upload-url-input.url(v-model="link.url", name="url")
 							.actions
 								bunt-icon-button(@click="poster.links.splice(index, 1)") delete-outline
 						//- 	bunt-icon-button(@click="up_link(index, link.category)") arrow-up-bold-outline
 						//- 	bunt-icon-button(@click="down_link(index, link.category)") arrow-down-bold-outline
 					bunt-button(@click="poster.links.push({display_text: '', url: ''})") {{ $t('poster-manager/poster:btn-add-file') }}
 		.ui-form-actions
-			bunt-button.btn-save(@click="save", :loading="saving", :error-message="error") {{ create ? $t('poster-manager/poster:btn-create') : $t('poster-manager/poster:btn-save') }}
+			bunt-button.btn-save(:loading="saving", :errorMessage="error", @click="save") {{ create ? $t('poster-manager/poster:btn-create') : $t('poster-manager/poster:btn-save') }}
 			//- .errors {{ validationErrors.join(', ') }}
 	bunt-progress-circular(v-else, size="huge")
 	transition(name="prompt")
 		prompt.add-presenter-prompt(v-if="showPresenterPrompt", :scrollable="false", @close="showPresenterPrompt = false")
 			.content
 				h1 {{ $t('poster-manager/poster:add-presenter-prompt:headline') }}
-				user-select(:button-label="$t('poster-manager/poster:add-presenter-prompt:btn-label')", @selected="addPresenters")
+				user-select(:buttonLabel="$t('poster-manager/poster:add-presenter-prompt:btn-label')", @selected="addPresenters")
 	transition(name="prompt")
 		prompt.delete-prompt(v-if="showDeletePrompt", @close="showDeletePrompt = false")
 			.content
@@ -79,19 +79,18 @@
 				p {{ $t('poster-manager/poster:delete-prompt:warning') }}
 				.poster-title {{ poster.title }}
 				p {{ $t('poster-manager/poster:delete-prompt:confirm-cta') }}
-				bunt-input(name="posterTitle", :label="$t('poster-manager/poster:delete-prompt:input-title:label')", v-model="deletingPosterTitle", @keypress.enter="deletePoster")
-				bunt-button.delete-poster(icon="delete", :disabled="deletingPosterTitle !== poster.title", @click="deletePoster", :loading="deleting", :error-message="deleteError") {{ $t('poster-manager/poster:delete-prompt:btn-delete-poster') }}
+				bunt-input(v-model="deletingPosterTitle", name="posterTitle", :label="$t('poster-manager/poster:delete-prompt:input-title:label')", @keypress.enter="deletePoster")
+				bunt-button.delete-poster(icon="delete", :disabled="deletingPosterTitle !== poster.title", :loading="deleting", :errorMessage="deleteError", @click="deletePoster") {{ $t('poster-manager/poster:delete-prompt:btn-delete-poster') }}
 </template>
 <script>
 // TODO
 // - better tag input
 
-import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.js'
-// eslint-disable-next-line import/no-webpack-loader-syntax
-import PdfjsWorker from 'worker-loader?esModule=false&filename=[name].[contenthash].js!pdfjs-dist/legacy/build/pdf.worker.js'
+import * as pdfjs from 'pdfjs-dist/webpack.mjs'
 import Quill from 'quill'
 import { mapGetters } from 'vuex'
-import { required} from 'buntpapier/src/vuelidate/validators'
+import { useVuelidate } from '@vuelidate/core'
+import { required } from 'lib/validators'
 import api from 'lib/api'
 import router from 'router'
 import Avatar from 'components/Avatar'
@@ -101,11 +100,6 @@ import UploadUrlInput from 'components/UploadUrlInput'
 import RichTextEditor from 'components/RichTextEditor'
 import ExhibitorPreview from 'views/exhibitors/item'
 
-if (typeof window !== 'undefined' && 'Worker' in window) {
-	console.log(PdfjsWorker)
-	pdfjs.GlobalWorkerOptions.workerPort = new PdfjsWorker()
-}
-
 const Delta = Quill.import('delta')
 
 export default {
@@ -114,6 +108,7 @@ export default {
 		create: Boolean,
 		posterId: String
 	},
+	setup: () => ({ v$: useVuelidate() }),
 	data () {
 		return {
 			error: null,
@@ -140,7 +135,7 @@ export default {
 			return this.room?.modules.find(module => module.type === 'poster.native')
 		},
 		presentationRoomOptions () {
-			return [{name: '', id: ''}, ...this.$store.state.rooms]
+			return [{ name: '', id: '' }, ...this.$store.state.rooms]
 		},
 	},
 	validations () {
@@ -173,17 +168,22 @@ export default {
 				links: []
 			}
 		} else {
-			this.poster = await api.call('poster.get', {poster: this.posterId})
+			this.poster = await api.call('poster.get', { poster: this.posterId })
 			this.poster.abstract = new Delta(this.poster.abstract)
 			this.tags = this.poster.tags.join(',')
 		}
 	},
 	methods: {
 		async generatePosterPreview () {
+			if (!this.poster.poster_url) {
+				this.poster.poster_preview = null
+				return
+			}
+			console.log('HEY', pdfjs.getDocument(this.poster.poster_url))
 			const pdf = await pdfjs.getDocument(this.poster.poster_url).promise
 			const page = await pdf.getPage(1)
-			const unscaledViewport = page.getViewport({scale: 1})
-			const viewport = page.getViewport({scale: 360 / unscaledViewport.height})
+			const unscaledViewport = page.getViewport({ scale: 1 })
+			const viewport = page.getViewport({ scale: 360 / unscaledViewport.height })
 			const canvas = document.createElement('canvas')
 			canvas.height = viewport.height
 			canvas.width = viewport.width
@@ -192,7 +192,7 @@ export default {
 				viewport
 			}).promise
 			const blob = await new Promise(canvas.toBlob.bind(canvas))
-			const {url} = await api.uploadFilePromise(blob, 'poster_preview.png')
+			const { url } = await api.uploadFilePromise(blob, 'poster_preview.png')
 			// TODO handle error (const {url, error} = …)
 			this.poster.poster_preview = url
 		},
@@ -222,15 +222,15 @@ export default {
 			this.poster.presenters.splice(index, 1)
 		},
 		async save () {
-			this.$v.$touch()
-			if (this.$v.$invalid) return
+			this.v$.$touch()
+			if (this.v$.$invalid) return
 			this.saving = true
 			this.poster.tags = this.tags === '' ? [] : this.tags.split(',').map(tag => tag.trim())
 			let poster = Object.assign({}, this.poster)
 			poster.abstract = poster.abstract.ops
 			poster.links.forEach((link, index) => link.sorting_priority = index)
 			poster = await api.call('poster.patch', poster)
-			if (this.create) await router.push({name: 'posters:poster', params: {posterId: poster.id}})
+			if (this.create) await router.push({ name: 'posters:poster', params: { posterId: poster.id } })
 			this.saving = false
 		},
 		async deletePoster () {
@@ -238,8 +238,8 @@ export default {
 			this.deleting = true
 			this.deleteError = null
 			try {
-				await api.call('poster.delete', {poster: this.poster.id})
-				this.$router.replace({name: 'posters'})
+				await api.call('poster.delete', { poster: this.poster.id })
+				this.$router.replace({ name: 'posters' })
 			} catch (error) {
 				this.deleteError = this.$t(`error:${error.code}`)
 			}

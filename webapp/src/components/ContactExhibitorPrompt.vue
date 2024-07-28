@@ -1,5 +1,5 @@
 <template lang="pug">
-prompt.c-contact-exhibitor-prompt(@close="cancel", :allowCancel="false")
+prompt.c-contact-exhibitor-prompt(:allowCancel="false", @close="cancel")
 	.content
 		img.logo(:src="exhibitor.logo")
 		.exhibitor {{ exhibitor.name }}
@@ -22,6 +22,7 @@ export default {
 	props: {
 		exhibitor: Object,
 	},
+	emits: ['close'],
 	data () {
 		return {
 			timer: 31,
@@ -31,9 +32,9 @@ export default {
 	async created () {
 		// TODO error handling
 		this.tickTimer()
-		this.request = (await api.call('exhibition.contact', {exhibitor: this.exhibitor.id})).contact_request
+		this.request = (await api.call('exhibition.contact', { exhibitor: this.exhibitor.id })).contact_request
 	},
-	beforeDestroy () {
+	beforeUnmount () {
 		clearTimeout(this.ticker)
 	},
 	methods: {
@@ -42,11 +43,11 @@ export default {
 				this.timer--
 				this.ticker = setTimeout(this.tickTimer, 1000)
 			} else {
-				await api.call('exhibition.contact_cancel', {contact_request: this.request.id})
+				await api.call('exhibition.contact_cancel', { contact_request: this.request.id })
 			}
 		},
 		async cancel () {
-			if (this.timer > 0) await api.call('exhibition.contact_cancel', {contact_request: this.request.id})
+			if (this.timer > 0) await api.call('exhibition.contact_cancel', { contact_request: this.request.id })
 			this.$emit('close')
 		},
 	}

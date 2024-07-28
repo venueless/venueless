@@ -21,6 +21,7 @@ export default {
 	props: {
 		room: Object
 	},
+	emits: ['close'],
 	data () {
 		return {
 			url: null,
@@ -36,9 +37,9 @@ export default {
 		}
 	},
 	async created () {
-		const { url } = await api.call('room.invite.anonymous.link', {room: this.room.id})
+		const { url } = await api.call('room.invite.anonymous.link', { room: this.room.id })
 		this.url = url
-		this.qrcode = await QRCode.toString(this.url, {type: 'svg', margin: 1})
+		this.qrcode = await QRCode.toString(this.url, { type: 'svg', margin: 1 })
 	}
 }
 </script>

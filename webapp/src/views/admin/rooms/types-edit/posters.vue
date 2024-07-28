@@ -4,14 +4,14 @@
 	.categories
 		.category(v-for="category of module.config.categories")
 			.id {{ category.id }}
-			bunt-input.label(name="label", v-model="category.label", @input="generateId(category)")
+			bunt-input.label(v-model="category.label", name="label", @input="generateId(category)")
 			bunt-icon-button(@click="removeCategory(category)") delete-outline
 		bunt-button.btn-add(@click="addCategory") Add Category
 	h2 Tags
 	.tags
 		.tag(v-for="tag of module.config.tags")
 			.id {{ tag.id }}
-			bunt-input.label(name="label", v-model="tag.label", @input="generateId(tag)")
+			bunt-input.label(v-model="tag.label", name="label", @input="generateId(tag)")
 			bunt-icon-button(@click="removeTag(tag)") delete-outline
 		bunt-button.btn-add(@click="addTag") Add Tag
 </template>
@@ -31,7 +31,7 @@ export default {
 	},
 	methods: {
 		addCategory () {
-			if (!this.module.config.categories) this.$set(this.module.config, 'categories', [])
+			if (!this.module.config.categories) this.module.config.categories = []
 			this.module.config.categories.push({
 				new: true, // mark as new to autogenerate id
 				id: '',
@@ -42,7 +42,7 @@ export default {
 			this.module.config.categories.splice(this.module.config.categories.indexOf(category), 1)
 		},
 		addTag () {
-			if (!this.module.config.tags) this.$set(this.module.config, 'tags', [])
+			if (!this.module.config.tags) this.module.config.tags = []
 			this.module.config.tags.push({
 				new: true, // mark as new to autogenerate id
 				id: '',

@@ -2,8 +2,8 @@
 bunt-input-outline-container.c-chat-input
 	.editor(ref="editor")
 	emoji-picker-button(@selected="addEmoji")
-	upload-button#btn-file(accept="image/png, image/jpg, image/gif, application/pdf, .png, .jpg, .gif, .jpeg, .pdf", icon="paperclip", multiple=true, :tooltip="$t('ChatInput:btn-file:tooltip')", @change="attachFiles")
-	bunt-icon-button#btn-send(:tooltip="$t('ChatInput:btn-send:tooltip')", tooltip-placement="top-end", @click="send") send
+	upload-button#btn-file(accept="image/png, image/jpg, image/gif, application/pdf, .png, .jpg, .gif, .jpeg, .pdf", icon="paperclip", multiple="true", :tooltip="$t('ChatInput:btn-file:tooltip')", @change="attachFiles")
+	bunt-icon-button#btn-send(:tooltip="$t('ChatInput:btn-send:tooltip')", tooltipPlacement="top-end", @click="send") send
 	.files-preview(v-if="files.length > 0 || uploading")
 		template(v-for="file in files")
 			.chat-file(v-if="file === null")
@@ -18,7 +18,7 @@ bunt-input-outline-container.c-chat-input
 						i.bunt-icon.mdi.mdi-file
 						| {{ file.name }}
 					bunt-icon-button#btn-remove-attachment(@click="removeFile(file)") close-circle
-		bunt-progress-circular(size="small" v-if="uploading")
+		bunt-progress-circular(v-if="uploading", size="small")
 	.ui-background-blocker(v-if="autocompleteCoordinates", @click="closeAutocomplete")
 		.autocomplete-dropdown(:style="autocompleteCoordinates")
 			template(v-if="autocomplete.options")
@@ -34,6 +34,7 @@ bunt-input-outline-container.c-chat-input
 // - parse ascii emoticons ;)
 // - parse colon emoji :+1:
 // - add scrollbar when overflowing parent
+import { markRaw } from 'vue'
 import api from 'lib/api'
 import Quill from 'quill'
 import 'lib/quill/emoji'
@@ -50,6 +51,7 @@ export default {
 	props: {
 		message: Object // initialize with existing message to edit
 	},
+	emits: ['send'],
 	data () {
 		return {
 			files: [],
@@ -69,8 +71,22 @@ export default {
 			}
 		}
 	},
+	watch: {
+		async 'autocomplete.search' (search) {
+			// TODO debounce?
+			if (!this.autocomplete) return
+			if (this.autocomplete.type === 'mention') {
+				const { results } = await api.call('user.list.search', { search_term: search, page: 1, include_banned: false })
+				this.autocomplete.options = results
+				// if (results.length === 1) {
+				// 	this.autocomplete.selected = 0
+				// 	this.handleMention()
+				// }
+			}
+		}
+	},
 	mounted () {
-		this.quill = new Quill(this.$refs.editor, {
+		this.quill = markRaw(new Quill(this.$refs.editor, {
 			debug: ENV_DEVELOPMENT ? 'info' : 'warn',
 			placeholder: this.$t('ChatInput:input:placeholder'),
 			formats: ['emoji', 'mention'],
@@ -100,28 +116,13 @@ export default {
 					}
 				}
 			}
-		})
+		}))
 		this.quill.on('editor-change', this.onEditorChange)
-		this.quill.on('selection-change', this.onSelectionChange)
 		// TODO paste
 		if (this.message) {
 			this.quill.setContents(nativeToOps(this.message.content?.body))
 			if (this.message.content?.files?.length > 0) {
 				this.files = this.message.content.files
-			}
-		}
-	},
-	watch: {
-		async 'autocomplete.search' (search) {
-			// TODO debounce?
-			if (!this.autocomplete) return
-			if (this.autocomplete.type === 'mention') {
-				const { results } = await api.call('user.list.search', {search_term: search, page: 1, include_banned: false})
-				this.autocomplete.options = results
-				// if (results.length === 1) {
-				// 	this.autocomplete.selected = 0
-				// 	this.handleMention()
-				// }
 			}
 		}
 	},
@@ -231,7 +232,7 @@ export default {
 					body: text
 				})
 			}
-			this.quill.setContents([{insert: '\n'}])
+			this.quill.setContents([{ insert: '\n' }])
 		},
 		async attachFiles (event) {
 			const files = Array.from(event.target.files)
@@ -258,7 +259,7 @@ export default {
 		addEmoji (emoji) {
 			// TODO skin color
 			const selection = this.quill.getSelection(true)
-			this.quill.updateContents(new Delta().retain(selection.index).delete(selection.length).insert({emoji: emoji.native}), 'user')
+			this.quill.updateContents(new Delta().retain(selection.index).delete(selection.length).insert({ emoji: emoji.native }), 'user')
 			this.quill.setSelection(selection.index + 1, 0)
 		},
 		removeFile (file) {
@@ -280,6 +281,8 @@ export default {
 	&.bunt-input-outline-container
 		padding: 8px 60px 6px 36px
 	.ql-editor
+		padding: 0
+		min-height: 0
 		font-size: 16px
 		&.ql-blank::before
 			font-style: normal
