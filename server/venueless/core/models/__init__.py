@@ -3,6 +3,7 @@ from .audit import AuditLog
 from .auth import User
 from .bbb import BBBCall, BBBServer
 from .chat import Channel, ChatEvent, ChatEventReaction, Membership
+from .digitalsamba import DigitalSambaCall
 from .exhibitor import (
     ContactRequest,
     Exhibitor,
@@ -31,6 +32,7 @@ __all__ = [
     "ChatEvent",
     "ChatEventReaction",
     "Channel",
+    "DigitalSambaCall",
     "Feedback",
     "JanusServer",
     "Membership",
