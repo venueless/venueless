@@ -113,6 +113,7 @@ class DigitalSambaService:
             "e2ee_enabled": False,
             "recordings_enabled": True,
             "recording_autostart_enabled": False,
+            "breakout_rooms_enabled": True,
             # "logo_enabled": False,  # TODO: requires higher plan at DigitalSamba
             "recording_logo_enabled": False,
             "invite_participants_enabled": False,
