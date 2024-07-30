@@ -21,7 +21,7 @@ import api from 'lib/api'
 import JanusCall from 'components/JanusCall'
 import JanusChannelCall from 'components/JanusChannelCall'
 import Livestream from 'components/Livestream'
-import DigitalSambaEmbedded from "@digitalsamba/embedded-sdk";
+import DigitalSambaEmbedded from '@digitalsamba/embedded-sdk'
 
 export default {
 	components: { Livestream, JanusCall, JanusChannelCall },
@@ -127,7 +127,7 @@ export default {
 				this.iframe = iframe
 
 				if (this.module.type === 'call.digitalsamba') {
-					let { url, token } = await api.call('digitalsamba.room_url', { room: this.room.id })
+					const { url, token } = await api.call('digitalsamba.room_url', { room: this.room.id })
 					const initOptions = {
 						frame: iframe,
 						url: url,
@@ -137,12 +137,11 @@ export default {
 							audioEnabled: !this.module.config.mute_on_start,
 						}
 					}
-					const sambaFrame = DigitalSambaEmbedded.createControl(initOptions);
+					const sambaFrame = DigitalSambaEmbedded.createControl(initOptions)
 					sambaFrame.load({
 						reportErrors: true,
-					});
+					})
 				}
-
 			} catch (error) {
 				// TODO handle bbb/zoom.join.missing_profile
 				this.iframeError = error

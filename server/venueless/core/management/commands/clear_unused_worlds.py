@@ -2,7 +2,7 @@ from datetime import datetime, time, timedelta
 
 import pytz
 from django.core.management.base import BaseCommand
-from django.db.models import Max, Q
+from django.db.models import Max
 from django.utils.timezone import now
 
 from venueless.core.models import ChatEvent, RoomView, World

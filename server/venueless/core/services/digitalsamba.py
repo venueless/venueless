@@ -7,12 +7,12 @@ import jwt
 import pytz
 from channels.db import database_sync_to_async
 from django.conf import settings
-from django.db.models import Exists, Q
+from django.db.models import Q
 from django.utils.timezone import now
 from redis.asyncio.lock import Lock
 from yarl import URL
 
-from venueless.core.models import DigitalSambaCall, User
+from venueless.core.models import DigitalSambaCall
 from venueless.core.services.bbb import escape_name
 from venueless.core.utils.redis import aredis
 
