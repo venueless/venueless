@@ -42,9 +42,9 @@ export default {
 	},
 	async created () {
 		try {
-			if (this.modules["call.bigbluebutton"]) {
+			if (this.modules['call.bigbluebutton']) {
 				this.recordings = (await api.call('bbb.recordings', { room: this.room.id }, { timeout: 150000 })).results
-			} else if (this.modules["call.digitalsamba"]) {
+			} else if (this.modules['call.digitalsamba']) {
 				this.recordings = (await api.call('digitalsamba.recordings', { room: this.room.id }, { timeout: 150000 })).results
 			}
 			this.error = null
