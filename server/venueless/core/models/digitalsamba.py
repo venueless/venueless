@@ -13,7 +13,7 @@ class DigitalSambaCall(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     room = models.OneToOneField(
-        to="Room", related_name="ds_call", on_delete=models.CASCADE, null=True
+        to="Room", related_name="ds_call", on_delete=models.SET_NULL, null=True
     )
     world = models.ForeignKey(
         to="World",

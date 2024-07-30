@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
                     "room",
                     models.OneToOneField(
                         null=True,
-                        on_delete=django.db.models.deletion.CASCADE,
+                        on_delete=django.db.models.deletion.SET_NULL,
                         related_name="ds_call",
                         to="core.room",
                     ),

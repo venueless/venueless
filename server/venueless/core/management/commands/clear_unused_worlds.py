@@ -20,8 +20,7 @@ class Command(BaseCommand):
             World.objects.annotate(
                 max_login=Max("user__last_login"),
             )
-            .filter(domain__isnull=False)
-            .filter(Q(Q(max_login__isnull=True) | Q(max_login__lt=cutoff)))
+            .filter(planned_usages__end__year__lte=2023)
             .order_by("max_login")
         )
 

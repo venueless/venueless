@@ -7,10 +7,12 @@ import jwt
 import pytz
 from channels.db import database_sync_to_async
 from django.conf import settings
+from django.db.models import Q, Exists
+from django.utils.timezone import now
 from redis.asyncio.lock import Lock
 from yarl import URL
 
-from venueless.core.models import DigitalSambaCall
+from venueless.core.models import DigitalSambaCall, User
 from venueless.core.services.bbb import escape_name
 from venueless.core.utils.redis import aredis
 
@@ -24,9 +26,9 @@ class DigitalSambaService:
     async def _get(self, url, timeout=30):
         try:
             async with aiohttp.ClientSession(
-                auth=aiohttp.BasicAuth(
-                    settings.DIGITALSAMBA_TEAM, settings.DIGITALSAMBA_KEY
-                )
+                    auth=aiohttp.BasicAuth(
+                        settings.DIGITALSAMBA_TEAM, settings.DIGITALSAMBA_KEY
+                    )
             ) as session:
                 async with session.get(URL(url, encoded=True), timeout=timeout) as resp:
                     if resp.status != 200:
@@ -36,6 +38,25 @@ class DigitalSambaService:
                         return False
 
                     return await resp.json()
+        except Exception:
+            logger.exception("Could not contact DS.")
+            return False
+
+    async def _delete(self, url, timeout=30):
+        try:
+            async with aiohttp.ClientSession(
+                auth=aiohttp.BasicAuth(
+                    settings.DIGITALSAMBA_TEAM, settings.DIGITALSAMBA_KEY
+                )
+            ) as session:
+                async with session.delete(URL(url, encoded=True), timeout=timeout) as resp:
+                    if resp.status not in (200, 204):
+                        logger.error(
+                            f"Could not contact DS. Return code: {resp.status}, Text: {await resp.text()}"
+                        )
+                        return False
+
+                    return True
         except Exception:
             logger.exception("Could not contact DS.")
             return False
@@ -52,7 +73,7 @@ class DigitalSambaService:
                     json=data,
                     headers={"Content-Type": "application/json"},
                 ) as resp:
-                    if resp.status != 200:
+                    if resp.status not in (200, 201):
                         logger.error(
                             f"Could not contact DS. Return code: {resp.status}, Text: {await resp.text()}"
                         )
@@ -230,3 +251,37 @@ class DigitalSambaService:
             )
 
         return recordings
+
+
+async def cleanup_rooms():
+    qs = await database_sync_to_async(list)(DigitalSambaCall.objects.filter(
+        Q(room__isnull=True, created__lt=now() - timedelta(days=3))  # old DM call
+        | Q(world__domain__isnull=True)  # world.clear_data() has been called
+        | Q(room__deleted=True)  # deleted room
+    ))
+    dss = DigitalSambaService(None)
+
+    for ds in qs:
+        await dss._delete(
+            f"https://api.digitalsamba.com/api/v1/rooms/{ds.ds_id}"
+        )
+
+
+async def cleanup_recordings():
+    # Delete all recordings older
+    dss = DigitalSambaService(None)
+    cutoff = now() - timedelta(days=settings.DIGITALSAMBA_RETENTION_DAYS)
+    after = ""
+
+    while True:
+        d = await dss._get(
+            f"https://api.digitalsamba.com/api/v1/recordings?order=asc{after}"
+        )
+        if not d["data"]:
+            break
+        after = d["data"][-1]["id"]
+        for rec in d["data"]:
+            if dateutil.parser.parse(rec["created_at"]) < cutoff:
+                await dss._delete(
+                    f"https://api.digitalsamba.com/api/v1/recordings/{rec['id']}"
+                )
