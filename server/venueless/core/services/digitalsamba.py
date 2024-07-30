@@ -7,7 +7,7 @@ import jwt
 import pytz
 from channels.db import database_sync_to_async
 from django.conf import settings
-from django.db.models import Q, Exists
+from django.db.models import Exists, Q
 from django.utils.timezone import now
 from redis.asyncio.lock import Lock
 from yarl import URL
@@ -26,9 +26,9 @@ class DigitalSambaService:
     async def _get(self, url, timeout=30):
         try:
             async with aiohttp.ClientSession(
-                    auth=aiohttp.BasicAuth(
-                        settings.DIGITALSAMBA_TEAM, settings.DIGITALSAMBA_KEY
-                    )
+                auth=aiohttp.BasicAuth(
+                    settings.DIGITALSAMBA_TEAM, settings.DIGITALSAMBA_KEY
+                )
             ) as session:
                 async with session.get(URL(url, encoded=True), timeout=timeout) as resp:
                     if resp.status != 200:
@@ -49,7 +49,9 @@ class DigitalSambaService:
                     settings.DIGITALSAMBA_TEAM, settings.DIGITALSAMBA_KEY
                 )
             ) as session:
-                async with session.delete(URL(url, encoded=True), timeout=timeout) as resp:
+                async with session.delete(
+                    URL(url, encoded=True), timeout=timeout
+                ) as resp:
                     if resp.status not in (200, 204):
                         logger.error(
                             f"Could not contact DS. Return code: {resp.status}, Text: {await resp.text()}"
@@ -254,17 +256,17 @@ class DigitalSambaService:
 
 
 async def cleanup_rooms():
-    qs = await database_sync_to_async(list)(DigitalSambaCall.objects.filter(
-        Q(room__isnull=True, created__lt=now() - timedelta(days=3))  # old DM call
-        | Q(world__domain__isnull=True)  # world.clear_data() has been called
-        | Q(room__deleted=True)  # deleted room
-    ))
+    qs = await database_sync_to_async(list)(
+        DigitalSambaCall.objects.filter(
+            Q(room__isnull=True, created__lt=now() - timedelta(days=3))  # old DM call
+            | Q(world__domain__isnull=True)  # world.clear_data() has been called
+            | Q(room__deleted=True)  # deleted room
+        )
+    )
     dss = DigitalSambaService(None)
 
     for ds in qs:
-        await dss._delete(
-            f"https://api.digitalsamba.com/api/v1/rooms/{ds.ds_id}"
-        )
+        await dss._delete(f"https://api.digitalsamba.com/api/v1/rooms/{ds.ds_id}")
 
 
 async def cleanup_recordings():

@@ -11,7 +11,11 @@ from venueless.core.models import RouletteRequest
 from venueless.core.models.auth import ShortToken
 from venueless.core.models.room import AnonymousInvite, RoomView
 from venueless.core.models.world import WorldView
-from venueless.core.services.digitalsamba import DigitalSambaService, cleanup_rooms, cleanup_recordings
+from venueless.core.services.digitalsamba import (
+    DigitalSambaService,
+    cleanup_recordings,
+    cleanup_rooms,
+)
 from venueless.storage.models import StoredFile
 
 logger = logging.getLogger(__name__)
