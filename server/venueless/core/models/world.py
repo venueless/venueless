@@ -123,6 +123,7 @@ FEATURE_FLAGS = [
     "poster",
     "conftool",
     "cross-origin-isolation",
+    "digitalsamba",
 ]
 
 
