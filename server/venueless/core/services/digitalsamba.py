@@ -137,7 +137,7 @@ class DigitalSambaService:
             "recordings_enabled": True,
             "recording_autostart_enabled": False,
             "breakout_rooms_enabled": True,
-            # "logo_enabled": False,  # TODO: requires higher plan at DigitalSamba
+            "logo_enabled": False,
             "recording_logo_enabled": False,
             "invite_participants_enabled": False,
             "consent_message_enabled": False,
