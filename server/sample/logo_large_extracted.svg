@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="112.65424"
    height="112.65424"
    viewBox="0 0 29.806436 29.806437"
    version="1.1"
    id="svg8"
-   inkscape:version="1.0 (4035a4fb49, 2020-05-01)"
-   sodipodi:docname="logo_large_extracted.svg">
+   inkscape:version="1.3.2 (091e20ef0f, 2023-11-25, custom)"
+   sodipodi:docname="logo_large_extracted.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
   <defs
      id="defs2">
     <inkscape:perspective
@@ -36,18 +36,21 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.4"
-     inkscape:cx="-131.79994"
-     inkscape:cy="-68.3042"
+     inkscape:cx="-131.78571"
+     inkscape:cy="-67.857143"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
      showgrid="false"
      units="px"
      inkscape:window-width="2556"
-     inkscape:window-height="1293"
+     inkscape:window-height="1221"
      inkscape:window-x="0"
-     inkscape:window-y="1206"
-     inkscape:window-maximized="1" />
+     inkscape:window-y="198"
+     inkscape:window-maximized="1"
+     inkscape:showpageshadow="2"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1" />
   <metadata
      id="metadata5">
     <rdf:RDF>
@@ -56,7 +59,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -65,17 +68,11 @@
      inkscape:label="Ebene 1"
      inkscape:groupmode="layer"
      id="layer1">
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:20.471px;line-height:19.8046px;font-family:Brown-Bold;-inkscape-font-specification:'Brown-Bold, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#aa0000;fill-opacity:1;stroke:none;stroke-width:1.53532px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;"
-       x="199.44398"
-       y="99.885643"
-       id="text1193-5-7"><tspan
-         id="tspan1287-5"
-         sodipodi:role="line"
-         x="199.44398"
-         y="99.885643"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:20.471px;font-family:Brown-Bold;-inkscape-font-specification:'Brown-Bold, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#aa0000;stroke-width:1.53532px;">B</tspan></text>
+    <path
+       style="font-size:20.471px;line-height:19.8046px;font-family:Brown;-inkscape-font-specification:Brown;letter-spacing:0px;word-spacing:0px;fill:#aa0000;stroke-width:1.53532px"
+       d="m 209.82278,92.188547 q 0.88026,0.655072 1.4125,1.576267 0.55272,0.921195 0.55272,1.862861 0,1.044021 -0.45036,1.924274 -0.53225,1.003079 -1.47392,1.678622 -0.94166,0.655072 -2.35416,0.655072 h -6.9192 V 85.637827 h 4.93351 l 1.08497,-0.02047 q 1.39202,0.102355 2.08804,0.470833 0.71648,0.348007 1.20779,0.921195 0.4913,0.552717 0.75742,1.269202 0.2866,0.716485 0.2866,1.473912 0,0.61413 -0.2866,1.289673 -0.28659,0.675543 -0.83931,1.146376 z m -2.31322,5.158692 q 0.71648,0 1.22826,-0.491304 0.53225,-0.511775 0.53225,-1.248731 0,-0.736956 -0.53225,-1.22826 -0.51178,-0.511775 -1.22826,-0.511775 h -3.80761 q 0.67555,-2.313223 1.82192,-2.538404 h 1.31015 q 0.65507,0 1.1259,-0.450362 0.47083,-0.470833 0.47083,-1.125905 0,-0.655072 -0.47083,-1.125905 -0.45036,-0.470833 -1.1259,-0.470833 h -3.72573 v 9.191479 z"
+       id="text1193-5-7"
+       aria-label="B" />
     <circle
        style="color:#000000;overflow:visible;fill:none;fill-opacity:1;stroke:#aa0000;stroke-width:1.06495;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="path1416"

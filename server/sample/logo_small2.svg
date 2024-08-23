@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    sodipodi:docname="logo_small2.svg"
-   inkscape:version="1.0 (4035a4fb49, 2020-05-01)"
+   inkscape:version="1.3.2 (091e20ef0f, 2023-11-25, custom)"
    id="svg8"
    version="1.1"
    viewBox="0 0 68.791665 34.395834"
    height="130"
-   width="260">
+   width="260"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
   <defs
      id="defs2">
     <inkscape:perspective
@@ -26,24 +26,27 @@
   </defs>
   <sodipodi:namedview
      inkscape:window-maximized="1"
-     inkscape:window-y="1188"
+     inkscape:window-y="198"
      inkscape:window-x="0"
-     inkscape:window-height="1311"
+     inkscape:window-height="1221"
      inkscape:window-width="2556"
      units="px"
      showgrid="false"
      inkscape:document-rotation="0"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="g958"
      inkscape:document-units="px"
-     inkscape:cy="40.290637"
-     inkscape:cx="160.70308"
+     inkscape:cy="40.406102"
+     inkscape:cx="160.74052"
      inkscape:zoom="3.959798"
      inkscape:pageshadow="2"
      inkscape:pageopacity="0.0"
      borderopacity="1.0"
      bordercolor="#666666"
      pagecolor="#ffffff"
-     id="base" />
+     id="base"
+     inkscape:showpageshadow="2"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1" />
   <metadata
      id="metadata5">
     <rdf:RDF>
@@ -52,7 +55,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -63,17 +66,11 @@
     <g
        transform="matrix(1.3556227,0,0,1.3556227,-12.231939,-6.0002706)"
        id="g958">
-      <text
-         xml:space="preserve"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.98143px;line-height:13.0902px;font-family:Cubano;-inkscape-font-specification:'Cubano, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#2604bf;fill-opacity:1;stroke:none;stroke-width:0.52361px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         x="21.200956"
-         y="29.485588"
-         id="text853"><tspan
-           sodipodi:role="line"
-           id="tspan851"
-           x="21.200956"
-           y="29.485588"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.98143px;font-family:Cubano;-inkscape-font-specification:'Cubano, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#2604bf;fill-opacity:1;stroke-width:0.52361px">BOX LTD</tspan></text>
+      <path
+         style="font-weight:bold;font-size:6.98143px;line-height:13.0902px;font-family:'Ubuntu Mono';-inkscape-font-specification:'Ubuntu Mono';letter-spacing:0px;word-spacing:0px;fill:#2604bf;stroke-width:0.52361px"
+         d="m 25.358372,28.180061 q 0,0.39096 -0.132647,0.656254 -0.132647,0.258313 -0.363034,0.418886 -0.223406,0.153591 -0.53757,0.223406 -0.307183,0.06283 -0.663236,0.06283 -0.286239,0 -0.593422,-0.03491 -0.307183,-0.02792 -0.607384,-0.09076 v -4.19584 q 0.24435,-0.04189 0.53757,-0.06981 0.29322,-0.03491 0.579459,-0.03491 0.4887,0 0.795883,0.104721 0.307183,0.09774 0.481718,0.265295 0.174536,0.160573 0.237369,0.363034 0.06283,0.202461 0.06283,0.404923 0,0.307183 -0.153592,0.544552 -0.14661,0.237368 -0.397941,0.376997 0.43983,0.160573 0.593421,0.432848 0.160573,0.272276 0.160573,0.572478 z m -2.038577,-0.58644 v 1.17288 q 0.09076,0.01396 0.19548,0.02094 0.111703,0.007 0.216424,0.007 0.14661,0 0.286239,-0.02094 0.139628,-0.02793 0.24435,-0.09076 0.111703,-0.06982 0.181517,-0.188499 0.06981,-0.125666 0.06981,-0.314164 0,-0.314165 -0.202461,-0.446812 -0.19548,-0.139628 -0.530589,-0.139628 z m 0.335108,-0.712106 q 0.328128,0 0.495682,-0.139629 0.167554,-0.14661 0.167554,-0.397941 0,-0.153592 -0.04887,-0.244351 -0.04887,-0.09774 -0.132647,-0.14661 -0.08378,-0.05585 -0.19548,-0.06981 -0.111703,-0.02094 -0.230387,-0.02094 -0.09774,0 -0.202462,0.007 -0.104721,0.007 -0.188498,0.02095 v 0.991363 z m 2.981071,0.43983 q 0,0.314164 0.02094,0.593421 0.02793,0.272276 0.09774,0.474738 0.0768,0.202461 0.209443,0.321145 0.132647,0.118685 0.356053,0.118685 0.216425,0 0.349072,-0.118685 0.139628,-0.118684 0.209443,-0.321145 0.0768,-0.209443 0.09774,-0.481719 0.02792,-0.272276 0.02792,-0.58644 0,-0.314165 -0.02792,-0.58644 -0.02095,-0.279258 -0.09774,-0.481719 -0.06981,-0.202462 -0.202462,-0.321146 -0.132647,-0.118684 -0.356053,-0.118684 -0.223406,0 -0.356053,0.118684 -0.132647,0.118684 -0.209443,0.328127 -0.06981,0.202462 -0.09774,0.474738 -0.02094,0.272275 -0.02094,0.58644 z m -0.872679,0 q 0,-1.117029 0.411905,-1.682525 0.411904,-0.572477 1.144954,-0.572477 0.760976,0 1.158918,0.572477 0.397941,0.565496 0.397941,1.682525 0,1.117029 -0.404923,1.689506 -0.404923,0.565496 -1.144954,0.565496 -0.760976,0 -1.165899,-0.565496 -0.397942,-0.572477 -0.397942,-1.689506 z m 5.787606,2.164243 q -0.132647,-0.356053 -0.328127,-0.788902 -0.188499,-0.432848 -0.397942,-0.865697 -0.202461,0.411905 -0.404923,0.858716 -0.202461,0.43983 -0.349071,0.795883 h -0.928531 q 0.06982,-0.188499 0.202462,-0.453793 0.139629,-0.265294 0.300201,-0.572477 0.167555,-0.307183 0.349072,-0.628329 0.181517,-0.328127 0.349071,-0.628329 l -1.130991,-2.038577 h 0.92853 l 0.68418,1.382323 0.719087,-1.382323 h 0.865698 l -1.103066,2.017633 q 0.188498,0.300202 0.370016,0.628329 0.181517,0.328127 0.335108,0.642291 0.160573,0.307183 0.279257,0.579459 0.118685,0.265294 0.188499,0.453793 z m 7.707499,0 h -2.715777 v -4.321505 h 0.865698 v 3.609399 H 39.2584 Z m 3.595436,-4.321505 v 0.712106 h -1.137973 v 3.609399 h -0.865697 v -3.609399 h -1.137973 v -0.712106 z m 1.410249,3.623362 q 0.03491,0.007 0.0768,0.007 0.04189,0 0.07679,0 0.29322,0 0.4887,-0.111702 0.202462,-0.111703 0.321146,-0.307183 0.125666,-0.19548 0.174536,-0.460775 0.05585,-0.272275 0.05585,-0.593421 0,-0.279257 -0.04189,-0.544552 -0.04189,-0.265294 -0.14661,-0.467756 -0.104722,-0.202461 -0.286239,-0.321145 -0.181517,-0.125666 -0.467756,-0.125666 -0.05585,0 -0.125665,0.007 -0.06981,0 -0.125666,0.01396 z m 2.066503,-1.4661 q 0,0.600403 -0.153591,1.02627 -0.14661,0.418886 -0.411905,0.68418 -0.265294,0.265294 -0.63531,0.39096 -0.363034,0.118685 -0.802864,0.118685 -0.230387,0 -0.453793,-0.02793 -0.216424,-0.02094 -0.467756,-0.0768 v -4.216784 q 0.29322,-0.06283 0.551533,-0.08378 0.258313,-0.02094 0.481719,-0.02094 0.425867,0 0.774938,0.125666 0.356053,0.125665 0.600403,0.397941 0.24435,0.265294 0.376998,0.68418 0.139628,0.411905 0.139628,0.998345 z"
+         id="text853"
+         aria-label="BOX LTD" />
       <g
          id="g903"
          style="color:#000000;overflow:visible;opacity:0.5;fill:#800080;stroke-width:4.0252;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:8.05039, 4.0252"
