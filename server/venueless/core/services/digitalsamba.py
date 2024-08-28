@@ -282,7 +282,7 @@ async def cleanup_recordings():
         )
         if not d["data"]:
             break
-        after = d["data"][-1]["id"]
+        after = "&after=" + d["data"][-1]["id"]
         for rec in d["data"]:
             if dateutil.parser.parse(rec["created_at"]) < cutoff:
                 await dss._delete(
