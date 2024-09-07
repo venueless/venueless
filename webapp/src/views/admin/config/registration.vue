@@ -115,8 +115,8 @@ export default {
 		addField () {
 			this.config.profile_fields.push({ id: uuid(), label: '', type: 'text', searchable: false })
 		},
-		removeField (field) {
-			delete this.config.profile_fields[field]
+		removeField (index) {
+			this.config.profile_fields.splice(index, 1)
 		},
 		async save () {
 			this.saving = true
