@@ -10,8 +10,7 @@ if (ENV_DEVELOPMENT || !window.venueless) {
 		base: `http://${hostname}:8375/api/v1/worlds/sample/`,
 		socket: `ws://${hostname}:8375/ws/world/sample/`,
 		upload: `http://${hostname}:8375/storage/upload/`,
-		scheduleImport: `http://${hostname}:8375/storage/schedule_imp
-		ort/`,
+		scheduleImport: `http://${hostname}:8375/storage/import/`,
 		feedback: `http://${hostname}:8375/_feedback/`,
 	}
 	if (WITH_PROXY) {
