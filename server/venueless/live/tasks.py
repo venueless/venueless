@@ -73,7 +73,7 @@ def send_web_push(self, world: World, user_id: str, data: dict):
             logging.warning(
                 f"Could not send web push notification to client {client.pk} of user {user.pk}. Exception: {ex}"
             )
-            if ex.response:
+            if ex.response is not None:
                 if ex.response.status_code == 410:
                     # push subscription expired or revoked, don't message again
                     client.delete()
