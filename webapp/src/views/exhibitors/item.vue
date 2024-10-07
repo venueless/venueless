@@ -97,7 +97,7 @@ export default {
 					if (ytSourceParams.has('t')) {
 						const timecode = ytSourceParams.get('t')
 						let startTime = 0
-						if (timecode.includes("m")) {
+						if (timecode.includes('m')) {
 							const timecodeMatch = timecode.match('^([0-9]+)m([0-9])+s')
 							startTime = parseInt(timecodeMatch[1]) * 60 + parseInt((timecodeMatch[2]))
 						} else {
