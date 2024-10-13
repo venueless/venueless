@@ -112,17 +112,3 @@ if (config.externalAuthUrl && !token) {
 // 		registration.unregister()
 // 	}
 // })
-
-if ('serviceWorker' in navigator) {
-	const testNotification = new Notification('', {silent: true})
-	testNotification.addEventListener('show', () => {
-		testNotification.close()
-	})
-	// THIS WILL TRIGGER A NOTIFICATION PERMISSION REQUEST
-	const serviceWorker = await navigator.serviceWorker.register(
-		import.meta.env.MODE === 'production' ? '/sw.js' : '/dev-sw.js?dev-sw', { type: import.meta.env.MODE === 'production' ? 'classic' : 'module' }
-	)
-	serviceWorker.update()
-	console.log(serviceWorker)
-	window.serviceWorker = serviceWorker
-}

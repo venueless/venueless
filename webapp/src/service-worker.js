@@ -29,13 +29,12 @@ const init = (async () => {
 	}
 	const svg = new Resvg(svgText, opts)
 	const pngData = svg.render().asPng()
-	console.log(`data:image/png;base64,${btoa(pngData)}`)
-	console.info('Original SVG Size:', `${svg.width} x ${svg.height}`)
-	console.info('Output PNG Size  :', `${svg.render().width} x ${svg.render().height}`)
-})();
+	// console.log(`data:image/png;base64,${btoa(pngData)}`)
+	// console.info('Original SVG Size:', `${svg.width} x ${svg.height}`)
+	// console.info('Output PNG Size  :', `${svg.render().width} x ${svg.render().height}`)
+})()
 
-
-addEventListener("install", (event) => {
+addEventListener('install', () => {
 	self.skipWaiting()
 })
 
@@ -59,7 +58,6 @@ async function handleNotification({ channel_name, event, user, link }) {
 			icon = `data:image/png;base64,${btoa(pngData)}`
 		}
 	}
-	console.log(icon)
 	await self.registration.showNotification(channel_name, {
 		body: event.content.body,
 		tag: channel_name,
@@ -69,24 +67,21 @@ async function handleNotification({ channel_name, event, user, link }) {
 		}
 	})
 }
-addEventListener("push", (event) => {
-	console.log('push', event, event.data.json())
+
+addEventListener('push', (event) => {
 	// display notification
 	const data = event.data.json()
 	event.waitUntil(handleNotification(data))
-	
 })
 
-addEventListener("notificationclick", (event) => {
-	console.log("On notification click: ", event.notification.tag)
+addEventListener('notificationclick', (event) => {
 	event.notification.close()
 
 	// This looks to see if the current is already open and
 	// focuses if it is
-	console.log(event)
 	event.waitUntil((async () => {
 		const clients = await self.clients.matchAll({
-			type: "window",
+			type: 'window',
 		})
 		console.log(clients)
 		if (clients[0]) {

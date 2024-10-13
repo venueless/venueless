@@ -113,17 +113,7 @@ export default new Vuex.Store({
 				// 	// TODO return after profile update?
 				// }
 				dispatch('schedule/fetch', { root: true })
-				const serviceWorker = await navigator.serviceWorker.ready
-				// if (await serviceWorker.pushManager.getSubscription()) return
-				// TODO unsubscribe on error
-				const subscription = await serviceWorker.pushManager.subscribe({
-					userVisibleOnly: true,
-					applicationServerKey: state.world.vapid_public_key
-				})
-				api.call('user.web_push.subscribe', {
-					subscription: subscription.toJSON()
-				})
-				console.log('subscribed', subscription)
+				dispatch('notifications/init', { root: true })
 			})
 			api.on('closed', (code) => {
 				state.connected = false
