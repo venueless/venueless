@@ -242,7 +242,7 @@ class DigitalSambaService:
                     .isoformat(),
                     "end": (
                         dateutil.parser.parse(rec["created_at"]).astimezone(tz)
-                        + timedelta(seconds=rec["duration"])
+                        + timedelta(seconds=rec.get("duration", 0))
                     ).isoformat(),
                     "participants": rec["participant_name"],
                     "state": rec["status"],
