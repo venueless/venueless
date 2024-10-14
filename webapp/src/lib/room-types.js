@@ -18,7 +18,7 @@ const ROOM_TYPES = [{
 	name: 'Video Channel (beta)',
 	description: 'A video channel allows you to connect with attendees in real time and host workshops or panels. The video channels are powered by Digital Samba.',
 	startingModule: 'call.digitalsamba',
-	behindFeatureFlag: 'janus'
+	behindFeatureFlag: 'digitalsamba'
 }, {
 	id: 'channel-janus',
 	icon: 'webcam',
