@@ -18,7 +18,7 @@ def gen_keys(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("core", "0065_alter_auditlog_data_alter_chatevent_content_and_more"),
+        ("core", "0066_digitalsambacall"),
     ]
 
     operations = [
