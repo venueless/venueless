@@ -114,6 +114,19 @@ class DigitalSambaService:
     def get_room_config(self, room):
         m = [m for m in room.module_config if m["type"] == "call.digitalsamba"][0]
         config = m["config"]
+
+        if config.get("size") == "large":
+            participants = {
+                "max_participants": 2000,
+                "max_broadcasters": 15,
+            }
+        else:
+            participants = {
+                "max_participants": 100,
+                "max_broadcasters": 100,
+            }
+
+
         return {
             # Reference: https://developer.digitalsamba.com/rest-api/#rooms-POSTapi-v1-rooms
             "privacy": "private",
@@ -129,9 +142,11 @@ class DigitalSambaService:
             "language": (
                 self.world.locale if self.world.locale in ("de", "en", "es") else "en"
             ),
+            **participants,
             # Settings we offer
             "is_locked": config.get("waiting_room", False),
             "join_screen_enabled": not config.get("skip_join_screen", False),
+            "broadcaster_tile_visibility": config.get("tiles", "all"),
             # General settings (for now)
             "e2ee_enabled": False,
             "recordings_enabled": True,
