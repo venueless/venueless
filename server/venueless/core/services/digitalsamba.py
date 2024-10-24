@@ -136,12 +136,17 @@ class DigitalSambaService:
             "e2ee_enabled": False,
             "recordings_enabled": True,
             "recording_autostart_enabled": False,
+            "recording_logo_enabled": False,
+            "recording_consent_message_enabled": True,
+            "transcription_enabled": True,
+            "transcription_auto_start_enabled": False,
+            "captions_enabled": True,
+            "captions_language": "de" if self.world.locale == "de" else "en",
+            "captions_in_recordings_enabled": False,
             "breakout_rooms_enabled": True,
             "logo_enabled": False,
-            "recording_logo_enabled": False,
             "invite_participants_enabled": False,
             "consent_message_enabled": False,
-            "recording_consent_message_enabled": True,
             "layout_mode_on_join": "tiled",
             "roles": ["moderator", "speaker", "attendee"],
             "default_role": "attendee",
@@ -242,7 +247,7 @@ class DigitalSambaService:
                     .isoformat(),
                     "end": (
                         dateutil.parser.parse(rec["created_at"]).astimezone(tz)
-                        + timedelta(seconds=rec["duration"])
+                        + timedelta(seconds=rec.get("duration", 0))
                     ).isoformat(),
                     "participants": rec["participant_name"],
                     "state": rec["status"],

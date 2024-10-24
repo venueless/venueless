@@ -76,7 +76,7 @@ export default {
 		},
 		bannerIsFrame () {
 			return this.exhibitor.banner_detail && (
-				this.exhibitor.banner_detail.match('^https?://(www.)?(youtube.com/watch\\?v=|youtu.be/)([^&?]*)([&?].*)?$') ||
+				this.exhibitor.banner_detail.match('^https?://(www.)?(youtube.com/watch\\?v=|youtu.be/|youtube.com/live/)([^&?]*)([&?].*)?$') ||
 				this.exhibitor.banner_detail.match('^https?://(www.)?(vimeo.com)/(.*)$')
 			)
 		},
@@ -87,10 +87,27 @@ export default {
 			)
 		},
 		bannerVideoSource () {
-			const ytMatch = this.exhibitor.banner_detail.match('^https?://(www.)?(youtube.com/watch\\?v=|youtu.be/)([^&?]*)([&?].*)?$')
+			const ytMatch = this.exhibitor.banner_detail.match('^https?://(www.)?(youtube.com/watch\\?v=|youtu.be/|youtube.com/live/)([^&?]*)([&?].*)?$')
 			const vimeoMatch = this.exhibitor.banner_detail.match('^https?://(www.)?(vimeo.com)/(.*)$')
 			if (ytMatch) {
-				return 'https://www.youtube-nocookie.com/embed/' + ytMatch[3]
+				let url = 'https://www.youtube-nocookie.com/embed/' + ytMatch[3]
+				if (ytMatch[4]) {
+					const ytSourceParams = new URLSearchParams(ytMatch[4].substring(1))
+					const ytEmbedParams = new URLSearchParams()
+					if (ytSourceParams.has('t')) {
+						const timecode = ytSourceParams.get('t')
+						let startTime = 0
+						if (timecode.includes('m')) {
+							const timecodeMatch = timecode.match('^([0-9]+)m([0-9])+s')
+							startTime = parseInt(timecodeMatch[1]) * 60 + parseInt((timecodeMatch[2]))
+						} else {
+							startTime = parseInt(timecode)
+						}
+						ytEmbedParams.set('start', startTime)
+					}
+					url += '?' + ytEmbedParams.toString()
+				}
+				return url
 			}
 			if (vimeoMatch) {
 				return 'https://player.vimeo.com/video/' + vimeoMatch[3]
