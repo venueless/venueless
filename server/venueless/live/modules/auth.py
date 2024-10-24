@@ -8,12 +8,14 @@ import jwt
 from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.core.signing import dumps
+from django.core.validators import URLValidator
 from django.urls import reverse
 from sentry_sdk import configure_scope
 
 from venueless.core.models import User
-from venueless.core.models.auth import ShortToken
+from venueless.core.models.auth import ShortToken, WebPushClient
 from venueless.core.permissions import Permission
 from venueless.core.services.announcement import get_announcements
 from venueless.core.services.chat import ChatService
@@ -266,6 +268,33 @@ class AuthModule(BaseModule):
         )
         await self.consumer.user.refresh_from_db_if_outdated(allowed_age=0)
         await ChatService(self.consumer.world).enforce_forced_joins(self.consumer.user)
+
+    @command("web_push.subscribe")
+    @require_world_permission(Permission.WORLD_VIEW)
+    async def web_push_subscribe(self, body):
+        sub = body.get("subscription", {})
+        try:
+            URLValidator()(sub.get("endpoint", "invalid"))
+            int(sub.get("expirationTime") or 0)
+            if any(
+                k
+                not in (
+                    "endpoint",
+                    "invalid",
+                    "expirationTime",
+                    "subscriptionId",
+                    "keys",
+                )
+                for k in sub.keys()
+            ):
+                raise ValidationError(code="invalid_input")
+        except (TypeError, ValidationError):
+            await self.consumer.send_error(code="invalid_input")
+        await database_sync_to_async(WebPushClient.objects.update_or_create)(
+            endpoint=sub["endpoint"],
+            defaults=dict(user=self.consumer.user, subscription=sub),
+        )
+        await self.consumer.send_success()
 
     @command("admin.update")
     @require_world_permission(Permission.WORLD_USERS_MANAGE)

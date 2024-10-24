@@ -229,6 +229,14 @@ class RoomGrant(models.Model):
         return r
 
 
+class WebPushClient(models.Model):
+    user = models.ForeignKey(
+        "User", related_name="web_push_clients", on_delete=models.CASCADE
+    )
+    endpoint = models.URLField(unique=True)
+    subscription = models.JSONField()
+
+
 class WorldGrant(models.Model):
     world = models.ForeignKey(
         "World", related_name="world_grants", on_delete=models.CASCADE

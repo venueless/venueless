@@ -90,7 +90,7 @@ export default new Vuex.Store({
 		},
 		connect ({ state, dispatch, commit }) {
 			initApi({ token: state.token, clientId: state.clientId, inviteToken: state.inviteToken, store: this })
-			api.on('joined', (serverState) => {
+			api.on('joined', async (serverState) => {
 				state.connected = true
 				state.socketCloseCode = null
 				state.user = serverState['user.config']
@@ -113,6 +113,7 @@ export default new Vuex.Store({
 				// 	// TODO return after profile update?
 				// }
 				dispatch('schedule/fetch', { root: true })
+				dispatch('notifications/init', { root: true })
 			})
 			api.on('closed', (code) => {
 				state.connected = false

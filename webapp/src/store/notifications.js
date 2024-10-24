@@ -1,6 +1,8 @@
 // TODO handle mobile stuff
 import theme from 'theme'
+import api from 'lib/api'
 import { renderUrl as renderIdenticonUrl } from 'lib/identicons'
+import { isMobile, supportsNotifications, supportsWebPushNotifications } from 'lib/feature-detect'
 
 const loadSettings = function () {
 	try {
@@ -8,12 +10,10 @@ const loadSettings = function () {
 	} catch (e) {}
 }
 
-const notificationsSupported = typeof Notification !== 'undefined' // false on mobile safari
-
 export default {
 	namespaced: true,
 	state: {
-		permission: notificationsSupported && Notification.permission,
+		permission: supportsNotifications && Notification.permission,
 		permissionPromptDismissed: !!localStorage.notificationPermissionPromptDismissed,
 		askingPermission: false,
 		settings: loadSettings() || {
@@ -24,7 +24,7 @@ export default {
 	},
 	getters: {
 		showNotificationPermissionPrompt (state) {
-			return notificationsSupported && !state.permissionPromptDismissed && state.permission === 'default'
+			return supportsNotifications && !state.permissionPromptDismissed && state.permission === 'default'
 		},
 		shouldNotify (state) {
 			return state.permission === 'granted' && !!state.settings.notify
@@ -33,10 +33,33 @@ export default {
 	mutations: {
 	},
 	actions: {
+		async init ({ dispatch }) {
+			if (!supportsNotifications || Notification.permission !== 'granted') return
+			await dispatch('initPushNotifications')
+			// TODO resubscribe to push notifications on error
+		},
+		async initPushNotifications ({ rootState }) {
+			if (!isMobile || !supportsWebPushNotifications) return
+			const serviceWorker = await navigator.serviceWorker.register(
+				import.meta.env.MODE === 'production' ? '/sw.js' : '/dev-sw.js?dev-sw', { type: import.meta.env.MODE === 'production' ? 'classic' : 'module' }
+			)
+			serviceWorker.update()
+			window.serviceWorker = serviceWorker
+			// if (await serviceWorker.pushManager.getSubscription()) return
+			await navigator.serviceWorker.ready
+			// TODO unsubscribe on error
+			const subscription = await serviceWorker.pushManager.subscribe({
+				userVisibleOnly: true,
+				applicationServerKey: rootState.world.vapid_public_key
+			})
+			api.call('user.web_push.subscribe', {
+				subscription: subscription.toJSON()
+			})
+		},
 		// sets state from browser permission and localStorage
 		// TODO prevent switching of settings at app load
 		pollExternals ({ state }) {
-			state.permission = notificationsSupported && Notification.permission
+			state.permission = supportsNotifications && Notification.permission
 			state.permissionPromptDismissed = !!localStorage.notificationPermissionPromptDismissed
 			const settings = loadSettings()
 			if (settings) {
@@ -44,7 +67,7 @@ export default {
 			}
 		},
 		async askForPermission ({ state, dispatch }) {
-			if (!notificationsSupported) return
+			if (!supportsNotifications) return
 			state.askingPermission = true
 			let permission
 			// safari only has callback
@@ -54,6 +77,7 @@ export default {
 				permission = await new Promise((resolve) => Notification.requestPermission(resolve))
 			}
 			state.permission = permission
+			await dispatch('initPushNotifications')
 			state.askingPermission = false
 			dispatch('dismissPermissionPrompt')
 		},
@@ -67,6 +91,7 @@ export default {
 		},
 		async createDesktopNotification ({ state, getters }, { title, body, tag, user, icon, onClose, onClick }) {
 			if (!getters.shouldNotify || document.hasFocus()) return // don't show desktop notification when we have focus
+			if (isMobile) return // we shouldn't be getting this AT ALL
 			if (user) {
 				if (user.profile?.avatar?.url) {
 					icon = user.profile.avatar.url
@@ -87,22 +112,27 @@ export default {
 				}
 			}
 			// TODO set tag to handle multiple tabs
-			const desktopNotification = new Notification(title ?? '', { body, icon, tag })
-			if (state.settings.playSounds) {
-				const audio = new Audio('/notify.wav')
-				audio.play()
+			try {
+				const desktopNotification = new Notification(title ?? '', { body, icon, tag })
+				if (state.settings.playSounds) {
+					const audio = new Audio('/notify.wav')
+					audio.play()
+				}
+				desktopNotification.onclose = () => {
+					onClose?.(desktopNotification)
+					const index = state.desktopNotifications.indexOf(desktopNotification)
+					if (index) state.desktopNotifications.splice(index, 1)
+				}
+				desktopNotification.onclick = () => {
+					window.focus()
+					onClick?.(desktopNotification)
+				}
+				state.desktopNotifications.push(desktopNotification)
+				return desktopNotification
+			} catch (e) {
+				// ignore notifications not working on android. Doesn't seem to be a way to detect this without actively trying to show a notification
+				if (e.message !== 'Illegal constructor') throw e
 			}
-			desktopNotification.onclose = () => {
-				onClose?.(desktopNotification)
-				const index = state.desktopNotifications.indexOf(desktopNotification)
-				if (index) state.desktopNotifications.splice(index, 1)
-			}
-			desktopNotification.onclick = () => {
-				window.focus()
-				onClick?.(desktopNotification)
-			}
-			state.desktopNotifications.push(desktopNotification)
-			return desktopNotification
 		},
 		closeDesktopNotifications ({ state }, fn) {
 			for (const desktopNotification of state.desktopNotifications) {

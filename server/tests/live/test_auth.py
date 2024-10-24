@@ -10,6 +10,7 @@ from django.utils.timezone import now
 
 from tests.utils import get_token
 from venueless.core.models import User
+from venueless.core.models.auth import WebPushClient
 from venueless.core.models.room import AnonymousInvite
 from venueless.core.services.user import get_user_by_token_id
 from venueless.routing import application
@@ -247,6 +248,48 @@ async def test_wrong_user_command():
         await c.send_json_to(["user.foobar", 123, {"display_name": "Cool User"}])
         response = await c.receive_json_from()
         assert response == ["error", 123, {"code": "user.unsupported_command"}]
+
+
+@pytest.mark.asyncio
+@pytest.mark.django_db
+async def test_register_web_push():
+    async with world_communicator() as c:
+        await c.send_json_to(["authenticate", {"client_id": "4"}])
+        response = await c.receive_json_from()
+        assert response[0] == "authenticated"
+
+        await c.send_json_to(
+            [
+                "user.web_push.subscribe",
+                123,
+                {
+                    "subscription": {
+                        "endpoint": "https://updates.push.services.mozilla.com/push/v1/gAA",
+                        "keys": {"auth": "k8J...", "p256dh": "BOr..."},
+                    }
+                },
+            ]
+        )
+        response = await c.receive_json_from()
+        assert response == ["success", 123, {}], response
+        assert await database_sync_to_async(WebPushClient.objects.count)() == 1
+
+        # Idempotent on same endpoint
+        await c.send_json_to(
+            [
+                "user.web_push.subscribe",
+                123,
+                {
+                    "subscription": {
+                        "endpoint": "https://updates.push.services.mozilla.com/push/v1/gAA",
+                        "keys": {"auth": "k8J...", "p256dh": "BOr..."},
+                    }
+                },
+            ]
+        )
+        response = await c.receive_json_from()
+        assert response == ["success", 123, {}], response
+        assert await database_sync_to_async(WebPushClient.objects.count)() == 1
 
 
 @pytest.mark.asyncio

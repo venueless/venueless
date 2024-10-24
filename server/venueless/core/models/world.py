@@ -10,6 +10,7 @@ from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import JSONField
 from django.utils.crypto import get_random_string
+from py_vapid import Vapid02
 
 from venueless.core.models import User
 from venueless.core.models.cache import VersionedModel
@@ -161,12 +162,22 @@ class World(VersionedModel):
     timezone = models.CharField(max_length=120, default="Europe/Berlin")
     feature_flags = JSONField(blank=True, default=default_feature_flags)
     external_auth_url = models.URLField(null=True, blank=True)
+    vapid_private_key = models.TextField()
+    vapid_public_key = models.TextField()
 
     class Meta:
         ordering = ("id",)
 
     def __str__(self):
         return f"{self.id} ({self.title})"
+
+    def save(self, *args, **kwargs):
+        if not self.vapid_private_key:
+            vapid = Vapid02()
+            vapid.generate_keys()
+            self.vapid_private_key = vapid.private_pem().decode()
+            self.vapid_public_key = vapid.public_pem().decode()
+        super().save(*args, **kwargs)
 
     def decode_token(self, token, allow_raise=False):
         exc = None
