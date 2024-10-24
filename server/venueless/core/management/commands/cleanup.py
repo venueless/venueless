@@ -1,6 +1,8 @@
 import logging
 from datetime import timedelta
 
+from asgiref.sync import async_to_sync
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db.models import F
 from django.utils.timezone import now
@@ -9,6 +11,7 @@ from venueless.core.models import RouletteRequest
 from venueless.core.models.auth import ShortToken
 from venueless.core.models.room import AnonymousInvite, RoomView
 from venueless.core.models.world import WorldView
+from venueless.core.services.digitalsamba import cleanup_recordings, cleanup_rooms
 from venueless.storage.models import StoredFile
 
 logger = logging.getLogger(__name__)
@@ -21,6 +24,7 @@ class Command(BaseCommand):
         self._cleanup_views()
         self._cleanup_files()
         self._cleanup_tokens()
+        self._cleanup_digitalsamba()
 
     def _cleanup_files(self):
         for f in StoredFile.objects.filter(expires__isnull=False, expires__lt=now()):
@@ -51,3 +55,8 @@ class Command(BaseCommand):
     def _cleanup_tokens(self):
         ShortToken.objects.filter(expires__lte=now() - timedelta(days=90)).delete()
         AnonymousInvite.objects.filter(expires__lte=now() - timedelta(days=90)).delete()
+
+    def _cleanup_digitalsamba(self):
+        if settings.DIGITALSAMBA_TEAM:
+            async_to_sync(cleanup_rooms)()
+            async_to_sync(cleanup_recordings)()

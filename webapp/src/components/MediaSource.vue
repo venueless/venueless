@@ -21,6 +21,7 @@ import api from 'lib/api'
 import JanusCall from 'components/JanusCall'
 import JanusChannelCall from 'components/JanusChannelCall'
 import Livestream from 'components/Livestream'
+import DigitalSambaEmbedded from '@digitalsamba/embedded-sdk'
 
 export default {
 	components: { Livestream, JanusCall, JanusChannelCall },
@@ -45,7 +46,7 @@ export default {
 			if (!this.room) {
 				return null
 			}
-			return this.room.modules.find(module => ['livestream.native', 'livestream.youtube', 'livestream.iframe', 'call.bigbluebutton', 'call.janus', 'call.zoom'].includes(module.type))
+			return this.room.modules.find(module => ['livestream.native', 'livestream.youtube', 'livestream.iframe', 'call.bigbluebutton', 'call.janus', 'call.digitalsamba', 'call.zoom'].includes(module.type))
 		},
 		inRoomManager () {
 			return this.$route.name === 'room:manage'
@@ -96,6 +97,11 @@ export default {
 						hideIfBackground = true
 						break
 					}
+					case 'call.digitalsamba': {
+						iframeUrl = 'data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3ELoading...%3C/body%3E%3C/html%3E'
+						hideIfBackground = true
+						break
+					}
 					case 'livestream.iframe': {
 						iframeUrl = this.module.config.url
 						break
@@ -119,6 +125,23 @@ export default {
 				const container = document.querySelector('#media-source-iframes')
 				container.appendChild(iframe)
 				this.iframe = iframe
+
+				if (this.module.type === 'call.digitalsamba') {
+					const { url, token } = await api.call('digitalsamba.room_url', { room: this.room.id })
+					const initOptions = {
+						frame: iframe,
+						url: url,
+						token: token,
+						roomSettings: {
+							videoEnabled: !this.module.config.disable_cam_on_start,
+							audioEnabled: !this.module.config.mute_on_start,
+						}
+					}
+					const sambaFrame = DigitalSambaEmbedded.createControl(initOptions)
+					sambaFrame.load({
+						reportErrors: true,
+					})
+				}
 			} catch (error) {
 				// TODO handle bbb/zoom.join.missing_profile
 				this.iframeError = error
@@ -137,6 +160,9 @@ export default {
 			}
 			if (this.module.type === 'call.janus') {
 				return this.$refs.janus.roomId
+			}
+			if (this.module.type === 'call.digitalsamba') {
+				return !!this.iframe
 			}
 			if (this.module.type === 'call.bigbluebutton') {
 				return !!this.iframe

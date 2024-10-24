@@ -13,6 +13,13 @@ const ROOM_TYPES = [{
 	description: 'A video channel allows you to connect with attendees in real time and host workshops or panels. The video channels are powered by BigBlueButton and support 25-80 people, depending on usage.',
 	startingModule: 'call.bigbluebutton'
 }, {
+	id: 'channel-digitalsamba',
+	icon: 'webcam',
+	name: 'Video Channel (beta)',
+	description: 'A video channel allows you to connect with attendees in real time and host workshops or panels. The video channels are powered by Digital Samba.',
+	startingModule: 'call.digitalsamba',
+	behindFeatureFlag: 'janus'
+}, {
 	id: 'channel-janus',
 	icon: 'webcam',
 	name: 'Video Channel (beta)',
@@ -93,6 +100,7 @@ export function inferType (config) {
 	if (modules['livestream.native'] || modules['livestream.youtube'] || modules['livestream.iframe']) return findById('stage')
 	if (modules['call.bigbluebutton']) return findById('channel-bbb')
 	if (modules['call.janus']) return findById('channel-janus')
+	if (modules['call.digitalsamba']) return findById('channel-digitalsamba')
 	if (modules['call.zoom']) return findById('channel-zoom')
 
 	// non-media rooms should only have one module

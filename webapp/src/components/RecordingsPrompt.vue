@@ -9,10 +9,10 @@ prompt.c-recordings-prompt(@close="$emit('close')")
 		.recordings(v-if="recordings != null")
 			.recording(v-for="r in recordings")
 				.recording-dates {{ moment(r.start).format('l, LT') }} – {{ moment(r.end).format('LT') }}
-				a.link.bunt-button(v-if="r.url && (r.state == 'published' || r.state == 'available')", :href="r.url", target="_blank") {{ $t('RecordingsPrompt:view:label') }}
-				a.link.bunt-button(v-if="r.url_screenshare && (r.state == 'published' || r.state == 'available')", :href="r.url_screenshare", target="_blank") {{ $t('RecordingsPrompt:view-screenshare:label') }}
-				a.link.bunt-button(v-if="r.url_video && (r.state == 'published' || r.state == 'available')", :href="r.url_video", target="_blank") {{ $t('RecordingsPrompt:view-video:label') }}
-				a.link.bunt-button(v-if="r.url_notes && (r.state == 'published' || r.state == 'available')", :href="r.url_notes", target="_blank") {{ $t('RecordingsPrompt:view-notes:label') }}
+				a.link.bunt-button(v-if="r.url && (r.state == 'published' || r.state == 'available' || r.state == 'READY')", :href="r.url", target="_blank") {{ $t('RecordingsPrompt:view:label') }}
+				a.link.bunt-button(v-if="r.url_screenshare && (r.state == 'published' || r.state == 'available' || r.state == 'READY')", :href="r.url_screenshare", target="_blank") {{ $t('RecordingsPrompt:view-screenshare:label') }}
+				a.link.bunt-button(v-if="r.url_video && (r.state == 'published' || r.state == 'available' || r.state == 'READY')", :href="r.url_video", target="_blank") {{ $t('RecordingsPrompt:view-video:label') }}
+				a.link.bunt-button(v-if="r.url_notes && (r.state == 'published' || r.state == 'available' || r.state == 'READY')", :href="r.url_notes", target="_blank") {{ $t('RecordingsPrompt:view-notes:label') }}
 				span(v-if="!r.url && !r.url_screenshare") {{ r.state }}
 </template>
 <script>
@@ -32,10 +32,21 @@ export default {
 			error: null,
 		}
 	},
-	computed: {},
+	computed: {
+		modules () {
+			return this.room?.modules.reduce((acc, module) => {
+				acc[module.type] = module
+				return acc
+			}, {})
+		},
+	},
 	async created () {
 		try {
-			this.recordings = (await api.call('bbb.recordings', { room: this.room.id }, { timeout: 150000 })).results
+			if (this.modules['call.bigbluebutton']) {
+				this.recordings = (await api.call('bbb.recordings', { room: this.room.id }, { timeout: 150000 })).results
+			} else if (this.modules['call.digitalsamba']) {
+				this.recordings = (await api.call('digitalsamba.recordings', { room: this.room.id }, { timeout: 150000 })).results
+			}
 			this.error = null
 		} catch (error) {
 			this.error = error

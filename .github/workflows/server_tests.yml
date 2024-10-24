@@ -79,17 +79,3 @@ jobs:
 
           python -m coverage report --fail-under=70
         if: matrix.pubsub == 'no' && matrix.experimental == false
-
-      - name: "Make badge"
-        uses: schneegans/dynamic-badges-action@v1.6.0
-        with:
-          # GIST_TOKEN is a GitHub personal access token with scope "gist".
-          auth: ${{ secrets.GIST_TOKEN }}
-          gistID: f7aede37157ab0a7e1fb2a5beaf78abc
-          filename: covbadge.json
-          label: coverage
-          message: ${{ env.TOTAL_COV }}%
-          valColorRange: ${{ env.TOTAL_COV }}
-          maxColorRange: 90
-          minColorRange: 50
-        if: env.TOTAL_COV && github.ref == 'refs/heads/dev'

@@ -28,7 +28,11 @@ def default_roles():
         Permission.WORLD_EXHIBITION_CONTACT,
         Permission.WORLD_CHAT_DIRECT,
     ]
-    viewer = attendee + [Permission.ROOM_VIEW, Permission.ROOM_CHAT_READ]
+    viewer = attendee + [
+        Permission.ROOM_VIEW,
+        Permission.ROOM_CHAT_READ,
+        Permission.ROOM_DIGITALSAMBA_JOIN,
+    ]
     participant = viewer + [
         Permission.ROOM_CHAT_JOIN,
         Permission.ROOM_CHAT_SEND,
@@ -39,6 +43,8 @@ def default_roles():
         Permission.ROOM_POLL_VOTE,
         Permission.ROOM_ROULETTE_JOIN,
         Permission.ROOM_BBB_JOIN,
+        Permission.ROOM_DIGITALSAMBA_JOIN,
+        Permission.ROOM_DIGITALSAMBA_SPEAK,
         Permission.ROOM_JANUSCALL_JOIN,
         Permission.ROOM_ZOOM_JOIN,
     ]
@@ -49,6 +55,7 @@ def default_roles():
     ]
     speaker = participant + [
         Permission.ROOM_BBB_MODERATE,
+        Permission.ROOM_DIGITALSAMBA_SPEAK,
         Permission.ROOM_JANUSCALL_MODERATE,
         Permission.ROOM_POLL_EARLY_RESULTS,
     ]
@@ -57,6 +64,8 @@ def default_roles():
         Permission.ROOM_CHAT_MODERATE,
         Permission.ROOM_ANNOUNCE,
         Permission.ROOM_BBB_RECORDINGS,
+        Permission.ROOM_DIGITALSAMBA_MODERATE,
+        Permission.ROOM_DIGITALSAMBA_RECORDINGS,
         Permission.ROOM_QUESTION_MODERATE,
         Permission.ROOM_POLL_EARLY_RESULTS,
         Permission.ROOM_POLL_MANAGE,
@@ -115,6 +124,7 @@ FEATURE_FLAGS = [
     "poster",
     "conftool",
     "cross-origin-isolation",
+    "digitalsamba",
 ]
 
 

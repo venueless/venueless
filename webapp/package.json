@@ -14,6 +14,7 @@
     "analyze": "ANALYZE=true npm run build"
   },
   "dependencies": {
+    "@digitalsamba/embedded-sdk": "0.0.40",
     "@mdi/font": "^5.5.55",
     "@popperjs/core": "^2.6.0",
     "@pretalx/schedule": "^2.0.0-alpha.2",
@@ -50,9 +51,9 @@
     "roboto-fontface": "^0.10.0",
     "twemoji-emojis": "^14.1.0",
     "uuid": "^8.3.0",
-    "vue": "^3.4.19",
+    "vue": "^3.5.3",
     "vue-advanced-cropper": "^2.8.8",
-    "vue-router": "^4.2.5",
+    "vue-router": "^4.4.3",
     "vue-slicksort": "^2.0.5",
     "vue-virtual-scroller": "^2.0.0-beta.8",
     "vuex": "^4.1.0",
@@ -60,7 +61,7 @@
   },
   "devDependencies": {
     "@vite-pwa/assets-generator": "^0.2.4",
-    "@vitejs/plugin-vue": "^5.0.4",
+    "@vitejs/plugin-vue": "^5.1.3",
     "@vue-macros/reactivity-transform": "^0.4.3",
     "@vue/eslint-config-typescript": "^13.0.0",
     "@vue/language-plugin-pug": "^2.0.21",
@@ -76,8 +77,9 @@
     "stylelint-config-standard": "^36.0.0",
     "stylelint-plugin-stylus": "^1.0.0",
     "stylus": "^0.55.0",
-    "vite": "^5.1.3",
+    "vite": "^5.4.3",
     "vite-plugin-pwa": "^0.19.7",
+    "vite": "^5.4.3",
     "vite-plugin-static-copy": "^1.0.1"
   }
 }
