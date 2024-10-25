@@ -267,7 +267,7 @@ class DigitalSambaService:
                     "participants": rec["participant_name"],
                     "state": rec["status"],
                     "url": None,
-                    "url_video": download["link"],
+                    "url_video": download["link"] if download else None,
                     "url_screenshare": None,
                     "url_notes": None,
                 }
