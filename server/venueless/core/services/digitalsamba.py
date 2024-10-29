@@ -157,7 +157,7 @@ class DigitalSambaService:
             "transcription_auto_start_enabled": False,
             "captions_enabled": True,
             "captions_language": "de" if self.world.locale == "de" else "en",
-            "captions_in_recordings_enabled": False,
+            "captions_in_recordings_enabled": True,
             "breakout_rooms_enabled": True,
             "logo_enabled": False,
             "invite_participants_enabled": False,
