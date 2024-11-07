@@ -46,7 +46,7 @@ export default {
 		}),
 		VitePWA({
 			srcDir: "src",
-			filename: "service-worker.js",
+			filename: "sw.js",
 			strategies: "injectManifest",
 			injectRegister: false,
 			manifest: {
