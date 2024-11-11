@@ -32,7 +32,7 @@ reportlab==4.2.*
 requests==2.32.*
 sentry-sdk==1.30.*
 tqdm==4.67.*
-websockets==13.*
+websockets==14.*
 
 # deploy
 psycopg2==2.9.10
