@@ -238,9 +238,10 @@ export default {
 			}
 			document.title = title
 			this.$store.dispatch('changeRoom', newRoom)
-			const isExclusive = module => module.type === 'call.bigbluebutton' || module.type === 'call.zoom'
+			const isExclusive = module => ['call.bigbluebutton', 'call.zoom', 'call.digitalsamba'].includes(module.type)
 			if (!this.$mq.above.m) return // no background rooms for mobile
 			if (this.call) return // When a DM call is running, we never want background media
+
 			if (oldRoom &&
 				this.rooms.includes(oldRoom) &&
 				!this.backgroundRoom &&
