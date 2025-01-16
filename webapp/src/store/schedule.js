@@ -28,7 +28,9 @@ export default {
 		},
 		rooms (state, getters, rootState) {
 			if (!state.schedule) return
-			return state.schedule.rooms.map(room => rootState.rooms.find(r => r.pretalx_id === room.id) || room)
+			return state.schedule.rooms
+				.map(room => rootState.rooms.find(r => r.pretalx_id === room.id) || room)
+				.filter(room => !rootState.world.pretalx?.show_only_venueless_rooms || room.pretalx_id)
 		},
 		roomsLookup (state, getters) {
 			if (!state.schedule) return {}
@@ -49,6 +51,7 @@ export default {
 			if (!state.schedule) return
 			const sessions = []
 			for (const session of state.schedule.talks) {
+				if (!getters.roomsLookup[session.room]) continue
 				sessions.push({
 					id: session.code ? session.code.toString() : null,
 					title: session.title,

@@ -126,7 +126,6 @@ class DigitalSambaService:
                 "max_broadcasters": 100,
             }
 
-
         return {
             # Reference: https://developer.digitalsamba.com/rest-api/#rooms-POSTapi-v1-rooms
             "privacy": "private",

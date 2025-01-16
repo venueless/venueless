@@ -67,7 +67,8 @@ VENUELESS_MULTIFACTOR_REQUIRE = (
 )
 
 MAIL_FROM = SERVER_EMAIL = DEFAULT_FROM_EMAIL = os.environ.get(
-    "VENUELESS_MAIL_FROM", config.get("mail", "from", fallback="admin@localhost")
+    "VENUELESS_MAIL_FROM",
+    config.get("mail", "from", fallback="admin@localhost.venueless.org"),
 )
 if DEBUG:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

@@ -74,6 +74,16 @@ You can change a user's profile using the ``user.update`` call::
     => ["user.update", 123, {"profile": {…}, "client_state": {}}]
     <- ["success", 123, {}]
 
+Sign up for push notifications
+------------------------------
+
+To set up push notifications to a device, call::
+
+    => ["user.web_push.subscribe", 123, {"subscription": {…}}]
+    <- ["success", 123, {}]
+
+The contents of ``subscription`` should be generated through [``PushSubscription.toJSON``](https://developer.mozilla.org/en-US/docs/Web/API/PushSubscription).
+
 Receiving info on another user
 ------------------------------
 
