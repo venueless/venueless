@@ -68,9 +68,15 @@ export default {
 					type: 'chat.native'
 				})
 			} else {
-				modules.push({
-					type: 'call.bigbluebutton'
-				})
+				if (this.$features.enabled('digitalsamba')) {
+					modules.push({
+						type: 'call.digitalsamba'
+					})
+				} else {
+					modules.push({
+						type: 'call.bigbluebutton',
+					})
+				}
 			}
 			const { room } = await this.$store.dispatch('createRoom', {
 				name: this.name,

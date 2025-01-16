@@ -96,7 +96,7 @@ class RoomPermissions(permissions.BasePermission):
                 traits=traits,
                 permissions=[
                     Permission.WORLD_ROOMS_CREATE_STAGE,
-                    Permission.WORLD_ROOMS_CREATE_BBB,
+                    Permission.WORLD_ROOMS_CREATE_VIDEO,
                     Permission.WORLD_ROOMS_CREATE_CHAT,
                 ],
             )

@@ -285,7 +285,7 @@ class RoomModule(BaseModule):
     @require_world_permission(
         [
             Permission.WORLD_ROOMS_CREATE_STAGE,
-            Permission.WORLD_ROOMS_CREATE_BBB,
+            Permission.WORLD_ROOMS_CREATE_VIDEO,
             Permission.WORLD_ROOMS_CREATE_CHAT,
             Permission.WORLD_ROOMS_CREATE_EXHIBITION,
             Permission.ROOM_UPDATE,
