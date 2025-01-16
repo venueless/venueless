@@ -55,3 +55,16 @@ class DigitalSambaModule(BaseModule):
             self.room,
         )
         await self.consumer.send_success({"results": recordings})
+
+    @command("call_url")
+    async def call_url(self, body):
+        service = DigitalSambaService(self.consumer.world)
+        if not self.consumer.user.profile.get("display_name"):
+            raise ConsumerException("digitalsamba.join.missing_profile")
+        url = await service.get_join_url_for_call_id(
+            body.get("call"),
+            self.consumer.user,
+        )
+        if not url:
+            raise ConsumerException("digitalsamba.failed")
+        await self.consumer.send_success({"url": url})
