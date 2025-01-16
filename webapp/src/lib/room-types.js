@@ -9,13 +9,13 @@ const ROOM_TYPES = [{
 }, {
 	id: 'channel-bbb',
 	icon: 'webcam',
-	name: 'Video Channel',
+	name: 'Video Channel (BigBlueButton)',
 	description: 'A video channel allows you to connect with attendees in real time and host workshops or panels. The video channels are powered by BigBlueButton and support 25-80 people, depending on usage.',
 	startingModule: 'call.bigbluebutton'
 }, {
 	id: 'channel-digitalsamba',
 	icon: 'webcam',
-	name: 'Video Channel (beta)',
+	name: 'Video Channel',
 	description: 'A video channel allows you to connect with attendees in real time and host workshops or panels. The video channels are powered by Digital Samba.',
 	startingModule: 'call.digitalsamba',
 	behindFeatureFlag: 'digitalsamba'
