@@ -59,9 +59,6 @@ class User(VersionedModel):
         self.bbb_invites.clear()
         self.room_grants.all().delete()
         self.world_grants.all().delete()
-        self.rouletterequest_set.all().delete()
-        self.roulette_pairing_left.all().delete()
-        self.roulette_pairing_right.all().delete()
         self.audit_logs.filter(
             type__startswith="auth.user.profile",
             data__object=str(self.pk),

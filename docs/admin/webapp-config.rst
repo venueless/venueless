@@ -75,10 +75,8 @@ Experimental Features
 ---------------------
 
 * schedule-control
-* roulette
 * muxdata
 * zoom
-* janus
 * digitalsamba
 * page.landing
 * iframe-player

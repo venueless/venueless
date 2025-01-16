@@ -7,7 +7,6 @@ import announcement from './announcement'
 import chat from './chat'
 import question from './question'
 import poll from './poll'
-import roulette from './roulette'
 import exhibition from './exhibition'
 import schedule from './schedule'
 import notifications from './notifications'
@@ -160,7 +159,7 @@ export default new Vuex.Store({
 			state.activeRoom = room
 			state.reactions = null
 			state.roomViewers = null
-			if (room?.modules.some(module => ['livestream.native', 'livestream.youtube', 'livestream.iframe', 'call.bigbluebutton', 'call.zoom', 'call.digitalsamba', 'call.janus'].includes(module.type))) {
+			if (room?.modules.some(module => ['livestream.native', 'livestream.youtube', 'livestream.iframe', 'call.bigbluebutton', 'call.zoom', 'call.digitalsamba'].includes(module.type))) {
 				const { viewers } = await api.call('room.enter', { room: room.id })
 				state.roomViewers = viewers
 			}
@@ -258,7 +257,6 @@ export default new Vuex.Store({
 		poll,
 		exhibition,
 		schedule,
-		roulette,
 		notifications
 	}
 })

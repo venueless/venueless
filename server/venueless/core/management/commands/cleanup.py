@@ -7,7 +7,6 @@ from django.core.management.base import BaseCommand
 from django.db.models import F
 from django.utils.timezone import now
 
-from venueless.core.models import RouletteRequest
 from venueless.core.models.auth import ShortToken
 from venueless.core.models.room import AnonymousInvite, RoomView
 from venueless.core.models.world import WorldView
@@ -49,8 +48,6 @@ class Command(BaseCommand):
         WorldView.objects.filter(
             end__isnull=False, world__config__track_world_views=False
         ).delete()
-
-        RouletteRequest.objects.filter(expiry__lte=now() - timedelta(hours=1)).delete()
 
     def _cleanup_tokens(self):
         ShortToken.objects.filter(expires__lte=now() - timedelta(days=90)).delete()

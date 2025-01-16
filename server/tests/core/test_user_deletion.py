@@ -1,6 +1,4 @@
-import datetime
 import os
-import uuid
 
 import pytest
 from django.core.files.base import ContentFile
@@ -15,8 +13,6 @@ from venueless.core.models import (
     Exhibitor,
     Membership,
     Poster,
-    RoulettePairing,
-    RouletteRequest,
 )
 from venueless.core.services.user import create_user, update_user
 from venueless.storage.models import StoredFile
@@ -75,20 +71,6 @@ def test_delete_user(world, chat_room):
     )
     should_be_deleted_after_u1_is_deleted.append(
         u1.world_grants.create(world=world, role="test")
-    )
-    should_be_deleted_after_u1_is_deleted.append(
-        RouletteRequest.objects.create(
-            room=chat_room,
-            user=u1,
-            socket_id=uuid.uuid4(),
-            expiry=now() + datetime.timedelta(minutes=5),
-        )
-    )
-    should_be_deleted_after_u1_is_deleted.append(
-        RoulettePairing.objects.create(room=chat_room, user1=u1, user2=u2)
-    )
-    should_be_deleted_after_u1_is_deleted.append(
-        RoulettePairing.objects.create(room=chat_room, user1=u2, user2=u1)
     )
     should_be_deleted_after_u1_is_deleted.append(exhibitor.staff.create(user=u1))
     should_be_deleted_after_u1_is_deleted.append(poster.presenters.create(user=u1))

@@ -41,11 +41,9 @@ def default_roles():
         Permission.ROOM_QUESTION_VOTE,
         Permission.ROOM_POLL_READ,
         Permission.ROOM_POLL_VOTE,
-        Permission.ROOM_ROULETTE_JOIN,
         Permission.ROOM_BBB_JOIN,
         Permission.ROOM_DIGITALSAMBA_JOIN,
         Permission.ROOM_DIGITALSAMBA_SPEAK,
-        Permission.ROOM_JANUSCALL_JOIN,
         Permission.ROOM_ZOOM_JOIN,
     ]
     room_creator = [Permission.WORLD_ROOMS_CREATE_CHAT]
@@ -56,7 +54,6 @@ def default_roles():
     speaker = participant + [
         Permission.ROOM_BBB_MODERATE,
         Permission.ROOM_DIGITALSAMBA_SPEAK,
-        Permission.ROOM_JANUSCALL_MODERATE,
         Permission.ROOM_POLL_EARLY_RESULTS,
     ]
     moderator = speaker + [
@@ -115,11 +112,9 @@ def default_grants():
 FEATURE_FLAGS = [
     "schedule-control",
     "iframe-player",
-    "roulette",
     "muxdata",
     "page.landing",
     "zoom",
-    "janus",
     "polls",
     "poster",
     "conftool",

@@ -26,16 +26,6 @@ urlpatterns = [
         name="bbbserver.delete",
     ),
     path("bbbs/<uuid:pk>/", views.BBBServerUpdate.as_view(), name="bbbserver.update"),
-    path("janus/", views.JanusServerList.as_view(), name="janusserver.list"),
-    path("janus/new/", views.JanusServerCreate.as_view(), name="janusserver.create"),
-    path(
-        "janus/<uuid:pk>/delete",
-        views.JanusServerDelete.as_view(),
-        name="janusserver.delete",
-    ),
-    path(
-        "janus/<uuid:pk>/", views.JanusServerUpdate.as_view(), name="janusserver.update"
-    ),
     path("turns/", views.TurnServerList.as_view(), name="turnserver.list"),
     path("turns/new/", views.TurnServerCreate.as_view(), name="turnserver.create"),
     path(

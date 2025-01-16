@@ -242,14 +242,9 @@ export default {
 			})
 			dispatch('joinCall', event.content.body)
 		},
-		async joinCall ({ state }, body) {
+		async joinCall (_, body) {
 			if (body.type === 'janus') {
-				state.call = {
-					type: 'janus',
-					id: state.channel,
-					parameters: await api.call('januscall.channel_url', { channel: state.channel }),
-					channel: state.channel
-				}
+				// leave stub to add in digitalsamba later
 			} else {
 				// We need to create the window right away, otherwise Safari will not believe this to be caused by the user
 				const win = window.open()

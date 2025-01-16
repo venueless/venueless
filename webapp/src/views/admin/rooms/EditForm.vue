@@ -8,7 +8,7 @@
 				bunt-input(v-model="config.description", name="description", label="Description")
 				bunt-input(v-model="config.sorting_priority", name="sorting_priority", label="Sorting priority", :validation="v$.config.sorting_priority")
 				template(v-if="inferredType")
-					bunt-input(v-if="['stage', 'channel-bbb', 'channel-janus', 'channel-zoom', 'channel-digitalsamba'].includes(inferredType.id)", v-model="config.pretalx_id", name="pretalx_id", label="pretalx ID", :validation="v$.config.pretalx_id")
+					bunt-input(v-if="['stage', 'channel-bbb', 'channel-zoom', 'channel-digitalsamba'].includes(inferredType.id)", v-model="config.pretalx_id", name="pretalx_id", label="pretalx ID", :validation="v$.config.pretalx_id")
 					bunt-checkbox(v-if="inferredType.id === 'channel-text'", v-model="config.force_join", name="force_join", label="Force join on login (use for non-volatile, text-based chats only!!)")
 			component.stage-settings(:is="typeComponents[inferredType.id]", v-if="inferredType && typeComponents[inferredType.id]", ref="settings", :config="config", :modules="modules")
 	.ui-form-actions
@@ -27,10 +27,8 @@ import Stage from './types-edit/stage'
 import PageStatic from './types-edit/page-static'
 import PageIframe from './types-edit/page-iframe'
 import ChannelBBB from './types-edit/channel-bbb'
-import ChannelJanus from './types-edit/channel-janus'
 import ChannelDigitalSamba from './types-edit/channel-digitalsamba'
 import ChannelZoom from './types-edit/channel-zoom'
-import ChannelRoulette from './types-edit/channel-roulette'
 import Posters from './types-edit/posters'
 import PageLanding from './types-edit/page-landing'
 
@@ -56,8 +54,6 @@ export default {
 				'page-iframe': PageIframe,
 				'page-landing': PageLanding,
 				'channel-bbb': ChannelBBB,
-				'channel-roulette': ChannelRoulette,
-				'channel-janus': ChannelJanus,
 				'channel-digitalsamba': ChannelDigitalSamba,
 				'channel-zoom': ChannelZoom,
 				posters: Posters

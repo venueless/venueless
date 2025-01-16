@@ -33,7 +33,6 @@
     "events": "^3.3.0",
     "hls.js": "^1.0.8",
     "i18next": "^21.0.1",
-    "janus-gateway": "git+https://wtf-npm@github.com/meetecho/janus-gateway.git#7b010cd265991132158541ea80afcaa14bf4eb42",
     "js-md5": "^0.8.3",
     "jwt-decode": "^3.1.2",
     "lodash-es": "^4.17.21",

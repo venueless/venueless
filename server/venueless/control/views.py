@@ -33,7 +33,6 @@ from venueless.core.models import (
     BBBCall,
     BBBServer,
     Feedback,
-    JanusServer,
     StreamingServer,
     TurnServer,
     World,
@@ -46,7 +45,6 @@ from .forms import (
     BBBMoveRoomForm,
     BBBServerForm,
     ConftoolSyncPostersForm,
-    JanusServerForm,
     PlannedUsageFormSet,
     ProfileForm,
     SignupForm,
@@ -398,70 +396,6 @@ class BBBServerDelete(AdminBase, DeleteView):
             content_object=self.object,
             user=self.request.user,
             action_type="bbbserver.deleted",
-            data={},
-        )
-        success_url = self.get_success_url()
-        self.object.delete()
-        messages.success(self.request, _("Ok!"))
-        return HttpResponseRedirect(success_url)
-
-
-class JanusServerList(AdminBase, ListView):
-    template_name = "control/janus_list.html"
-    queryset = JanusServer.objects.select_related("world_exclusive").order_by("url")
-    context_object_name = "servers"
-
-
-class JanusServerCreate(AdminBase, CreateView):
-    template_name = "control/janus_form.html"
-    form_class = JanusServerForm
-    success_url = "/control/janus/"
-
-    @transaction.atomic()
-    def form_valid(self, form):
-        self.object = form.save()
-
-        LogEntry.objects.create(
-            content_object=form.instance,
-            user=self.request.user,
-            action_type="janusserver.created",
-            data={k: str(v) for k, v in form.cleaned_data.items()},
-        )
-        messages.success(self.request, _("Ok!"))
-        return super().form_valid(form)
-
-
-class JanusServerUpdate(AdminBase, UpdateView):
-    template_name = "control/janus_form.html"
-    form_class = JanusServerForm
-    queryset = JanusServer.objects.all()
-    success_url = "/control/janus/"
-
-    def form_valid(self, form):
-        self.object = form.save()
-
-        LogEntry.objects.create(
-            content_object=form.instance,
-            user=self.request.user,
-            action_type="janusserver.updated",
-            data={k: str(v) for k, v in form.cleaned_data.items()},
-        )
-        messages.success(self.request, _("Ok!"))
-        return super().form_valid(form)
-
-
-class JanusServerDelete(AdminBase, DeleteView):
-    template_name = "control/janus_delete.html"
-    queryset = JanusServer.objects.all()
-    success_url = "/control/janus/"
-    context_object_name = "server"
-
-    def delete(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        LogEntry.objects.create(
-            content_object=self.object,
-            user=self.request.user,
-            action_type="janusserver.deleted",
             data={},
         )
         success_url = self.get_success_url()

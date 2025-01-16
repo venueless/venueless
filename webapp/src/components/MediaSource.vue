@@ -9,8 +9,6 @@
 			.global-placeholder
 			bunt-icon-button(@click.prevent.stop="$emit('close')") close
 	livestream(v-if="room && module.type === 'livestream.native'", ref="livestream", :key="`livestream-${room.id}`", :room="room", :module="module", :size="background ? 'tiny' : 'normal'")
-	janus-call(v-else-if="room && module.type === 'call.janus'", ref="janus", :key="`janus-${room.id}`", :room="room", :module="module", :background="background", :size="background ? 'tiny' : 'normal'")
-	janus-channel-call(v-else-if="call", ref="janus", :key="`call-${call.id}`", :call="call", :background="background", :size="background ? 'tiny' : 'normal'", @close="$emit('close')")
 	.iframe-error(v-if="iframeError") {{ $t('MediaSource:iframe-error:text') }}
 </template>
 <script>
@@ -18,13 +16,11 @@
 import { mapState, mapGetters } from 'vuex'
 import { isEqual } from 'lodash'
 import api from 'lib/api'
-import JanusCall from 'components/JanusCall'
-import JanusChannelCall from 'components/JanusChannelCall'
 import Livestream from 'components/Livestream'
 import DigitalSambaEmbedded from '@digitalsamba/embedded-sdk'
 
 export default {
-	components: { Livestream, JanusCall, JanusChannelCall },
+	components: { Livestream },
 	props: {
 		room: Object,
 		call: Object,
@@ -46,7 +42,7 @@ export default {
 			if (!this.room) {
 				return null
 			}
-			return this.room.modules.find(module => ['livestream.native', 'livestream.youtube', 'livestream.iframe', 'call.bigbluebutton', 'call.janus', 'call.digitalsamba', 'call.zoom'].includes(module.type))
+			return this.room.modules.find(module => ['livestream.native', 'livestream.youtube', 'livestream.iframe', 'call.bigbluebutton', 'call.digitalsamba', 'call.zoom'].includes(module.type))
 		},
 		inRoomManager () {
 			return this.$route.name === 'room:manage'
@@ -152,14 +148,8 @@ export default {
 			this.iframe?.remove()
 		},
 		isPlaying () {
-			if (this.call) {
-				return this.$refs.janus.roomId
-			}
 			if (this.module.type === 'livestream.native') {
 				return this.$refs.livestream.playing && !this.$refs.livestream.offline
-			}
-			if (this.module.type === 'call.janus') {
-				return this.$refs.janus.roomId
 			}
 			if (this.module.type === 'call.digitalsamba') {
 				return !!this.iframe
@@ -220,7 +210,7 @@ export default {
 	// 	transition-delay: .1s
 	.background-room-enter-from, .background-room-leave-to
 		transform: translate(calc(-1 * var(--chatbar-width)), 52px)
-.c-media-source .c-livestream, .c-media-source .c-januscall, .c-media-source .c-januschannelcall, iframe.iframe-media-source
+.c-media-source .c-livestream, iframe.iframe-media-source
 	position: fixed
 	transition: all .3s ease
 	&.size-tiny, &.background
