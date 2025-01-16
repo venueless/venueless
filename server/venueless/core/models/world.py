@@ -124,7 +124,7 @@ FEATURE_FLAGS = [
 
 
 def default_feature_flags():
-    return ["chat-moderation"]
+    return ["digitalsamba", "schedule-control", "polls", "page.landing"]
 
 
 class World(VersionedModel):
