@@ -84,6 +84,7 @@ class WorldModule(BaseModule):
                 "dateLocale",
                 "connection_limit",
                 "bbb_defaults",
+                "digitalsamba_defaults",
                 "pretalx",
                 "videoPlayer",
                 "profile_fields",

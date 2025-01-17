@@ -273,7 +273,7 @@ async def create_room(world, data, creator):
         m["config"] = {"volatile": m.get("config", {}).get("volatile", False)}
     elif types == {"call.bigbluebutton"}:
         if not await world.has_permission_async(
-                user=creator, permission=Permission.WORLD_ROOMS_CREATE_VIDEO
+            user=creator, permission=Permission.WORLD_ROOMS_CREATE_VIDEO
         ):
             raise ValidationError(
                 "This user is not allowed to create a room of this type.", code="denied"

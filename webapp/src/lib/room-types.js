@@ -11,7 +11,8 @@ const ROOM_TYPES = [{
 	icon: 'webcam',
 	name: 'Video Channel (BigBlueButton)',
 	description: 'A video channel allows you to connect with attendees in real time and host workshops or panels. The video channels are powered by BigBlueButton and support 25-80 people, depending on usage.',
-	startingModule: 'call.bigbluebutton'
+	startingModule: 'call.bigbluebutton',
+	behindFeatureFlag: 'bigbluebutton'
 }, {
 	id: 'channel-digitalsamba',
 	icon: 'webcam',

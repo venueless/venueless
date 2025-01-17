@@ -72,10 +72,13 @@ export default {
 					modules.push({
 						type: 'call.digitalsamba'
 					})
-				} else {
+				} else if (this.$features.enabled('bigbluebutton')) {
 					modules.push({
 						type: 'call.bigbluebutton',
 					})
+				} else {
+					console.error('No video backend enabled')
+					// TODO error handling
 				}
 			}
 			const { room } = await this.$store.dispatch('createRoom', {

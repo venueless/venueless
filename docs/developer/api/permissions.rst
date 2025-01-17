@@ -37,6 +37,8 @@ are defined::
     world:users.list
     world:users.manage
     world:chat.direct
+    world:exhibition.contact
+    world:connections.unlimited
     room:announce
     room:view
     room:update
@@ -44,11 +46,26 @@ are defined::
     room:chat.read
     room:chat.join
     room:chat.send
+    room:viewers
     room:invite
+    room:invite.anonymous
     room:chat.moderate
     room:bbb.join
     room:bbb.moderate
     room:bbb.recordings
+    room:digitalsamba.join
+    room:digitalsamba.speak
+    room:digitalsamba.moderate
+    room:digitalsamba.recordings
+    room:zoom.join
+    room:question.read
+    room:question.ask
+    room:question.vote
+    room:question.moderate
+    room:poll.read
+    room:poll.early_results
+    room:poll.vote
+    room:poll.manage
 
 These strings are also exposed through the API to tell the client with operations are permitted.
 

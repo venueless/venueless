@@ -187,7 +187,7 @@ Currently, the following types are defined:
 * ``deleted``: Any message that was removed by the user or a moderator.
 * ``call``: A audio/video call that can be joined. ``body`` is a dictionary that should be empty when you send such a
   message. If you receive such a message, there will be an ``id`` property with the call ID which you can use to fetch
-  the BigBlueButton call URL. Currently only supported in direct messages.
+  the DigitalSamba or BigBlueButton call URL (defined by the ``type`` property). Currently only supported in direct messages.
 
 ``channel.member``
 """"""""""""""""""
