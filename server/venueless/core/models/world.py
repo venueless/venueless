@@ -120,6 +120,7 @@ FEATURE_FLAGS = [
     "conftool",
     "cross-origin-isolation",
     "digitalsamba",
+    "bigbluebutton",
 ]
 
 

@@ -142,3 +142,16 @@ def require_world_permission(permission: Permission):
         return wrapped
 
     return wrapper
+
+
+def require_feature_flag(flag: str):
+    def wrapper(func):
+        @functools.wraps(func)
+        async def wrapped(self, *args):
+            if flag not in self.consumer.world.feature_flags:
+                raise ConsumerException("auth.denied", "Feature disabled.")
+            return await func(self, *args)
+
+        return wrapped
+
+    return wrapper

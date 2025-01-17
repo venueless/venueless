@@ -4,7 +4,7 @@ from django.core import signing
 from django.urls import reverse
 
 from venueless.core.permissions import Permission
-from venueless.live.decorators import command, room_action
+from venueless.live.decorators import command, require_feature_flag, room_action
 from venueless.live.exceptions import ConsumerException
 from venueless.live.modules.base import BaseModule
 
@@ -20,6 +20,7 @@ class ZoomModule(BaseModule):
         permission_required=Permission.ROOM_ZOOM_JOIN,
         module_required="call.zoom",
     )
+    @require_feature_flag("zoom")
     async def room_url(self, body):
         if not self.consumer.user.profile.get("display_name"):
             raise ConsumerException("bbb.join.missing_profile")

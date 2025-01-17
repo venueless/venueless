@@ -1,6 +1,6 @@
 from venueless.core.permissions import Permission
 from venueless.core.services.digitalsamba import DigitalSambaService
-from venueless.live.decorators import command, room_action
+from venueless.live.decorators import command, require_feature_flag, room_action
 from venueless.live.exceptions import ConsumerException
 from venueless.live.modules.base import BaseModule
 
@@ -16,6 +16,7 @@ class DigitalSambaModule(BaseModule):
         permission_required=Permission.ROOM_DIGITALSAMBA_JOIN,
         module_required="call.digitalsamba",
     )
+    @require_feature_flag("digitalsamba")
     async def room_url(self, body):
         service = DigitalSambaService(self.consumer.world)
         if not self.consumer.user.profile.get("display_name"):
@@ -49,6 +50,7 @@ class DigitalSambaModule(BaseModule):
         permission_required=Permission.ROOM_DIGITALSAMBA_RECORDINGS,
         module_required="call.digitalsamba",
     )
+    @require_feature_flag("digitalsamba")
     async def recordings(self, body):
         service = DigitalSambaService(self.consumer.world)
         recordings = await service.get_recordings_for_room(
@@ -57,6 +59,7 @@ class DigitalSambaModule(BaseModule):
         await self.consumer.send_success({"results": recordings})
 
     @command("call_url")
+    @require_feature_flag("digitalsamba")
     async def call_url(self, body):
         service = DigitalSambaService(self.consumer.world)
         if not self.consumer.user.profile.get("display_name"):
