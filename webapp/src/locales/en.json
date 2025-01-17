@@ -188,6 +188,7 @@
   "Poll:moderation-menu:archive-poll:label": "archive",
   "Poll:moderation-menu:unarchive-poll:label": "unarchive",
   "Poll:moderation-menu:delete-poll:label": "delete",
+  "Poll:your-choice": "Your choice",
   "PosterHall:input-search:placeholder": "Search posters",
   "PosterHall:filter:field-category": "category",
   "PosterHall:filter:field-tag": "tag",
