@@ -71,18 +71,26 @@ export default {
 	watch: {
 		activeSidebarTab (tab) {
 			this.unreadTabs[tab] = false
+		},
+		modules () {
+			if (!this.activeSidebarTab) {
+				this.setDefaultSidebarTab()
+			}
 		}
 	},
 	mounted () {
-		if (this.modules['chat.native']) {
-			this.activeSidebarTab = 'chat'
-		} else if (this.modules.question) {
-			this.activeSidebarTab = 'questions'
-		} else if (this.modules.poll) {
-			this.activeSidebarTab = 'polls'
-		}
+		this.setDefaultSidebarTab()
 	},
 	methods: {
+		setDefaultSidebarTab () {
+			if (this.modules['chat.native']) {
+				this.activeSidebarTab = 'chat'
+			} else if (this.modules.question) {
+				this.activeSidebarTab = 'questions'
+			} else if (this.modules.poll) {
+				this.activeSidebarTab = 'polls'
+			}
+		},
 		changedTabContent (tab) {
 			if (tab === this.activeSidebarTab) return
 			this.unreadTabs[tab] = true
