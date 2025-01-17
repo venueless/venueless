@@ -163,8 +163,8 @@ class DigitalSambaService:
             "invite_participants_enabled": False,
             "consent_message_enabled": False,
             "layout_mode_on_join": "tiled",
-            "roles": ["moderator", "speaker", "attendee"],
-            "default_role": "attendee",
+            "roles": ["v-moderator", "v-speaker", "v-attendee"],
+            "default_role": "v-attendee",
             # Features that we have in venueless as well and don't want to double
             "chat_enabled": False,
             "private_chat_enabled": False,
@@ -206,8 +206,8 @@ class DigitalSambaService:
             "invite_participants_enabled": False,
             "consent_message_enabled": False,
             "layout_mode_on_join": "tiled",
-            "roles": ["dm-call"],
-            "default_role": "dm-call",
+            "roles": ["v-dm-call"],
+            "default_role": "v-dm-call",
             # Features that we have in venueless as well and don't want to double
             "chat_enabled": False,
             "private_chat_enabled": False,
