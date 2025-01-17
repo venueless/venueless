@@ -8,7 +8,7 @@
 				span.room-name(v-html="$emojify(config.name)")
 			.actions
 				bunt-button.btn-delete-room(@click="showDeletePrompt = true") delete
-		edit-form(:config="config")
+		edit-form(:config="config", :roomId="roomId")
 	bunt-progress-circular(v-else, size="huge")
 	transition(name="prompt")
 		prompt.delete-prompt(v-if="showDeletePrompt", @close="showDeletePrompt = false")

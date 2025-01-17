@@ -58,6 +58,19 @@ class DigitalSambaModule(BaseModule):
         )
         await self.consumer.send_success({"results": recordings})
 
+    @command("room_id")
+    @room_action(
+        permission_required=Permission.ROOM_UPDATE,
+        module_required="call.digitalsamba",
+    )
+    @require_feature_flag("digitalsamba")
+    async def room_id(self, body):
+        service = DigitalSambaService(self.consumer.world)
+        room_id = await service.get_room_id_for_room(
+            self.room,
+        )
+        await self.consumer.send_success({"room_id": room_id})
+
     @command("call_url")
     @require_feature_flag("digitalsamba")
     async def call_url(self, body):

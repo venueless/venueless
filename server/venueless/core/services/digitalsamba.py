@@ -320,6 +320,13 @@ class DigitalSambaService:
             f"https://{settings.DIGITALSAMBA_DOMAIN}/{c.url_name}?token={quote(token)}"
         )
 
+    async def get_room_id_for_room(self, room):
+        try:
+            c = await database_sync_to_async(DigitalSambaCall.objects.get)(room=room)
+        except DigitalSambaCall.DoesNotExist:
+            return None
+        return c.ds_id
+
     async def get_recordings_for_room(self, room):
         try:
             c = await database_sync_to_async(DigitalSambaCall.objects.get)(room=room)
