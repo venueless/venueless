@@ -1,6 +1,8 @@
 import functools
 from typing import List, Union
 
+from django.conf import settings
+
 from venueless.core.permissions import Permission
 from venueless.core.services.chat import get_channel
 from venueless.core.services.world import get_room
@@ -148,7 +150,7 @@ def require_feature_flag(flag: str):
     def wrapper(func):
         @functools.wraps(func)
         async def wrapped(self, *args):
-            if flag not in self.consumer.world.feature_flags:
+            if not settings.DEBUG and flag not in self.consumer.world.feature_flags:
                 raise ConsumerException("auth.denied", "Feature disabled.")
             return await func(self, *args)
 
