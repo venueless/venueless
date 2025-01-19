@@ -43,7 +43,7 @@ export default {
 		...mapGetters('schedule', ['sessionsLookup', 'favs']),
 		sessions () {
 			if (this.speaker.submissions) {
-				return this.speaker.submissions.map(submission => this.sessionsLookup[submission])
+				return this.speaker.submissions.map(submission => this.sessionsLookup[submission]).filter(Boolean)
 			}
 			return this.$store.getters['schedule/sessions'].filter(session => session.speakers.includes(this.speaker))
 		}
