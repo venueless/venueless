@@ -5,7 +5,8 @@
 		bunt-button.btn-option(v-for="option of poll.options", @click="$store.dispatch('poll/vote', {poll, option})") {{ option.content }}
 	template(v-else)
 		.option(v-for="option of poll.options", :class="{'most-votes': optionsWithMostVotes.includes(option.id)}")
-			.content {{ option.content }}
+			.content
+				| {{ option.content }}
 				span.mdi.mdi-check-circle-outline(v-if="poll.answers && poll.answers.includes(option.id)", v-tooltip="$t('Poll:your-choice')")
 			.votes(:style="{'--votes': poll.results[option.id]}") {{ totalVotes ? (poll.results[option.id] / totalVotes * 100).toFixed() : 0 }}%
 	.actions(v-if="isManaging && hasPermission('room:poll.manage')")
