@@ -1,13 +1,13 @@
 # prod
 aiofile==3.9.*
 aiohttp==3.11.11
-beautifulsoup4==4.12.*
+beautifulsoup4==4.13.*
 celery==5.4.*
 channels==4.2.*
 channels_redis==4.2.*
 Django==4.2.*
 django-cors-headers==4.6.*
-django-decorator-include==3.2
+django-decorator-include==3.3
 django-extensions==3.2.*
 django-formset-js-improved
 django-multifactor==0.7.4
@@ -19,8 +19,8 @@ matplotlib==3.10.*
 numpy==1.26.*
 orjson==3.10.*
 openpyxl~=3.1.5
-Pillow==11.0.*
-pandas==2.2.*
+Pillow==11.1.*
+pandas==2.1.*
 pdf2image==1.17.*
 pdfrw==0.4
 pyjwt==2.10.*
@@ -42,12 +42,12 @@ uvicorn[standard]==0.25.0
 # dev
 daphne==4.1.*
 black==24.1
-isort==5.13.2
+isort==6.0.0
 flake8==7.1.1
 pytest==8.3.4
 pytest-django==4.9.0
-pytest-asyncio==0.25.1
+pytest-asyncio==0.25.3
 pytest-cov==6.0.0
 pytest-rerunfailures==15.0
-aioresponses==0.7.7
+aioresponses==0.7.8
 yappi==1.6.10
