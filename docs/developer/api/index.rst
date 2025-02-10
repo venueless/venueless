@@ -25,4 +25,3 @@ without warning.
    poster
    polls
    questions
-   roulette

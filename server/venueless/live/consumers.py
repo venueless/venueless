@@ -29,12 +29,10 @@ from .modules.bbb import BBBModule
 from .modules.chat import ChatModule
 from .modules.digitalsamba import DigitalSambaModule
 from .modules.exhibition import ExhibitionModule
-from .modules.januscall import JanusCallModule
 from .modules.poll import PollModule
 from .modules.poster import PosterModule
 from .modules.question import QuestionModule
 from .modules.room import RoomModule
-from .modules.roulette import RouletteModule
 from .modules.world import WorldModule
 from .modules.zoom import ZoomModule
 
@@ -109,13 +107,11 @@ class MainConsumer(AsyncJsonWebsocketConsumer):
             "bbb": BBBModule(self),
             "digitalsamba": DigitalSambaModule(self),
             "zoom": ZoomModule(self),
-            "januscall": JanusCallModule(self),
             "exhibition": ExhibitionModule(self),
             "poster": PosterModule(self),
             "question": QuestionModule(self),
             "poll": PollModule(self),
             "room": RoomModule(self),
-            "roulette": RouletteModule(self),
             "user": AuthModule(self),
             "world": WorldModule(self),
         }

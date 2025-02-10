@@ -32,7 +32,6 @@
       "room:bbb.join",
       "room:chat.send",
       "room:chat.join",
-      "room:roulette.join",
       "room:question.read",
       "room:question.ask",
       "room:question.vote",

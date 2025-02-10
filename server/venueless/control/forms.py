@@ -4,14 +4,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.forms import inlineformset_factory
 
-from venueless.core.models import (
-    BBBServer,
-    JanusServer,
-    Room,
-    StreamingServer,
-    TurnServer,
-    World,
-)
+from venueless.core.models import BBBServer, Room, StreamingServer, TurnServer, World
 from venueless.core.models.world import FEATURE_FLAGS, PlannedUsage
 
 User = get_user_model()
@@ -192,18 +185,6 @@ class BBBServerForm(HasSecretsMixin, forms.ModelForm):
             "secret",
         )
         field_classes = {"secret": SecretKeyField}
-
-
-class JanusServerForm(HasSecretsMixin, forms.ModelForm):
-    class Meta:
-        model = JanusServer
-        fields = (
-            "url",
-            "active",
-            "room_create_key",
-            "world_exclusive",
-        )
-        field_classes = {"room_create_key": SecretKeyField}
 
 
 class TurnServerForm(HasSecretsMixin, forms.ModelForm):

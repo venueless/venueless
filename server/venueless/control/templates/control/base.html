@@ -34,9 +34,6 @@
                 <a href="{% url "control:turnserver.list" %}"{% if request.path == "/control/turns/" %} class="active"{% endif %}>
                    {% trans "TURN servers" %}
                 </a>
-                <a href="{% url "control:janusserver.list" %}"{% if request.path == "/control/janus/" %} class="active"{% endif %}>
-                    {% trans "Janus servers" %}
-                </a>
                 <a href="{% url "control:streamingserver.list" %}"{% if request.path == "/control/streamingservers/" %} class="active"{% endif %}>
                     {% trans "Streaming servers" %}
                 </a>

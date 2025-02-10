@@ -20,13 +20,6 @@ const ROOM_TYPES = [{
 	startingModule: 'call.digitalsamba',
 	behindFeatureFlag: 'digitalsamba'
 }, {
-	id: 'channel-janus',
-	icon: 'webcam',
-	name: 'Video Channel (beta)',
-	description: 'A video channel allows you to connect with attendees in real time and host workshops or panels. The video channels are powered by Janus.',
-	startingModule: 'call.janus',
-	behindFeatureFlag: 'janus'
-}, {
 	id: 'channel-zoom',
 	icon: 'webcam',
 	name: 'Video Channel (Zoom)',
@@ -52,13 +45,6 @@ const ROOM_TYPES = [{
 	description: 'Hang your posters high!',
 	startingModule: 'poster.native',
 	behindFeatureFlag: 'poster'
-}, {
-	id: 'channel-roulette',
-	icon: 'webcam',
-	name: 'Random video calls',
-	description: 'Connect your attendees for short video calls in random combinations.',
-	startingModule: 'networking.roulette',
-	behindFeatureFlag: 'roulette'
 }, {
 	id: 'page-static',
 	icon: 'text-box-outline',
@@ -99,7 +85,6 @@ export function inferType (config) {
 	// infer media rooms by primary content
 	if (modules['livestream.native'] || modules['livestream.youtube'] || modules['livestream.iframe']) return findById('stage')
 	if (modules['call.bigbluebutton']) return findById('channel-bbb')
-	if (modules['call.janus']) return findById('channel-janus')
 	if (modules['call.digitalsamba']) return findById('channel-digitalsamba')
 	if (modules['call.zoom']) return findById('channel-zoom')
 

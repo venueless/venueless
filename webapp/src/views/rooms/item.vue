@@ -1,14 +1,13 @@
 <template lang="pug">
 .c-room(v-if="room", :class="{'standalone-chat': modules['chat.native'] && room.modules.length === 1}")
-	.stage(v-if="modules['livestream.native'] || modules['livestream.youtube'] || modules['livestream.iframe'] || modules['call.janus'] || modules['call.digitalsamba']")
+	.stage(v-if="modules['livestream.native'] || modules['livestream.youtube'] || modules['livestream.iframe'] || modules['call.digitalsamba']")
 		media-source-placeholder
-		reactions-overlay(v-if="modules['livestream.native'] || modules['livestream.youtube'] || modules['livestream.iframe'] || modules['call.janus'] || modules['call.digitalsamba']")
+		reactions-overlay(v-if="modules['livestream.native'] || modules['livestream.youtube'] || modules['livestream.iframe'] || modules['call.digitalsamba']")
 		.stage-tool-blocker(v-if="activeStageTool !== null", @click="activeStageTool = null")
-		.stage-tools(v-if="modules['livestream.native'] || modules['livestream.youtube'] || modules['livestream.iframe'] || modules['call.janus'] || modules['call.digitalsamba']")
+		.stage-tools(v-if="modules['livestream.native'] || modules['livestream.youtube'] || modules['livestream.iframe'] || modules['call.digitalsamba']")
 			reactions-bar(:expanded="true", @expand="activeStageTool = 'reaction'")
 			//- reactions-bar(:expanded="activeStageTool === 'reaction'", @expand="activeStageTool = 'reaction'")
 	media-source-placeholder(v-else-if="modules['call.bigbluebutton'] || modules['call.zoom']")
-	roulette(v-else-if="modules['networking.roulette'] && $features.enabled('roulette')", :module="modules['networking.roulette']", :room="room")
 	landing-page(v-else-if="modules['page.landing']", :module="modules['page.landing']")
 	markdown-page(v-else-if="modules['page.markdown']", :module="modules['page.markdown']")
 	static-page(v-else-if="modules['page.static']", :module="modules['page.static']")
@@ -38,7 +37,6 @@ import IframePage from 'components/IframePage'
 import Exhibition from 'components/Exhibition'
 import ReactionsBar from 'components/ReactionsBar'
 import ReactionsOverlay from 'components/ReactionsOverlay'
-import Roulette from 'components/Roulette'
 import UserListPage from 'components/UserListPage'
 import Polls from 'components/Polls'
 import PosterHall from 'components/PosterHall'
@@ -47,7 +45,7 @@ import MediaSourcePlaceholder from 'components/MediaSourcePlaceholder'
 
 export default {
 	name: 'Room',
-	components: { Chat, Exhibition, LandingPage, MarkdownPage, StaticPage, IframePage, ReactionsBar, ReactionsOverlay, UserListPage, Roulette, Polls, PosterHall, Questions, MediaSourcePlaceholder },
+	components: { Chat, Exhibition, LandingPage, MarkdownPage, StaticPage, IframePage, ReactionsBar, ReactionsOverlay, UserListPage, Polls, PosterHall, Questions, MediaSourcePlaceholder },
 	props: {
 		room: Object,
 		modules: Object
