@@ -175,6 +175,7 @@
   "Poll:moderation-menu:archive-poll:label": "archivieren",
   "Poll:moderation-menu:unarchive-poll:label": "wiederherstellen",
   "Poll:moderation-menu:delete-poll:label": "löschen",
+  "Poll:your-choice": "Deine Auswahl",
   "preferences/index:btn-change-avatar:label": "Bild ändern",
   "preferences/index:btn-enable-desktop-notifications:label": "Benachrichtigungen aktivieren",
   "preferences/index:btn-save:label": "speichern",
