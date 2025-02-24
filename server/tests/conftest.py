@@ -57,6 +57,7 @@ def _import_world(world_data):
 
     import_config(world_data)
     world = World.objects.all().get()
+    world.feature_flags = [*world.feature_flags, "bigbluebutton"]
     world.domain = "localhost"
     world.save()
     return world

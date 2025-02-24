@@ -20,7 +20,7 @@ from venueless.live.channels import (
     GROUP_ROOM_POLL_READ,
     GROUP_ROOM_POLL_RESULTS,
 )
-from venueless.live.decorators import command, event, room_action
+from venueless.live.decorators import command, event, require_feature_flag, room_action
 from venueless.live.modules.base import BaseModule
 
 logger = logging.getLogger(__name__)
@@ -40,6 +40,7 @@ class PollModule(BaseModule):
     @room_action(
         permission_required=Permission.ROOM_POLL_MANAGE, module_required="poll"
     )
+    @require_feature_flag("polls")
     async def create_poll(self, body):
         if not self.module_config.get("active", False):
             await self.consumer.send_error("poll.inactive")
@@ -69,6 +70,7 @@ class PollModule(BaseModule):
         permission_required=Permission.ROOM_POLL_MANAGE,
         module_required="poll",
     )
+    @require_feature_flag("polls")
     async def update_poll(self, body):
         if not self.module_config.get("active", False):
             await self.consumer.send_error("poll.inactive")
@@ -120,6 +122,7 @@ class PollModule(BaseModule):
         permission_required=Permission.ROOM_POLL_MANAGE,
         module_required="poll",
     )
+    @require_feature_flag("polls")
     async def delete_poll(self, body):
         if not self.module_config.get("active", False):
             await self.consumer.send_error("poll.inactive")
@@ -139,6 +142,7 @@ class PollModule(BaseModule):
 
     @command("vote")
     @room_action(permission_required=Permission.ROOM_POLL_VOTE, module_required="poll")
+    @require_feature_flag("polls")
     async def vote(self, body):
         if not self.module_config.get("active", False):
             await self.consumer.send_error("poll.inactive")
@@ -189,6 +193,7 @@ class PollModule(BaseModule):
 
     @command("list")
     @room_action(permission_required=Permission.ROOM_POLL_READ, module_required="poll")
+    @require_feature_flag("polls")
     async def list_polls(self, body):
         if not self.module_config.get("active", False):
             await self.consumer.send_error("poll.inactive")
@@ -214,6 +219,7 @@ class PollModule(BaseModule):
 
     @command("pin")
     @room_action(permission_required=Permission.ROOM_POLL_MANAGE)
+    @require_feature_flag("polls")
     async def pin_poll(self, body):
         poll = await get_poll(body.get("id"), self.room)
         await pin_poll(pk=poll["id"], room=self.room)
@@ -230,6 +236,7 @@ class PollModule(BaseModule):
 
     @command("unpin")
     @room_action(permission_required=Permission.ROOM_POLL_MANAGE)
+    @require_feature_flag("polls")
     async def unpin_poll(self, body):
         await unpin_poll(room=self.room)
         await self.consumer.send_success()

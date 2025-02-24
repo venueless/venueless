@@ -1,6 +1,6 @@
 from venueless.core.permissions import Permission
 from venueless.core.services.bbb import BBBService
-from venueless.live.decorators import command, room_action
+from venueless.live.decorators import command, require_feature_flag, room_action
 from venueless.live.exceptions import ConsumerException
 from venueless.live.modules.base import BaseModule
 
@@ -16,6 +16,7 @@ class BBBModule(BaseModule):
         permission_required=Permission.ROOM_BBB_JOIN,
         module_required="call.bigbluebutton",
     )
+    @require_feature_flag("bigbluebutton")
     async def room_url(self, body):
         service = BBBService(self.consumer.world)
         if not self.consumer.user.profile.get("display_name"):
@@ -34,6 +35,7 @@ class BBBModule(BaseModule):
         await self.consumer.send_success({"url": url})
 
     @command("call_url")
+    @require_feature_flag("bigbluebutton")
     async def call_url(self, body):
         service = BBBService(self.consumer.world)
         if not self.consumer.user.profile.get("display_name"):
@@ -51,6 +53,7 @@ class BBBModule(BaseModule):
         permission_required=Permission.ROOM_BBB_RECORDINGS,
         module_required="call.bigbluebutton",
     )
+    @require_feature_flag("bigbluebutton")
     async def recordings(self, body):
         service = BBBService(self.consumer.world)
         recordings = await service.get_recordings_for_room(

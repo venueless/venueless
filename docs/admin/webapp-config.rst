@@ -71,13 +71,25 @@ You can style presenation mode via custom css:
 		color: A_COLOR_THAT_MATCHES_YOUR_BACKGROUND;
 	}
 
-Experimental Features
----------------------
+Feature flags
+-------------
 
-* schedule-control
-* muxdata
-* zoom
-* digitalsamba
-* page.landing
+Platform features:
+
+* schedule-control (default)
+* page.landing (default)
+* polls (default)
 * iframe-player
-* polls
+* poster
+
+Video call backends:
+
+* digitalsamba (default)
+* bigbluebutton
+* zoom
+
+Further integrations:
+
+* muxdata
+* conftool
+* cross-origin-isolation

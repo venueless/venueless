@@ -68,9 +68,18 @@ export default {
 					type: 'chat.native'
 				})
 			} else {
-				modules.push({
-					type: 'call.bigbluebutton'
-				})
+				if (this.$features.enabled('digitalsamba')) {
+					modules.push({
+						type: 'call.digitalsamba'
+					})
+				} else if (this.$features.enabled('bigbluebutton')) {
+					modules.push({
+						type: 'call.bigbluebutton',
+					})
+				} else {
+					console.error('No video backend enabled')
+					// TODO error handling
+				}
 			}
 			const { room } = await this.$store.dispatch('createRoom', {
 				name: this.name,

@@ -566,7 +566,7 @@ def list_users(
             qs = qs.none()
 
     if search_term:
-        conditions = [(Q(profile__display_name__icontains=search_term))]
+        conditions = [Q(profile__display_name__icontains=search_term)]
         search_fields = search_fields or []
         for field in search_fields:
             conditions.append(

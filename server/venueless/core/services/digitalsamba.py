@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime, timedelta
+from urllib.parse import quote
 
 import aiohttp
 import dateutil
@@ -162,8 +163,51 @@ class DigitalSambaService:
             "invite_participants_enabled": False,
             "consent_message_enabled": False,
             "layout_mode_on_join": "tiled",
-            "roles": ["moderator", "speaker", "attendee"],
-            "default_role": "attendee",
+            "roles": ["v-moderator", "v-speaker", "v-attendee"],
+            "default_role": "v-attendee",
+            # Features that we have in venueless as well and don't want to double
+            "chat_enabled": False,
+            "private_chat_enabled": False,
+            "private_group_chat_enabled": False,
+            "qa_enabled": False,
+            "upvote_qa_enabled": False,
+            "polls_enabled": False,
+        }
+
+    def get_dm_config(self, channel):
+        return {
+            # Reference: https://developer.digitalsamba.com/rest-api/#rooms-POSTapi-v1-rooms
+            "privacy": "private",
+            # World/room customizing
+            "description": "Private Call",
+            "external_id": f"{self.world.pk}/channel/{channel.id}",
+            "primary_color": self.world.config.get("theme", {})
+            .get("colors", {})
+            .get("primary", "#3771e0"),
+            "background_color": self.world.config.get("theme", {})
+            .get("colors", {})
+            .get("bbb_background", "#000000"),
+            "language": (
+                self.world.locale if self.world.locale in ("de", "en", "es") else "en"
+            ),
+            "max_participants": 100,
+            "max_broadcasters": 100,
+            # Settings we offer
+            "is_locked": False,
+            "join_screen_enabled": False,
+            "broadcaster_tile_visibility": "all",
+            # General settings (for now)
+            "e2ee_enabled": False,
+            "recordings_enabled": False,
+            "transcription_enabled": False,
+            "captions_enabled": False,
+            "breakout_rooms_enabled": False,
+            "logo_enabled": False,
+            "invite_participants_enabled": False,
+            "consent_message_enabled": False,
+            "layout_mode_on_join": "tiled",
+            "roles": ["v-dm-call"],
+            "default_role": "v-dm-call",
             # Features that we have in venueless as well and don't want to double
             "chat_enabled": False,
             "private_chat_enabled": False,
@@ -183,6 +227,18 @@ class DigitalSambaService:
             ds_id=d["id"],
             url_name=d["friendly_url"],
         )
+
+    async def create_dm_call(self, members, config):
+        d = await self._post("https://api.digitalsamba.com/api/v1/rooms", config)
+        if not d:
+            return False
+        call = await database_sync_to_async(DigitalSambaCall.objects.create)(
+            world=self.world,
+            ds_id=d["id"],
+            url_name=d["friendly_url"],
+        )
+        await database_sync_to_async(call.invited_members.set)(members)
+        return call
 
     async def get_join_url_for_room(self, room, user, role):
         config = self.get_room_config(room)
@@ -234,6 +290,45 @@ class DigitalSambaService:
         )
 
         return f"https://{settings.DIGITALSAMBA_DOMAIN}/{c.url_name}", token
+
+    async def get_join_url_for_call_id(self, call_id, user):
+        c = await database_sync_to_async(DigitalSambaCall.objects.get)(
+            pk=call_id,
+            room__isnull=True,
+            world=self.world,
+            invited_members__in=[user],
+        )
+
+        if user.profile.get("avatar", {}).get("url"):
+            avatar = {"avatar": user.profile.get("avatar", {}).get("url")}
+        else:
+            avatar = {}
+
+        token = jwt.encode(
+            {
+                "td": settings.DIGITALSAMBA_TEAM,
+                "rd": c.url_name,
+                "ud": str(user.pk),
+                "u": escape_name(user.profile.get("display_name", "")),
+                "role": "dm-call",
+                **avatar,
+                "iat": datetime.utcnow(),
+                "exp": datetime.utcnow() + timedelta(hours=12),
+            },
+            settings.DIGITALSAMBA_KEY,
+            algorithm="HS256",
+        )
+
+        return (
+            f"https://{settings.DIGITALSAMBA_DOMAIN}/{c.url_name}?token={quote(token)}"
+        )
+
+    async def get_room_id_for_room(self, room):
+        try:
+            c = await database_sync_to_async(DigitalSambaCall.objects.get)(room=room)
+        except DigitalSambaCall.DoesNotExist:
+            return None
+        return c.ds_id
 
     async def get_recordings_for_room(self, room):
         try:

@@ -1,6 +1,7 @@
 import re
 from contextlib import suppress
 
+from asgiref.sync import async_to_sync
 from channels.db import database_sync_to_async
 from channels.layers import get_channel_layer
 from django.core.exceptions import ValidationError
@@ -31,6 +32,7 @@ from ..models.chat import ChatEventNotification
 from ..permissions import Permission
 from ..utils.redis import aredis
 from .bbb import choose_server
+from .digitalsamba import DigitalSambaService
 from .user import get_public_users, user_broadcast
 
 MENTION_RE = re.compile(
@@ -259,9 +261,14 @@ class ChatService:
     @database_sync_to_async
     def _store_event(self, channel, id, event_type, content, sender, replaces=None):
         if content.get("type") == "call":
-            if False:
-                # leave stub to add in digitalsamba later
-                pass
+            if "digitalsamba" in self.world.feature_flags:
+                ds = DigitalSambaService(self.world)
+                call = async_to_sync(ds.create_dm_call)(
+                    [m.user for m in channel.members.all()], ds.get_dm_config(channel)
+                )
+                content.setdefault("body", {})
+                content["body"]["id"] = str(call.id)
+                content["body"]["type"] = "digitalsamba"
             else:
                 call = BBBCall.objects.create(
                     world_id=self.world.pk, server=choose_server(self.world)

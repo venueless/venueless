@@ -1,0 +1,212 @@
+import logging
+
+import requests
+from django.conf import settings
+from django.core.management.base import BaseCommand
+
+logger = logging.getLogger(__name__)
+
+ROLES = [
+    {
+        "name": "v-attendee",
+        "display_name": "Attendees",
+        "description": "The Venueless attendee may listen but only broadcast when asked.",
+        "default": False,
+        "permissions": {
+            "answer_qa": False,
+            "ask_remote_unmute": False,
+            "broadcast": False,
+            "broadcast_video": False,
+            "control_room_components": False,
+            "control_room_entry": False,
+            "delete_others_chat_messages": False,
+            "edit_whiteboard": False,
+            "end_session": False,
+            "export_chat": False,
+            "general_chat": True,
+            "invite_participant": False,
+            "manage_breakout": False,
+            "manage_broadcast": False,
+            "manage_content_library": False,
+            "manage_edit_whiteboard": False,
+            "manage_personal_content_library": False,
+            "manage_polls": False,
+            "manage_roles": False,
+            "manage_screenshare": False,
+            "moderate_qa": False,
+            "present_content_library": False,
+            "present_files": False,
+            "private_chat": False,
+            "raise_hand": True,
+            "recording": False,
+            "remote_muting": False,
+            "remove_participant": False,
+            "screenshare": False,
+            "see_participants_panel": False,
+            "start_session": True,
+            "take_polls": True,
+            "transcribe_session": False,
+            "upvote_qa": True,
+        },
+    },
+    {
+        "name": "v-dm-call",
+        "display_name": "Participant",
+        "description": "Venueless Direct Message Call participant",
+        "default": False,
+        "permissions": {
+            "answer_qa": False,
+            "ask_remote_unmute": False,
+            "broadcast": True,
+            "broadcast_video": False,
+            "control_room_components": False,
+            "control_room_entry": False,
+            "delete_others_chat_messages": False,
+            "edit_whiteboard": True,
+            "end_session": False,
+            "export_chat": False,
+            "general_chat": False,
+            "invite_participant": False,
+            "manage_breakout": False,
+            "manage_broadcast": False,
+            "manage_content_library": False,
+            "manage_edit_whiteboard": False,
+            "manage_personal_content_library": False,
+            "manage_polls": False,
+            "manage_roles": False,
+            "manage_screenshare": False,
+            "moderate_qa": False,
+            "present_content_library": False,
+            "present_files": False,
+            "private_chat": False,
+            "raise_hand": False,
+            "recording": False,
+            "remote_muting": False,
+            "remove_participant": False,
+            "screenshare": True,
+            "see_participants_panel": True,
+            "start_session": True,
+            "take_polls": False,
+            "transcribe_session": False,
+            "upvote_qa": False,
+        },
+    },
+    {
+        "name": "v-moderator",
+        "display_name": "Moderators",
+        "description": "The Venueless moderator may manage the session as far as it is delegated to DS.",
+        "default": True,
+        "permissions": {
+            "answer_qa": True,
+            "ask_remote_unmute": True,
+            "broadcast": True,
+            "broadcast_video": False,
+            "control_room_components": False,
+            "control_room_entry": True,
+            "delete_others_chat_messages": True,
+            "edit_whiteboard": True,
+            "end_session": True,
+            "export_chat": True,
+            "general_chat": True,
+            "invite_participant": True,
+            "manage_breakout": True,
+            "manage_broadcast": True,
+            "manage_content_library": True,
+            "manage_edit_whiteboard": True,
+            "manage_personal_content_library": True,
+            "manage_polls": True,
+            "manage_roles": True,
+            "manage_screenshare": True,
+            "moderate_qa": True,
+            "present_content_library": True,
+            "present_files": True,
+            "private_chat": True,
+            "raise_hand": True,
+            "recording": True,
+            "remote_muting": True,
+            "remove_participant": True,
+            "screenshare": True,
+            "see_participants_panel": True,
+            "start_session": True,
+            "take_polls": False,
+            "transcribe_session": True,
+            "upvote_qa": False,
+        },
+    },
+    {
+        "name": "v-speaker",
+        "display_name": "Speakers",
+        "description": "The Venueless speaker may broadcast but not manage other users.",
+        "default": False,
+        "permissions": {
+            "answer_qa": True,
+            "ask_remote_unmute": ["moderator", "speaker", "attendee"],
+            "broadcast": True,
+            "broadcast_video": False,
+            "control_room_components": False,
+            "control_room_entry": False,
+            "delete_others_chat_messages": False,
+            "edit_whiteboard": True,
+            "end_session": False,
+            "export_chat": False,
+            "general_chat": True,
+            "invite_participant": False,
+            "manage_breakout": False,
+            "manage_broadcast": False,
+            "manage_content_library": False,
+            "manage_edit_whiteboard": False,
+            "manage_personal_content_library": False,
+            "manage_polls": False,
+            "manage_roles": False,
+            "manage_screenshare": False,
+            "moderate_qa": False,
+            "present_content_library": True,
+            "present_files": True,
+            "private_chat": True,
+            "raise_hand": True,
+            "recording": False,
+            "remote_muting": False,
+            "remove_participant": False,
+            "screenshare": True,
+            "see_participants_panel": True,
+            "start_session": True,
+            "take_polls": False,
+            "transcribe_session": False,
+            "upvote_qa": False,
+        },
+    },
+]
+
+
+class Command(BaseCommand):
+    help = "Create or update the DigitalSamba roles to what Venueless expects"
+
+    def handle(self, *args, **options):
+        r = requests.get(
+            "https://api.digitalsamba.com/api/v1/roles",
+            auth=(settings.DIGITALSAMBA_TEAM, settings.DIGITALSAMBA_KEY),
+            headers={"Content-Type": "application/json"},
+        )
+        r.raise_for_status()
+        d = r.json()
+        if d["total_count"] > 100:
+            raise Exception("Pagination not implemented")
+
+        names = {r["name"]: r["id"] for r in d["data"]}
+        for r in ROLES:
+            if r["name"] in names:
+                r = requests.patch(
+                    "https://api.digitalsamba.com/api/v1/roles/" + names[r["name"]],
+                    json=r,
+                    auth=(settings.DIGITALSAMBA_TEAM, settings.DIGITALSAMBA_KEY),
+                    headers={"Content-Type": "application/json"},
+                )
+                r.raise_for_status()
+            else:
+                r = requests.post(
+                    "https://api.digitalsamba.com/api/v1/roles",
+                    json=r,
+                    auth=(settings.DIGITALSAMBA_TEAM, settings.DIGITALSAMBA_KEY),
+                    headers={"Content-Type": "application/json"},
+                )
+                r.raise_for_status()

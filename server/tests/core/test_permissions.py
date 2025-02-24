@@ -17,6 +17,8 @@ def test_user_explicit_roles(world, chat_room, bbb_room):
     }
     assert world.get_all_permissions(user)[chat_room] == {
         "room:bbb.join",
+        "room:digitalsamba.join",
+        "room:digitalsamba.speak",
         "room:chat.join",
         "room:chat.read",
         "room:chat.send",
@@ -57,6 +59,8 @@ def test_user_explicit_roles(world, chat_room, bbb_room):
     )
     assert world.get_all_permissions(user)[chat_room] == {
         "room:bbb.join",
+        "room:digitalsamba.join",
+        "room:digitalsamba.speak",
         "room:chat.join",
         "room:chat.read",
         "room:chat.send",
@@ -74,6 +78,8 @@ def test_user_explicit_roles(world, chat_room, bbb_room):
     }
     assert world.get_all_permissions(user)[bbb_room] == {
         "room:bbb.join",
+        "room:digitalsamba.join",
+        "room:digitalsamba.speak",
         "room:chat.join",
         "room:chat.read",
         "room:chat.send",
@@ -101,6 +107,8 @@ def test_user_implicit_roles(world, chat_room, bbb_room):
     }
     assert world.get_all_permissions(user)[chat_room] == {
         "room:bbb.join",
+        "room:digitalsamba.join",
+        "room:digitalsamba.speak",
         "room:chat.join",
         "room:chat.read",
         "room:chat.send",
@@ -152,6 +160,8 @@ def test_user_implicit_roles(world, chat_room, bbb_room):
     )
     assert world.get_all_permissions(user)[chat_room] == {
         "room:bbb.join",
+        "room:digitalsamba.join",
+        "room:digitalsamba.speak",
         "room:chat.join",
         "room:chat.read",
         "room:chat.send",
@@ -169,6 +179,8 @@ def test_user_implicit_roles(world, chat_room, bbb_room):
     }
     assert world.get_all_permissions(user)[bbb_room] == {
         "room:bbb.join",
+        "room:digitalsamba.join",
+        "room:digitalsamba.speak",
         "room:chat.join",
         "room:chat.read",
         "room:chat.send",
@@ -196,6 +208,8 @@ def test_user_implicit_roles_or_support(world, chat_room, bbb_room):
     }
     assert world.get_all_permissions(user)[chat_room] == {
         "room:bbb.join",
+        "room:digitalsamba.join",
+        "room:digitalsamba.speak",
         "room:chat.join",
         "room:chat.read",
         "room:chat.send",

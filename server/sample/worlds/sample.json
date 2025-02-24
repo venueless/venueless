@@ -55,7 +55,8 @@
     "viewer": [
       "world:view",
       "room:view",
-      "room:chat.read"
+      "room:chat.read",
+      "room:bbb.join"
     ],
     "participant": [
       "world:view",
@@ -63,6 +64,8 @@
       "room:view",
       "room:chat.read",
       "room:bbb.join",
+      "room:digitalsamba.join",
+      "room:digitalsamba.speak",
       "room:chat.send",
       "room:chat.join",
       "room:question.read",
@@ -83,6 +86,8 @@
       "room:chat.join",
       "room:chat.send",
       "room:bbb.join",
+      "room:digitalsamba.join",
+      "room:digitalsamba.speak",
       "room:invite",
       "room:delete",
       "world:exhibition.contact"
@@ -96,6 +101,9 @@
       "room:chat.send",
       "room:bbb.join",
       "room:bbb.moderate",
+      "room:digitalsamba.join",
+      "room:digitalsamba.speak",
+      "room:digitalsamba.moderate",
       "world:exhibition.contact"
     ],
     "moderator": [
@@ -108,6 +116,10 @@
       "room:bbb.join",
       "room:bbb.moderate",
       "room:bbb.recordings",
+      "room:digitalsamba.join",
+      "room:digitalsamba.speak",
+      "room:digitalsamba.moderate",
+      "room:digitalsamba.recordings",
       "room:chat.moderate",
       "room:viewers",
       "room:announce",
@@ -131,6 +143,10 @@
       "room:bbb.join",
       "room:bbb.moderate",
       "room:bbb.recordings",
+      "room:digitalsamba.join",
+      "room:digitalsamba.speak",
+      "room:digitalsamba.moderate",
+      "room:digitalsamba.recordings",
       "room:chat.moderate",
       "room:announce",
       "world:exhibition.contact",
@@ -157,6 +173,10 @@
       "room:bbb.join",
       "room:bbb.moderate",
       "room:bbb.recordings",
+      "room:digitalsamba.join",
+      "room:digitalsamba.speak",
+      "room:digitalsamba.moderate",
+      "room:digitalsamba.recordings",
       "room:chat.moderate",
       "room:announce",
       "world:exhibition.contact",

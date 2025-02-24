@@ -273,7 +273,7 @@ async def create_room(world, data, creator):
         m["config"] = {"volatile": m.get("config", {}).get("volatile", False)}
     elif types == {"call.bigbluebutton"}:
         if not await world.has_permission_async(
-            user=creator, permission=Permission.WORLD_ROOMS_CREATE_BBB
+            user=creator, permission=Permission.WORLD_ROOMS_CREATE_VIDEO
         ):
             raise ValidationError(
                 "This user is not allowed to create a room of this type.", code="denied"
@@ -281,6 +281,15 @@ async def create_room(world, data, creator):
         m = [m for m in data.get("modules", []) if m["type"] == "call.bigbluebutton"][0]
         m["config"] = world.config.get("bbb_defaults", {})
         m["config"].pop("secret", None)  # legacy
+    elif types == {"call.digitalsamba"}:
+        if not await world.has_permission_async(
+            user=creator, permission=Permission.WORLD_ROOMS_CREATE_VIDEO
+        ):
+            raise ValidationError(
+                "This user is not allowed to create a room of this type.", code="denied"
+            )
+        m = [m for m in data.get("modules", []) if m["type"] == "call.digitalsamba"][0]
+        m["config"] = world.config.get("digitalsamba_defaults", {})
     elif "livestream.native" in types:
         if not await world.has_permission_async(
             user=creator, permission=Permission.WORLD_ROOMS_CREATE_STAGE

@@ -54,7 +54,7 @@ The first room acts as the landing page.
                 "permissions": ["room:view"],
                 "modules": [
                     {
-                        "type": "call.bigbluebutton",
+                        "type": "call.digitalsamba",
                         "config": {},
                         "permissions": []
                     }

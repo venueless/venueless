@@ -75,7 +75,7 @@ def default_roles():
             Permission.WORLD_UPDATE,
             Permission.ROOM_DELETE,
             Permission.ROOM_UPDATE,
-            Permission.WORLD_ROOMS_CREATE_BBB,
+            Permission.WORLD_ROOMS_CREATE_VIDEO,
             Permission.WORLD_ROOMS_CREATE_STAGE,
             Permission.WORLD_ROOMS_CREATE_EXHIBITION,
             Permission.WORLD_ROOMS_CREATE_POSTER,
@@ -120,11 +120,12 @@ FEATURE_FLAGS = [
     "conftool",
     "cross-origin-isolation",
     "digitalsamba",
+    "bigbluebutton",
 ]
 
 
 def default_feature_flags():
-    return ["chat-moderation"]
+    return ["digitalsamba", "schedule-control", "polls", "page.landing"]
 
 
 class World(VersionedModel):

@@ -4,6 +4,10 @@ export default {
 			type: Object,
 			required: true
 		},
+		roomId: {
+			type: Number,
+			required: false
+		},
 		modules: {
 			type: Object,
 			required: true

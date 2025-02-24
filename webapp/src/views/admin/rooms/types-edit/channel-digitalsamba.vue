@@ -7,6 +7,7 @@
 	bunt-checkbox(v-model="module.config.mute_on_start", name="samba-mute-on-start", label="Auto-mute users")
 	bunt-checkbox(v-model="module.config.disable_cam_on_start", name="samba-mute-on-start", label="Auto-disable camera")
 	sidebar-addons(v-bind="$props")
+	bunt-input(v-if="roomId", v-model="dsRoomId", name="room-id", label="Backend room ID", disabled="true")
 </template>
 <script>
 import mixin from './mixin'
@@ -27,13 +28,14 @@ export default {
 	mixins: [mixin],
 	data () {
 		return {
+			dsRoomId: null,
 			SAMBA_SIZE_OPTIONS,
 			SAMBA_TILE_OPTIONS,
 		}
 	},
 	computed: {
 		module () {
-			let m = this.modules['call.digitalsamba']
+			const m = this.modules['call.digitalsamba']
 			if (!m.config.size) {
 				m.config.size = 'small'
 			}
@@ -41,6 +43,11 @@ export default {
 				m.config.tiles = 'all'
 			}
 			return m
+		}
+	},
+	async mounted () {
+		if (this.roomId) {
+			this.dsRoomId = (await api.call('digitalsamba.room_id', { room: this.roomId })).room_id || 'not yet assigned'
 		}
 	}
 }
