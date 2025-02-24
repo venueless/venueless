@@ -588,7 +588,7 @@ async def test_fetch_messages_after_join(chat_room):
                 {
                     "channel": str(chat_room.channel.id),
                     "event": event_id,
-                    "reaction": "\U0001F608",
+                    "reaction": "\U0001f608",
                 },
             ]
         )
@@ -651,7 +651,7 @@ async def test_fetch_messages_after_join(chat_room):
                 "event_type": "channel.message",
                 "edited": None,
                 "replaces": None,
-                "reactions": {"\U0001F608": [c1.context["user.config"]["id"]]},
+                "reactions": {"\U0001f608": [c1.context["user.config"]["id"]]},
                 "content": {"type": "text", "body": "Hello world"},
                 "sender": c1.context["user.config"]["id"],
             }

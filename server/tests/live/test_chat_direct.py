@@ -544,7 +544,7 @@ async def test_send_if_blocked_by_user(world):
         assert "chat.denied" == response[2]["code"]
 
 
-DS_CREATE_ROOM_RESPONSE = '''{
+DS_CREATE_ROOM_RESPONSE = """{
     "id": "13a5aa53-f4da-470b-bfd0-63dd9e5dd81d",
     "description": "My public room description.",
     "friendly_url": "MyPublicRoom",
@@ -593,7 +593,7 @@ DS_CREATE_ROOM_RESPONSE = '''{
     "consent_message_enabled": true,
     "recording_consent_message_enabled": true,
     "consent_message_type": "generic",
-    "consent_message": "By joining, you consent to the processing of your personal data in accordance with our [link https://www.digitalsamba.com/redirect/privacy-policy]Privacy Policy[/link].",
+    "consent_message": "By joining, you consent to the processing of your personal data.",
     "checkbox_message": "Don’t show this again.",
     "recordings_layout_mode": "tiled",
     "content_library_enabled": true,
@@ -654,7 +654,8 @@ DS_CREATE_ROOM_RESPONSE = '''{
     "captions_language": "en",
     "created_at": "2022-05-13T19:09:04Z",
     "updated_at": "2024-03-28T00:43:42Z"
-}'''
+}"""
+
 
 @pytest.mark.asyncio
 @pytest.mark.django_db
@@ -662,7 +663,7 @@ async def test_send_call_invite(world):
     with aioresponses() as m:
         m.post(
             re.compile(r"^https://api.digitalsamba.com/api/v1/rooms$"),
-            body=DS_CREATE_ROOM_RESPONSE
+            body=DS_CREATE_ROOM_RESPONSE,
         )
 
         world.trait_grants["participant"] = []
@@ -710,7 +711,7 @@ async def test_send_call_require_invite(world):
     with aioresponses() as m:
         m.post(
             re.compile(r"^https://api.digitalsamba.com/api/v1/rooms$"),
-            body=DS_CREATE_ROOM_RESPONSE
+            body=DS_CREATE_ROOM_RESPONSE,
         )
         world.trait_grants["participant"] = []
         await database_sync_to_async(world.save)()
