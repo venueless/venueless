@@ -544,31 +544,125 @@ async def test_send_if_blocked_by_user(world):
         assert "chat.denied" == response[2]["code"]
 
 
+DS_CREATE_ROOM_RESPONSE = '''{
+    "id": "13a5aa53-f4da-470b-bfd0-63dd9e5dd81d",
+    "description": "My public room description.",
+    "friendly_url": "MyPublicRoom",
+    "privacy": "public",
+    "max_participants": 100,
+    "max_broadcasters": 10,
+    "is_locked": false,
+    "topbar_enabled": true,
+    "toolbar_enabled": true,
+    "toolbar_position": "left",
+    "toolbar_color": "#000000",
+    "primary_color": "#3771E0",
+    "background_color": "#000000",
+    "palette_mode": "light",
+    "language": "en",
+    "language_selection_enabled": true,
+    "audio_on_join_enabled": true,
+    "video_on_join_enabled": true,
+    "screenshare_enabled": true,
+    "participants_list_enabled": true,
+    "recordings_enabled": true,
+    "logo_enabled": true,
+    "custom_logo": null,
+    "recording_logo_enabled": false,
+    "virtual_backgrounds_enabled": true,
+    "raise_hand_enabled": true,
+    "chat_enabled": true,
+    "private_chat_enabled": true,
+    "private_group_chat_enabled": true,
+    "private_group_chat_name": "test",
+    "pin_enabled": true,
+    "full_screen_enabled": true,
+    "minimize_own_tile_enabled": true,
+    "minimize_own_tile_on_join_enabled": false,
+    "end_session_enabled": true,
+    "e2ee_enabled": false,
+    "layout_mode_switch_enabled": true,
+    "simple_notifications_enabled": true,
+    "join_screen_enabled": true,
+    "participant_names_in_recordings_enabled": false,
+    "hide_tiles_in_recordings_enabled": false,
+    "invite_participants_enabled": true,
+    "whiteboard_enabled": true,
+    "qa_enabled": true,
+    "files_panel_enabled": true,
+    "consent_message_enabled": true,
+    "recording_consent_message_enabled": true,
+    "consent_message_type": "generic",
+    "consent_message": "By joining, you consent to the processing of your personal data in accordance with our [link https://www.digitalsamba.com/redirect/privacy-policy]Privacy Policy[/link].",
+    "checkbox_message": "Don’t show this again.",
+    "recordings_layout_mode": "tiled",
+    "content_library_enabled": true,
+    "library_id": "15bf7fba-7de2-4dbf-877c-62103cc274c4",
+    "layout_mode_on_join": "tiled",
+    "room_url": "https://myteam.digitalsamba.com/MyPublicRoom",
+    "external_id": "EXTID123",
+    "default_role": {
+        "id": "47697570-a2e8-4b0c-8f2d-1af1ea2bae67",
+        "name": "moderator",
+        "display_name": "Moderators"
+    },
+    "roles": [
+        {
+            "id": "47697570-a2e8-4b0c-8f2d-1af1ea2bae67",
+            "name": "moderator",
+            "display_name": "Moderators",
+            "allow_private_group_chat": true
+        },
+        {
+            "id": "4fae2627-3d52-4b01-905f-5022b285ee8c",
+            "name": "attendee",
+            "display_name": "Attendees",
+            "allow_private_group_chat": false
+        }
+    ],
+    "files": [
+        {
+            "id": "ae137edf-741e-4d0d-acd9-e5ad2c1dd74f",
+            "name": "image.png",
+            "url": "https://www.myimages.com/image.png",
+            "thumbnail_url": "https://www.myimages.com/image-thumbnail.png"
+        }
+    ],
+    "webhooks": [
+        "3d5260b1-741e-4d0d-4a00-e5ad2c1dd74f",
+        "77ea623b-741e-4d0d-acd9-32d98793e168"
+    ],
+    "breakout_rooms_enabled": true,
+    "breakouts": [
+        {
+            "id": "ae137edf-741e-4d0d-acd9-e5ad2c1dd74f",
+            "name": "Breakout Room 1"
+        },
+        {
+            "id": "77ea623b-f677-4a00-8307-ec19aa022d22",
+            "name": "Breakout Room 2"
+        },
+        {
+            "id": "6cc45935-f00c-4683-9f14-32d98793e168",
+            "name": "Breakout Room 3"
+        }
+    ],
+    "html_title": "MyPublicRoom custom HTML title",
+    "transcription_enabled": false,
+    "captions_enabled": true,
+    "captions_in_recordings_enabled": false,
+    "captions_language": "en",
+    "created_at": "2022-05-13T19:09:04Z",
+    "updated_at": "2024-03-28T00:43:42Z"
+}'''
+
 @pytest.mark.asyncio
 @pytest.mark.django_db
 async def test_send_call_invite(world):
     with aioresponses() as m:
-        m.get(
-            re.compile(r"^https://video1.pretix.eu/bigbluebutton.*$"),
-            body="""<response>
-<returncode>SUCCESS</returncode>
-<meetingID>6c58284d0c68af95</meetingID>
-<internalMeetingID>322ed97cafe9a92fa4ef7f7c70da553f213df06b-1587484839039</internalMeetingID>
-<parentMeetingID>bbb-none</parentMeetingID>
-<attendeePW>d35746f043310256</attendeePW>
-<moderatorPW>bf889e3c60742bee</moderatorPW>
-<createTime>1587484839039</createTime>
-<voiceBridge>70957</voiceBridge>
-<dialNumber>613-555-1234</dialNumber>
-<createDate>Tue Apr 21 18:00:39 CEST 2020</createDate>
-<hasUserJoined>true</hasUserJoined>
-<duration>0</duration>
-<hasBeenForciblyEnded>false</hasBeenForciblyEnded>
-<messageKey>duplicateWarning</messageKey>
-<message>
-This conference was already in existence and may currently be in progress.
-</message>
-</response>""",
+        m.post(
+            re.compile(r"^https://api.digitalsamba.com/api/v1/rooms$"),
+            body=DS_CREATE_ROOM_RESPONSE
         )
 
         world.trait_grants["participant"] = []
@@ -599,7 +693,7 @@ This conference was already in existence and may currently be in progress.
 
             await c1.send_json_to(
                 [
-                    "bbb.call_url",
+                    "digitalsamba.call_url",
                     123,
                     {
                         "call": call_id,
@@ -613,43 +707,48 @@ This conference was already in existence and may currently be in progress.
 @pytest.mark.asyncio
 @pytest.mark.django_db
 async def test_send_call_require_invite(world):
-    world.trait_grants["participant"] = []
-    await database_sync_to_async(world.save)()
-    async with world_communicator(client_id="a") as c1, world_communicator(
-        client_id="b"
-    ) as c2, world_communicator(client_id="c") as c3:
-        channel = await _setup_dms(c1, c2)
-        await c1.send_json_to(
-            [
-                "chat.send",
-                123,
-                {
-                    "event_type": "channel.message",
-                    "content": {"type": "call", "body": {}},
-                    "channel": channel,
-                },
-            ]
+    with aioresponses() as m:
+        m.post(
+            re.compile(r"^https://api.digitalsamba.com/api/v1/rooms$"),
+            body=DS_CREATE_ROOM_RESPONSE
         )
-        response = await c1.receive_json_from()
-        assert "success" == response[0]
+        world.trait_grants["participant"] = []
+        await database_sync_to_async(world.save)()
+        async with world_communicator(client_id="a") as c1, world_communicator(
+            client_id="b"
+        ) as c2, world_communicator(client_id="c") as c3:
+            channel = await _setup_dms(c1, c2)
+            await c1.send_json_to(
+                [
+                    "chat.send",
+                    123,
+                    {
+                        "event_type": "channel.message",
+                        "content": {"type": "call", "body": {}},
+                        "channel": channel,
+                    },
+                ]
+            )
+            response = await c1.receive_json_from()
+            assert "success" == response[0]
 
-        response = await c1.receive_json_from()  # chat event
-        await c2.receive_json_from()  # new notification pointer
+            response = await c1.receive_json_from()  # chat event
+            await c2.receive_json_from()  # new notification pointer
 
-        assert response[0] == "chat.event"
-        call_id = response[1]["content"]["body"]["id"]
+            assert response[0] == "chat.event"
+            call_id = response[1]["content"]["body"]["id"]
 
-        await c3.send_json_to(
-            [
-                "bbb.call_url",
-                123,
-                {
-                    "call": call_id,
-                },
-            ]
-        )
-        response = await c3.receive_json_from()
-        assert "error" == response[0]
+            await c3.send_json_to(
+                [
+                    "digitalsamba.call_url",
+                    123,
+                    {
+                        "call": call_id,
+                    },
+                ]
+            )
+            response = await c3.receive_json_from()
+            assert "error" == response[0]
 
 
 @pytest.mark.asyncio

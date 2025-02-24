@@ -293,7 +293,7 @@ class DigitalSambaService:
 
     async def get_join_url_for_call_id(self, call_id, user):
         c = await database_sync_to_async(DigitalSambaCall.objects.get)(
-            pk=call_id, room__isnull=True, world=self.world
+            pk=call_id, room__isnull=True, world=self.world, invited_members__in=[user],
         )
 
         if user.profile.get("avatar", {}).get("url"):
