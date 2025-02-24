@@ -5,7 +5,7 @@ from django.core.validators import RegexValidator
 from django.forms import inlineformset_factory
 
 from venueless.core.models import BBBServer, Room, StreamingServer, TurnServer, World
-from venueless.core.models.world import FEATURE_FLAGS, PlannedUsage
+from venueless.core.models.world import FEATURE_FLAGS, PlannedUsage, default_feature_flags
 
 User = get_user_model()
 SECRET_REDACTED = "*****"
@@ -128,6 +128,8 @@ class WorldForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if self.instance and self.instance.pk:
             self.fields["id"].disabled = True
+        else:
+            self.fields["feature_flags"].initial = default_feature_flags()
 
     def clean_id(self):
         d = self.cleaned_data["id"]
