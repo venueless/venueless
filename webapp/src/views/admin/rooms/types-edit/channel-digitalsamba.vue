@@ -33,14 +33,9 @@ export default {
 			SAMBA_TILE_OPTIONS,
 		}
 	},
-	async mounted () {
-		if (this.roomId) {
-			this.dsRoomId = (await api.call('digitalsamba.room_id', { room: this.roomId })).room_id || "not yet assigned"
-		}
-	},
 	computed: {
 		module () {
-			let m = this.modules['call.digitalsamba']
+			const m = this.modules['call.digitalsamba']
 			if (!m.config.size) {
 				m.config.size = 'small'
 			}
@@ -48,6 +43,11 @@ export default {
 				m.config.tiles = 'all'
 			}
 			return m
+		}
+	},
+	async mounted () {
+		if (this.roomId) {
+			this.dsRoomId = (await api.call('digitalsamba.room_id', { room: this.roomId })).room_id || 'not yet assigned'
 		}
 	}
 }
