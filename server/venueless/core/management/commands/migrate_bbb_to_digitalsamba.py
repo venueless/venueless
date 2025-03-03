@@ -26,7 +26,10 @@ class Command(BaseCommand):
             for w in World.objects.all():
                 new_roles = {}
                 for k, v in w.roles.items():
-                    if k == "viewer" and Permission.ROOM_DIGITALSAMBA_JOIN.value not in v:
+                    if (
+                        k == "viewer"
+                        and Permission.ROOM_DIGITALSAMBA_JOIN.value not in v
+                    ):
                         v.append(Permission.ROOM_DIGITALSAMBA_JOIN.value)
                     if (
                         Permission.ROOM_BBB_JOIN.value in v

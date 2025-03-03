@@ -5,7 +5,11 @@ from django.core.validators import RegexValidator
 from django.forms import inlineformset_factory
 
 from venueless.core.models import BBBServer, Room, StreamingServer, TurnServer, World
-from venueless.core.models.world import FEATURE_FLAGS, PlannedUsage, default_feature_flags
+from venueless.core.models.world import (
+    FEATURE_FLAGS,
+    PlannedUsage,
+    default_feature_flags,
+)
 
 User = get_user_model()
 SECRET_REDACTED = "*****"
