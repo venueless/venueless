@@ -206,10 +206,20 @@ export default new Vuex.Store({
 			if (state.activeRoom.id !== room) return
 			state.reactions = reactions
 		},
-		'api::world.updated' ({ state, commit }, { world, rooms, permissions }) {
+		'api::world.updated' ({ state, dispatch, commit }, { world, rooms, permissions }) {
+			const oldCurrentRoomModules = state.activeRoom.modules.map(m => m.type)
 			state.world = world
 			state.permission = permissions
 			commit('updateRooms', rooms)
+			const currentRoom = state.rooms.find(r => r.id === state.activeRoom.id)
+			const newCurrentRoomModules = currentRoom.modules.map(m => m.type)
+
+			if (!oldCurrentRoomModules.includes('poll') && newCurrentRoomModules.includes('poll')) {
+				dispatch('poll/changeRoom', currentRoom)
+			}
+			if (!oldCurrentRoomModules.includes('question') && newCurrentRoomModules.includes('question')) {
+				dispatch('question/changeRoom', currentRoom)
+			}
 		},
 		'api::world.schedule.updated' ({ state, dispatch }, pretalx) {
 			state.world.pretalx = pretalx
