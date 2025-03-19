@@ -496,7 +496,7 @@ class AuthModule(BaseModule):
             await self.consumer.send_error(code="user.social.return_url_required")
             return
 
-        if network not in ("twitter", "linkedin"):
+        if network not in ("linkedin",):
             await self.consumer.send_error(code="user.social.unknown")
             return
 

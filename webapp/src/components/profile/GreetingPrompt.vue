@@ -5,9 +5,6 @@ prompt.c-profile-greeting-prompt(:allowCancel="false")
 		.step-connect-social(v-else-if="activeStep === 'connectSocial'")
 			h1 {{ $t('profile/GreetingPrompt:step-social:heading') }}
 			p {{ $t('profile/GreetingPrompt:step-social:text') }}
-			bunt-button.social-connection.social-twitter(v-if="world.social_logins.includes('twitter')", @click="connectSocial('twitter')")
-				.mdi.mdi-twitter
-				.label twitter
 			bunt-button.social-connection.social-linkedin(v-if="world.social_logins.includes('linkedin')", @click="connectSocial('linkedin')")
 				.mdi.mdi-linkedin
 				.label linkedin
@@ -173,8 +170,6 @@ export default {
 						font-size: 24px
 					.label
 						width: 72px
-			.social-twitter
-				button-style(style: clear, color: #1DA1F2)
 			.social-linkedin
 				button-style(style: clear, color: #0A66C2)
 			.social-gravatar
