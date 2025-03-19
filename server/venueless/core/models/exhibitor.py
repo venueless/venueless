@@ -4,7 +4,7 @@ from django.db import models
 
 
 def default_text():
-    return []
+    return {"ops": []}
 
 
 class Exhibitor(models.Model):
