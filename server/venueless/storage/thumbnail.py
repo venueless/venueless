@@ -56,7 +56,7 @@ def get_thumbnail(world, url, width, height):
     image = Image.open(BytesIO(response.content), formats=("PNG", "GIF", "JPEG"))
     try:
         image.load()
-    except:
+    except Exception:
         raise ValueError("Could not load image")
 
     image_out = resize_image(image, width, height)

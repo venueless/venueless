@@ -121,9 +121,6 @@ async def test_get(world, exhibition_room):
                 "contact_enabled": True,
                 "text_legacy": "# Wir liefern wovon andere nur reden\n\nHallo!\nDas ist ein Markdowntext!",
                 "text_content": [],
-                "short_text": "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod "
-                "tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero "
-                "eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea tak",
                 "size": "1x1",
                 "sorting_priority": 0,
                 "highlighted_room_id": None,
@@ -157,9 +154,6 @@ async def test_get(world, exhibition_room):
                 "contact_enabled": True,
                 "text_legacy": "# Gastro und mehr\n\nVon Apfel bis Zebra, wir liefern!",
                 "text_content": [],
-                "short_text": "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod "
-                "tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero "
-                "eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea tak",
                 "size": "1x1",
                 "sorting_priority": 1,
                 "highlighted_room_id": None,

@@ -140,7 +140,14 @@ ROLES = [
         "default": False,
         "permissions": {
             "answer_qa": True,
-            "ask_remote_unmute": ["moderator", "speaker", "attendee", "v-attendee", "v-moderator", "v-speaker"],
+            "ask_remote_unmute": [
+                "moderator",
+                "speaker",
+                "attendee",
+                "v-attendee",
+                "v-moderator",
+                "v-speaker",
+            ],
             "broadcast": True,
             "broadcast_video": False,
             "control_room_components": False,
