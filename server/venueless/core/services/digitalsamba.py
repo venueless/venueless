@@ -310,7 +310,7 @@ class DigitalSambaService:
                 "rd": c.url_name,
                 "ud": str(user.pk),
                 "u": escape_name(user.profile.get("display_name", "")),
-                "role": "dm-call",
+                "role": "v-dm-call",
                 **avatar,
                 "iat": datetime.utcnow(),
                 "exp": datetime.utcnow() + timedelta(hours=12),
