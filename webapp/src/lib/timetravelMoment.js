@@ -24,7 +24,12 @@ import 'moment-timezone'
 // just load all relevant locales
 // TODO figure this out correctly to save a bit of bundle size
 import 'moment/dist/locale/en-ie'
+import 'moment/dist/locale/en-au'
+import 'moment/dist/locale/en-gb'
+import 'moment/dist/locale/en-in'
+import 'moment/dist/locale/en-nz'
 import 'moment/dist/locale/de'
+import 'moment/dist/locale/de-at'
 import 'moment/dist/locale/pt-br'
 import config from 'config'
 
