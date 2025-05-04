@@ -28,20 +28,21 @@
 								.filter-item(v-for="tag of tags", :title="tag.name", :class="{active: filters.some(filter => filter.field === 'tag' && filter.value === tag.name)}", @click="toggleFilter({field: 'tag', value: tag.key, label: tag.name})")
 									.name {{ tag.name }}
 									.count {{ tag.count }}
-		RecycleScroller.posters.bunt-scrollbar(v-slot="{item: poster}", v-scrollbar.y="", :items="flatCategorizedFilteredPosters", typeField="type")
-			h2.category(v-if="poster.type === 'category'") {{ poster.label }}
-			router-link.poster(v-else, :key="poster.id", :to="{name: 'poster', params: {posterId: poster.id}}")
-				.content
-					.tags
-						.tag(v-for="tag of poster.tags") {{ tag }}
-					h3.title {{ poster.title }}
-					.authors(v-if="poster.authors && poster.authors.authors") {{ poster.authors.authors.map(a => a.name).join(' / ') }}
-					rich-text-content.abstract(v-dynamic-line-clamp, :content="poster.abstract")
-					.actions
-						bunt-button {{ $t('PosterHall:more:label') }}
-				img.poster-screenshot(v-if="poster.poster_preview", :src="poster.poster_preview")
-				.preview-placeholder(v-else)
-					.mdi(:class="`mdi-${getIconByFileEnding(poster.poster_url)}`")
+		.posters.bunt-scrollbar(v-scrollbar.y="", :items="flatCategorizedFilteredPosters", typeField="type")
+			template(v-for="poster of flatCategorizedFilteredPosters", :key="poster.id")
+				h2.category(v-if="poster.type === 'category'") {{ poster.label }}
+				router-link.poster(v-else, :key="poster.id", :to="{name: 'poster', params: {posterId: poster.id}}")
+					.content
+						.tags
+							.tag(v-for="tag of poster.tags") {{ tag }}
+						h3.title {{ poster.title }}
+						.authors(v-if="poster.authors && poster.authors.authors") {{ poster.authors.authors.map(a => a.name).join(' / ') }}
+						rich-text-content.abstract(v-dynamic-line-clamp, :content="poster.abstract")
+						.actions
+							bunt-button {{ $t('PosterHall:more:label') }}
+					img.poster-screenshot(v-if="poster.poster_preview", :src="poster.poster_preview")
+					.preview-placeholder(v-else)
+						.mdi(:class="`mdi-${getIconByFileEnding(poster.poster_url)}`")
 	bunt-progress-circular(v-else, size="huge", :page="true")
 </template>
 <script>
@@ -356,6 +357,7 @@ $logo-height-large = 427px
 			+below('s')
 				flex-direction: column-reverse
 				max-height: none
+				height: auto
 				.content
 					padding: 16px 0 0 0
 </style>
