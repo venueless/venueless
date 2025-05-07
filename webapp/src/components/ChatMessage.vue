@@ -40,8 +40,8 @@
 						.emoji(:style="nativeEmojiToStyle(reactionTooltip.emoji)")
 					.description
 						span.users {{ reactionTooltip.usersString }}
-						|  reacted with
-						span.emoji-text  {{ getEmojiDataFromNative(reactionTooltip.emoji).short_names[0] }}
+						|  {{ $t('ChatMessage:reaction-tooltip:description', {count: reactionTooltip.usersString.length }) }}
+						span.emoji-text &nbsp; {{ getEmojiDataFromNative(reactionTooltip.emoji).short_names[0] }}
 		.actions(v-if="!readonly")
 			emoji-picker-button(strategy="fixed", placement="bottom-end", :offset="[36, 3]", iconStyle="plus", @selected="addReaction")
 			menu-dropdown(v-if="(hasPermission('room:chat.moderate') || message.sender === user.id)", v-model="selected", placement="bottom-end", strategy="fixed", :offset="[0, 3]")
