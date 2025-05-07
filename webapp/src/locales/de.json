@@ -42,8 +42,6 @@
   "ChatMessage:leave-message:text": "hat den Raum verlassen",
   "ChatMessage:message-delete:label": "Nachricht löschen",
   "ChatMessage:message-edit:label": "Nachricht bearbeiten",
-  "ChatMessage:reaction-tooltip:description_one": "reagierte mit",
-  "ChatMessage:reaction-tooltip:description_other": "reagierten mit",
   "Chat:permission-block:room:chat.join": "Sorry, du darfst diesem Kanal nicht beitreten.",
   "Chat:permission-block:room:chat.send": "Du kannst in diesem Kanal nur lesen.",
   "ContactExhibitorPrompt:dismiss-button:label": "abbrechen",
