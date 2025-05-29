@@ -30,7 +30,7 @@ We manage our translations over at `translate.pretix.eu <https://translate.preti
 Security
 --------
 
-If you discover a security issue, please contact us at security@pretix.eu and see our [Responsible Disclosure Policy](https://docs.pretix.eu/trust/security/disclosure/) further information.
+If you discover a security issue, please contact us at security@pretix.eu and see our `Responsible Disclosure Policy`_ further information.
 
 
 License
@@ -122,3 +122,4 @@ community.
 .. _pretix: https://pretix.eu
 .. _Sentry blogpost: https://blog.sentry.io/2019/11/06/relicensing-sentry
 .. _rash.codes: https://rash.codes/
+.. _Responsible Disclosure Policy: https://docs.pretix.eu/trust/security/disclosure/
