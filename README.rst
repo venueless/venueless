@@ -27,6 +27,12 @@ We manage our translations over at `translate.pretix.eu <https://translate.preti
    :target: https://translate.pretix.eu/engage/venueless/
 
 
+Security
+--------
+
+If you discover a security issue, please contact us at security@pretix.eu and see our [Responsible Disclosure Policy](https://docs.pretix.eu/trust/security/disclosure/) further information.
+
+
 License
 -------
 
