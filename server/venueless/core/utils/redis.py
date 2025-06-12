@@ -28,8 +28,6 @@ _pool = {}
 
 @asynccontextmanager
 async def aredis(shard_key=None):
-    global _pool
-
     if shard_key:
         shard_index = consistent_hash(shard_key)
     else:
@@ -69,8 +67,6 @@ async def aredis(shard_key=None):
 
 
 async def flush_aredis_pool():
-    global _pool
-
     for v in _pool.values():
         await v.aclose()
     _pool.clear()
