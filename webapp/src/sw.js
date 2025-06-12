@@ -1,7 +1,6 @@
 // import { contentToPlainText } from 'components/ChatContent'
 import { initWasm, Resvg } from '@resvg/resvg-wasm'
 import resvgWasm from '@resvg/resvg-wasm/index_bg.wasm?url'
-import { renderUrl as renderIdenticonUrl, renderSvg } from 'lib/identicons'
 // TODO mirror config, theme
 // TODO https://developer.mozilla.org/en-US/docs/Web/API/Navigator/setAppBadge
 
@@ -28,7 +27,7 @@ const init = (async () => {
 		logLevel: 'off',
 	}
 	const svg = new Resvg(svgText, opts)
-	const pngData = svg.render().asPng()
+	const pngData = svg.render().asPng()  // eslint-disable-line
 	// console.log(`data:image/png;base64,${btoa(pngData)}`)
 	// console.info('Original SVG Size:', `${svg.width} x ${svg.height}`)
 	// console.info('Output PNG Size  :', `${svg.render().width} x ${svg.render().height}`)
@@ -60,6 +59,7 @@ async function handleNotification ({ channel_name, event, user, link }) {
 	}
 	await self.registration.showNotification(channel_name, {
 		body: event.content.body,
+		// eslint-disable-next-line camelcase
 		tag: channel_name,
 		icon,
 		data: {

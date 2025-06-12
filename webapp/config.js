@@ -13,7 +13,7 @@ if (ENV_DEVELOPMENT || !window.venueless) {
 		scheduleImport: `http://${hostname}:8375/storage/import/`,
 		feedback: `http://${hostname}:8375/_feedback/`,
 	}
-	if (WITH_PROXY) {
+	if (WITH_PROXY) {  // eslint-disable-line
 		api = {
 			base: '/api/v1/worlds/sample/',
 			socket: `${wsProtocol}//${host}/ws/world/sample/`,
