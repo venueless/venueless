@@ -126,8 +126,8 @@ export default {
 					const { url, token } = await api.call('digitalsamba.room_url', { room: this.room.id })
 					const initOptions = {
 						frame: iframe,
-						url: url,
-						token: token,
+						url,
+						token,
 						roomSettings: {
 							videoEnabled: !this.module.config.disable_cam_on_start,
 							audioEnabled: !this.module.config.mute_on_start,

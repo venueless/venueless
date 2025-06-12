@@ -24,13 +24,15 @@ export default {
 	server: {
 		host: '0.0.0.0',
 		port: 8880,
-		proxy: process.env.WITH_PROXY ? {
-			'/api': 'http://localhost:8375',
-			'/ws': {
-				target: 'ws://localhost:8375',
-				ws: true,
-			},
-		} : null
+		proxy: process.env.WITH_PROXY
+			? {
+				'/api': 'http://localhost:8375',
+				'/ws': {
+					target: 'ws://localhost:8375',
+					ws: true,
+				},
+			}
+			: null
 	},
 	plugins: [
 		vue(),
@@ -45,36 +47,36 @@ export default {
 			]
 		}),
 		VitePWA({
-			srcDir: "src",
-			filename: "sw.js",
-			strategies: "injectManifest",
+			srcDir: 'src',
+			filename: 'sw.js',
+			strategies: 'injectManifest',
 			injectRegister: false,
 			manifest: {
-				name: "Venueless",
-				short_name: "Venueless",
-				description: "Venueless is a virtual conference platform",
-				theme_color: "#673ab7",
+				name: 'Venueless',
+				short_name: 'Venueless',
+				description: 'Venueless is a virtual conference platform',
+				theme_color: '#673ab7',
 				icons: [
 					{
-						"src": "pwa-64x64.png",
-						"sizes": "64x64",
-						"type": "image/png"
+						src: 'pwa-64x64.png',
+						sizes: '64x64',
+						type: 'image/png'
 					},
 					{
-						"src": "pwa-192x192.png",
-						"sizes": "192x192",
-						"type": "image/png"
+						src: 'pwa-192x192.png',
+						sizes: '192x192',
+						type: 'image/png'
 					},
 					{
-						"src": "pwa-512x512.png",
-						"sizes": "512x512",
-						"type": "image/png"
+						src: 'pwa-512x512.png',
+						sizes: '512x512',
+						type: 'image/png'
 					},
 					{
-						"src": "maskable-icon-512x512.png",
-						"sizes": "512x512",
-						"type": "image/png",
-						"purpose": "maskable"
+						src: 'maskable-icon-512x512.png',
+						sizes: '512x512',
+						type: 'image/png',
+						purpose: 'maskable'
 					}
 				]
 			},

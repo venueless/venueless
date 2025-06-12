@@ -38,8 +38,8 @@ addEventListener('install', () => {
 	self.skipWaiting()
 })
 
-async function handleNotification({ channel_name, event, user, link }) {
-	const clients = await self.clients.matchAll({type: 'window'})
+async function handleNotification ({ channel_name, event, user, link }) {
+	const clients = await self.clients.matchAll({ type: 'window' })
 	if (clients.some(client => client.visibilityState === 'visible')) return
 	await init
 	let icon
