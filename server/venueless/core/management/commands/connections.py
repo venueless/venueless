@@ -5,7 +5,6 @@ import time
 
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
-from django.conf import settings
 from django.core.management.base import BaseCommand
 from tqdm import tqdm
 
@@ -147,49 +146,17 @@ class Command(BaseCommand):
                 await cl.group_send(group, message)
             return
 
-        if settings.REDIS_USE_PUBSUB:
-            channel_names = []
+        channel_names = []
 
-            async with aredis() as redis:
-                for v in conns:
-                    await redis.zremrangebyscore(
-                        f"version.{v}", min=0, max=int(time.time()) - 24 * 3600
-                    )
-                    channel_names += [
-                        x.decode("utf8")
-                        for x in await redis.zrange(f"version.{v}", 0, -1)
-                    ]
+        async with aredis() as redis:
+            for v in conns:
+                await redis.zremrangebyscore(
+                    f"version.{v}", min=0, max=int(time.time()) - 24 * 3600
+                )
+                channel_names += [
+                    x.decode("utf8") for x in await redis.zrange(f"version.{v}", 0, -1)
+                ]
 
-            for name in tqdm(channel_names):
-                await cl.send(name, message)
-                time.sleep(float(interval) / 1000.0)
-        else:
-            channel_names = []
-            for group in groups:
-                assert cl.valid_group_name(group), "Group name not valid"
-                # Retrieve list of all channel names
-                key = cl._group_key(group)
-                async with cl.connection(cl.consistent_hash(group)) as connection:
-                    # Discard old channels based on group_expiry
-                    await connection.zremrangebyscore(
-                        key, min=0, max=int(time.time()) - cl.group_expiry
-                    )
-
-                    channel_names += [
-                        x.decode("utf8") for x in await connection.zrange(key, 0, -1)
-                    ]
-
-            (connection_to_channel_keys,) = self._group_messages(channel_names, message)
-            with tqdm(total=len(channel_names)) as pbar:
-                for (
-                    connection_index,
-                    channel_redis_keys,
-                ) in connection_to_channel_keys.items():
-                    async with cl.connection(connection_index) as connection:
-                        for key, message in channel_redis_keys:
-                            await connection.zadd(
-                                key, dict([(message, int(time.time()))])
-                            )
-                            await connection.expire(key, cl.expiry)
-                            time.sleep(float(interval) / 1000.0)
-                            pbar.update(1)
+        for name in tqdm(channel_names):
+            await cl.send(name, message)
+            time.sleep(float(interval) / 1000.0)

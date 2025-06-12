@@ -152,17 +152,9 @@ else:
     REDIS_HOSTS = [{"address": redis_url, **redis_connection_kwargs}]
 
 
-REDIS_USE_PUBSUB = os.getenv(
-    "VENUELESS_REDIS_USE_PUBSUB", config.get("redis", "use_pubsub", fallback="false")
-) in (True, "yes", "on", "true", "True", "1")
-
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": (
-            "channels_redis.pubsub.RedisPubSubChannelLayer"
-            if REDIS_USE_PUBSUB
-            else "channels_redis.core.RedisChannelLayer"
-        ),
+        "BACKEND": ("channels_redis.pubsub.RedisPubSubChannelLayer"),
         "CONFIG": {
             "hosts": REDIS_HOSTS,
             # If pubsub is used, redis ignores the database parameter, so we prefix instead to differentiate between
