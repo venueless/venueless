@@ -23,67 +23,57 @@ def consistent_hash(value):
     return int(bigval / ring_divisor)
 
 
-if settings.REDIS_USE_PUBSUB:
-    _pool = {}
+_pool = {}
 
-    @asynccontextmanager
-    async def aredis(shard_key=None):
-        global _pool
 
-        if shard_key:
-            shard_index = consistent_hash(shard_key)
-        else:
-            shard_index = 0
+@asynccontextmanager
+async def aredis(shard_key=None):
+    global _pool
 
-        if "PYTEST_CURRENT_TEST" in os.environ:
-            # During tests, async is... different.
-            shard = get_channel_layer()._shards[shard_index]
-            async with shard._lock:
-                shard._ensure_redis()
-            yield shard._redis
-            return
+    if shard_key:
+        shard_index = consistent_hash(shard_key)
+    else:
+        shard_index = 0
 
-        if shard_index not in _pool:
-            shard = get_channel_layer()._shards[shard_index]
-            _pool[shard_index] = create_pool(shard.host)
+    if "PYTEST_CURRENT_TEST" in os.environ:
+        # During tests, async is... different.
+        shard = get_channel_layer()._shards[shard_index]
+        async with shard._lock:
+            shard._ensure_redis()
+        yield shard._redis
+        return
 
-        def _make_conn():
-            return aioredis.Redis(
-                connection_pool=_pool[shard_index],
-                retry=Retry(ExponentialBackoff(), 3),
-                retry_on_error=[redis.exceptions.ConnectionError],
-                retry_on_timeout=True,
-            )
+    if shard_index not in _pool:
+        shard = get_channel_layer()._shards[shard_index]
+        _pool[shard_index] = create_pool(shard.host)
 
-        try:
-            conn = _make_conn()
-            await conn.ping()
-        except redis.exceptions.ConnectionError:  # retry once
-            conn = _make_conn()
-            await conn.ping()
+    def _make_conn():
+        return aioredis.Redis(
+            connection_pool=_pool[shard_index],
+            retry=Retry(ExponentialBackoff(), 3),
+            retry_on_error=[redis.exceptions.ConnectionError],
+            retry_on_timeout=True,
+        )
 
-        try:
-            yield conn
-        finally:
-            await conn.aclose()
+    try:
+        conn = _make_conn()
+        await conn.ping()
+    except redis.exceptions.ConnectionError:  # retry once
+        conn = _make_conn()
+        await conn.ping()
 
-else:
-
-    def aredis(shard_key=None):
-        if shard_key:
-            shard_index = consistent_hash(shard_key)
-        else:
-            shard_index = 0
-        return get_channel_layer().connection(shard_index)
+    try:
+        yield conn
+    finally:
+        await conn.aclose()
 
 
 async def flush_aredis_pool():
     global _pool
 
-    if settings.REDIS_USE_PUBSUB:
-        for v in _pool.values():
-            await v.aclose()
-        _pool.clear()
+    for v in _pool.values():
+        await v.aclose()
+    _pool.clear()
 
 
 """

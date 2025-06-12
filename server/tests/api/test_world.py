@@ -1,5 +1,4 @@
 import pytest
-from django.conf import settings
 
 from tests.utils import get_token_header
 from venueless.core.services.user import create_user
@@ -107,9 +106,6 @@ def test_world_no_delete(client, world):
 
 
 @pytest.mark.django_db
-@pytest.mark.skipif(
-    settings.REDIS_USE_PUBSUB, reason="asyncio weirdness makes this fail"
-)
 @pytest.mark.parametrize(
     "data", ({}, {"event": "foo"}, {"domain": "https://pretalx.dev"})
 )
@@ -128,9 +124,6 @@ def test_schedule_update_domain_and_event_required(client, world, data):
 
 
 @pytest.mark.django_db
-@pytest.mark.skipif(
-    settings.REDIS_USE_PUBSUB, reason="asyncio weirdness makes this fail"
-)
 def test_schedule_update_wrong_event(client, world):
     assert not world.config["pretalx"].get("connected")
     r = client.post(
@@ -146,9 +139,6 @@ def test_schedule_update_wrong_event(client, world):
 
 
 @pytest.mark.django_db
-@pytest.mark.skipif(
-    settings.REDIS_USE_PUBSUB, reason="asyncio weirdness makes this fail"
-)
 def test_schedule_update(client, world):
     assert not world.config["pretalx"].get("connected")
     world.config["pretalx"]["domain"] = "https://pretalx.dev"

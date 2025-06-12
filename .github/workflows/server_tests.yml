@@ -15,15 +15,8 @@ jobs:
     name: Tests
     runs-on: ubuntu-latest
     container: python:3.11
-    continue-on-error: ${{ matrix.experimental }}
     strategy:
       fail-fast: false
-      matrix:
-        pubsub: ["no"]
-        experimental: [false]
-        include:
-          - pubsub: "yes"
-            experimental: true
     services:
       redis:
         image: redis:latest
@@ -59,7 +52,6 @@ jobs:
         working-directory: ./server
         run: py.test tests/ --cov=./ --reruns 3 --reruns-delay 1
         env:
-          VENUELESS_REDIS_USE_PUBSUB: '${{ matrix.pubsub }}'
           VENUELESS_REDIS_HOST: 'redis'
           VENUELESS_DB_TYPE: 'postgresql'
           VENUELESS_DB_NAME: 'venueless'
@@ -78,4 +70,3 @@ jobs:
           python -m coverage report --skip-covered --skip-empty --show-missing --format=markdown >> $GITHUB_STEP_SUMMARY
 
           python -m coverage report --fail-under=70
-        if: matrix.pubsub == 'no' && matrix.experimental == false

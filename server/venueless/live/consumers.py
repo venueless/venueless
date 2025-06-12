@@ -22,7 +22,6 @@ from venueless.live.exceptions import ConsumerException
 
 from ..core.utils.redis import aredis
 from ..core.utils.statsd import statsd
-from .channels import GROUP_VERSION
 from .modules.announcement import AnnouncementModule
 from .modules.auth import AuthModule
 from .modules.bbb import BBBModule
@@ -60,24 +59,14 @@ class MainConsumer(AsyncJsonWebsocketConsumer):
         self.conn_time = time.time()
         world_id = self.scope["url_route"]["kwargs"]["world"]
         await self.accept()
-        if settings.REDIS_USE_PUBSUB:
-            async with aredis() as redis:
-                await redis.zadd(
-                    f"version.{settings.VENUELESS_COMMIT}.{settings.VENUELESS_ENVIRONMENT}",
-                    dict([(self.channel_name, int(time.time()))]),
-                )
-                await redis.expire(
-                    f"version.{settings.VENUELESS_COMMIT}.{settings.VENUELESS_ENVIRONMENT}",
-                    24 * 3600,
-                )
-        else:
-            await self.channel_layer.group_add(
-                GROUP_VERSION.format(
-                    label=settings.VENUELESS_COMMIT
-                    + "."
-                    + settings.VENUELESS_ENVIRONMENT
-                ),
-                self.channel_name,
+        async with aredis() as redis:
+            await redis.zadd(
+                f"version.{settings.VENUELESS_COMMIT}.{settings.VENUELESS_ENVIRONMENT}",
+                dict([(self.channel_name, int(time.time()))]),
+            )
+            await redis.expire(
+                f"version.{settings.VENUELESS_COMMIT}.{settings.VENUELESS_ENVIRONMENT}",
+                24 * 3600,
             )
 
         await register_connection()
@@ -121,19 +110,9 @@ class MainConsumer(AsyncJsonWebsocketConsumer):
             if hasattr(c, "dispatch_disconnect"):
                 await c.dispatch_disconnect(close_code)
 
-        if settings.REDIS_USE_PUBSUB:
-            async with aredis() as redis:
-                await redis.zrem(
-                    f"version.{settings.VENUELESS_COMMIT}.{settings.VENUELESS_ENVIRONMENT}",
-                    self.channel_name,
-                )
-        else:
-            await self.channel_layer.group_discard(
-                GROUP_VERSION.format(
-                    label=settings.VENUELESS_COMMIT
-                    + "."
-                    + settings.VENUELESS_ENVIRONMENT
-                ),
+        async with aredis() as redis:
+            await redis.zrem(
+                f"version.{settings.VENUELESS_COMMIT}.{settings.VENUELESS_ENVIRONMENT}",
                 self.channel_name,
             )
 

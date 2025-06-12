@@ -1,6 +1,5 @@
 import datetime
 import logging
-import time
 import uuid
 from urllib.parse import urljoin
 
@@ -182,68 +181,14 @@ class AuthModule(BaseModule):
 
         message = {"type": "connection.replaced"}
 
-        if settings.REDIS_USE_PUBSUB:
-            async with aredis() as redis:
-                channels_to_drop = await redis.lrange(
-                    f"connections.list.user:{self.consumer.user.id}",
-                    0,
-                    -1 * connection_limit - 1,
-                )
-                for c in channels_to_drop:
-                    await self.consumer.channel_layer.send(c.decode(), message)
-        else:
-            channel_names = []
-            group = GROUP_USER.format(id=self.consumer.user.id)
-            cl = self.consumer.channel_layer
-            key = cl._group_key(group)
-            async with cl.connection(cl.consistent_hash(group)) as connection:
-                # Discard old channels based on group_expiry
-                await connection.zremrangebyscore(
-                    key, min=0, max=int(time.time()) - cl.group_expiry
-                )
-                channel_names += [
-                    x.decode("utf8") for x in await connection.zrange(key, 0, -1)
-                ]
-
-            if len(channel_names) < connection_limit:
-                return
-
-            if connection_limit == 1:
-                channels_to_drop = channel_names
-            else:
-                channels_to_drop = channel_names[: -1 * (connection_limit - 1)]
-
-            (
-                connection_to_channel_keys,
-                channel_keys_to_message,
-                channel_keys_to_capacity,
-            ) = cl._map_channel_keys_to_connection(channels_to_drop, message)
-
-            for (
-                connection_index,
-                channel_redis_keys,
-            ) in connection_to_channel_keys.items():
-                group_send_lua = """
-                    local current_time = ARGV[#ARGV - 1]
-                    local expiry = ARGV[#ARGV]
-                    for i=1,#KEYS do
-                        redis.call('ZADD', KEYS[i], current_time, ARGV[i])
-                        redis.call('EXPIRE', KEYS[i], expiry)
-                    end
-                    """
-
-                args = [
-                    channel_keys_to_message[channel_key]
-                    for channel_key in channel_redis_keys
-                ]
-                args += [int(time.time()), cl.expiry]
-                async with cl.connection(connection_index) as connection:
-                    await connection.eval(
-                        group_send_lua,
-                        len(channel_redis_keys),
-                        *channel_redis_keys,
-                        *args,
-                    )
+        async with aredis() as redis:
+            channels_to_drop = await redis.lrange(
+                f"connections.list.user:{self.consumer.user.id}",
+                0,
+                -1 * connection_limit - 1,
+            )
+            for c in channels_to_drop:
+                await self.consumer.channel_layer.send(c.decode(), message)
 
     @command("update")
     @require_world_permission(Permission.WORLD_VIEW)
