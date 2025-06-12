@@ -45,7 +45,7 @@ black==24.1
 isort==6.0.1
 flake8==7.1.2
 pytest==8.3.5
-pytest-django==4.10.0
+pytest-django==4.11.1
 pytest-asyncio==0.25.3
 pytest-cov==6.0.0
 pytest-rerunfailures==15.0
