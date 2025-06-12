@@ -47,6 +47,8 @@ ROLES = [
             "take_polls": True,
             "transcribe_session": False,
             "upvote_qa": True,
+            "see_notes": True,
+            "collaborate_in_notes": False,
         },
     },
     {
@@ -89,6 +91,8 @@ ROLES = [
             "take_polls": False,
             "transcribe_session": False,
             "upvote_qa": False,
+            "see_notes": True,
+            "collaborate_in_notes": True,
         },
     },
     {
@@ -131,6 +135,8 @@ ROLES = [
             "take_polls": False,
             "transcribe_session": True,
             "upvote_qa": False,
+            "see_notes": True,
+            "collaborate_in_notes": True,
         },
     },
     {
@@ -180,6 +186,8 @@ ROLES = [
             "take_polls": False,
             "transcribe_session": False,
             "upvote_qa": False,
+            "see_notes": True,
+            "collaborate_in_notes": True,
         },
     },
 ]
