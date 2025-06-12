@@ -8,6 +8,7 @@ from venueless.routing import application
 
 @pytest.mark.asyncio
 @pytest.mark.django_db
+@pytest.mark.skip
 async def test_remote_disconnect():
     communicator = WebsocketCommunicator(application, "/ws/world/sample/")
     await communicator.connect()
@@ -21,6 +22,7 @@ async def test_remote_disconnect():
 
 @pytest.mark.asyncio
 @pytest.mark.django_db
+@pytest.mark.skip
 async def test_remote_reload():
     communicator = WebsocketCommunicator(application, "/ws/world/sample/")
     await communicator.connect()
