@@ -3,7 +3,7 @@
 	bunt-progress-circular(v-if="!speaker || !schedule", size="huge", :page="true")
 	scrollbars(v-else, y="")
 		.profile
-			img.avatar(v-if="speaker.avatar", :src="speaker.avatar")
+			img.avatar(v-if="speaker.avatar || speaker.avatar_url", :src="speaker.avatar || speaker.avatar_url")
 			identicon(v-else, :user="{id: speaker.name, profile: {display_name: speaker.name}}")
 			.content
 				h1 {{ speaker.name }}

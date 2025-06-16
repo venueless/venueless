@@ -16,7 +16,7 @@
 			.header {{ $t('schedule/talks/item:speakers:header', {count: talk.speakers.length}) }}
 			.speakers-list
 				.speaker(v-for="speaker of talk.speakers")
-					img.avatar(v-if="speaker.avatar", :src="speaker.avatar")
+					img.avatar(v-if="speaker.avatar || speaker.avatar_url", :src="speaker.avatar || speaker.avatar_url")
 					router-link.name(v-if="pretalxApiBaseUrl", :to="{name: 'schedule:speaker', params: {speakerId: speaker.code}}") {{ speaker.name }}
 					.name(v-else) {{ speaker.name }}
 					markdown-content.biography(:markdown="speaker.biography")
@@ -61,7 +61,15 @@ export default {
 	async created () {
 		// TODO error handling
 		if (!this.pretalxApiBaseUrl) return
-		this.talk = await (await fetch(`${this.pretalxApiBaseUrl}/talks/${this.talkId}/`)).json()
+		const talk = await (await fetch(`${this.pretalxApiBaseUrl}/submissions/${this.talkId}/`)).json()
+		talk.slot = await (await fetch(`${this.pretalxApiBaseUrl}/slots/${talk.slots[0]}/`)).json()
+		talk.speakers = (await Promise.all(talk.speakers.map(async (speaker) => {
+			const response = await fetch(`${this.pretalxApiBaseUrl}/speakers/${speaker}/`)
+			if (!response.ok) return null
+			return await response.json()
+		}))).filter(Boolean)
+		console.log(talk)
+		this.talk = talk
 	},
 	mounted () {
 		this.$nextTick(() => {
