@@ -70,16 +70,16 @@ deploy:
     - cp "$SSH_KNOWN_HOSTS" ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
   script:
-    - ssh deployer@venueless-web1.rami.io $CI_COMMIT_REF_NAME pull
-    - ssh deployer@venueless-web2.rami.io $CI_COMMIT_REF_NAME pull
-    - ssh deployer@venueless-web3.rami.io $CI_COMMIT_REF_NAME pull
-    - ssh deployer@venueless-web4.rami.io $CI_COMMIT_REF_NAME pull
-    - ssh deployer@venueless-web5.rami.io $CI_COMMIT_REF_NAME pull
-    - ssh deployer@venueless-web1.rami.io $CI_COMMIT_REF_NAME upgrade
-    - ssh deployer@venueless-web2.rami.io $CI_COMMIT_REF_NAME upgrade
-    - ssh deployer@venueless-web3.rami.io $CI_COMMIT_REF_NAME upgrade
-    - ssh deployer@venueless-web4.rami.io $CI_COMMIT_REF_NAME upgrade
-    - ssh deployer@venueless-web5.rami.io $CI_COMMIT_REF_NAME upgrade
+    - ssh -p 1337 deployer@venueless-web1.rami.io $CI_COMMIT_REF_NAME pull
+    - ssh -p 1337 deployer@venueless-web2.rami.io $CI_COMMIT_REF_NAME pull
+    - ssh -p 1337 deployer@venueless-web3.rami.io $CI_COMMIT_REF_NAME pull
+    - ssh -p 1337 deployer@venueless-web4.rami.io $CI_COMMIT_REF_NAME pull
+    - ssh -p 1337 deployer@venueless-web5.rami.io $CI_COMMIT_REF_NAME pull
+    - ssh -p 1337 deployer@venueless-web1.rami.io $CI_COMMIT_REF_NAME upgrade
+    - ssh -p 1337 deployer@venueless-web2.rami.io $CI_COMMIT_REF_NAME upgrade
+    - ssh -p 1337 deployer@venueless-web3.rami.io $CI_COMMIT_REF_NAME upgrade
+    - ssh -p 1337 deployer@venueless-web4.rami.io $CI_COMMIT_REF_NAME upgrade
+    - ssh -p 1337 deployer@venueless-web5.rami.io $CI_COMMIT_REF_NAME upgrade
   only:
     - prod
     - master
