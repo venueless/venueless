@@ -61,14 +61,8 @@ export default {
 	async created () {
 		// TODO error handling
 		if (!this.pretalxApiBaseUrl) return
-		const talk = await (await fetch(`${this.pretalxApiBaseUrl}/submissions/${this.talkId}/`)).json()
-		talk.slot = await (await fetch(`${this.pretalxApiBaseUrl}/slots/${talk.slots[0]}/`)).json()
-		talk.speakers = (await Promise.all(talk.speakers.map(async (speaker) => {
-			const response = await fetch(`${this.pretalxApiBaseUrl}/speakers/${speaker}/`)
-			if (!response.ok) return null
-			return await response.json()
-		}))).filter(Boolean)
-		console.log(talk)
+		const talk = await (await fetch(`${this.pretalxApiBaseUrl}/submissions/${this.talkId}/?expand=slots,speakers`)).json()
+		talk.slot = talk.slots[0]
 		this.talk = talk
 	},
 	mounted () {
