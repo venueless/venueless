@@ -28,7 +28,7 @@ python-dateutil==2.9.*
 pytz
 pywebpush==2.0.*
 redis==5.2.1
-reportlab==4.3.*
+reportlab==4.4.*
 requests==2.32.*
 sentry-sdk==1.30.*
 tqdm==4.67.*
