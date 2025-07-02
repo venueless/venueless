@@ -9,7 +9,6 @@
 			bunt-tab(header="Social Connections")
 				scrollbars(key="social", y).ui-form-body
 					p Let users connect to the following social networks when they first visit your event. Connecting to a social network fills the user's profile with data available from the social connection, like name, avatar and link to the social network profile.
-					bunt-checkbox(v-model="socialTwitter", name="social-twitter") Twitter
 					bunt-checkbox(v-model="socialLinkedIn", name="social-linkedin") LinkedIn
 					bunt-checkbox(v-model="socialGravatar", name="social-gravatar") Gravatar
 			bunt-tab(header="Additional Fields")
@@ -98,7 +97,6 @@ export default {
 		}
 	},
 	computed: {
-		socialTwitter: generateSocialComputed('twitter'),
 		socialLinkedIn: generateSocialComputed('linkedin'),
 		socialGravatar: generateSocialComputed('gravatar')
 	},

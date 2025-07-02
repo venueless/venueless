@@ -61,15 +61,9 @@ class WorldConfigSerializer(serializers.Serializer):
         return [d.value for d in Permission]
 
     def validate_social_logins(self, val):
-        known = ("gravatar", "twitter", "linkedin")
+        known = ("gravatar", "linkedin")
         if any(v not in known for v in val):
             raise ValidationError("Invalid value for social_logins")
-
-        if "twitter" in val and not settings.TWITTER_CLIENT_ID:
-            raise ValidationError(
-                "Twitter login can't be enabled since there's no Twitter API keys set for this "
-                "Venueless installation."
-            )
 
         if "linkedin" in val and not settings.LINKEDIN_CLIENT_ID:
             raise ValidationError(

@@ -240,13 +240,6 @@ STATSD_PORT = os.getenv(
 STATSD_PREFIX = "venueless"
 
 
-TWITTER_CLIENT_ID = os.getenv(
-    "VENUELESS_TWITTER_CLIENT_ID", config.get("twitter", "client_id", fallback="")
-)
-TWITTER_CLIENT_SECRET = os.getenv(
-    "VENUELESS_TWITTER_CLIENT_SECRET",
-    config.get("twitter", "client_secret", fallback=""),
-)
 LINKEDIN_CLIENT_ID = os.getenv(
     "VENUELESS_LINKEDIN_CLIENT_ID", config.get("linkedin", "client_id", fallback="")
 )
