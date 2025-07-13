@@ -210,6 +210,10 @@ const routes = [{
 			name: 'admin:config:theme',
 			component: () => import(/* webpackChunkName: "admin" */ 'views/admin/config/theme')
 		}, {
+			path: 'links',
+			name: 'admin:config:links',
+			component: () => import(/* webpackChunkName: "admin" */ 'views/admin/config/links')
+		}, {
 			path: 'permissions',
 			name: 'admin:config:permissions',
 			component: () => import(/* webpackChunkName: "admin" */ 'views/admin/config/permissions')

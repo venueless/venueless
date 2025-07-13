@@ -56,6 +56,10 @@ transition(name="sidebar")
 					.notifications(v-if="channel.notifications") {{ channel.notifications }}
 					bunt-icon-button(tooltip="remove", :tooltipFixed="true", @click.prevent.stop="$store.dispatch('chat/leaveChannel', {channelId: channel.id})") close
 			.buffer
+			.external-links
+				a.external-link(v-for="link of world.external_links", :href="link.url", target="_blank", rel="noopener noreferrer")
+					i.icon.mdi.mdi-open-in-new
+					.name {{ link.name }}
 			template(v-if="worldHasExhibition && (staffedExhibitions.length > 0 || hasPermission('world:rooms.create.exhibition'))")
 				.group-title {{ $t('RoomsSidebar:exhibitions-headline:text') }}
 				.admin
@@ -291,7 +295,7 @@ export default {
 		vertical-align: text-bottom
 		&.needs-space
 			margin-right: 4px
-	.stages, .chats, .direct-messages, .admin
+	.stages, .chats, .direct-messages, .external-links, .admin
 		flex: none
 		display: flex
 		flex-direction: column
@@ -312,7 +316,7 @@ export default {
 			&.router-link-exact-active, &.active
 				.room-icon::before
 					color: var(--clr-sidebar-text-secondary)
-			.room-icon
+			.room-icon, .icon
 				width: 22px
 				&::before
 					font-family: "Material Design Icons"
@@ -477,6 +481,14 @@ export default {
 			border-radius: 0
 			&:hover:not(.disabled)
 				background-color: var(--clr-sidebar-hover-bg)
+		.external-link
+			padding-left: 8px
+			display: flex
+			gap: 4px
+			.name
+				ellipsis()
+	.external-links
+		margin-top: 32px
 	.admin
 		> .router-link-active
 				background-color: var(--clr-sidebar-active-bg)

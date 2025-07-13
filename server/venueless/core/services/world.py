@@ -56,6 +56,7 @@ class WorldConfigSerializer(serializers.Serializer):
     conftool_password = serializers.CharField(
         required=False, allow_null=True, allow_blank=True
     )
+    external_links = serializers.JSONField()
 
     def _available_permissions(self, *args):
         return [d.value for d in Permission]
@@ -198,6 +199,7 @@ def get_world_config_for_user(world, user):
             ),
             "onsite_traits": world.config.get("onsite_traits", []),
             "vapid_public_key": public_key,
+            "external_links": world.config.get("external_links", []),
         },
         "permissions": list(permissions[world]),
         "rooms": [],
@@ -405,6 +407,7 @@ def _config_serializer(world, *args, **kwargs):
             "iframe_blockers": world.config.get(
                 "iframe_blockers", {"default": {"enabled": False, "policy_url": None}}
             ),
+            "external_links": world.config.get("external_links", []),
         },
         **kwargs,
     )
