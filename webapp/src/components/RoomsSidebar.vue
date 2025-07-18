@@ -58,7 +58,6 @@ transition(name="sidebar")
 			.buffer
 			.external-links
 				a.external-link(v-for="link of world.external_links", :href="link.url", target="_blank", rel="noopener noreferrer")
-					i.icon.mdi.mdi-open-in-new
 					.name {{ link.name }}
 			template(v-if="worldHasExhibition && (staffedExhibitions.length > 0 || hasPermission('world:rooms.create.exhibition'))")
 				.group-title {{ $t('RoomsSidebar:exhibitions-headline:text') }}
@@ -482,9 +481,6 @@ export default {
 			&:hover:not(.disabled)
 				background-color: var(--clr-sidebar-hover-bg)
 		.external-link
-			padding-left: 8px
-			display: flex
-			gap: 4px
 			.name
 				ellipsis()
 	.external-links
