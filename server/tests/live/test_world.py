@@ -181,7 +181,7 @@ async def test_config_get(world):
                     "searchable": True,
                 },
             ],
-            "external_links": []
+            "external_links": [],
         }
 
 
