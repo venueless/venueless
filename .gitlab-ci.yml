@@ -16,7 +16,7 @@ py_style:
 
 py_test:
   stage: build
-  retry: 2
+  #retry: 2
   image:
     name: python:3.11-bookworm
   services:
