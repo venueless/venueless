@@ -117,6 +117,7 @@ export default {
 				iframe.allow = 'screen-wake-lock *; encrypted-media *; gyroscope *; camera *; microphone *; fullscreen *; display-capture *' + (this.autoplay ? '; autoplay *' : '')
 				iframe.allowfullscreen = true
 				iframe.allowusermedia = true
+				iframe.referrerPolicy = 'strict-origin-when-cross-origin'
 				iframe.setAttribute('allowfullscreen', '') // iframe.allowfullscreen is not enough in firefox#media-source-iframes
 				const container = document.querySelector('#media-source-iframes')
 				container.appendChild(iframe)
