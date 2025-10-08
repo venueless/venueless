@@ -1,5 +1,5 @@
 <script setup>
-import { SlickList, SlickItem, DragHandle, ElementMixin, HandleDirective } from 'vue-slicksort'
+import { SlickList, SlickItem, DragHandle } from 'vue-slicksort'
 import api from 'lib/api'
 
 let config = $ref()
