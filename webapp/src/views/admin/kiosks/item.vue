@@ -19,7 +19,7 @@
 				h2 Slides
 				p Select which slides to show on the kiosk. Slides will only show when they have content to show. Pinned poll and question slides will always take priority over others, there is no need to manually intervene during a session.
 				bunt-checkbox(v-model="kiosk.profile.slides.pinned_poll", name="show_pinned_poll", label="Pinned poll")
-				bunt-checkbox(v-model="kiosk.profile.slides.pinned_poll_voting", name="show_pinned_poll", label="Pinned poll voting QR code")
+				bunt-checkbox.sub-checkbox(v-if="kiosk.profile.slides.pinned_poll", v-model="kiosk.profile.pinned_poll_show_qr", name="pinned_poll_qr", label="Show voting QR code")
 				bunt-checkbox(v-model="kiosk.profile.slides.pinned_question", name="show_pinned_question", label="Pinned question")
 				bunt-checkbox(v-model="kiosk.profile.slides.next_session", name="show_next_session", label="Next session")
 				bunt-checkbox(v-model="kiosk.profile.slides.current_session", name="show_current_session", label="Current session")
@@ -176,6 +176,8 @@ export default {
 	.ui-form-body
 		.bunt-checkbox
 			margin-bottom: 8px
+			&.sub-checkbox
+				margin-left: 24px
 
 	.kiosk-url
 		display: flex

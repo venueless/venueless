@@ -3,7 +3,6 @@ import { watch, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import moment from 'lib/timetravelMoment'
 import PollSlide from './Poll'
-import VoteSlide from './Vote'
 import QuestionSlide from './Question'
 import NextSessionSlide from './NextSession'
 import CurrentSessionSlide from './CurrentSession'
@@ -32,13 +31,6 @@ const SLIDES = [{
 	},
 	priority: 10,
 	component: PollSlide
-}, {
-	id: 'vote',
-	condition () {
-		return isSlideEnabled('pinned_poll_voting') && !!store.getters['poll/pinnedPoll']
-	},
-	priority: 10,
-	component: VoteSlide
 }, {
 	id: 'question',
 	condition () {
@@ -129,7 +121,7 @@ onMounted(() => {
 .v-standalone-kiosk
 	transition(name="kiosk")
 		.slide(v-if="activeSlide", :key="activeSlide.id")
-			component(:is="activeSlide.component", :room="room")
+			component(:is="activeSlide.component", :room="room", :config="config")
 </template>
 <style lang="stylus">
 .v-standalone-kiosk

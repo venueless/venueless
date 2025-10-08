@@ -10,7 +10,8 @@ import { Session } from '@pretalx/schedule'
 export default {
 	components: { Session },
 	props: {
-		room: Object
+		room: Object,
+		config: Object
 	},
 	data () {
 		return {

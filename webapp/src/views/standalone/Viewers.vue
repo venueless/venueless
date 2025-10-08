@@ -12,7 +12,8 @@ import Avatar from 'components/Avatar'
 export default {
 	components: { Avatar },
 	props: {
-		room: Object
+		room: Object,
+		config: Object
 	},
 	computed: {
 		...mapState(['roomViewers']),
