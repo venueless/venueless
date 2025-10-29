@@ -14,17 +14,13 @@ from django.utils.timezone import make_aware
 def load_sheet(io):
     sheets = {
         "Talks": {
-            "usecols": "A:I,K",
             "parse_dates": [5, 6],
         },
         "Rooms": {
-            "usecols": "A:C",
         },
         "Speakers": {
-            "usecols": "A:D",
         },
         "Tracks": {
-            "usecols": "A:C",
         },
     }
     return {
