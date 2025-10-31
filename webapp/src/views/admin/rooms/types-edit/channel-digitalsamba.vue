@@ -2,7 +2,7 @@
 .c-channel-digitalsamba-settings
 	bunt-select(v-model="module.config.size", name="size", :options="SAMBA_SIZE_OPTIONS", label="Room size")
 	bunt-select(v-model="module.config.tiles", name="tiles", :options="SAMBA_TILE_OPTIONS", label="Tile options")
-	bunt-checkbox(v-model="module.config.waiting_room", name="waiting-room", label="Only allow attendees after moderator joined")
+	bunt-checkbox(v-model="module.config.waiting_room", name="waiting-room", label="Only allow attendees after moderator joined and let them in")
 	bunt-checkbox(v-model="module.config.skip_join_screen", name="join-screen", label="Skip join screen that allows to test audio and camera")
 	bunt-checkbox(v-model="module.config.mute_on_start", name="samba-mute-on-start", label="Auto-mute users")
 	bunt-checkbox(v-model="module.config.disable_cam_on_start", name="samba-mute-on-start", label="Auto-disable camera")

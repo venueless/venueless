@@ -22,7 +22,7 @@ class DigitalSambaModule(BaseModule):
         if not self.consumer.user.profile.get("display_name"):
             raise ConsumerException("digitalsamba.join.missing_profile")
 
-        role = "v-attendee"
+        role = "v-attendee-locked" if self.module_config.get("waiting_room", False) else "v-attendee"
         if await self.consumer.world.has_permission_async(
             user=self.consumer.user,
             permission=Permission.ROOM_DIGITALSAMBA_MODERATE,
@@ -34,7 +34,7 @@ class DigitalSambaModule(BaseModule):
             permission=Permission.ROOM_DIGITALSAMBA_SPEAK,
             room=self.room,
         ):
-            role = "v-speaker"
+            role = "v-speaker-locked" if self.module_config.get("waiting_room", False) else "v-speaker"
 
         url, token = await service.get_join_url_for_room(
             self.room,

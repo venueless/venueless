@@ -163,8 +163,8 @@ class DigitalSambaService:
             "invite_participants_enabled": False,
             "consent_message_enabled": False,
             "layout_mode_on_join": "tiled",
-            "roles": ["v-moderator", "v-speaker", "v-attendee"],
-            "default_role": "v-attendee",
+            "roles": ["v-moderator", "v-speaker", "v-attendee", "v-speaker-locked", "v-attendee-locked"],
+            "default_role": "v-attendee-locked" if config.get("waiting_room", False) else "v-attendee",
             # Features that we have in venueless as well and don't want to double
             "chat_enabled": False,
             "private_chat_enabled": False,
@@ -265,6 +265,8 @@ class DigitalSambaService:
             await self._patch(
                 f"https://api.digitalsamba.com/api/v1/rooms/{c.ds_id}", config
             )
+            c.config = config
+            await database_sync_to_async(c.save)()
 
         if not c:
             return None, None
