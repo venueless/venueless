@@ -163,8 +163,18 @@ class DigitalSambaService:
             "invite_participants_enabled": False,
             "consent_message_enabled": False,
             "layout_mode_on_join": "tiled",
-            "roles": ["v-moderator", "v-speaker", "v-attendee", "v-speaker-locked", "v-attendee-locked"],
-            "default_role": "v-attendee-locked" if config.get("waiting_room", False) else "v-attendee",
+            "roles": [
+                "v-moderator",
+                "v-speaker",
+                "v-attendee",
+                "v-speaker-locked",
+                "v-attendee-locked",
+            ],
+            "default_role": (
+                "v-attendee-locked"
+                if config.get("waiting_room", False)
+                else "v-attendee"
+            ),
             # Features that we have in venueless as well and don't want to double
             "chat_enabled": False,
             "private_chat_enabled": False,

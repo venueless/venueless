@@ -16,12 +16,9 @@ def load_sheet(io):
         "Talks": {
             "parse_dates": [5, 6],
         },
-        "Rooms": {
-        },
-        "Speakers": {
-        },
-        "Tracks": {
-        },
+        "Rooms": {},
+        "Speakers": {},
+        "Tracks": {},
     }
     return {
         title: pandas.read_excel(
