@@ -58,14 +58,6 @@ if not SECRET_KEY:
 debug_default = "runserver" in sys.argv
 DEBUG = os.environ.get("VENUELESS_DEBUG", str(debug_default)) == "True"
 
-VENUELESS_MULTIFACTOR_REQUIRE = (
-    os.environ.get(
-        "VENUELESS_MULTIFACTOR_REQUIRE",
-        str(config.getboolean("venueless", "multifactor_require", fallback=False)),
-    )
-    == "True"
-)
-
 MAIL_FROM = SERVER_EMAIL = DEFAULT_FROM_EMAIL = os.environ.get(
     "VENUELESS_MAIL_FROM",
     config.get("mail", "from", fallback="admin@localhost.venueless.org"),
@@ -278,7 +270,6 @@ INSTALLED_APPS = [
     "venueless.social.SocialConfig",
     "venueless.zoom.ZoomConfig",
     "venueless.control.ControlConfig",
-    "multifactor",  # after our modules since we replace some templates
 ]
 
 try:
@@ -488,18 +479,94 @@ CELERY_TASK_QUEUES = (
 CELERY_TASK_TRACK_STARTED = True
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
-LOGIN_URL = "/admin/login/"
-LOGIN_REDIRECT_URL = "/admin/"
+LOGIN_URL = "/control/auth/login/"
+LOGIN_REDIRECT_URL = "/control/"
 
-MULTIFACTOR = {
-    "LOGIN_CALLBACK": False,  # False, or dotted import path to function to process after successful authentication
-    "RECHECK": True,  # Invalidate previous authorisations at random intervals
-    "RECHECK_MIN": 3600 * 24,  # No recheks before this many days
-    "RECHECK_MAX": 3600 * 24 * 7,  # But within this many days
-    "FIDO_SERVER_ID": urlparse(SITE_URL).hostname,  # Server ID for FIDO request
-    "FIDO_SERVER_NAME": "Venueless",  # Human-readable name for FIDO request
-    "TOKEN_ISSUER_NAME": "Venueless",  # TOTP token issuing name (to be shown in authenticator)
-    "U2F_APPID": SITE_URL,  # U2F request issuer
-    "FACTORS": ["FIDO2"],
-    "FALLBACKS": {},
-}
+if os.environ.get(
+    "VENUELESS_OIDC_CLIENT_ID", config.get("oidc", "client_id", fallback="")
+):
+    AUTHENTICATION_BACKENDS = ("venueless.control.auth.OIDCAB",)
+    ALLOW_LOGOUT_GET_METHOD = True
+    OIDC_CREATE_USER = True
+    OIDC_RP_CLIENT_ID = os.environ.get(
+        "VENUELESS_OIDC_CLIENT_ID", config.get("oidc", "client_id", fallback="")
+    )
+    OIDC_RP_CLIENT_SECRET = os.environ.get(
+        "VENUELESS_OIDC_CLIENT_SECRET", config.get("oidc", "client_secret", fallback="")
+    )
+    OIDC_RP_SIGN_ALGO = os.getenv(
+        "VENUELESS_OIDC_RP_SIGN_ALGO",
+        config.get("oidc", "rp_sign_algo", fallback="RS256"),
+    )
+    OIDC_OP_AUTHORIZATION_ENDPOINT = os.getenv(
+        "VENUELESS_OIDC_AUTHORIZATION_ENDPOINT",
+        config.get(
+            "oidc",
+            "authorization_endpoint",
+            fallback="https://example.com/realms/master/protocol/openid-connect/auth",
+        ),
+    )
+    OIDC_OP_TOKEN_ENDPOINT = os.getenv(
+        "VENUELESS_OIDC_OP_TOKEN_ENDPOINT",
+        config.get(
+            "oidc",
+            "op_token_endpoint",
+            fallback="https://example.com/realms/master/protocol/openid-connect/token",
+        ),
+    )
+    OIDC_OP_USER_ENDPOINT = os.getenv(
+        "VENUELESS_OIDC_OP_USER_ENDPOINT",
+        config.get(
+            "oidc",
+            "op_user_endpoint",
+            fallback="https://example.com/realms/master/protocol/openid-connect/userinfo",
+        ),
+    )
+    OIDC_OP_JWKS_ENDPOINT = os.getenv(
+        "VENUELESS_OIDC_OP_JWKS_ENDPOINT",
+        config.get(
+            "oidc",
+            "op_jwks_endpoint",
+            fallback="https://example.com/realms/master/protocol/openid-connect/certs",
+        ),
+    )
+    OIDC_OP_LOGOUT_ENDPOINT = os.getenv(
+        "VENUELESS_OIDC_OP_LOGOUT_ENDPOINT",
+        config.get(
+            "oidc",
+            "op_logout_endpoint",
+            fallback="https://example.com/realms/master/protocol/openid-connect/logout",
+        ),
+    )
+    OIDC_USE_PKCE = True
+    OIDC_PKCE_CODE_CHALLENGE_METHOD = "S256"
+    OIDC_RP_SCOPES = "openid email basic"
+    OIDC_USERNAME_ALGO = "venueless.control.auth.generate_username"
+    OIDC_REQUIRED_ROLES = ["restricted-access"]
+    OIDC_OP_LOGOUT_URL_METHOD = "venueless.control.auth.provider_logout"
+    OIDC_RENEW_ID_TOKEN_EXPIRY_SECONDS = 3600 * 24
+    MIDDLEWARE.append("venueless.control.middleware.SessionRefresh")
+    OIDC_CALLBACK_CLASS = "venueless.control.auth.CustomOIDCAuthenticationCallbackView"
+    VENUELESS_MULTIFACTOR_REQUIRE = False
+else:
+    VENUELESS_MULTIFACTOR_REQUIRE = (
+        os.environ.get(
+            "VENUELESS_MULTIFACTOR_REQUIRE",
+            str(config.getboolean("venueless", "multifactor_require", fallback=False)),
+        )
+        == "True"
+    )
+    OIDC_RP_CLIENT_ID = None
+    INSTALLED_APPS.append("multifactor")
+    MULTIFACTOR = {
+        "LOGIN_CALLBACK": False,  # False, or dotted import path to function to process after successful authentication
+        "RECHECK": True,  # Invalidate previous authorisations at random intervals
+        "RECHECK_MIN": 3600 * 24,  # No recheks before this many days
+        "RECHECK_MAX": 3600 * 24 * 7,  # But within this many days
+        "FIDO_SERVER_ID": urlparse(SITE_URL).hostname,  # Server ID for FIDO request
+        "FIDO_SERVER_NAME": "Venueless",  # Human-readable name for FIDO request
+        "TOKEN_ISSUER_NAME": "Venueless",  # TOTP token issuing name (to be shown in authenticator)
+        "U2F_APPID": SITE_URL,  # U2F request issuer
+        "FACTORS": ["FIDO2"],
+        "FALLBACKS": {},
+    }

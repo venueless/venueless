@@ -3,6 +3,7 @@ from django.contrib.auth.middleware import (
 )
 from django.contrib.messages.middleware import MessageMiddleware as DjMessageMiddleware
 from django.contrib.sessions.middleware import SessionMiddleware as DjSessionMiddleware
+from mozilla_django_oidc.middleware import SessionRefresh as DjSessionRefresh
 
 
 class ControlMiddleware:
@@ -23,4 +24,8 @@ class AuthenticationMiddleware(ControlMiddleware, DjAuthenticationMiddleware):
 
 
 class MessageMiddleware(ControlMiddleware, DjMessageMiddleware):
+    pass
+
+
+class SessionRefresh(ControlMiddleware, DjSessionRefresh):
     pass
