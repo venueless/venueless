@@ -1,5 +1,6 @@
+import asyncio
 import uuid
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, suppress
 
 import pytest
 from channels.testing import WebsocketCommunicator
@@ -31,7 +32,9 @@ async def world_communicator(client_id=None, token=None, room=None, first=True):
     try:
         yield communicator
     finally:
-        await communicator.disconnect()
+        # suppress cleanup errors, https://github.com/django/asgiref/issues/518
+        with suppress(asyncio.exceptions.CancelledError):
+            await communicator.disconnect()
 
 
 @pytest.mark.asyncio

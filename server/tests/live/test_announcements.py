@@ -1,6 +1,7 @@
+import asyncio
 import datetime as dt
 import uuid
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, suppress
 
 import pytest
 from channels.db import database_sync_to_async
@@ -40,7 +41,9 @@ async def world_communicator(client_id=None, token=None, room=None, first=True):
     try:
         yield communicator
     finally:
-        await communicator.disconnect()
+        # suppress cleanup errors, https://github.com/django/asgiref/issues/518
+        with suppress(asyncio.exceptions.CancelledError):
+            await communicator.disconnect()
 
 
 @pytest.mark.asyncio
