@@ -47,7 +47,7 @@ isort==6.0.1
 flake8==7.3.0
 pytest==8.4.1
 pytest-django==4.11.1
-pytest-asyncio==1.0.0
+pytest-asyncio==1.2.0
 pytest-cov==6.2.1
 pytest-rerunfailures==15.1
 aioresponses==0.7.8
