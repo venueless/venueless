@@ -1,3 +1,6 @@
+import asyncio
+from contextlib import suppress
+
 import pytest
 from asgiref.sync import sync_to_async
 from channels.testing import WebsocketCommunicator
@@ -17,7 +20,9 @@ async def test_remote_disconnect():
 
         assert {"type": "websocket.close"} == await communicator.receive_output()
     finally:
-        await communicator.disconnect()
+        # suppress cleanup errors, https://github.com/django/asgiref/issues/518
+        with suppress(asyncio.exceptions.CancelledError):
+            await communicator.disconnect()
 
 
 @pytest.mark.asyncio
@@ -31,7 +36,9 @@ async def test_remote_reload():
 
         assert ["connection.reload", {}] == await communicator.receive_json_from()
     finally:
-        await communicator.disconnect()
+        # suppress cleanup errors, https://github.com/django/asgiref/issues/518
+        with suppress(asyncio.exceptions.CancelledError):
+            await communicator.disconnect()
 
 
 @pytest.mark.asyncio
@@ -46,4 +53,6 @@ async def test_remote_reload_staggered():
 
         assert ["connection.reload", {}] == await communicator.receive_json_from()
     finally:
-        await communicator.disconnect()
+        # suppress cleanup errors, https://github.com/django/asgiref/issues/518
+        with suppress(asyncio.exceptions.CancelledError):
+            await communicator.disconnect()

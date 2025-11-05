@@ -1,6 +1,7 @@
+import asyncio
 import re
 import uuid
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, suppress
 
 import pytest
 from aiohttp.http_exceptions import HttpProcessingError
@@ -29,7 +30,9 @@ async def world_communicator(named=True):
     try:
         yield communicator
     finally:
-        await communicator.disconnect()
+        # suppress cleanup errors, https://github.com/django/asgiref/issues/518
+        with suppress(asyncio.exceptions.CancelledError):
+            await communicator.disconnect()
 
 
 @pytest.mark.asyncio
@@ -45,7 +48,9 @@ async def test_settings_not_disclosed(bbb_room):
         if room["id"] == str(bbb_room.id):
             assert room["modules"][0]["type"] == "call.bigbluebutton"
             assert room["modules"][0]["config"] == {}
-    await communicator.disconnect()
+    # suppress cleanup errors, https://github.com/django/asgiref/issues/518
+    with suppress(asyncio.exceptions.CancelledError):
+        await communicator.disconnect()
 
 
 @pytest.mark.asyncio
@@ -61,7 +66,9 @@ async def test_login_required(bbb_room):
         assert response[0] == "error"
         assert response[2]["code"] == "protocol.unauthenticated"
     finally:
-        await communicator.disconnect()
+        # suppress cleanup errors, https://github.com/django/asgiref/issues/518
+        with suppress(asyncio.exceptions.CancelledError):
+            await communicator.disconnect()
 
 
 @pytest.mark.asyncio
