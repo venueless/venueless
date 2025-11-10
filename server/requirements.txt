@@ -4,7 +4,7 @@ aiohttp==3.13.2
 beautifulsoup4==4.13.*
 celery==5.5.*
 channels==4.3.*
-channels_redis==4.2.*
+channels_redis==4.3.*
 Django==4.2.*
 django-cors-headers==4.9.*
 django-decorator-include==3.3
