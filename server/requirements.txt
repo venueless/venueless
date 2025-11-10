@@ -51,4 +51,4 @@ pytest-asyncio==1.2.0
 pytest-cov==7.0.0
 pytest-rerunfailures==16.1
 aioresponses==0.7.8
-yappi==1.6.10
+yappi==1.7.3
