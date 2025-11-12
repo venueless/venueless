@@ -35,22 +35,24 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/cache@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
         with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip
+          enable-cache: true
       - name: Install Python dependencies
-        run: pip3 install -U pip wheel setuptools ".[dev]"
+        run: uv sync --extra dev
         working-directory: ./server
+      - name: Minimize uv cache
+        run: uv cache prune --ci
       - name: Run checks
-        run: python manage.py check
+        run: uv run  python manage.py check
         working-directory: ./server
       - name: Run collectstatic
-        run: python manage.py collectstatic
+        run: uv run python manage.py collectstatic
         working-directory: ./server
       - name: Run tests
         working-directory: ./server
-        run: py.test tests/ --cov=./ --reruns 3 --reruns-delay 1
+        run: uv run pytest tests/ --cov=./ --reruns 3 --reruns-delay 1
         env:
           VENUELESS_REDIS_HOST: 'redis'
           VENUELESS_DB_TYPE: 'postgresql'
@@ -62,11 +64,11 @@ jobs:
       - name: Build coverage info
         working-directory: ./server
         run: |
-          python -m coverage json
+          uv run python -m coverage json
 
           export TOTAL_COV=$(python -c "import json;print(json.load(open('coverage.json'))['totals']['percent_covered_display'])")
           echo "TOTAL_COV=$TOTAL_COV" >> $GITHUB_ENV
           echo "## Test coverage: $TOTAL_COV%" >> $GITHUB_STEP_SUMMARY
-          python -m coverage report --skip-covered --skip-empty --show-missing --format=markdown >> $GITHUB_STEP_SUMMARY
+          uv run python -m coverage report --skip-covered --skip-empty --show-missing --format=markdown >> $GITHUB_STEP_SUMMARY
 
-          python -m coverage report --fail-under=70
+          uv run python -m coverage report --fail-under=70
