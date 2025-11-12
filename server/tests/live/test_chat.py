@@ -120,9 +120,10 @@ async def test_join_leave(chat_room):
 @pytest.mark.django_db
 async def test_join_volatile_based_on_room_config(volatile_chat_room, chat_room, world):
     cid = str(uuid.uuid4())
-    async with world_communicator(client_id=cid) as c, world_communicator(
-        client_id=cid, named=False
-    ) as c2:
+    async with (
+        world_communicator(client_id=cid) as c,
+        world_communicator(client_id=cid, named=False) as c2,
+    ):
         await c.send_json_to(
             ["chat.join", 123, {"channel": str(volatile_chat_room.channel.id)}]
         )
@@ -1049,9 +1050,10 @@ async def test_edit_messages(world, chat_room, editor, editee, message_type, suc
     editor_token = get_token(world, [editor])
     editee_token = get_token(world, [editee]) if editor != editee else None
     channel_id = str(chat_room.channel.id)
-    async with world_communicator(token=editor_token) as c1, world_communicator(
-        token=editee_token
-    ) as c2:
+    async with (
+        world_communicator(token=editor_token) as c1,
+        world_communicator(token=editee_token) as c2,
+    ):
         # Setup
         await c1.send_json_to(["chat.join", 123, {"channel": channel_id}])
         await c1.receive_json_from()  # Success
@@ -1128,9 +1130,10 @@ async def test_unread_channels(world, chat_room):
     sender_token = get_token(world, [])
     receiver_token = get_token(world, [])
     channel_id = str(chat_room.channel.id)
-    async with world_communicator(token=sender_token) as c1, world_communicator(
-        token=receiver_token
-    ) as c2:
+    async with (
+        world_communicator(token=sender_token) as c1,
+        world_communicator(token=receiver_token) as c2,
+    ):
         # Setup. Both clients join, then c2 unsubscribes again ("background tab")
         await c1.send_json_to(["chat.join", 123, {"channel": channel_id}])
         await c1.receive_json_from()  # Success
@@ -1229,9 +1232,10 @@ async def test_unread_channels(world, chat_room):
 async def test_broadcast_read_channels(world, chat_room):
     token = get_token(world, [])
     channel_id = str(chat_room.channel.id)
-    async with world_communicator(token=token) as c1, world_communicator(
-        token=token, named=False
-    ) as c2:
+    async with (
+        world_communicator(token=token) as c1,
+        world_communicator(token=token, named=False) as c2,
+    ):
         await c1.send_json_to(["chat.join", 123, {"channel": channel_id}])
         await c1.receive_json_from()  # Success
         await c1.receive_json_from()  # Join notification c1

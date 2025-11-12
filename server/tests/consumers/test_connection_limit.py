@@ -32,7 +32,11 @@ async def world_communicator(token=None):
 async def test_limit_missing(world):
     world.config["connection_limit"] = None
     await database_sync_to_async(world.save)()
-    async with world_communicator() as c1, world_communicator() as c2, world_communicator() as c3:
+    async with (
+        world_communicator() as c1,
+        world_communicator() as c2,
+        world_communicator() as c3,
+    ):
         await c1.send_json_to(["ping", 1])
         response = await c1.receive_json_from()
         assert response == ["pong", 1]
@@ -47,7 +51,11 @@ async def test_limit_missing(world):
 async def test_limit_1(world):
     world.config["connection_limit"] = 1
     await database_sync_to_async(world.save)()
-    async with world_communicator() as c1, world_communicator() as c2, world_communicator() as c3:
+    async with (
+        world_communicator() as c1,
+        world_communicator() as c2,
+        world_communicator() as c3,
+    ):
         response = await c1.receive_json_from()
         assert response == [
             "error",
@@ -69,7 +77,11 @@ async def test_limit_1(world):
 async def test_limit_2(world):
     world.config["connection_limit"] = 2
     await database_sync_to_async(world.save)()
-    async with world_communicator() as c1, world_communicator() as c2, world_communicator() as c3:
+    async with (
+        world_communicator() as c1,
+        world_communicator() as c2,
+        world_communicator() as c3,
+    ):
         response = await c1.receive_json_from()
         assert response == [
             "error",
@@ -90,9 +102,11 @@ async def test_unlimited_admin(world):
     world.config["connection_limit"] = 1
     await database_sync_to_async(world.save)()
     t = get_token(world, ["admin"])
-    async with world_communicator(token=t) as c1, world_communicator(
-        token=t
-    ) as c2, world_communicator(token=t) as c3:
+    async with (
+        world_communicator(token=t) as c1,
+        world_communicator(token=t) as c2,
+        world_communicator(token=t) as c3,
+    ):
         await c1.send_json_to(["ping", 1])
         response = await c1.receive_json_from()
         assert response == ["pong", 1]

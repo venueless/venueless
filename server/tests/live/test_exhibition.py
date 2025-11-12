@@ -397,7 +397,11 @@ async def test_exhibition_contact(world, exhibition_room):
 @pytest.mark.asyncio
 @pytest.mark.django_db
 async def test_exhibition_contact_not_staff(world, exhibition_room):
-    async with world_communicator() as c_staff, world_communicator() as c1, world_communicator() as c2:
+    async with (
+        world_communicator() as c_staff,
+        world_communicator() as c1,
+        world_communicator() as c2,
+    ):
         await database_sync_to_async(world.world_grants.create)(
             user=await database_sync_to_async(User.objects.get)(
                 id=c1.context["user.config"]["id"]

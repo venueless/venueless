@@ -177,7 +177,11 @@ async def test_auth_with_invalid_jwt_token(world):
 @pytest.mark.asyncio
 @pytest.mark.django_db
 async def test_update_user():
-    async with world_communicator() as c, world_communicator() as c2, world_communicator() as c3:
+    async with (
+        world_communicator() as c,
+        world_communicator() as c2,
+        world_communicator() as c3,
+    ):
         await c.send_json_to(["authenticate", {"client_id": "4"}])
         response = await c.receive_json_from()
         assert response[0] == "authenticated"
@@ -896,7 +900,11 @@ async def test_list_search_users(world):
     world.config["user_list"]["search_min_chars"] = 3
     await database_sync_to_async(world.save)()
     token = jwt.encode(payload, config["secret"], algorithm="HS256")
-    async with world_communicator() as c, world_communicator() as c_user1, world_communicator() as c_user2:
+    async with (
+        world_communicator() as c,
+        world_communicator() as c_user1,
+        world_communicator() as c_user2,
+    ):
         # User 1
         await c.send_json_to(["authenticate", {"token": token}])
         response = await c.receive_json_from()

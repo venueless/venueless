@@ -17,9 +17,10 @@ async def test_notification_on_mention_if_joined(world, chat_room):
     sender_token = get_token(world, [], uid="a")
     receiver_token = get_token(world, [], uid="b")
     channel_id = str(chat_room.channel.id)
-    async with world_communicator(token=sender_token) as c1, world_communicator(
-        token=receiver_token
-    ) as c2:
+    async with (
+        world_communicator(token=sender_token) as c1,
+        world_communicator(token=receiver_token) as c2,
+    ):
         # Setup. Both clients join, then c2 unsubscribes again ("background tab")
         await c1.send_json_to(["chat.join", 123, {"channel": channel_id}])
         await c1.receive_json_from()  # Success
@@ -72,9 +73,10 @@ async def test_no_notification_on_mention_if_rate_limit_exceeded(world, chat_roo
     sender_token = get_token(world, [], uid="a")
     receiver_token = get_token(world, [], uid="b")
     channel_id = str(chat_room.channel.id)
-    async with world_communicator(token=sender_token) as c1, world_communicator(
-        token=receiver_token
-    ) as c2:
+    async with (
+        world_communicator(token=sender_token) as c1,
+        world_communicator(token=receiver_token) as c2,
+    ):
         # Setup. Both clients join, then c2 unsubscribes again ("background tab")
         await c1.send_json_to(["chat.join", 123, {"channel": channel_id}])
         await c1.receive_json_from()  # Success
@@ -126,9 +128,10 @@ async def test_no_notification_on_mention_if_not_joined(world, chat_room):
     sender_token = get_token(world, [], uid="a")
     receiver_token = get_token(world, [], uid="b")
     channel_id = str(chat_room.channel.id)
-    async with world_communicator(token=sender_token) as c1, world_communicator(
-        token=receiver_token
-    ) as c2:
+    async with (
+        world_communicator(token=sender_token) as c1,
+        world_communicator(token=receiver_token) as c2,
+    ):
         await c1.send_json_to(["chat.join", 123, {"channel": channel_id}])
         await c1.receive_json_from()  # Success
         await c1.receive_json_from()  # Join notification c1
@@ -165,9 +168,10 @@ async def test_notification_on_mention_if_not_joined_volatile_and_permitted(
     sender_token = get_token(world, [], uid="a")
     receiver_token = get_token(world, [], uid="b")
     channel_id = str(volatile_chat_room.channel.id)
-    async with world_communicator(token=sender_token) as c1, world_communicator(
-        token=receiver_token
-    ) as c2:
+    async with (
+        world_communicator(token=sender_token) as c1,
+        world_communicator(token=receiver_token) as c2,
+    ):
         # Setup. Both clients join, then c2 unsubscribes again ("background tab")
         await c1.send_json_to(["chat.join", 123, {"channel": channel_id}])
         await c1.receive_json_from()  # Success
@@ -210,9 +214,10 @@ async def test_no_notification_on_mention_if_not_joined_volatile_and_no_permitte
     sender_token = get_token(world, ["foo"], uid="a")
     receiver_token = get_token(world, [], uid="b")
     channel_id = str(volatile_chat_room.channel.id)
-    async with world_communicator(token=sender_token) as c1, world_communicator(
-        token=receiver_token
-    ) as c2:
+    async with (
+        world_communicator(token=sender_token) as c1,
+        world_communicator(token=receiver_token) as c2,
+    ):
         # Setup. Both clients join, then c2 unsubscribes again ("background tab")
         await c1.send_json_to(["chat.join", 123, {"channel": channel_id}])
         await c1.receive_json_from()  # Success

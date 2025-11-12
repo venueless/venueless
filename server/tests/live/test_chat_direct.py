@@ -37,8 +37,9 @@ async def world_communicator(client_id=None):
 @pytest.mark.asyncio
 @pytest.mark.django_db
 async def test_no_permission(world):
-    async with world_communicator(client_id="a") as c1, world_communicator(
-        client_id="b"
+    async with (
+        world_communicator(client_id="a") as c1,
+        world_communicator(client_id="b"),
     ):
         await c1.send_json_to(
             [
@@ -66,9 +67,10 @@ async def test_no_permission(world):
 async def test_start_direct_channel(world):
     world.trait_grants["participant"] = []
     await database_sync_to_async(world.save)()
-    async with world_communicator(client_id="a") as c1, world_communicator(
-        client_id="b"
-    ) as c2:
+    async with (
+        world_communicator(client_id="a") as c1,
+        world_communicator(client_id="b") as c2,
+    ):
         await c1.send_json_to(
             [
                 "chat.direct.create",
@@ -172,9 +174,10 @@ async def _setup_dms(c1, c2):
 async def test_reuse_direct_channel(world):
     world.trait_grants["participant"] = []
     await database_sync_to_async(world.save)()
-    async with world_communicator(client_id="a") as c1, world_communicator(
-        client_id="b"
-    ) as c2:
+    async with (
+        world_communicator(client_id="a") as c1,
+        world_communicator(client_id="b") as c2,
+    ):
         channel = await _setup_dms(c1, c2)
 
         await c1.send_json_to(
@@ -225,9 +228,11 @@ async def test_reuse_direct_channel(world):
 async def test_do_not_reuse_direct_channel_with_additional_user(world):
     world.trait_grants["participant"] = []
     await database_sync_to_async(world.save)()
-    async with world_communicator(client_id="a") as c1, world_communicator(
-        client_id="b"
-    ), world_communicator(client_id="c"):
+    async with (
+        world_communicator(client_id="a") as c1,
+        world_communicator(client_id="b"),
+        world_communicator(client_id="c"),
+    ):
         await c1.send_json_to(
             [
                 "chat.direct.create",
@@ -287,9 +292,11 @@ async def test_do_not_reuse_direct_channel_with_additional_user(world):
 async def test_subscribe_member_only(world):
     world.trait_grants["participant"] = []
     await database_sync_to_async(world.save)()
-    async with world_communicator(client_id="a") as c1, world_communicator(
-        client_id="b"
-    ) as c2, world_communicator(client_id="c") as c3:
+    async with (
+        world_communicator(client_id="a") as c1,
+        world_communicator(client_id="b") as c2,
+        world_communicator(client_id="c") as c3,
+    ):
         channel = await _setup_dms(c1, c2)
 
         await c1.send_json_to(
@@ -318,9 +325,11 @@ async def test_subscribe_member_only(world):
 async def test_send_member_only(world):
     world.trait_grants["participant"] = []
     await database_sync_to_async(world.save)()
-    async with world_communicator(client_id="a") as c1, world_communicator(
-        client_id="b"
-    ) as c2, world_communicator(client_id="c") as c3:
+    async with (
+        world_communicator(client_id="a") as c1,
+        world_communicator(client_id="b") as c2,
+        world_communicator(client_id="c") as c3,
+    ):
         channel = await _setup_dms(c1, c2)
 
         await c1.send_json_to(
@@ -357,9 +366,11 @@ async def test_send_member_only(world):
 async def test_fetch_member_only(world):
     world.trait_grants["participant"] = []
     await database_sync_to_async(world.save)()
-    async with world_communicator(client_id="a") as c1, world_communicator(
-        client_id="b"
-    ) as c2, world_communicator(client_id="c") as c3:
+    async with (
+        world_communicator(client_id="a") as c1,
+        world_communicator(client_id="b") as c2,
+        world_communicator(client_id="c") as c3,
+    ):
         channel = await _setup_dms(c1, c2)
 
         await c1.send_json_to(
@@ -396,8 +407,9 @@ async def test_fetch_member_only(world):
 async def test_create_blocked_user(world):
     world.trait_grants["participant"] = []
     await database_sync_to_async(world.save)()
-    async with world_communicator(client_id="a") as c1, world_communicator(
-        client_id="b"
+    async with (
+        world_communicator(client_id="a") as c1,
+        world_communicator(client_id="b"),
     ):
         await c1.send_json_to(
             [
@@ -443,9 +455,10 @@ async def test_create_blocked_user(world):
 async def test_create_blocked_by_user(world):
     world.trait_grants["participant"] = []
     await database_sync_to_async(world.save)()
-    async with world_communicator(client_id="a") as c1, world_communicator(
-        client_id="b"
-    ) as c2:
+    async with (
+        world_communicator(client_id="a") as c1,
+        world_communicator(client_id="b") as c2,
+    ):
         await c2.send_json_to(
             [
                 "user.block",
@@ -490,9 +503,10 @@ async def test_create_blocked_by_user(world):
 async def test_send_if_blocked_by_user(world):
     world.trait_grants["participant"] = []
     await database_sync_to_async(world.save)()
-    async with world_communicator(client_id="a") as c1, world_communicator(
-        client_id="b"
-    ) as c2:
+    async with (
+        world_communicator(client_id="a") as c1,
+        world_communicator(client_id="b") as c2,
+    ):
         channel = await _setup_dms(c1, c2)
         await c1.send_json_to(
             [
@@ -671,9 +685,10 @@ async def test_send_call_invite(world):
 
         world.trait_grants["participant"] = []
         await database_sync_to_async(world.save)()
-        async with world_communicator(client_id="a") as c1, world_communicator(
-            client_id="b"
-        ) as c2:
+        async with (
+            world_communicator(client_id="a") as c1,
+            world_communicator(client_id="b") as c2,
+        ):
             channel = await _setup_dms(c1, c2)
             await c1.send_json_to(
                 [
@@ -718,9 +733,11 @@ async def test_send_call_require_invite(world):
         )
         world.trait_grants["participant"] = []
         await database_sync_to_async(world.save)()
-        async with world_communicator(client_id="a") as c1, world_communicator(
-            client_id="b"
-        ) as c2, world_communicator(client_id="c") as c3:
+        async with (
+            world_communicator(client_id="a") as c1,
+            world_communicator(client_id="b") as c2,
+            world_communicator(client_id="c") as c3,
+        ):
             channel = await _setup_dms(c1, c2)
             await c1.send_json_to(
                 [
@@ -760,9 +777,11 @@ async def test_send_call_require_invite(world):
 async def test_hide_and_reappear(world):
     world.trait_grants["participant"] = []
     await database_sync_to_async(world.save)()
-    async with world_communicator(client_id="a") as c1, world_communicator(
-        client_id="b"
-    ) as c2, world_communicator(client_id="b") as c2b:
+    async with (
+        world_communicator(client_id="a") as c1,
+        world_communicator(client_id="b") as c2,
+        world_communicator(client_id="b") as c2b,
+    ):
         await c2.receive_json_from()  # user updated
 
         await c1.send_json_to(
@@ -854,9 +873,10 @@ async def test_hide_and_reappear(world):
 async def test_send_if_silenced(world):
     world.trait_grants["participant"] = []
     await database_sync_to_async(world.save)()
-    async with world_communicator(client_id="a") as c1, world_communicator(
-        client_id="b"
-    ) as c2:
+    async with (
+        world_communicator(client_id="a") as c1,
+        world_communicator(client_id="b") as c2,
+    ):
         channel = await _setup_dms(c1, c2)
         await c1.send_json_to(
             [
@@ -901,9 +921,10 @@ async def test_send_if_silenced(world):
 async def test_notification_contains_content_and_persists(world):
     world.trait_grants["participant"] = []
     await database_sync_to_async(world.save)()
-    async with world_communicator(client_id="a") as c1, world_communicator(
-        client_id="b"
-    ) as c2:
+    async with (
+        world_communicator(client_id="a") as c1,
+        world_communicator(client_id="b") as c2,
+    ):
         channel = await _setup_dms(c1, c2)
 
         # First message
@@ -975,9 +996,11 @@ async def test_notification_contains_content_and_persists(world):
 async def test_notification_sync_read_state_across_clients(world):
     world.trait_grants["participant"] = []
     await database_sync_to_async(world.save)()
-    async with world_communicator(client_id="a") as c1, world_communicator(
-        client_id="b"
-    ) as c2, world_communicator() as c2b:
+    async with (
+        world_communicator(client_id="a") as c1,
+        world_communicator(client_id="b") as c2,
+        world_communicator() as c2b,
+    ):
         channel = await _setup_dms(c1, c2)
 
         await c2b.send_json_to(["authenticate", {"client_id": "b"}])

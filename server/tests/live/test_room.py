@@ -389,9 +389,11 @@ async def test_user_count(world, stream_room):
 async def test_viewers(world, stream_room):
     token = get_token(world, ["moderator"], uid="moderator")
 
-    async with world_communicator(token=token) as c1, world_communicator(
-        client_id="guest"
-    ) as c2, world_communicator(client_id="guest") as c3:
+    async with (
+        world_communicator(token=token) as c1,
+        world_communicator(client_id="guest") as c2,
+        world_communicator(client_id="guest") as c3,
+    ):
         u1 = await database_sync_to_async(User.objects.get)(token_id="moderator")
         u2 = await database_sync_to_async(User.objects.get)(client_id="guest")
 
