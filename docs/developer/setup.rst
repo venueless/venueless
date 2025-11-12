@@ -54,7 +54,7 @@ To check locally, it is convenient to have a local Python environment (such as a
 can install the dependencies of the server component::
 
 	(venueless) $ cd server
-	(venueless) $ pip install -r requirements.txt
+	(venueless) $ uv pip install -e ".[dev]"
 
 To auto-format the code according to the code style and to check for linter issues, you can run the following
 commands::
