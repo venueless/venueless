@@ -40,7 +40,7 @@ jobs:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip
       - name: Install Python dependencies
-        run: pip3 install -U pip wheel setuptools && pip3 install -Ur requirements.txt
+        run: pip3 install -U pip wheel setuptools ".[dev]"
         working-directory: ./server
       - name: Run checks
         run: python manage.py check
