@@ -1,4 +1,4 @@
-FROM python:3.14-bookworm
+FROM python:3.11-bookworm
 
 RUN curl -sL https://deb.nodesource.com/setup_20.x | bash && \
     apt-get install -y --no-install-recommends \
