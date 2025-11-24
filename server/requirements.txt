@@ -1,7 +1,7 @@
 # prod
 aiofile==3.9.*
 aiohttp==3.13.2
-beautifulsoup4==4.13.*
+beautifulsoup4==4.14.*
 celery==5.5.*
 channels==4.3.*
 channels_redis==4.3.*
