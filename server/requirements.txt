@@ -27,7 +27,7 @@ pdfrw==0.4
 pyjwt==2.10.*
 python-dateutil==2.9.*
 pytz
-pywebpush==2.0.*
+pywebpush==2.1.*
 redis==7.1.0
 reportlab==4.4.*
 requests==2.32.*
