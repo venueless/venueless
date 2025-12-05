@@ -9,7 +9,7 @@
 			.ui-form-body
 				color-picker(v-model="config.theme.colors.primary", name="colors_primary", label="Primary color", :validation="v$.config.theme.colors.primary")
 				color-picker(v-model="config.theme.colors.sidebar", name="colors_sidebar", label="Sidebar color", :validation="v$.config.theme.colors.sidebar")
-				color-picker(v-model="config.theme.colors.bbb_background", name="colors_bbb_background", label="BBB background color", :validation="v$.config.theme.colors.bbb_background")
+				color-picker(v-model="config.theme.colors.bbb_background", name="colors_bbb_background", label="Video room background color", :validation="v$.config.theme.colors.bbb_background")
 				upload-url-input(v-model="config.theme.logo.url", name="logo_url", label="Logo", :validation="v$.config.theme.logo.url")
 				bunt-checkbox(v-model="config.theme.logo.fitToWidth", name="logo_fit", label="Fit logo to width")
 				upload-url-input(v-model="config.theme.streamOfflineImage", name="streamoffline_url", label="Stream offline image", :validation="v$.config.theme.streamOfflineImage")
