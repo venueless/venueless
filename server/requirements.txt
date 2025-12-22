@@ -17,7 +17,7 @@ emoji==2.15.*
 icalendar==6.3.*
 lxml==6.0.*
 matplotlib==3.10.*
-numpy==2.3.*
+numpy==2.4.*
 orjson==3.11.*
 openpyxl~=3.1.5
 Pillow==12.0.*
