@@ -11,7 +11,7 @@ django-decorator-include==3.3
 django-extensions==4.1
 django-formset-js-improved
 django-multifactor==0.8.4
-mozilla-django-oidc==4.0.*
+mozilla-django-oidc==5.0.*
 djangorestframework==3.16.*
 emoji==2.15.*
 icalendar==6.3.*
