@@ -548,6 +548,9 @@ if os.environ.get(
     MIDDLEWARE.append("venueless.control.middleware.SessionRefresh")
     OIDC_CALLBACK_CLASS = "venueless.control.auth.CustomOIDCAuthenticationCallbackView"
     VENUELESS_MULTIFACTOR_REQUIRE = False
+    # SessionRefresh middleware only checks on GET requests. To prevent a security issue on POST requests, we
+    # set cookie age only slightly higher than the SSO interval.
+    SESSION_COOKIE_AGE = 3600 * 25
 else:
     VENUELESS_MULTIFACTOR_REQUIRE = (
         os.environ.get(
