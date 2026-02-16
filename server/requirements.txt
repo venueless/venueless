@@ -14,7 +14,7 @@ django-multifactor==0.8.4
 mozilla-django-oidc==5.0.*
 djangorestframework==3.16.*
 emoji==2.15.*
-icalendar==6.3.*
+icalendar==7.0.*
 lxml==6.0.*
 matplotlib==3.10.*
 numpy==2.3.*
