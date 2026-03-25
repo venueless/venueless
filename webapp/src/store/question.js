@@ -11,18 +11,18 @@ export default {
 		}
 	},
 	actions: {
-		async changeRoom ({ state }, room) {
+		async changeRoom ({ state, rootGetters }, room) {
 			state.questions = null
 			if (!room) return
-			if (room.modules.some(module => module.type === 'question')) {
+			if (room.modules.some(module => module.type === 'question') && rootGetters.hasPermission('room:question.read')) {
 				state.questions = await api.call('question.list', { room: room.id })
 			}
 		},
 		async submitQuestion ({ state, rootState }, question) {
 			const result = await api.call('question.ask', { room: rootState.activeRoom.id, content: question })
-			if (state.questions.some(q => q.id === result.question.id)) return
+			if (state.questions?.some(q => q.id === result.question.id)) return
 			// add own question to the list since we're not getting a broadcast for own questions waiting in mod queue
-			state.questions.push(result.question)
+			state.questions?.push(result.question)
 		},
 		async vote ({ rootState }, question) {
 			await api.call('question.vote', { room: rootState.activeRoom.id, id: question.id, vote: !question.voted })
