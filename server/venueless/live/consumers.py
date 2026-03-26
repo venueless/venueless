@@ -10,6 +10,7 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from django.conf import settings
 from django.db import OperationalError
 from sentry_sdk import capture_exception, configure_scope
+from uvicorn.protocols.utils import ClientDisconnected
 from websockets import ConnectionClosed
 
 from venueless.core.services.connections import (
@@ -192,7 +193,7 @@ class MainConsumer(AsyncJsonWebsocketConsumer):
                     return await component.dispatch_event(message)
             else:
                 return await super().dispatch(message)
-        except ConnectionClosed:  # pragma: no cover
+        except (ConnectionClosed, ClientDisconnected):  # pragma: no cover
             # Connection vanished while we were trying to send something, oops. Nothing we can do except hope our
             # disconnect handler will be called.
             pass
@@ -236,7 +237,7 @@ class MainConsumer(AsyncJsonWebsocketConsumer):
     async def send_json(self, content, close=False):
         try:
             await super().send(text_data=orjson.dumps(content).decode(), close=close)
-        except (RuntimeError, ConnectionClosed):
+        except (RuntimeError, ConnectionClosed, ClientDisconnected):
             # socket has been closed in the meantime
             pass
 
