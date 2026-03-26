@@ -31,7 +31,7 @@ pywebpush==2.3.*
 redis==7.4.0
 reportlab==4.4.*
 requests==2.32.*
-sentry-sdk==1.30.*
+sentry-sdk==2.56.*
 tqdm==4.67.*
 websockets==16.*
 
