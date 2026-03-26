@@ -24,7 +24,7 @@ Pillow==12.1.*
 pandas==2.3.*
 pdf2image==1.17.*
 pdfrw==0.4
-pyjwt==2.10.*
+pyjwt==2.11.*
 python-dateutil==2.9.*
 pytz
 pywebpush==2.3.*
