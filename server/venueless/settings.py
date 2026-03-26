@@ -15,6 +15,7 @@ MEDIA_ROOT = os.path.join(DATA_DIR, "media")
 STATIC_ROOT = os.path.join(os.path.dirname(__file__), "static.dist")
 FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o775
 FILE_UPLOAD_PERMISSIONS = 0o644
+FORMS_URLFIELD_ASSUME_HTTPS = True  # transitional for django 6.0
 
 if not os.path.exists(DATA_DIR):
     os.mkdir(DATA_DIR)
