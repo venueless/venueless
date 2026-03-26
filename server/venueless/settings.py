@@ -208,7 +208,12 @@ DIGITALSAMBA_TEAM = os.getenv(
     "VENUELESS_DIGITALSAMBA_TEAM", config.get("digitalsamba", "team", fallback="")
 )
 DIGITALSAMBA_KEY = os.getenv(
-    "VENUELESS_DIGITALSAMBA_KEY", config.get("digitalsamba", "key", fallback="key-not-set-but-a-long-string-is-needed-in-testing")
+    "VENUELESS_DIGITALSAMBA_KEY",
+    config.get(
+        "digitalsamba",
+        "key",
+        fallback="key-not-set-but-a-long-string-is-needed-in-testing",
+    ),
 )
 DIGITALSAMBA_RETENTION_DAYS = int(
     os.getenv(
