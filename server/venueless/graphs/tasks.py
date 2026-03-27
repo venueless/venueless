@@ -84,7 +84,9 @@ def generate_attendee_list(world, input=None):
 
 @app.task(base=WorldTask)
 def generate_chat_history(world, input=None):
-    channel = Channel.objects.get(world=world, room__isnull=False, pk=input.get("channel"))
+    channel = Channel.objects.get(
+        world=world, room__isnull=False, pk=input.get("channel")
+    )
     tz = pytz.timezone(world.timezone)
     io = BytesIO()
 
