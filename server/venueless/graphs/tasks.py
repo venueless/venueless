@@ -84,7 +84,7 @@ def generate_attendee_list(world, input=None):
 
 @app.task(base=WorldTask)
 def generate_chat_history(world, input=None):
-    channel = Channel.objects.get(pk=input.get("channel"))
+    channel = Channel.objects.get(world=world, room__isnull=False, pk=input.get("channel"))
     tz = pytz.timezone(world.timezone)
     io = BytesIO()
 
@@ -139,7 +139,7 @@ def generate_chat_history(world, input=None):
 
 @app.task(base=WorldTask)
 def generate_question_history(world, input=None):
-    room = Room.objects.get(pk=input.get("room"))
+    room = Room.objects.get(pk=input.get("room"), world=world)
     tz = pytz.timezone(world.timezone)
     io = BytesIO()
 
@@ -497,7 +497,7 @@ def generate_views(world, input=None):
 
 @app.task(base=WorldTask)
 def generate_poll_history(world, input=None):
-    room = Room.objects.get(pk=input.get("room"))
+    room = Room.objects.get(pk=input.get("room"), world=world)
     io = BytesIO()
 
     wb = Workbook(write_only=True)
