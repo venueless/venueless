@@ -37,12 +37,12 @@
     ],
     "JWT_secrets": [
       {
-        "secret": "FaZaa4KeeZoo2ahgoh2uenahd3Uta4Ei",
+        "secret": "vPG8Hmvax6kvi6JbFFV72hz5bsRDnM4l",
         "issuer": "https://pretix.eu/",
         "audience": "demo-event"
       },
       {
-        "secret": "lol",
+        "secret": "yJe4JC8PfYCEoL7ko9e3mYCVqvijy1Os",
         "issuer": "https://example.org/",
         "audience": "demo-event"
       }
