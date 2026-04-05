@@ -478,7 +478,7 @@ async def test_exhibition_contact_not_staff(world, exhibition_room):
         )
         response = await c2.receive_json_from()
         assert response[0] == "error"
-        assert response[2]["code"] == "exhibition.not_staff_member"
+        assert response[2]["code"] == "exhibition.unknown_contact_request"
 
 
 @pytest.mark.asyncio

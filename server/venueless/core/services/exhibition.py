@@ -284,13 +284,17 @@ class ExhibitionService:
     def accept(self, contact_request_id, staff):
         r = get_request_by_id(self.world.pk, contact_request_id)
         if not r:
-            return None
+            return None, []
+        all_staff = r.exhibitor.staff.values_list("user__id", flat=True)
+        if staff.pk not in all_staff:
+            return None, []
         if r.state == "answered":
-            return None
+            return None, []
         r.state = "answered"
         r.answered_by = staff
         r.save(update_fields=["state", "answered_by"])
-        return r.serialize()
+
+        return r.serialize(), all_staff
 
     @database_sync_to_async
     def get_staff(self, exhibitor_id):
