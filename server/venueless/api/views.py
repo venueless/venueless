@@ -136,11 +136,9 @@ def delete_user(request, **kwargs):
     user = None
     with suppress(exceptions.ValidationError):  # raised when user_id isn't a uid
         if user_id:
-            user = request.world.user_set.objects.filter(
-                id=user_id, deleted=False
-            ).first()
+            user = request.world.user_set.filter(id=user_id, deleted=False).first()
         elif token_id:
-            user = request.world.user_set.objects.filter(
+            user = request.world.user_set.filter(
                 token_id=token_id, deleted=False
             ).first()
     if not user:
