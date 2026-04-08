@@ -124,7 +124,10 @@ class AppView(View):
                         f"/standalone/{invite.room_id}/anonymous#invite={invite.short_token}",
                     )
                 )
-        elif not short_host and len(request.path) in (7, 9):  # 7 for backwards compatibility
+        elif not short_host and len(request.path) in (
+            7,
+            9,
+        ):  # 7 for backwards compatibility
             # The sysadmin has not set up a separate domain for short URLs
             try:
                 invite = AnonymousInvite.objects.get(
