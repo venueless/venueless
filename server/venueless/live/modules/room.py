@@ -9,7 +9,7 @@ from channels.layers import get_channel_layer
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now
-from sentry_sdk import add_breadcrumb, configure_scope
+from sentry_sdk import add_breadcrumb, get_current_scope
 
 from venueless.core.models.room import (
     AnonymousInvite,
@@ -145,8 +145,8 @@ class RoomModule(BaseModule):
                 message=f"Entered room {self.room.pk} ({self.room.name})",
                 level="info",
             )
-            with configure_scope() as scope:
-                scope.set_extra("last_room", str(self.room.pk))
+            scope = get_current_scope()
+            scope.set_extra("last_room", str(self.room.pk))
 
     async def _leave_room(self, room):
         group_names = [
