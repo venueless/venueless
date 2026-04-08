@@ -212,7 +212,7 @@ def approximate_view_number(actual_number):
 
 def generate_short_token():
     chars = "abcdefghijklmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ123456789"
-    return get_random_string(6, chars)
+    return get_random_string(8, chars)
 
 
 class AnonymousInvite(models.Model):

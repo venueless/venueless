@@ -174,15 +174,11 @@ class ExhibitionModule(BaseModule):
     @command("contact_accept")
     async def contact_accept(self, body):
         channel = body["channel"]
-        request = await self.service.accept(
+        request, staff = await self.service.accept(
             contact_request_id=body["contact_request"], staff=self.consumer.user
         )
         if not request:
             await self.consumer.send_error("exhibition.unknown_contact_request")
-            return
-        staff = await self.service.get_staff(exhibitor_id=request["exhibitor"]["id"])
-        if self.consumer.user.id not in staff:
-            await self.consumer.send_error("exhibition.not_staff_member")
             return
         await self.consumer.send_success()
         await self.consumer.channel_layer.group_send(

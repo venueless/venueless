@@ -154,7 +154,7 @@ class ChatService:
 
         if include_all_permitted:
             result = set()
-            for u in User.objects.filter(id__in=uids):
+            for u in User.objects.filter(id__in=uids, world=self.world):
                 if self.world.has_permission(
                     user=u, permission=Permission.ROOM_CHAT_READ, room=channel.room
                 ):
