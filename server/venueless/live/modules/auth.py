@@ -11,7 +11,7 @@ from django.core.exceptions import ValidationError
 from django.core.signing import dumps
 from django.core.validators import URLValidator
 from django.urls import reverse
-from sentry_sdk import configure_scope
+from sentry_sdk import get_current_scope
 
 from venueless.core.models import User
 from venueless.core.models.auth import ShortToken, WebPushClient
@@ -108,8 +108,8 @@ class AuthModule(BaseModule):
         self.consumer.user = login_result.user
         self._current_view = login_result.view
         if settings.SENTRY_DSN:
-            with configure_scope() as scope:
-                scope.user = {"id": str(self.consumer.user.id)}
+            scope = get_current_scope()
+            scope.user = {"id": str(self.consumer.user.id)}
 
         async with aredis() as redis:
             redis_read = await redis.hgetall(f"chat:read:{self.consumer.user.id}")

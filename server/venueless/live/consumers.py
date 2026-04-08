@@ -9,7 +9,7 @@ from channels.exceptions import StopConsumer
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from django.conf import settings
 from django.db import OperationalError
-from sentry_sdk import capture_exception, configure_scope
+from sentry_sdk import capture_exception, get_current_scope
 from uvicorn.protocols.utils import ClientDisconnected
 from websockets import ConnectionClosed
 
@@ -85,8 +85,8 @@ class MainConsumer(AsyncJsonWebsocketConsumer):
             return
 
         if settings.SENTRY_DSN:
-            with configure_scope() as scope:
-                scope.set_extra("world", self.world.id)
+            scope = get_current_scope()
+            scope.set_extra("world", self.world.id)
 
         async with statsd() as s:
             s.increment(f"connection.established,world={world_id}")
