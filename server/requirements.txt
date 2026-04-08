@@ -1,6 +1,6 @@
 # prod
 aiofile==3.9.*
-aiohttp==3.13.3
+aiohttp==3.13.4
 beautifulsoup4==4.14.*
 celery==5.6.*
 channels==4.3.*
