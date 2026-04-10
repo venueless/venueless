@@ -89,7 +89,7 @@ def fetch_preview_data(url, world):
             return {"image": image_url}
 
     elif "text/html" in content_type:
-        text = response.content.decode()
+        text = response.text
         header_end = text.find("</head>")
         if not header_end:  # Avoid parsing huge HTML docs for now
             return
