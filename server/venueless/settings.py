@@ -488,6 +488,13 @@ DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 LOGIN_URL = "/control/auth/login/"
 LOGIN_REDIRECT_URL = "/control/"
 
+ALLOW_HTTP_TO_PRIVATE_NETWORKS = config.getboolean(
+    "urls",
+    "allow_http_to_private_networks",
+    fallback=os.environ.get("VENUELESS_ALLOW_HTTP_TO_PRIVATE_NETWORKS", "").lower()
+    == "true",
+)
+
 if os.environ.get(
     "VENUELESS_OIDC_CLIENT_ID", config.get("oidc", "client_id", fallback="")
 ):
