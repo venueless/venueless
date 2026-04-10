@@ -6,11 +6,16 @@ from django.conf import settings
 from urllib3.connection import HTTPConnection, HTTPSConnection
 from urllib3.connectionpool import HTTPConnectionPool, HTTPSConnectionPool
 from urllib3.exceptions import (
-    ConnectTimeoutError, HTTPError, LocationParseError, NameResolutionError,
+    ConnectTimeoutError,
+    HTTPError,
+    LocationParseError,
+    NameResolutionError,
     NewConnectionError,
 )
 from urllib3.util.connection import (
-    _TYPE_SOCKET_OPTIONS, _set_socket_options, allowed_gai_family,
+    _TYPE_SOCKET_OPTIONS,
+    _set_socket_options,
+    allowed_gai_family,
 )
 from urllib3.util.timeout import _DEFAULT_TIMEOUT
 
@@ -34,10 +39,10 @@ def monkeypatch_urllib3_ssrf_protection():
         return
 
     def create_connection(
-            address: tuple[str, int],
-            timeout=_DEFAULT_TIMEOUT,
-            source_address: tuple[str, int] | None = None,
-            socket_options: _TYPE_SOCKET_OPTIONS | None = None,
+        address: tuple[str, int],
+        timeout=_DEFAULT_TIMEOUT,
+        source_address: tuple[str, int] | None = None,
+        socket_options: _TYPE_SOCKET_OPTIONS | None = None,
     ) -> socket.socket:
         # This is copied from urllib3.util.connection v2.3.0
         host, port = address

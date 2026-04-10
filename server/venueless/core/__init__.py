@@ -7,4 +7,5 @@ class CoreConfig(AppConfig):
 
     def ready(self):
         from .monkeypatching import monkeypatch_all_at_ready
+
         monkeypatch_all_at_ready()
