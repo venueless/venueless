@@ -50,11 +50,10 @@ Code style
 For our server component, we enforce a specific code style to make things more consistent and diffs easier to read.
 Any pull requests you send us will automatically be checked against these rules.
 
-To check locally, it is convenient to have a local Python environment (such as a virtual environemnt) in which you
-can install the dependencies of the server component::
+To check locally, use uv for convenient venv management::
 
 	(venueless) $ cd server
-	(venueless) $ pip install -e '.[dev]'
+	(venueless) $ uv pip install -e '.[dev]'
 
 To auto-format the code according to the code style and to check for linter issues, you can run the following
 commands::
@@ -66,7 +65,7 @@ commands::
 To automatically check before commits, add a script like the following to ``.git/hooks/pre-commit`` and apply ``chmod +x .git/hooks/pre-commit``::
 
 	#!/bin/bash
-	source ~/.virtualenvs/venueless/bin/activate
+	source .venv/bin/activate
 	cd server
 	for file in $(git diff --cached --name-only | grep -E '\.py$' | grep -Ev "venueless/celery_app\.py|venueless/settings\.py")
 	do

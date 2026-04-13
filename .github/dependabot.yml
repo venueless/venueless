@@ -11,7 +11,7 @@ updates:
   #   - dependency-name: "@babel*"
   #   - dependency-name: "@vue*"
   #   - dependency-name: "@eslint*"
-  - package-ecosystem: pip
+  - package-ecosystem: uv
     directory: "/server"
     schedule:
       interval: weekly
