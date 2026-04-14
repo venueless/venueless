@@ -40,17 +40,17 @@ jobs:
         with:
           enable-cache: true
       - name: Install Python dependencies
-        run: uv pip install --system ".[dev]"
+        run: uv sync --locked --extra dev
         working-directory: ./server
       - name: Run checks
-        run: python manage.py check
+        run: uv run --no-sync python manage.py check
         working-directory: ./server
       - name: Run collectstatic
-        run: python manage.py collectstatic
+        run: uv run --no-sync python manage.py collectstatic
         working-directory: ./server
       - name: Run tests
         working-directory: ./server
-        run: py.test tests/ --cov=./ --reruns 3 --reruns-delay 1
+        run: uv run --no-sync py.test tests/ --cov=./ --reruns 3 --reruns-delay 1
         env:
           VENUELESS_REDIS_HOST: 'redis'
           VENUELESS_DB_TYPE: 'postgresql'
@@ -62,11 +62,11 @@ jobs:
       - name: Build coverage info
         working-directory: ./server
         run: |
-          python -m coverage json
+          uv run --no-sync python -m coverage json
 
-          export TOTAL_COV=$(python -c "import json;print(json.load(open('coverage.json'))['totals']['percent_covered_display'])")
+          export TOTAL_COV=$(uv run --no-sync python -c "import json;print(json.load(open('coverage.json'))['totals']['percent_covered_display'])")
           echo "TOTAL_COV=$TOTAL_COV" >> $GITHUB_ENV
           echo "## Test coverage: $TOTAL_COV%" >> $GITHUB_STEP_SUMMARY
-          python -m coverage report --skip-covered --skip-empty --show-missing --format=markdown >> $GITHUB_STEP_SUMMARY
+          uv run --no-sync python -m coverage report --skip-covered --skip-empty --show-missing --format=markdown >> $GITHUB_STEP_SUMMARY
 
-          python -m coverage report --fail-under=70
+          uv run --no-sync python -m coverage report --fail-under=70
