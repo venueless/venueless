@@ -25,7 +25,7 @@ dependencies = [
     "lxml==6.0.*",
     "matplotlib==3.10.*",
     "mozilla-django-oidc==5.0.*",
-    "numpy==2.3.*",
+    "numpy==2.4.*",
     "openpyxl~=3.1.5",
     "orjson==3.11.*",
     "pandas==2.3.*",
