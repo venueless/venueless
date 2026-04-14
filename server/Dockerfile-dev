@@ -1,9 +1,19 @@
 FROM python:3.14-bookworm
 
-COPY pyproject.toml /pyproject.toml
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+ENV UV_LINK_MODE=copy \
+    UV_COMPILE_BYTECODE=1 \
+    UV_PROJECT_ENVIRONMENT=/opt/venv \
+    VIRTUAL_ENV=/opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
 RUN apt update && apt install -y poppler-utils && apt-get clean && rm -rf /var/lib/apt/lists/*
-RUN pip3 install -U pip wheel setuptools && pip3 install -Ue '.[dev]'
+
+COPY pyproject.toml uv.lock /_deps/
+RUN cd /_deps && uv sync --locked --no-install-project --extra dev && \
+    rm -rf /root/.cache/uv
+
 ENV VENUELESS_COMMIT_SHA=devcontainer
 WORKDIR /app
 EXPOSE 8375
-

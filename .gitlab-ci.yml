@@ -1,16 +1,13 @@
 py_style:
   image:
-    name: python:3.11-bookworm
+    name: ghcr.io/astral-sh/uv:python3.14-bookworm
   stage: build
   script:
     - cd server
-    - python -m venv env
-    - source env/bin/activate
-    - pip install -U pip wheel setuptools
-    - XDG_CACHE_HOME=/cache pip install black flake8 isort==5.*
-    - black --check venueless tests
-    - flake8 venueless tests
-    - isort -rc -c venueless tests
+    - uv sync --locked --extra dev
+    - uv run --no-sync black --check venueless tests
+    - uv run --no-sync flake8 venueless tests
+    - uv run --no-sync isort -c venueless tests
   interruptible: true
   allow_failure: true  # We check this in Github, and if it's urgent, we don't want to skip deployments because of this
 
@@ -18,18 +15,15 @@ py_test:
   stage: build
   #retry: 2
   image:
-    name: python:3.11-bookworm
+    name: ghcr.io/astral-sh/uv:python3.14-bookworm
   services:
     - redis:latest
     - postgres:15
   script:
     - cd server
-    - python -m venv env
-    - source env/bin/activate
-    - pip install -U pip wheel setuptools
-    - XDG_CACHE_HOME=/cache pip install '.[dev]'
-    - python manage.py collectstatic
-    - VENUELESS_REDIS_HOST=redis VENUELESS_DB_TYPE=postgresql VENUELESS_DB_NAME=venueless VENUELESS_DB_USER=venueless VENUELESS_DB_PASS=venueless VENUELESS_DB_HOST=postgres py.test tests/ --reruns 3 --reruns-delay 1
+    - uv sync --locked --extra dev
+    - uv run --no-sync python manage.py collectstatic
+    - VENUELESS_REDIS_HOST=redis VENUELESS_DB_TYPE=postgresql VENUELESS_DB_NAME=venueless VENUELESS_DB_USER=venueless VENUELESS_DB_PASS=venueless VENUELESS_DB_HOST=postgres uv run --no-sync py.test tests/ --reruns 3 --reruns-delay 1
   interruptible: true
   allow_failure: true  # We check this in Github, and if it's urgent, we don't want to skip deployments because of this
   variables:

@@ -52,8 +52,8 @@ Any pull requests you send us will automatically be checked against these rules.
 
 To check locally, use uv for convenient venv management::
 
-	(venueless) $ cd server
-	(venueless) $ uv pip install -e '.[dev]'
+	$ cd server
+	$ uv sync --locked --extra dev
 
 To auto-format the code according to the code style and to check for linter issues, you can run the following
 commands::

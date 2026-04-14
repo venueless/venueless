@@ -1,5 +1,7 @@
 FROM python:3.14-bookworm
 
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
 RUN curl -sL https://deb.nodesource.com/setup_20.x | bash && \
     apt-get install -y --no-install-recommends \
             build-essential \
@@ -29,13 +31,20 @@ RUN curl -sL https://deb.nodesource.com/setup_20.x | bash && \
 
 ENV LC_ALL=C.UTF-8 \
     DJANGO_SETTINGS_MODULE=venueless.settings \
-	IPYTHONDIR=/data/.ipython
+	IPYTHONDIR=/data/.ipython \
+    UV_LINK_MODE=copy \
+    UV_COMPILE_BYTECODE=1 \
+    UV_PROJECT_ENVIRONMENT=/opt/venv \
+    VIRTUAL_ENV=/opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
-# To copy only the requirements files needed to install from PIP
-COPY server/pyproject.toml /pyproject.toml
-RUN pip3 install -U pip wheel setuptools && \
-    pip3 install -Ue . ipython && \
-    rm -rf ~/.cache/pip
+# Install locked dependencies. Doing this before copying the source means this
+# layer is only rebuilt when pyproject.toml or uv.lock change.
+COPY server/pyproject.toml server/uv.lock /venueless/server/
+RUN cd /venueless/server && \
+    uv sync --locked --no-install-project && \
+    uv pip install ipython && \
+    rm -rf /root/.cache/uv
 
 COPY prod/entrypoint.bash /usr/local/bin/venueless
 COPY prod/supervisord.conf /etc/supervisord.conf
@@ -60,7 +69,7 @@ RUN cd /venueless/webapp && \
 
 COPY server /venueless/server
 WORKDIR /venueless/server
-RUN python manage.py collectstatic
+RUN python manage.py collectstatic --noinput
 
 ARG COMMIT=""
 LABEL commit=${COMMIT}

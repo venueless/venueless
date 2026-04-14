@@ -1,0 +1,14 @@
+.git
+.github
+.gitlab-ci.yml
+.venv
+**/.venv
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+**/node_modules
+webapp/dist
+server/data
+server/db.sqlite3
+server/venueless/static.dist
+docs/_build
