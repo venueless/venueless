@@ -30,7 +30,7 @@ dependencies = [
     "orjson==3.11.*",
     "pandas==2.3.*",
     "pdf2image==1.17.*",
-    "Pillow==12.1.*",
+    "Pillow==12.2.*",
     "psycopg2-binary==2.9.11",
     "pyjwt==2.12.*",
     "python-dateutil==2.9.*",
