@@ -32,7 +32,7 @@ dependencies = [
     "pdf2image==1.17.*",
     "Pillow==12.1.*",
     "psycopg2-binary==2.9.11",
-    "pyjwt==2.11.*",
+    "pyjwt==2.12.*",
     "python-dateutil==2.9.*",
     "pytz",
     "pywebpush==2.3.*",
