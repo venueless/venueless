@@ -31,7 +31,7 @@ dependencies = [
     "pandas==3.0.*",
     "pdf2image==1.17.*",
     "Pillow==12.2.*",
-    "psycopg2-binary==2.9.11",
+    "psycopg2-binary==2.9.12",
     "pyjwt==2.12.*",
     "python-dateutil==2.9.*",
     "pytz",
