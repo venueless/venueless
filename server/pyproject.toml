@@ -21,7 +21,7 @@ dependencies = [
     "djangorestframework==3.17.*",
     "emoji==2.15.*",
     "gunicorn==25.3.0",
-    "icalendar==7.0.*",
+    "icalendar==7.1.*",
     "lxml==6.1.*",
     "matplotlib==3.10.*",
     "mozilla-django-oidc==5.0.*",
