@@ -39,7 +39,7 @@ dependencies = [
     "redis==7.4.0",
     "reportlab==4.5.*",
     "requests==2.34.*",
-    "sentry-sdk==2.59.*",
+    "sentry-sdk==2.60.*",
     "svglib==1.6.*",
     "tqdm==4.67.*",
     "uvicorn[standard]==0.47.0",
