@@ -5,7 +5,7 @@ description = "Not for publishing - local development only"
 requires-python = ">=3.14"
 
 dependencies = [
-    "aiofile==3.9.*",
+    "aiofile==3.11.*",
     "aiohttp==3.13.5",
     "beautifulsoup4==4.14.*",
     "celery==5.6.*",
