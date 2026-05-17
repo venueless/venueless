@@ -38,7 +38,7 @@ dependencies = [
     "pywebpush==2.3.*",
     "redis==7.4.0",
     "reportlab==4.5.*",
-    "requests==2.33.*",
+    "requests==2.34.*",
     "sentry-sdk==2.59.*",
     "svglib==1.6.*",
     "tqdm==4.67.*",
