@@ -36,7 +36,7 @@ dependencies = [
     "python-dateutil==2.9.*",
     "pytz",
     "pywebpush==2.3.*",
-    "redis==7.4.0",
+    "redis==8.0.0",
     "reportlab==4.5.*",
     "requests==2.34.*",
     "sentry-sdk==2.61.*",
