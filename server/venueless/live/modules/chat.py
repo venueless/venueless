@@ -479,8 +479,8 @@ class ChatModule(BaseModule):
                             str(user.id),
                         )
             async with aredis() as redis:
-                await redis.setex(
-                    f"chat:direct:shownall:{self.channel_id}", 3600 * 24 * 7, "true"
+                await redis.set(
+                    f"chat:direct:shownall:{self.channel_id}", "true", ex=3600 * 24 * 7
                 )
 
         event = await self.service.create_event(
@@ -747,8 +747,10 @@ class ChatModule(BaseModule):
                         )
             if not hide:
                 async with aredis() as redis:
-                    await redis.setex(
-                        f"chat:direct:shownall:{self.channel_id}", 3600 * 24 * 7, "true"
+                    await redis.set(
+                        f"chat:direct:shownall:{self.channel_id}",
+                        "true",
+                        ex=3600 * 24 * 7,
                     )
 
         reply["id"] = str(channel.id)

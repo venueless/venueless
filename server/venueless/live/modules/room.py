@@ -185,8 +185,8 @@ class RoomModule(BaseModule):
     async def _update_view_count(self, room, actual_view_count):
         async with aredis(f"room:approxcount:known:{room.pk}") as redis:
             next_value = approximate_view_number(actual_view_count)
-            prev_value = await redis.getset(
-                f"room:approxcount:known:{room.pk}", next_value
+            prev_value = await redis.set(
+                f"room:approxcount:known:{room.pk}", next_value, get=True
             )
             if prev_value:
                 prev_value = prev_value.decode()
