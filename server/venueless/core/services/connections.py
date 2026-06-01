@@ -13,10 +13,10 @@ async def register_connection():
             f"{settings.VENUELESS_COMMIT}.{settings.VENUELESS_ENVIRONMENT}",
             1,
         )
-        tr.setex(
+        tr.set(
             f"connections:{settings.VENUELESS_COMMIT}.{settings.VENUELESS_ENVIRONMENT}",
-            60,
             "exists",
+            ex=60,
         )
         await tr.execute()
 
@@ -77,10 +77,10 @@ async def ping_connection(last_ping, user=None):
                 f"connections.list.user:{user.id}",
                 90,
             )
-        tr.setex(
+        tr.set(
             f"connections:{settings.VENUELESS_COMMIT}.{settings.VENUELESS_ENVIRONMENT}",
-            60,
             "exists",
+            ex=60,
         )
         await tr.execute()
     return n
