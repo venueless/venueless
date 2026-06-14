@@ -23,7 +23,7 @@ dependencies = [
     "gunicorn==26.0.0",
     "icalendar==7.1.*",
     "lxml==6.1.*",
-    "matplotlib==3.10.*",
+    "matplotlib==3.11.*",
     "mozilla-django-oidc==5.0.*",
     "numpy==2.4.*",
     "openpyxl~=3.1.5",
