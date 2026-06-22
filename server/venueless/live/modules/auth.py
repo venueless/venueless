@@ -11,6 +11,7 @@ from django.core.exceptions import ValidationError
 from django.core.signing import dumps
 from django.core.validators import URLValidator
 from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
 from sentry_sdk import get_current_scope
 
 from venueless.core.models import User
@@ -494,6 +495,12 @@ class AuthModule(BaseModule):
 
         if not body.get("return_url"):
             await self.consumer.send_error(code="user.social.return_url_required")
+            return
+
+        if not url_has_allowed_host_and_scheme(
+            body["return_url"], allowed_hosts=[self.consumer.world.domain]
+        ):
+            await self.consumer.send_error(code="user.social.return_url_invalid")
             return
 
         if network not in ("linkedin",):
