@@ -27,9 +27,11 @@ class DigitalSambaService:
     async def _get(self, url, timeout=30):
         try:
             async with aiohttp.ClientSession(
-                auth=aiohttp.BasicAuth(
-                    settings.DIGITALSAMBA_TEAM, settings.DIGITALSAMBA_KEY
-                )
+                headers={
+                    "Authorization": aiohttp.encode_basic_auth(
+                        settings.DIGITALSAMBA_TEAM, settings.DIGITALSAMBA_KEY
+                    )
+                }
             ) as session:
                 async with session.get(URL(url, encoded=True), timeout=timeout) as resp:
                     if resp.status != 200:
@@ -46,9 +48,11 @@ class DigitalSambaService:
     async def _delete(self, url, timeout=30):
         try:
             async with aiohttp.ClientSession(
-                auth=aiohttp.BasicAuth(
-                    settings.DIGITALSAMBA_TEAM, settings.DIGITALSAMBA_KEY
-                )
+                headers={
+                    "Authorization": aiohttp.encode_basic_auth(
+                        settings.DIGITALSAMBA_TEAM, settings.DIGITALSAMBA_KEY
+                    )
+                }
             ) as session:
                 async with session.delete(
                     URL(url, encoded=True), timeout=timeout
@@ -67,9 +71,11 @@ class DigitalSambaService:
     async def _post(self, url, data):
         try:
             async with aiohttp.ClientSession(
-                auth=aiohttp.BasicAuth(
-                    settings.DIGITALSAMBA_TEAM, settings.DIGITALSAMBA_KEY
-                )
+                headers={
+                    "Authorization": aiohttp.encode_basic_auth(
+                        settings.DIGITALSAMBA_TEAM, settings.DIGITALSAMBA_KEY
+                    )
+                }
             ) as session:
                 async with session.post(
                     URL(url, encoded=True),
@@ -91,9 +97,11 @@ class DigitalSambaService:
     async def _patch(self, url, data):
         try:
             async with aiohttp.ClientSession(
-                auth=aiohttp.BasicAuth(
-                    settings.DIGITALSAMBA_TEAM, settings.DIGITALSAMBA_KEY
-                )
+                headers={
+                    "Authorization": aiohttp.encode_basic_auth(
+                        settings.DIGITALSAMBA_TEAM, settings.DIGITALSAMBA_KEY
+                    )
+                }
             ) as session:
                 async with session.patch(
                     URL(url, encoded=True),
