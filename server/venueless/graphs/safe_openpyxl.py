@@ -4,7 +4,11 @@ from inspect import isgenerator
 
 from openpyxl import Workbook
 from openpyxl.cell.cell import (
-    KNOWN_TYPES, TIME_TYPES, TYPE_FORMULA, TYPE_STRING, Cell,
+    KNOWN_TYPES,
+    TIME_TYPES,
+    TYPE_FORMULA,
+    TYPE_STRING,
+    Cell,
 )
 from openpyxl.compat import NUMERIC_TYPES
 from openpyxl.utils import column_index_from_string
@@ -31,7 +35,7 @@ There are mainly two problems this solves:
 ILLEGAL_CHARACTERS_RE = re.compile(
     # From the XML specification
     # Char ::= #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]
-    r'[^\u0020-\uD7FF\u0009\u000A\u000D\uE000-\uFFFD\U00010000-\U0010FFFF]'
+    r"[^\u0020-\uD7FF\u0009\u000A\u000D\uE000-\uFFFD\U00010000-\U0010FFFF]"
 )
 
 
@@ -46,7 +50,7 @@ def remove_invalid_excel_chars(val):
         val = val.decode("utf-8", errors="ignore")
 
     if isinstance(val, str):
-        val = re.sub(ILLEGAL_CHARACTERS_RE, '', val)
+        val = re.sub(ILLEGAL_CHARACTERS_RE, "", val)
 
     return val
 
@@ -80,7 +84,9 @@ class SafeWriteOnlyWorksheet(WriteOnlyWorksheet):
                 filtered_row.append(content)
             else:
                 filtered_row.append(
-                    SafeCell(self, row=1, column=1, value=remove_invalid_excel_chars(content))
+                    SafeCell(
+                        self, row=1, column=1, value=remove_invalid_excel_chars(content)
+                    )
                 )
 
         self._rows.send(filtered_row)
@@ -101,7 +107,12 @@ class SafeWorksheet(Worksheet):
                     cell.column = col_idx
                     cell.row = row_idx
                 else:
-                    cell = SafeCell(self, row=row_idx, column=col_idx, value=remove_invalid_excel_chars(content))
+                    cell = SafeCell(
+                        self,
+                        row=row_idx,
+                        column=col_idx,
+                        value=remove_invalid_excel_chars(content),
+                    )
                 self._cells[(row_idx, col_idx)] = cell
 
         elif isinstance(iterable, dict):
@@ -130,7 +141,9 @@ class SafeWorkbook(Workbook):
 
     def create_sheet(self, title=None, index=None):
         if self.read_only:
-            raise ReadOnlyWorkbookException('Cannot create new sheet in a read-only workbook')
+            raise ReadOnlyWorkbookException(
+                "Cannot create new sheet in a read-only workbook"
+            )
 
         if self.write_only:
             new_ws = SafeWriteOnlyWorksheet(parent=self, title=title)
