@@ -9,7 +9,6 @@ from django.core.files.base import ContentFile
 from django.db.models import Prefetch, Q
 from django.utils.timezone import is_naive, make_aware, now
 from django.utils.translation import override
-from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 
 from venueless.celery_app import app
@@ -17,6 +16,7 @@ from venueless.core.models import Channel, ExhibitorView, PollVote, Room, RoomVi
 from venueless.core.models.world import WorldView
 from venueless.core.tasks import WorldTask
 from venueless.graphs.report import ReportGenerator
+from venueless.graphs.safe_openpyxl import SafeWorkbook
 from venueless.graphs.utils import get_schedule, pretalx_uni18n
 from venueless.storage.models import StoredFile
 
@@ -37,7 +37,7 @@ def generate_report(world, input=None):
 def generate_attendee_list(world, input=None):
     io = BytesIO()
 
-    wb = Workbook(write_only=True)
+    wb = SafeWorkbook(write_only=True)
     ws = wb.create_sheet("Attendees")
     ws.freeze_panes = "A2"
     ws.column_dimensions["A"].width = 40
