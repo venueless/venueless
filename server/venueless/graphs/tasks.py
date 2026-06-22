@@ -90,7 +90,7 @@ def generate_chat_history(world, input=None):
     tz = pytz.timezone(world.timezone)
     io = BytesIO()
 
-    wb = Workbook(write_only=True)
+    wb = SafeWorkbook(write_only=True)
     ws = wb.create_sheet("Messages")
     ws.freeze_panes = "A2"
     ws.column_dimensions["A"].width = 15
@@ -145,7 +145,7 @@ def generate_question_history(world, input=None):
     tz = pytz.timezone(world.timezone)
     io = BytesIO()
 
-    wb = Workbook(write_only=True)
+    wb = SafeWorkbook(write_only=True)
     ws = wb.create_sheet("Questions")
     ws.freeze_panes = "A2"
     ws.column_dimensions["A"].width = 15
@@ -184,7 +184,7 @@ def generate_question_history(world, input=None):
 
 @app.task(base=WorldTask)
 def generate_room_views(world, input=None):
-    wb = Workbook(write_only=True)
+    wb = SafeWorkbook(write_only=True)
     io = BytesIO()
     tz = pytz.timezone(world.timezone)
     begin = dateutil.parser.parse(input.get("begin"))
@@ -267,7 +267,7 @@ def generate_room_views(world, input=None):
 
 @app.task(base=WorldTask)
 def generate_session_views(world, input=None):
-    wb = Workbook(write_only=True)
+    wb = SafeWorkbook(write_only=True)
     io = BytesIO()
     tz = pytz.timezone(world.timezone)
     begin = dateutil.parser.parse(input.get("begin"))
@@ -344,7 +344,7 @@ def generate_session_views(world, input=None):
 
 @app.task(base=WorldTask)
 def generate_views(world, input=None):
-    wb = Workbook(write_only=True)
+    wb = SafeWorkbook(write_only=True)
     io = BytesIO()
     tz = pytz.timezone(world.timezone)
     begin = dateutil.parser.parse(input.get("begin"))
@@ -502,7 +502,7 @@ def generate_poll_history(world, input=None):
     room = Room.objects.get(pk=input.get("room"), world=world)
     io = BytesIO()
 
-    wb = Workbook(write_only=True)
+    wb = SafeWorkbook(write_only=True)
 
     for poll in room.polls.all():
         name = re.sub("[^a-zA-Z0-9 ]", "", poll.content)[:30]
@@ -555,7 +555,7 @@ def generate_attendee_session_list(world, input=None):
     io = BytesIO()
     tz = pytz.timezone(world.timezone)
 
-    wb = Workbook(write_only=True)
+    wb = SafeWorkbook(write_only=True)
 
     header = ["Internal ID", "External ID", "Name", "Duration (minutes)"]
     for f in world.config.get("profile_fields", []):

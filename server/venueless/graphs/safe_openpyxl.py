@@ -3,13 +3,7 @@ import types
 from inspect import isgenerator
 
 from openpyxl import Workbook
-from openpyxl.cell.cell import (
-    KNOWN_TYPES,
-    TIME_TYPES,
-    TYPE_FORMULA,
-    TYPE_STRING,
-    Cell,
-)
+from openpyxl.cell.cell import KNOWN_TYPES, TIME_TYPES, TYPE_FORMULA, TYPE_STRING, Cell
 from openpyxl.compat import NUMERIC_TYPES
 from openpyxl.utils import column_index_from_string
 from openpyxl.utils.exceptions import ReadOnlyWorkbookException
