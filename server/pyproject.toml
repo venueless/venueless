@@ -7,7 +7,7 @@ requires-python = ">=3.14"
 dependencies = [
     "aiofile==3.11.*",
     "aiohttp==3.13.5",
-    "beautifulsoup4==4.14.*",
+    "beautifulsoup4==4.15.*",
     "celery==5.6.*",
     "channels==4.3.*",
     "daphne==4.2.*",
