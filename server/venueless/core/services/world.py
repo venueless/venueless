@@ -258,41 +258,33 @@ def _create_room(data, with_channel=False, permission_preset="public", creator=N
 
 async def create_room(world, data, creator):
     types = {m["type"] for m in data.get("modules", [])}
-    if "chat.native" in types:
-        if not await world.has_permission_async(
-            user=creator, permission=Permission.WORLD_ROOMS_CREATE_CHAT
-        ):
+    required_permission_map = {
+        "chat.native": Permission.WORLD_ROOMS_CREATE_CHAT,
+        "livestream.native": Permission.WORLD_ROOMS_CREATE_STAGE,
+        "call.bigbluebutton": Permission.WORLD_ROOMS_CREATE_VIDEO,
+        "call.digitalsamba": Permission.WORLD_ROOMS_CREATE_VIDEO,
+    }
+
+    for mt, p in required_permission_map.items():
+        if mt in types and not await world.has_permission_async(user=creator, permission=p):
             raise ValidationError(
                 "This user is not allowed to create a room of this type.", code="denied"
             )
+
+    if "chat.native" in types:
         m = [m for m in data.get("modules", []) if m["type"] == "chat.native"][0]
         m["config"] = {"volatile": m.get("config", {}).get("volatile", False)}
+
+    if types == {"chat.native"}:
+        pass
     elif types == {"call.bigbluebutton"}:
-        if not await world.has_permission_async(
-            user=creator, permission=Permission.WORLD_ROOMS_CREATE_VIDEO
-        ):
-            raise ValidationError(
-                "This user is not allowed to create a room of this type.", code="denied"
-            )
         m = [m for m in data.get("modules", []) if m["type"] == "call.bigbluebutton"][0]
         m["config"] = world.config.get("bbb_defaults", {})
         m["config"].pop("secret", None)  # legacy
     elif types == {"call.digitalsamba"}:
-        if not await world.has_permission_async(
-            user=creator, permission=Permission.WORLD_ROOMS_CREATE_VIDEO
-        ):
-            raise ValidationError(
-                "This user is not allowed to create a room of this type.", code="denied"
-            )
         m = [m for m in data.get("modules", []) if m["type"] == "call.digitalsamba"][0]
         m["config"] = world.config.get("digitalsamba_defaults", {})
-    elif "livestream.native" in types:
-        if not await world.has_permission_async(
-            user=creator, permission=Permission.WORLD_ROOMS_CREATE_STAGE
-        ):
-            raise ValidationError(
-                "This user is not allowed to create a room of this type.", code="denied"
-            )
+    elif types.issubset({"livestream.native", "chat.native"}):
         m = [m for m in data.get("modules", []) if m["type"] == "livestream.native"][0]
         m["config"] = {"hls_url": m.get("config", {}).get("hls_url", "")}
     elif types == set():
