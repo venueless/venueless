@@ -638,12 +638,15 @@ wheels = [
 
 [[package]]
 name = "django-decorator-include"
-version = "3.3"
+version = "3.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c0/5c/117a3070f3e9f9b51916c4f38db163e7afe1bb14f1d670e280f62efaf641/django_decorator_include-3.3.tar.gz", hash = "sha256:336f73c403983a5d1bf4da5f19cd114db3a912b9bfc0e69ef1f20ce589828c3e", size = 7040, upload-time = "2025-01-16T15:55:18.496Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/0a/4c/0f43b44bf91f54a584f5245de4c3326b7388dbabf5be1743b33823564b97/django_decorator_include-3.5.tar.gz", hash = "sha256:0929c679ec83ba48574c91b4af1e62edfb8a1fa4b02b70ef6a173ef35f6ca232", size = 7363, upload-time = "2026-06-23T07:32:05.957Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/97/1e/6f95b6ea72801234163ce8aab2089acb948854ced1c7100da10dda805faf/django_decorator_include-3.5-py3-none-any.whl", hash = "sha256:9b766ce4f5c6a1202df6713da419716d3d59919d78990119984366ce2bd0af3a", size = 6018, upload-time = "2026-06-23T07:32:05.004Z" },
+]
 
 [[package]]
 name = "django-extensions"
@@ -2090,7 +2093,7 @@ requires-dist = [
     { name = "daphne", specifier = "==4.2.*" },
     { name = "django", specifier = "==5.2.*" },
     { name = "django-cors-headers", specifier = "==4.9.*" },
-    { name = "django-decorator-include", specifier = "==3.3" },
+    { name = "django-decorator-include", specifier = "==3.5" },
     { name = "django-extensions", specifier = "==4.1" },
     { name = "django-formset-js-improved" },
     { name = "django-multifactor", specifier = "==0.8.7" },

@@ -13,7 +13,7 @@ dependencies = [
     "daphne==4.2.*",
     "channels_redis==4.3.*",
     "django-cors-headers==4.9.*",
-    "django-decorator-include==3.3",
+    "django-decorator-include==3.5",
     "django-extensions==4.1",
     "django-formset-js-improved",
     "django-multifactor==0.8.7",
