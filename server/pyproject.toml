@@ -16,7 +16,7 @@ dependencies = [
     "django-decorator-include==3.5",
     "django-extensions==4.1",
     "django-formset-js-improved",
-    "django-multifactor==0.8.7",
+    "django-multifactor==0.9.3",
     "Django==5.2.*",
     "djangorestframework==3.17.*",
     "emoji==2.15.*",
