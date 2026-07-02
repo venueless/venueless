@@ -266,7 +266,9 @@ async def create_room(world, data, creator):
     }
 
     for mt, p in required_permission_map.items():
-        if mt in types and not await world.has_permission_async(user=creator, permission=p):
+        if mt in types and not await world.has_permission_async(
+            user=creator, permission=p
+        ):
             raise ValidationError(
                 "This user is not allowed to create a room of this type.", code="denied"
             )
