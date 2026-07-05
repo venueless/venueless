@@ -1,7 +1,9 @@
 import datetime as dt
 import json
 
+import aioresponses.core
 import pytest
+from aiohttp import ClientResponse
 from channels.db import database_sync_to_async
 from channels.layers import get_channel_layer
 from django.utils.timezone import now
@@ -18,6 +20,21 @@ from venueless.core.models import (
 )
 from venueless.core.models.world import PlannedUsage
 from venueless.core.utils.redis import flush_aredis_pool
+
+
+class _CompatClientResponse(ClientResponse):
+    # aioresponses (<= 0.7.9) does not pass the stream_writer argument that
+    # aiohttp 3.14 made mandatory. When writer is None, aiohttp only reads
+    # stream_writer.output_size, so a minimal stub is enough.
+    def __init__(self, method, url, **kwargs):
+        class _StubStreamWriter:
+            output_size = 0
+
+        kwargs.setdefault("stream_writer", _StubStreamWriter())
+        super().__init__(method, url, **kwargs)
+
+
+aioresponses.core.ClientResponse = _CompatClientResponse
 
 
 @pytest.fixture(autouse=True)
