@@ -49,7 +49,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "aioresponses==0.7.8",
+    "aioresponses==0.7.9",
     "black",
     "flake8",
     "isort",
