@@ -42,7 +42,7 @@ dependencies = [
     "sentry-sdk==2.64.*",
     "svglib==2.0.*",
     "tqdm==4.68.*",
-    "uvicorn[standard]==0.50.0",
+    "uvicorn[standard]==0.51.0",
     "websockets==16.*",
     "yappi==1.7.6",
 ]
