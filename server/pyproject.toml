@@ -43,7 +43,7 @@ dependencies = [
     "svglib==2.0.*",
     "tqdm==4.70.*",
     "uvicorn[standard]==0.52.0",
-    "websockets==16.*",
+    "websockets==17.*",
     "yappi==1.7.6",
 ]
 
