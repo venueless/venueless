@@ -44,6 +44,8 @@ def start_view(request):
 def return_view(request):
     if not request.session.get("social_linkedin_session"):
         return HttpResponse("Invalid session", status=403)
+    if request.session.get("social_linkedin_state") != request.GET.get("state"):
+        return HttpResponse("Invalid state", status=403)
 
     try:
         r = requests.post(
