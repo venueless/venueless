@@ -18,7 +18,7 @@ dependencies = [
     "django-formset-js-improved",
     "django-multifactor==0.9.3",
     "Django==5.2.*",
-    "djangorestframework==3.17.*",
+    "djangorestframework==3.18.*",
     "emoji==2.15.*",
     "gunicorn==26.0.0",
     "icalendar==7.2.*",
