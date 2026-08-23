@@ -20,7 +20,7 @@ dependencies = [
     "Django==5.2.*",
     "djangorestframework==3.18.*",
     "emoji==2.15.*",
-    "gunicorn==26.0.0",
+    "gunicorn==26.1.0",
     "icalendar==7.2.*",
     "lxml==6.1.*",
     "matplotlib==3.11.*",
