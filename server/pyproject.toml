@@ -56,7 +56,7 @@ dev = [
     "pytest-asyncio==1.4.0",
     "pytest-cov==7.1.0",
     "pytest-django==4.14.0",
-    "pytest-rerunfailures==16.4",
+    "pytest-rerunfailures==16.6",
     "pytest==9.1.1",
 ]
 
