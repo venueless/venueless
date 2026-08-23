@@ -27,7 +27,7 @@ dependencies = [
     "mozilla-django-oidc==5.0.*",
     "numpy==2.5.*",
     "openpyxl~=3.1.5",
-    "orjson==3.11.*",
+    "orjson>=3.11,<3.13",
     "pandas==3.0.*",
     "pdf2image==1.17.*",
     "Pillow==12.2.*",
