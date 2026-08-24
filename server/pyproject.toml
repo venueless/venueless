@@ -40,7 +40,7 @@ dependencies = [
     "reportlab==5.0.*",
     "requests==2.34.*",
     "sentry-sdk>=2.67,<2.69",
-    "svglib==2.1.*",
+    "svglib>=2.1,<2.3",
     "tqdm==4.70.*",
     "uvicorn[standard]==0.52.4",
     "websockets==17.*",
