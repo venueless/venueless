@@ -1849,7 +1849,7 @@ wheels = [
 
 [[package]]
 name = "svglib"
-version = "2.1.0"
+version = "2.2.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cssselect2" },
@@ -1858,9 +1858,9 @@ dependencies = [
     { name = "reportlab" },
     { name = "tinycss2" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d2/62/1abdf43581939a099339a320247d357620106ef3ff76306637f44d18e131/svglib-2.1.0.tar.gz", hash = "sha256:c079bc5fa9e12736b23e7855413320a78afdab54c9492de48ade7bf318187605", size = 1371234, upload-time = "2026-08-01T11:27:59.066Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ca/92/3556caee194b318d7daff8d7bf4a1e16d3fca548f322b6b9bae3bc353897/svglib-2.2.0.tar.gz", hash = "sha256:bde5c5f9b0e091f1e210b8aafdda07a49bd8ebf21c0e90d67383a665c83597ac", size = 1373629, upload-time = "2026-08-14T12:02:25.803Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/07/96/53360b138938b2375e696870cbcc3b956218066d9c89e3956b658314698d/svglib-2.1.0-py3-none-any.whl", hash = "sha256:1c264ef21fe8840083e9c5a6033296d4c644e9d70c3ec42174be05fa5f8fbb9a", size = 49571, upload-time = "2026-08-01T11:27:57.723Z" },
+    { url = "https://files.pythonhosted.org/packages/76/c6/6c1d8b1899be627dada5650a24d8f3cb86a7cd2dd24c59edd1de0cc273e5/svglib-2.2.0-py3-none-any.whl", hash = "sha256:b0f07af5f1c8c77fa4e5788825af9aa4e21e005127997f02031b11edadca96f9", size = 49530, upload-time = "2026-08-14T12:02:24.351Z" },
 ]
 
 [[package]]
@@ -2152,7 +2152,7 @@ requires-dist = [
     { name = "reportlab", specifier = "==5.0.*" },
     { name = "requests", specifier = "==2.34.*" },
     { name = "sentry-sdk", specifier = ">=2.67,<2.69" },
-    { name = "svglib", specifier = "==2.1.*" },
+    { name = "svglib", specifier = ">=2.1,<2.3" },
     { name = "tqdm", specifier = "==4.70.*" },
     { name = "uvicorn", extras = ["standard"], specifier = "==0.52.4" },
     { name = "websockets", specifier = "==17.*" },
