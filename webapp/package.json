@@ -60,7 +60,7 @@
   },
   "devDependencies": {
     "@vite-pwa/assets-generator": "^0.2.4",
-    "@vitejs/plugin-vue": "^5.1.3",
+    "@vitejs/plugin-vue": "^6.0.8",
     "@vue-macros/reactivity-transform": "^0.4.3",
     "@vue/eslint-config-typescript": "^13.0.0",
     "@vue/language-plugin-pug": "^2.2.10",
@@ -76,8 +76,8 @@
     "stylelint-config-standard": "^36.0.0",
     "stylelint-plugin-stylus": "^1.0.0",
     "stylus": "^0.55.0",
-    "vite": "^5.4.19",
-    "vite-plugin-pwa": "^0.19.7",
-    "vite-plugin-static-copy": "^1.0.1"
+    "vite": "^8.1.5",
+    "vite-plugin-pwa": "^1.3.0",
+    "vite-plugin-static-copy": "^4.1.1"
   }
 }
