@@ -35,7 +35,7 @@ dependencies = [
     "pyjwt==2.13.*",
     "python-dateutil==2.9.*",
     "pytz",
-    "pywebpush==2.4.*",
+    "pywebpush>=2.4,<2.6",
     "redis==8.1.0",
     "reportlab==5.0.*",
     "requests==2.34.*",
