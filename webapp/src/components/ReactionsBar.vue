@@ -21,7 +21,7 @@ export default {
 	},
 	computed: {
 		availableReactions () {
-			const emoji = ['👏', '❤️', '👍', '🤣', '😮']
+			const emoji = ['👏', '❤️', '👍', '✊', '🤣', '😮']
 			return emoji.map(e => ({ emoji: e, style: nativeEmojiToStyle(e) }))
 		}
 	},
