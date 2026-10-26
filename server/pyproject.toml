@@ -33,7 +33,7 @@ dependencies = [
     "Pillow==12.2.*",
     "psycopg2-binary==2.9.13",
     "pyjwt>=2.13,<2.16",
-    "python-dateutil==2.9.*",
+    "python-dateutil>=2.9,<3.1",
     "pytz",
     "pywebpush>=2.4,<2.6",
     "redis==8.1.0",
