@@ -19,8 +19,7 @@ from urllib3.util.connection import (
 )
 from urllib3.util.timeout import _DEFAULT_TIMEOUT
 
-
-_cgnat_net = ipaddress.ip_network('100.64.0.0/10')
+_cgnat_net = ipaddress.ip_network("100.64.0.0/10")
 
 
 def monkeypatch_urllib3_ssrf_protection():
@@ -68,7 +67,11 @@ def monkeypatch_urllib3_ssrf_protection():
 
             if not getattr(settings, "ALLOW_HTTP_TO_PRIVATE_NETWORKS", False):
                 ip_addr = ipaddress.ip_address(sa[0])
-                check_ip4 = ip_addr.ipv4_mapped if getattr(ip_addr, "ipv4_mapped", None) else ip_addr
+                check_ip4 = (
+                    ip_addr.ipv4_mapped
+                    if getattr(ip_addr, "ipv4_mapped", None)
+                    else ip_addr
+                )
                 if ip_addr.is_multicast:
                     raise HTTPError(f"Request to multicast address {sa[0]} blocked")
                 if ip_addr.is_loopback or ip_addr.is_link_local:
