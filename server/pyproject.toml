@@ -37,7 +37,7 @@ dependencies = [
     "pytz",
     "pywebpush>=2.4,<2.6",
     "redis==8.1.0",
-    "reportlab==5.0.*",
+    "reportlab>=5.0,<5.2",
     "requests==2.34.*",
     "sentry-sdk>=2.67,<2.73",
     "svglib>=2.1,<2.4",
