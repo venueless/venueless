@@ -68,7 +68,7 @@
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-vue": "^9.26.0",
     "eslint-plugin-vue-pug": "^0.6.2",
-    "i18next-parser": "^4.7.0",
+    "i18next-parser": "^9.3.0",
     "modernizr": "^3.11.3",
     "modernizr-loader": "^1.0.1",
     "pug": "^3.0.3",
