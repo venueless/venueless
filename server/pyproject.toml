@@ -53,7 +53,7 @@ dev = [
     "black",
     "flake8",
     "isort",
-    "pytest-asyncio==1.4.1",
+    "pytest-asyncio==1.4.1.post1",
     "pytest-cov==7.1.0",
     "pytest-django==4.14.0",
     "pytest-rerunfailures==16.7",
