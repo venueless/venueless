@@ -129,7 +129,7 @@ export default {
 			try {
 				const canvas = this.$refs.pdfCanvas
 				const canvasRect = canvas.getBoundingClientRect()
-				const pdf = await pdfjs.getDocument(this.poster.poster_url).promise
+				const pdf = await pdfjs.getDocument({ url: this.poster.poster_url }).promise
 				const page = await pdf.getPage(1)
 				const unscaledViewport = page.getViewport({ scale: 1 })
 				const viewport = page.getViewport({ scale: canvasRect.width / unscaledViewport.width })
