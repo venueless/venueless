@@ -8,7 +8,7 @@ const markdownIt = MarkdownIt({
 	breaks: true,
 	html: true
 })
-markdownIt.linkify.set({ fuzzyLink: true })  // Link bare domains like venueless.org
+markdownIt.linkify.set({ fuzzyLink: true }) // Link bare domains like venueless.org
 
 const DOMPurify = createDOMPurify(window)
 

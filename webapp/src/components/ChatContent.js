@@ -8,7 +8,7 @@ const markdownIt = MarkdownIt('zero', {
 	linkify: true // TODO more tlds
 })
 markdownIt.enable('linkify')
-markdownIt.linkify.set({ fuzzyLink: true })  // Link bare domains like venueless.org
+markdownIt.linkify.set({ fuzzyLink: true }) // Link bare domains like venueless.org
 markdownIt.renderer.rules.link_open = function (tokens, idx, options, env, self) {
 	tokens[idx].attrPush(['target', '_blank'])
 	tokens[idx].attrPush(['rel', 'noopener noreferrer'])
