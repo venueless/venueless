@@ -1,16 +1,15 @@
 version: 2
 updates:
-  # Configuration for npm
-  # - package-ecosystem: npm
-  #   directory: "/webapp"
-  #   schedule:
-  #     interval: daily
-  #   open-pull-requests-limit: 10
-  #   dependency-type: production  # don't update dev dependencies – do we want that?
-  #   ignore:
-  #   - dependency-name: "@babel*"
-  #   - dependency-name: "@vue*"
-  #   - dependency-name: "@eslint*"
+  - package-ecosystem: npm
+    directory: "/webapp"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    groups:
+      webapp-minor-patch:
+        update-types:
+          - minor
+          - patch
   - package-ecosystem: uv
     directory: "/server"
     schedule:
