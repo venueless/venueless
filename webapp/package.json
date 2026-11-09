@@ -39,7 +39,7 @@
     "markdown-it": "^14.3.3",
     "moment": "^2.31.0",
     "moment-timezone": "^0.5.34",
-    "mux-embed": "^3.4.1",
+    "mux-embed": "^5.19.0",
     "mux.js": "^6.3.0",
     "pdfjs-dist": "^4.0.379",
     "preact": "^10.4.7",
