@@ -4,7 +4,7 @@ updates:
     directory: "/webapp"
     schedule:
       interval: weekly
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 50
     groups:
       webapp-minor-patch:
         update-types:
@@ -14,4 +14,9 @@ updates:
     directory: "/server"
     schedule:
       interval: weekly
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 50
+    groups:
+      server-minor-patch:
+        update-types:
+          - minor
+          - patch
