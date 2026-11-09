@@ -63,7 +63,7 @@
     "@vitejs/plugin-vue": "^5.1.3",
     "@vue-macros/reactivity-transform": "^0.4.3",
     "@vue/eslint-config-typescript": "^13.0.0",
-    "@vue/language-plugin-pug": "^2.2.10",
+    "@vue/language-plugin-pug": "^3.3.14",
     "eslint": "^8.57.0",
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-vue": "^9.26.0",
