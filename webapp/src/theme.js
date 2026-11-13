@@ -4,21 +4,25 @@ import Color from 'color'
 import { kebabCase } from 'lodash'
 import config from 'config'
 
-import { normal as normalBlend } from 'color-blend'
+const clamp = (value, max) => Math.min(Math.max(value || 0, 0), max)
 
+// ⁂ "normal" blend of foreground over background, same math and rounding as color-blend@4's normal()
 const blend = function (background, foreground) {
-	const { r, g, b, a } = normalBlend({
-		r: background.red(),
-		g: background.green(),
-		b: background.blue(),
-		a: background.alpha()
-	}, {
-		r: foreground.red(),
-		g: foreground.green(),
-		b: foreground.blue(),
-		a: foreground.alpha()
+	const ba = clamp(background.alpha(), 1)
+	const fa = clamp(foreground.alpha(), 1)
+	const a = clamp(fa + ba - fa * ba, 1)
+	const channel = (bc, fc) => {
+		bc = clamp(bc, 255)
+		fc = clamp(fc, 255)
+		const mixed = (1 - fa / a) * bc + (fa / a) * Math.round((1 - ba) * fc + ba * (fc / 255 * 255))
+		return Math.round(clamp(mixed, 255))
+	}
+	return Color({
+		r: channel(background.red(), foreground.red()),
+		g: channel(background.green(), foreground.green()),
+		b: channel(background.blue(), foreground.blue()),
+		alpha: a
 	})
-	return Color({ r, g, b, alpha: a })
 }
 
 // returns first color with enough (>=4.5) contrast or failing that, the color with the highest contrast
