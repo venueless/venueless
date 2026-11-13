@@ -25,7 +25,7 @@
     "buntpapier": "^2.0.0-alpha.34",
     "color": "^5.0.3",
     "dompurify": "^3.4.17",
-    "emoji-datasource-twitter": "^5.0.1",
+    "emoji-datasource-twitter": "^16.0.0",
     "emoji-mart": "^3.0.0",
     "emoji-regex": "^9.0.0",
     "events": "^3.3.0",
