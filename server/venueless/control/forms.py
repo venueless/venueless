@@ -88,11 +88,11 @@ class SignupForm(PasswordMixin, forms.ModelForm):
 
 
 class ProfileForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput())
+    current_password = forms.CharField(widget=forms.PasswordInput())
     new_password = forms.CharField(widget=forms.PasswordInput(), required=False)
 
-    def clean_password(self):
-        data = self.cleaned_data["password"]
+    def clean_current_password(self):
+        data = self.cleaned_data["current_password"]
         if not self.instance.check_password(data):
             raise forms.ValidationError("Wrong password!")
         return data
@@ -106,7 +106,7 @@ class ProfileForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ("email", "username", "password")
+        fields = ("email", "username")
 
 
 class WorldForm(forms.ModelForm):
