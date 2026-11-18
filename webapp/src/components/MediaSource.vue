@@ -42,7 +42,7 @@ export default {
 			if (!this.room) {
 				return null
 			}
-			return this.room.modules.find(module => ['livestream.native', 'livestream.youtube', 'livestream.iframe', 'call.bigbluebutton', 'call.digitalsamba', 'call.zoom'].includes(module.type))
+			return this.room.modules.find(module => ['livestream.native', 'livestream.youtube', 'livestream.vimeo', 'livestream.iframe', 'call.bigbluebutton', 'call.digitalsamba', 'call.zoom'].includes(module.type))
 		},
 		inRoomManager () {
 			return this.$route.name === 'room:manage'
@@ -104,6 +104,10 @@ export default {
 					}
 					case 'livestream.youtube': {
 						iframeUrl = `https://www.youtube-nocookie.com/embed/${this.module.config.ytid}?${this.autoplay ? 'autoplay=1&' : ''}rel=0&showinfo=0`
+						break
+					}
+					case 'livestream.vimeo': {
+						iframeUrl = `https://vimeo.com/event/${this.module.config.vimeoid}/embed/?dnt=1&vimeo_logo=false${this.autoplay ? '&autoplay=true' : ''}`
 						break
 					}
 				}

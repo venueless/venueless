@@ -144,7 +144,7 @@ export default {
 					})
 				} else if (room.modules.some(module => ['call.bigbluebutton', 'call.digitalsamba', 'call.zoom'].includes(module.type))) {
 					rooms.videoChat.push(room)
-				} else if (room.modules.some(module => ['livestream.native', 'livestream.youtube', 'livestream.iframe'].includes(module.type))) {
+				} else if (room.modules.some(module => ['livestream.native', 'livestream.youtube', 'livestream.vimeo', 'livestream.iframe'].includes(module.type))) {
 					let session
 					if (this.$features.enabled('schedule-control')) {
 						session = this.currentSessionPerRoom?.[room.id]?.session
