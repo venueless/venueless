@@ -286,7 +286,7 @@ async def create_room(world, data, creator):
     elif types == {"call.digitalsamba"}:
         m = [m for m in data.get("modules", []) if m["type"] == "call.digitalsamba"][0]
         m["config"] = world.config.get("digitalsamba_defaults", {})
-    elif types.issubset({"livestream.native", "chat.native"}):
+    elif types.issuperset({"livestream.native", "chat.native"}):
         m = [m for m in data.get("modules", []) if m["type"] == "livestream.native"][0]
         m["config"] = {"hls_url": m.get("config", {}).get("hls_url", "")}
     elif types == set():
