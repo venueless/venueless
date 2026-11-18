@@ -14,6 +14,7 @@
 			bunt-icon-button(@click="deleteAlternativeStream(i)") delete-outline
 		bunt-button(@click="modules['livestream.native'].config.alternatives = modules['livestream.native'].config.alternatives || []; modules['livestream.native'].config.alternatives.push({label: '', hls_url: ''})") Add alternative stream
 	bunt-input(v-else-if="modules['livestream.youtube']", v-model="modules['livestream.youtube'].config.ytid", name="ytid", label="YouTube Video ID", :validation="v$.modules['livestream.youtube'].config.ytid")
+	bunt-input(v-else-if="modules['livestream.vimeo']", v-model="modules['livestream.vimeo'].config.vimeoid", name="vimeoid", label="Vimeo Video ID", :validation="v$.modules['livestream.vimeo'].config.ytid")
 	bunt-input(v-else-if="modules['livestream.iframe']", v-model="modules['livestream.iframe'].config.url", name="iframe-player", label="Iframe player url", hint="iframe player should be autoplaying and support resizing to small sizes for background playing")
 	sidebar-addons(v-bind="$props")
 </template>
@@ -23,11 +24,12 @@ import features from 'features'
 import UploadUrlInput from 'components/UploadUrlInput'
 import mixin from './mixin'
 import SidebarAddons from './SidebarAddons'
-import { youtubeid } from 'lib/validators'
+import { youtubeid, vimeoid } from 'lib/validators'
 
 const STREAM_SOURCE_OPTIONS = [
 	{ id: 'hls', label: 'HLS', module: 'livestream.native' },
-	{ id: 'youtube', label: 'YouTube', module: 'livestream.youtube' }
+	{ id: 'youtube', label: 'YouTube', module: 'livestream.youtube' },
+	{ id: 'vimeo', label: 'Vimeo', module: 'livestream.vimeo' }
 ]
 
 if (features.enabled('iframe-player')) {
@@ -52,6 +54,13 @@ export default {
 						youtubeid: youtubeid('not a valid YouTube video ID (do not supply the full URL)')
 					}
 				}
+			},
+			'livestream.vimeo': {
+				config: {
+					vimeoid: {
+						vimeoid: vimeoid('not a valid Vimeo video ID (do not supply the full URL)')
+					}
+				}
 			}
 		}
 	},
@@ -72,6 +81,8 @@ export default {
 			this.b_streamSource = 'hls'
 		} else if (this.modules['livestream.youtube']) {
 			this.b_streamSource = 'youtube'
+		} else if (this.modules['livestream.vimeo']) {
+			this.b_streamSource = 'vimeo'
 		} else if (this.modules['livestream.iframe']) {
 			this.b_streamSource = 'iframe'
 		}

@@ -25,6 +25,7 @@ export const color = message => helpers.withMessage(message, helpers.regex(/^#([
 // but let's not count on YouTube not changing their format. Our main goal here is to prevent
 // users from entering full URLs.
 export const youtubeid = message => helpers.withMessage(message, helpers.regex(/^[0-9A-Za-z_-]{5,}$/))
+export const vimeoid = message => helpers.withMessage(message, helpers.regex(/^[0-9]{3,}$/))
 
 const relative = helpers.regex(/^\/.*$/)
 const devurl = helpers.regex(/^http:\/\/localhost.*$/) // vuelidate does not allow localhost

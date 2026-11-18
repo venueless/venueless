@@ -1,10 +1,10 @@
 <template lang="pug">
 .c-room(v-if="room", :class="{'standalone-chat': modules['chat.native'] && room.modules.length === 1}")
-	.stage(v-if="modules['livestream.native'] || modules['livestream.youtube'] || modules['livestream.iframe'] || modules['call.digitalsamba']")
+	.stage(v-if="modules['livestream.native'] || modules['livestream.youtube'] || modules['livestream.vimeo'] || modules['livestream.iframe'] || modules['call.digitalsamba']")
 		media-source-placeholder
-		reactions-overlay(v-if="modules['livestream.native'] || modules['livestream.youtube'] || modules['livestream.iframe'] || modules['call.digitalsamba']")
+		reactions-overlay(v-if="modules['livestream.native'] || modules['livestream.vimeo'] || modules['livestream.youtube'] || modules['livestream.iframe'] || modules['call.digitalsamba']")
 		.stage-tool-blocker(v-if="activeStageTool !== null", @click="activeStageTool = null")
-		.stage-tools(v-if="modules['livestream.native'] || modules['livestream.youtube'] || modules['livestream.iframe'] || modules['call.digitalsamba']")
+		.stage-tools(v-if="modules['livestream.native'] || modules['livestream.vimeo'] || modules['livestream.youtube'] || modules['livestream.iframe'] || modules['call.digitalsamba']")
 			reactions-bar(:expanded="true", @expand="activeStageTool = 'reaction'")
 			//- reactions-bar(:expanded="activeStageTool === 'reaction'", @expand="activeStageTool = 'reaction'")
 	media-source-placeholder(v-else-if="modules['call.bigbluebutton'] || modules['call.zoom']")
