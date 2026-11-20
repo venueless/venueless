@@ -57,7 +57,11 @@ def store_image(response, world):  # TODO deduplicate
 
 
 def retrieve_url(url):
-    response = requests.get(url, timeout=10)  # TODO: user agent
+    response = requests.get(
+        url,
+        timeout=10,
+        headers={"User-Agent": "venueless-preview/1.0"},
+    )
     if response.status_code == 200:
         return response
 
