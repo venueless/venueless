@@ -4,6 +4,7 @@ export DJANGO_SETTINGS_MODULE=venueless.settings
 export VENUELESS_DATA_DIR=/data/
 export HOME=/venueless
 export NUM_WORKERS=${VENUELESS_WORKERS:-$((2 * $(nproc --all)))}
+export NUM_CELERY_WORKERS=${VENUELESS_WORKERS:-$(($(nproc --all)))}
 export BINDIR=/opt/venv/bin
 
 if [ ! -d /data/logs ]; then
@@ -19,7 +20,7 @@ if [ "$1" == "all" ]; then
 fi
 
 if [ "$1" == "celery" ]; then
-    exec $BINDIR/celery -A venueless.celery_app worker -l info
+    exec $BINDIR/celery -A venueless.celery_app worker -l info --concurrency $NUM_CELERY_WORKERS
 fi
 
 if [ "$1" == "webworker" ]; then
