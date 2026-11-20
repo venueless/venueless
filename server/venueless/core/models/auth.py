@@ -160,9 +160,9 @@ class User(VersionedModel):
         if self._grant_cache is None:
             self._update_grant_cache()
 
-        roles = self._grant_cache["world"]
+        roles = copy.copy(self._grant_cache["world"])
         if room:
-            roles |= copy.copy(self._grant_cache.get(room.id, set()))
+            roles |= self._grant_cache.get(room.id, set())
         return roles
 
     async def get_role_grants_async(self, room=None):
