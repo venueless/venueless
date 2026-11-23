@@ -5,31 +5,37 @@ from django.test import override_settings
 
 @pytest.mark.django_db
 def test_world_redirect_unauthenticated(world, client):
-    response = client.get("/control/worlds/")
+    response = client.get("/control/worlds/", HTTP_HOST="localhost")
     assert response.status_code == 302
 
 
 @pytest.mark.django_db
 def test_world_allow_unauthenticated_with_secret_key(world, client):
     token = "foobarverysecrettoken"
-    response = client.get(f"/control/worlds/?control_token={token}")
+    response = client.get(
+        f"/control/worlds/?control_token={token}", HTTP_HOST="localhost"
+    )
     assert response.status_code == 302
     with override_settings(CONTROL_SECRET=token):
-        response = client.get(f"/control/worlds/?control_token={token}")
+        response = client.get(
+            f"/control/worlds/?control_token={token}", HTTP_HOST="localhost"
+        )
         assert response.status_code == 200
         assert str(world.id) in response.content.decode()
 
 
 @pytest.mark.django_db
 def test_world_list_shows_worlds(world, staff_client):
-    response = staff_client.get("/control/worlds/")
+    response = staff_client.get("/control/worlds/", HTTP_HOST="localhost")
     assert response.status_code == 200
     assert str(world.id) in response.content.decode()
 
 
 @pytest.mark.django_db
 def test_world_admin_token_redirect(world, staff_client):
-    response = staff_client.get(f"/control/worlds/{world.id}/admin")
+    response = staff_client.get(
+        f"/control/worlds/{world.id}/admin", HTTP_HOST="localhost"
+    )
     assert response.status_code == 302
     location = response.headers["location"]
     assert location.startswith(f"https://{world.domain}/#token=")
@@ -40,7 +46,7 @@ def test_world_admin_token_redirect(world, staff_client):
 @pytest.mark.django_db
 def test_world_calendar(staff_client, planned_usage):
     world = planned_usage.world
-    response = staff_client.get("/control/worlds/calendar")
+    response = staff_client.get("/control/worlds/calendar", HTTP_HOST="localhost")
     assert response.status_code == 200
     assert str(world.id) in response.content.decode()
     content = response.content.decode()
@@ -48,3 +54,16 @@ def test_world_calendar(staff_client, planned_usage):
     assert calendar
     event = calendar.subcomponents[0]
     assert world.domain in event["URL"]
+
+
+@pytest.mark.django_db
+def test_world_list_rejects_wrong_domain(world, staff_client):
+    response = staff_client.get("/control/worlds/", HTTP_HOST="foobar.com")
+    assert response.status_code == 400
+    assert str(world.id) not in response.content.decode()
+
+
+@pytest.mark.django_db
+def test_world_list_ignores_port_in_host(world, staff_client):
+    response = staff_client.get("/control/worlds/", HTTP_HOST="localhost:8000")
+    assert response.status_code == 200
