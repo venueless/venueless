@@ -236,6 +236,7 @@ class AuthModule(BaseModule):
                 raise ValidationError(code="invalid_input")
         except (TypeError, ValidationError):
             await self.consumer.send_error(code="invalid_input")
+            return
         await database_sync_to_async(WebPushClient.objects.update_or_create)(
             endpoint=sub["endpoint"],
             defaults=dict(user=self.consumer.user, subscription=sub),

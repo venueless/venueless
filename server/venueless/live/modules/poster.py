@@ -34,6 +34,7 @@ class PosterModule(BaseModule):
             poster_id=body["poster"], by_user=self.consumer.user
         ):
             await self.consumer.send_error("poster.unknown_poster")
+            return
         await self.consumer.send_success({})
 
     @command("patch")

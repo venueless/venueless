@@ -298,6 +298,27 @@ async def test_register_web_push():
 
 @pytest.mark.asyncio
 @pytest.mark.django_db
+async def test_register_web_push_invalid_sends_only_error():
+    async with world_communicator() as c:
+        await c.send_json_to(["authenticate", {"client_id": "4"}])
+        response = await c.receive_json_from()
+        assert response[0] == "authenticated"
+
+        await c.send_json_to(
+            [
+                "user.web_push.subscribe",
+                123,
+                {"subscription": {"endpoint": "not a url", "keys": {}}},
+            ]
+        )
+        response = await c.receive_json_from()
+        assert response == ["error", 123, {"code": "invalid_input"}], response
+        assert await c.receive_nothing(timeout=0.5)
+        assert await database_sync_to_async(WebPushClient.objects.count)() == 0
+
+
+@pytest.mark.asyncio
+@pytest.mark.django_db
 async def test_auth_with_jwt_token_update_traits(world):
     config = world.config["JWT_secrets"][0]
     iat = datetime.datetime.utcnow()
