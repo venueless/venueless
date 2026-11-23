@@ -18,7 +18,9 @@ class ControlMiddleware:
             if request.path.startswith("/control/"):
                 expected_hostname = urlparse(settings.SITE_URL).hostname
                 if expected_hostname != request.get_host().split(":")[0]:
-                    raise BadRequest(f"Please only call this part on {expected_hostname}")
+                    raise BadRequest(
+                        f"Please only call this part on {expected_hostname}"
+                    )
 
             return super().__call__(request)
 
