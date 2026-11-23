@@ -30,6 +30,12 @@ flake8 *args=py_src:
 eslint *args:
     npx eslint . --ext .js,.ts,.vue {{ args }}
 
+# Fail if webapp/src/locales/en.json is out of date
+[group('linting')]
+[working-directory("webapp")]
+i18n-check:
+    npm run i18n:check
+
 # Format and lint the server (isort runs before black, both rewrite the same files)
 [group('linting')]
 fmt-server: isort black flake8
@@ -46,7 +52,7 @@ fmt-done:
 # Run all code quality checks without changing files
 [group('linting')]
 [parallel]
-check: (isort "--check" py_src) (black "--check" py_src) flake8 eslint && check-done
+check: (isort "--check" py_src) (black "--check" py_src) flake8 eslint i18n-check && check-done
 
 [private]
 check-done:

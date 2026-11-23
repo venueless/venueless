@@ -92,6 +92,7 @@ import { mapGetters } from 'vuex'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from 'lib/validators'
 import api from 'lib/api'
+import errorMessage from 'lib/errorMessage'
 import router from 'router'
 import Avatar from 'components/Avatar'
 import Prompt from 'components/Prompt'
@@ -239,7 +240,7 @@ export default {
 				await api.call('poster.delete', { poster: this.poster.id })
 				this.$router.replace({ name: 'posters' })
 			} catch (error) {
-				this.deleteError = this.$t(`error:${error.code}`)
+				this.deleteError = errorMessage(error)
 			}
 			this.deleting = false
 		}

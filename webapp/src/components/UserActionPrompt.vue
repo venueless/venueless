@@ -16,6 +16,7 @@ prompt.c-user-action-prompt(:class="[`action-${action}`]", @close="$emit('close'
 <script>
 import Prompt from 'components/Prompt'
 import Avatar from 'components/Avatar'
+import errorMessage from 'lib/errorMessage'
 
 export default {
 	components: { Prompt, Avatar },
@@ -63,7 +64,7 @@ export default {
 				setTimeout(() => this.$emit('close'), this.closeDelay)
 			} catch (error) {
 				console.log(error)
-				this.error = this.$t(`error:${error.code}`)
+				this.error = errorMessage(error)
 			}
 			this.loading = false
 		}

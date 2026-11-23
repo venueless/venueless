@@ -9,8 +9,8 @@
     "lint": "npm run lint:eslint",
     "lint:eslint": "eslint . --ext .js,.ts,.vue",
     "lint:eslint:fix": "eslint . --ext .js,.ts,.vue --fix",
-    "i18n:report": "vue-i18n-extract report -v './src/**/*.?(js|vue)' -l './src/locales/*.js'",
-    "i18n:extract": "npx i18next-parser 'src/**/*.vue' -c i18next-parser.config.js",
+    "i18n:extract": "i18next-cli extract",
+    "i18n:check": "i18next-cli extract --ci --dry-run",
     "analyze": "ANALYZE=true npm run build"
   },
   "dependencies": {
@@ -65,7 +65,7 @@
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-vue": "^9.26.0",
     "eslint-plugin-vue-pug": "^0.6.2",
-    "i18next-parser": "^9.4.0",
+    "i18next-cli": "^1.94.0",
     "modernizr": "^3.11.3",
     "modernizr-loader": "^1.0.1",
     "pug": "^3.0.3",

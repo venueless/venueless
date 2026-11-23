@@ -23,6 +23,7 @@
 </template>
 <script>
 import api from 'lib/api'
+import errorMessage from 'lib/errorMessage'
 import Prompt from 'components/Prompt'
 import { inferType } from 'lib/room-types'
 import EditForm from './EditForm'
@@ -65,7 +66,7 @@ export default {
 				await api.call('room.delete', { room: this.config.id })
 				this.$router.replace({ name: 'admin:rooms:index' })
 			} catch (error) {
-				this.deleteError = this.$t(`error:${error.code}`)
+				this.deleteError = errorMessage(error)
 			}
 			this.deleting = false
 		}

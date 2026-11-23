@@ -42,6 +42,7 @@
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import api from 'lib/api'
+import errorMessage from 'lib/errorMessage'
 import { color, required } from 'lib/validators'
 import { inferRoomType } from 'lib/room-types'
 import ColorPicker from 'components/ColorPicker'
@@ -135,7 +136,7 @@ export default {
 				await api.call('user.delete', { id: this.kiosk.id })
 				this.$router.replace({ name: 'admin:kiosks:index' })
 			} catch (error) {
-				this.deleteError = this.$t(`error:${error.code}`)
+				this.deleteError = errorMessage(error)
 			}
 			this.deleting = false
 		}

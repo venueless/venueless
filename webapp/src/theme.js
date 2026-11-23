@@ -6,7 +6,6 @@ import config from 'config'
 
 const clamp = (value, max) => Math.min(Math.max(value || 0, 0), max)
 
-// ⁂ "normal" blend of foreground over background, same math and rounding as color-blend@4's normal()
 const blend = function (background, foreground) {
 	const ba = clamp(background.alpha(), 1)
 	const fa = clamp(foreground.alpha(), 1)

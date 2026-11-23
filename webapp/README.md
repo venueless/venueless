@@ -25,9 +25,10 @@ npm run build
 npm run lint
 ```
 
-### Find missing i18n entries
+### Update translation strings
+Add new strings from the code to `src/locales/en.json` and drop unused ones:
 ```
-npm run i18n:report
+npm run i18n:extract
 ```
 
 ## Folder structure

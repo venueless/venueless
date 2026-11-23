@@ -8,12 +8,12 @@
 			.mdi.mdi-alert-octagon
 			h1 {{ $t('App:fatal-connection-error:connection.replaced:headline') }}
 			bunt-button(@click="reload") {{ $t('App:fatal-connection-error:connection.replaced:action') }}
-		template(v-else-if="['auth.denied', 'auth.invalid_token', 'auth.missing_token', 'auth.expired_token'].includes(fatalConnectionError.code)")
+		template(v-else-if="authErrorTexts(fatalConnectionError.code)")
 			.mdi.mdi-alert-octagon
-			h1 {{ $t('App:fatal-connection-error:' + fatalConnectionError.code + ':headline') }}
+			h1 {{ authErrorTexts(fatalConnectionError.code).headline }}
 				br
-				small {{ $t('App:fatal-connection-error:' + fatalConnectionError.code + ':text') }}
-			bunt-button(v-if="fatalConnectionError.code != 'auth.missing_token'", @click="clearTokenAndReload") {{ $t('App:fatal-connection-error:' + fatalConnectionError.code + ':action') }}
+				small {{ authErrorTexts(fatalConnectionError.code).text }}
+			bunt-button(v-if="authErrorTexts(fatalConnectionError.code).action", @click="clearTokenAndReload") {{ authErrorTexts(fatalConnectionError.code).action }}
 		template(v-else)
 			h1 {{ $t('App:fatal-connection-error:else:headline') }}
 		p.code error code: {{ fatalConnectionError.code }}
@@ -202,6 +202,31 @@ export default {
 		window.removeEventListener('focus', this.onFocus)
 	},
 	methods: {
+		// Can't be computed ($t is not reactive, so a computed would keep stale strings after a locale change)
+		authErrorTexts (code) {
+			switch (code) {
+				case 'auth.denied': return {
+					headline: this.$t('App:fatal-connection-error:auth.denied:headline'),
+					text: this.$t('App:fatal-connection-error:auth.denied:text'),
+					action: this.$t('App:fatal-connection-error:auth.denied:action')
+				}
+				case 'auth.invalid_token': return {
+					headline: this.$t('App:fatal-connection-error:auth.invalid_token:headline'),
+					text: this.$t('App:fatal-connection-error:auth.invalid_token:text'),
+					action: this.$t('App:fatal-connection-error:auth.invalid_token:action')
+				}
+				case 'auth.expired_token': return {
+					headline: this.$t('App:fatal-connection-error:auth.expired_token:headline'),
+					text: this.$t('App:fatal-connection-error:auth.expired_token:text'),
+					action: this.$t('App:fatal-connection-error:auth.expired_token:action')
+				}
+				case 'auth.missing_token': return {
+					headline: this.$t('App:fatal-connection-error:auth.missing_token:headline'),
+					text: this.$t('App:fatal-connection-error:auth.missing_token:text')
+				}
+			}
+			return null
+		},
 		onResize () {
 			this.windowHeight = window.innerHeight
 		},

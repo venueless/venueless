@@ -51,6 +51,7 @@
 // - search
 import { mapState } from 'vuex'
 import api from 'lib/api'
+import errorMessage from 'lib/errorMessage'
 import fuzzysearch from 'lib/fuzzysearch'
 import Avatar from 'components/Avatar'
 
@@ -92,7 +93,7 @@ export default {
 			} catch (error) {
 				user.error = {
 					action,
-					message: this.$t(`error:${error.code}`)
+					message: errorMessage(error)
 				}
 			}
 			user.updating = null
