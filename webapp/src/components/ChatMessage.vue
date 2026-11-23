@@ -41,7 +41,7 @@
 					.description
 						span.users {{ reactionTooltip.usersString }}
 						|  {{ $t('ChatMessage:reaction-tooltip:description', {count: reactionTooltip.count }) }}
-						span.emoji-text &nbsp; {{ getEmojiDataFromNative(reactionTooltip.emoji).short_names[0] }}
+						span.emoji-text(v-if="reactionTooltip.shortcode") &nbsp; {{ reactionTooltip.shortcode }}
 		.actions(v-if="!readonly")
 			emoji-picker-button(strategy="fixed", placement="bottom-end", :offset="[36, 3]", iconStyle="plus", @selected="addReaction")
 			menu-dropdown(v-if="(hasPermission('room:chat.moderate') || message.sender === user.id)", v-model="selected", placement="bottom-end", strategy="fixed", :offset="[0, 3]")
@@ -107,7 +107,6 @@ export default {
 			editing: false,
 			showDeletePrompt: false,
 			reactionTooltip: null,
-			getEmojiDataFromNative,
 			nativeEmojiToStyle
 		}
 	},
@@ -174,10 +173,14 @@ export default {
 		async initReactionTooltip (event, { emoji, users }) {
 			this.reactionTooltip = {
 				emoji,
+				shortcode: null,
 				// TODO 'and you'
 				usersString: users.map(u => this.usersLookup[u]?.profile?.display_name || '???').join(', '),
 				count: users.length
 			}
+			getEmojiDataFromNative(emoji).then(data => {
+				if (data && this.reactionTooltip?.emoji === emoji) this.reactionTooltip.shortcode = data.id
+			})
 			await this.$nextTick()
 			createPopper(event.target, this.$refs.reactionTooltip, {
 				placement: 'top',

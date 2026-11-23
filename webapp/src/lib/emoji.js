@@ -1,7 +1,4 @@
-import data from 'emoji-mart/data/twitter.json'
 import EmojiRegex from 'emoji-regex'
-import { getEmojiDataFromNative as _getEmojiDataFromNative } from 'emoji-mart'
-import { uncompress } from 'emoji-mart/dist-es/utils/data.js'
 import MarkdownIt from 'markdown-it'
 
 import emojiList from 'has-emoji'
@@ -10,11 +7,6 @@ const hasEmoji = emojiList.reduce((acc, emoji) => {
 	acc[emoji] = true
 	return acc
 }, {})
-
-// force uncompress data, because we don't use emoji-mart methods
-if (data.compressed) {
-	uncompress(data)
-}
 
 const emojiRegex = EmojiRegex()
 const splitEmojiRegex = new RegExp(`(${emojiRegex.source})`, 'g')
@@ -39,34 +31,48 @@ export function nativeToOps (string) {
 	})
 }
 
-export function getEmojiDataFromNative (native) {
-	return data.emojis[_getEmojiDataFromNative(native, 'twitter', data).id]
+function twemojiName (codepoints) {
+	codepoints = [...codepoints]
+	while (codepoints.length) {
+		const name = codepoints.join('-')
+		if (hasEmoji[name]) return name
+		const withoutVariation = codepoints.filter(c => c !== 'fe0f').join('-')
+		if (hasEmoji[withoutVariation]) return withoutVariation
+		codepoints.pop()
+	}
+	return '2753'
+}
+
+let emojiDataPromise = null
+let emojiByNative = null
+
+// Load data once; inject the src to avoid CDN load
+export function loadEmojiData () {
+	if (!emojiDataPromise) {
+		emojiDataPromise = import('@emoji-mart/data/sets/15/twitter.json').then(({ default: data }) => {
+			emojiByNative = {}
+			for (const emoji of Object.values(data.emojis)) {
+				for (const skin of emoji.skins) {
+					skin.src = `/emoji/${twemojiName(skin.unified.split('-').map(c => c.replace(/^0+/, '')))}.svg`
+					emojiByNative[skin.native] = emoji
+					emojiByNative[skin.native.replace(/\uFE0F/g, '')] ??= emoji
+				}
+			}
+			return data
+		})
+	}
+	return emojiDataPromise
+}
+
+export async function getEmojiDataFromNative (native) {
+	await loadEmojiData()
+	return emojiByNative[native] ?? emojiByNative[native.replace(/\uFE0F/g, '')] ?? null
 }
 
 export function nativeToStyle (unicodeEmoji) {
 	// maps multi-codepoint emoji like 🇻🇦 / \uD83C\uDDFB\uD83C\uDDE6 => 1f1fb-1f1e6.svg
 	const codepoints = Array.from(unicodeEmoji).map(c => c.codePointAt(0).toString(16))
-	let src
-	// drop modifiers if we don't have the full emoji
-	// for example red heart => heart
-	while (codepoints.length) {
-		// console.log(`../../node_modules/twemoji-emojis/vendor/svg/${codepoints.join('-')}.svg`)
-		// src = new URL(`../../node_modules/twemoji-emojis/vendor/svg/${}.svg`, import.meta.url).href
-		// console.log(new URL(`../../node_modules/twemoji-emojis/vendor/svg/${codepoints.join('-')}.svg`, import.meta.url))
-		const name = codepoints.join('-')
-		if (hasEmoji[name]) {
-			src = `/emoji/${name}.svg`
-			break
-		}
-		codepoints.pop()
-	}
-
-	// if we don't have the emoji, show❓
-	if (!src) {
-		src = require('twemoji-emojis/vendor/svg/2753.svg')
-	}
-
-	return { 'background-image': `url(${src})` }
+	return { 'background-image': `url(/emoji/${twemojiName(codepoints)}.svg)` }
 }
 
 export function markdownEmoji (md) {

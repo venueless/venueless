@@ -41,7 +41,7 @@ export default {
 		viteStaticCopy({
 			targets: [
 				{
-					src: 'node_modules/twemoji-emojis/vendor/svg/*.svg',
+					src: 'node_modules/@twemoji/svg/*.svg',
 					dest: 'emoji'
 				}
 			]
@@ -103,9 +103,6 @@ export default {
 			'~': path.resolve(__dirname, 'src'),
 			config: path.resolve(__dirname, 'config.js'),
 			modernizr$: path.resolve(__dirname, '.modernizrrc'),
-			react: 'preact/compat',
-			'react-dom': 'preact/compat',
-			// 'preact/hooks': 'preact/hooks/dist/hooks.js',
 			// vite doesn't have resolve.modules, hardcode all toplevel paths in src
 			assets: path.resolve(__dirname, 'src/assets'),
 			components: path.resolve(__dirname, 'src/components'),
