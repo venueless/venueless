@@ -40,7 +40,7 @@
 						.emoji(:style="nativeEmojiToStyle(reactionTooltip.emoji)")
 					.description
 						span.users {{ reactionTooltip.usersString }}
-						|  {{ $t('ChatMessage:reaction-tooltip:description', {count: reactionTooltip.usersString.length }) }}
+						|  {{ $t('ChatMessage:reaction-tooltip:description', {count: reactionTooltip.count }) }}
 						span.emoji-text &nbsp; {{ getEmojiDataFromNative(reactionTooltip.emoji).short_names[0] }}
 		.actions(v-if="!readonly")
 			emoji-picker-button(strategy="fixed", placement="bottom-end", :offset="[36, 3]", iconStyle="plus", @selected="addReaction")
@@ -175,7 +175,8 @@ export default {
 			this.reactionTooltip = {
 				emoji,
 				// TODO 'and you'
-				usersString: users.map(u => this.usersLookup[u]?.profile?.display_name || '???').join(', ')
+				usersString: users.map(u => this.usersLookup[u]?.profile?.display_name || '???').join(', '),
+				count: users.length
 			}
 			await this.$nextTick()
 			createPopper(event.target, this.$refs.reactionTooltip, {
