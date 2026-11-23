@@ -34,7 +34,6 @@ const showBrowserBlock = function () {
 		// }
 
 		// load app
-		// eslint-disable-next-line
 		import(/* webpackChunkName: "app" */ './main')
 	} catch (e) {
 		console.error(e)

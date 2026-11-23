@@ -56,12 +56,8 @@ export function renderSvg (random, userProfile, config) {
 				<stop offset="1" stop-color="${secondColor}" />
 			</radialGradient>
 		</defs>	
-		<circle fill="url(#gradient)" cx="${size / 2}" cy="${size / 2}" r="${
-	size / 2
-}"/>
-		<text x="50%" y="50%" style="color: ${textColor};line-height: 1;font-family: ${fontFamily};" alignment-baseline="middle" text-anchor="middle" font-size="${Math.round(
-	size * fontSize
-)}" font-weight="${fontWeight}" dy=".1em" dominant-baseline="middle" fill="${textColor}">${initials}</text>
+		<circle fill="url(#gradient)" cx="${size / 2}" cy="${size / 2}" r="${size / 2}"/>
+		<text x="50%" y="50%" style="color: ${textColor};line-height: 1;font-family: ${fontFamily};" alignment-baseline="middle" text-anchor="middle" font-size="${Math.round(size * fontSize)}" font-weight="${fontWeight}" dy=".1em" dominant-baseline="middle" fill="${textColor}">${initials}</text>
 	</svg>
 	`
 }

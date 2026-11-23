@@ -28,7 +28,7 @@ flake8 *args=py_src:
 [group('linting')]
 [working-directory("webapp")]
 eslint *args:
-    npx eslint . --ext .js,.ts,.vue {{ args }}
+    npx eslint . {{ args }}
 
 # Fail if webapp/src/locales/en.json is out of date
 [group('linting')]
