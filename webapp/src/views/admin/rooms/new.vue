@@ -7,11 +7,11 @@
 	.choose-type(v-if="!type", v-scrollbar.y="")
 		h2 Choose a room type
 		.types
-			router-link.type(v-for="type of ROOM_TYPES", :to="{name: 'admin:rooms:new', params: {type: type.id}}")
-				.icon.mdi(:class="[`mdi-${type.icon}`]")
+			router-link.type(v-for="roomType of ROOM_TYPES", :key="roomType.id", :to="{name: 'admin:rooms:new', params: {type: roomType.id}}")
+				.icon.mdi(:class="[`mdi-${roomType.icon}`]")
 				.text
-					.name {{ type.name }}
-					.description {{ type.description }}
+					.name {{ roomType.name }}
+					.description {{ roomType.description }}
 	edit-form(v-else, :config="config", :creating="true")
 </template>
 <script>

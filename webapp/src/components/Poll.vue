@@ -2,7 +2,7 @@
 .c-poll(:class="[poll.state, {'has-voted': poll.answers, pinned: poll.is_pinned, managing: isManaging}]", :style="{'--total-votes': totalVotes}")
 	.question {{ poll.content }}
 	template(v-if="!isManaging && !poll.answers && poll.state === 'open'")
-		bunt-button.btn-option(v-for="option of poll.options", @click="$store.dispatch('poll/vote', {poll, option})") {{ option.content }}
+		bunt-button.btn-option(v-for="option of poll.options", :key="option.id", @click="$store.dispatch('poll/vote', {poll, option})") {{ option.content }}
 	template(v-else)
 		.option(v-for="option of poll.options", :class="{'most-votes': optionsWithMostVotes.includes(option.id)}")
 			.content

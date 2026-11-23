@@ -3,14 +3,14 @@
 	.combobox(@keyup.enter.prevent="select(selectedIndex)", @keydown.down.prevent="selectNext()", @keydown.up.prevent="selectPrev()")
 		bunt-input(v-model="search", type="search", name="search", :placeholder="placeholder")
 		ul.list(v-scrollbar.y="")
-			li.list__item(v-for="(user, index) in list", :class="{'selected': index == selectedIndex, 'inactive': user.inactive}", @click="select(index)")
-				avatar(:user="user", :size="48")
+			li.list__item(v-for="(result, index) in list", :class="{'selected': index == selectedIndex, 'inactive': result.inactive}", @click="select(index)")
+				avatar(:user="result", :size="48")
 				span.display-name
-					| {{ user ? user.profile.display_name : '' }}
-					span.ui-badge(v-for="badge in user.badges") {{ badge }}
-					span.inactive-label(v-if="user.moderation_state === 'banned'") {{ $t('User:state:banned') }}
-					span.inactive-label(v-else-if="user.moderation_state === 'silenced'") {{ $t('User:state:silenced') }}
-					span.inactive-label(v-else-if="user.inactive") {{ $t('User:state:inactive') }}
+					| {{ result ? result.profile.display_name : '' }}
+					span.ui-badge(v-for="badge in result.badges") {{ badge }}
+					span.inactive-label(v-if="result.moderation_state === 'banned'") {{ $t('User:state:banned') }}
+					span.inactive-label(v-else-if="result.moderation_state === 'silenced'") {{ $t('User:state:silenced') }}
+					span.inactive-label(v-else-if="result.inactive") {{ $t('User:state:inactive') }}
 			li(v-if="!lastPage")
 				infinite-scroll(:loading="loading", @load="page++")
 </template>

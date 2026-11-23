@@ -15,7 +15,7 @@
 			//- v-else ?
 	.questions(v-if="questions && module.config.active", v-scrollbar.y="", :class="{'can-vote': hasPermission('room:question.vote')}")
 		.empty-placeholder(v-if="sortedQuestions.length === 0") {{ $t('Questions:empty-placeholder') }}
-		question(v-for="question of sortedQuestions", :key="question.id", :question="question")
+		question(v-for="q of sortedQuestions", :key="q.id", :question="q")
 </template>
 <script>
 import { mapState, mapGetters } from 'vuex'

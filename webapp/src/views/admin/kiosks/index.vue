@@ -10,7 +10,7 @@
 			.name Name
 			.room Room
 		.tbody(v-if="filteredKiosks", v-scrollbar.y="")
-			router-link.kiosk.table-row(v-for="kiosk of filteredKiosks", :to="{name: 'admin:kiosks:item', params: {kioskId: kiosk.id}}")
+			router-link.kiosk.table-row(v-for="kiosk of filteredKiosks", :key="kiosk.id", :to="{name: 'admin:kiosks:item', params: {kioskId: kiosk.id}}")
 				.name {{ kiosk.profile.display_name }}
 				.room {{ roomsLookup[kiosk.profile.room_id] ? roomsLookup[kiosk.profile.room_id].name : '' }}
 		bunt-progress-circular(v-else, size="huge", :page="true")

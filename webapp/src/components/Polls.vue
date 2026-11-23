@@ -2,7 +2,7 @@
 .c-polls
 	.polls(v-if="polls && module.config.active", v-scrollbar.y="", :class="{'can-vote': hasPermission('room:poll.vote')}")
 		.empty-placeholder(v-if="sortedPolls.length === 0") {{ $t('Poll:empty-placeholder') }}
-		poll(v-for="poll of sortedPolls", :poll="poll", @edit="$emit('edit', poll)")
+		poll(v-for="poll of sortedPolls", :key="poll.id", :poll="poll", @edit="$emit('edit', poll)")
 </template>
 <script>
 import { mapState, mapGetters } from 'vuex'

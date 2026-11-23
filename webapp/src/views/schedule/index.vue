@@ -5,7 +5,7 @@
 		//- 	p timezone:
 		//- 	timezone-changer
 		bunt-tabs.days(v-if="days && days.length > 1", ref="tabs", v-scrollbar.x="", :activeTab="currentDay.toISOString()")
-			bunt-tab(v-for="day in days", :id="day.toISOString()", :header="moment(day).format('dddd DD. MMMM')", @selected="changeDay(day)")
+			bunt-tab(v-for="day in days", :id="day.toISOString()", :key="day.toISOString()", :header="moment(day).format('dddd DD. MMMM')", @selected="changeDay(day)")
 		.scroll-parent(ref="scrollParent", v-scrollbar.x.y="")
 			grid-schedule(
 				v-if="$mq.above['m']",

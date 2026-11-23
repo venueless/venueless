@@ -22,7 +22,7 @@
 						Session(:session="session")
 					template(v-if="nextSessions.length")
 						h3 {{ $t('standalone/Anonymous:schedule:next-sessions') }}
-						Session(v-for="session of nextSessions", :session="session")
+						Session(v-for="nextSession of nextSessions", :key="nextSession.id", :session="nextSession")
 					.no-sessions(v-if="!session && !nextSessions.length") {{ $t('standalone/Anonymous:no-sessions') }}
 			.hint(v-if="activeSidebarTab !== 'schedule' && isAnonymous") {{ $t('standalone/Anonymous:footer-anonymously') }}
 		.no-content(v-else) {{ $t('standalone/Anonymous:no-content') }}

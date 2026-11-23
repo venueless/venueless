@@ -24,7 +24,7 @@
 		rooms-sidebar(:show="$mq.above['l'] || showSidebar || overrideSidebarCollapse", @close="showSidebar = false")
 		router-view(:key="!$route.path.startsWith('/admin') ? $route.fullPath : null", :role="roomHasMedia ? '' : 'main'")
 		//- defining keys like this keeps the playing dom element alive for uninterupted transitions
-		template(v-for="mediaSource of stableMediaSources")
+		template(v-for="(mediaSource, slot) of stableMediaSources", :key="slot")
 			media-source(v-if="mediaSource", v-bind="mediaSource", :ref="(el) => mediaSourceRefs[mediaSource.type] = el")
 		#media-source-iframes
 		notifications(:hasBackgroundMedia="!!backgroundRoom")

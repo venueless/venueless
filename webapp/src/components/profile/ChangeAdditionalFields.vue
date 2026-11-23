@@ -1,7 +1,7 @@
 <!-- eslint-disable vue/no-mutating-props -->
 <template lang="pug">
 .c-additional-fields
-	template(v-for="field of fields")
+	template(v-for="field of fields", :key="field.id")
 		bunt-input(v-if="field.type === 'text'", v-model="modelValue[field.id]", :name="field.label", :label="field.label", :disabled="disabled")
 		bunt-input-outline-container(v-if="field.type === 'textarea'", :label="field.label", :name="field.label", :class="{disabled: disabled}")
 			template(#default="{focus, blur}")

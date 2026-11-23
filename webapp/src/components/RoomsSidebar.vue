@@ -9,14 +9,14 @@ transition(name="sidebar")
 				// eslint-disable-next-line vue/no-v-text-v-html-on-component
 				router-link.room(v-if="roomsByType.page.includes(rooms[0])", :to="{name: 'home'}", v-html="$emojify(rooms[0].name)")
 				router-link.room(v-if="!!world.pretalx && (world.pretalx.url || world.pretalx.domain)", :to="{name: 'schedule'}") {{ $t('RoomsSidebar:schedule:label') }}
-				template(v-for="page of roomsByType.page")
+				template(v-for="page of roomsByType.page", :key="page.id")
 					// eslint-disable-next-line vue/no-v-text-v-html-on-component
 					router-link.room(v-if="page !== rooms[0]", :to="{name: 'room', params: {roomId: page.id}}", v-html="$emojify(page.name)")
 			.group-title#stages-title(v-if="roomsByType.stage.length || hasPermission('world:rooms.create.stage')")
 				span {{ $t('RoomsSidebar:stages-headline:text') }}
 				bunt-icon-button(v-if="hasPermission('world:rooms.create.stage')", @click="showStageCreationPrompt = true") plus
 			.stages(role="group", aria-describedby="stages-title")
-				router-link.stage(v-for="stage of roomsByType.stage", :to="stage.room === rooms[0] ? {name: 'home'} : {name: 'room', params: {roomId: stage.room.id}}", :class="{active: stage.room.id === $route.params.roomId, session: stage.session, live: stage.session && stage.room.schedule_data, 'has-image': stage.image, 'starts-with-emoji': startsWithEmoji(stage.room.name)}")
+				router-link.stage(v-for="stage of roomsByType.stage", :key="stage.room.id", :to="stage.room === rooms[0] ? {name: 'home'} : {name: 'room', params: {roomId: stage.room.id}}", :class="{active: stage.room.id === $route.params.roomId, session: stage.session, live: stage.session && stage.room.schedule_data, 'has-image': stage.image, 'starts-with-emoji': startsWithEmoji(stage.room.name)}")
 					template(v-if="stage.session")
 						img.preview(v-if="stage.image", :src="stage.image")
 						.info
@@ -36,11 +36,11 @@ transition(name="sidebar")
 				bunt-icon-button(v-if="hasPermission('world:rooms.create.chat') || hasPermission('world:rooms.create.bbb')", tooltip="Create Channel", :tooltipFixed="true", @click="showChatCreationPrompt = true") plus
 				bunt-icon-button(v-if="worldHasTextChannels", tooltip="Browse all channels", :tooltipFixed="true", @click="showChannelBrowser = true") compass-outline
 			.chats(role="group", aria-describedby="chats-title")
-				router-link.video-chat(v-for="chat of roomsByType.videoChat", :to="chat === rooms[0] ? {name: 'home'} : {name: 'room', params: {roomId: chat.id}}", :class="{active: chat.id === $route.params.roomId, 'starts-with-emoji': startsWithEmoji(chat.name)}")
+				router-link.video-chat(v-for="chat of roomsByType.videoChat", :key="chat.id", :to="chat === rooms[0] ? {name: 'home'} : {name: 'room', params: {roomId: chat.id}}", :class="{active: chat.id === $route.params.roomId, 'starts-with-emoji': startsWithEmoji(chat.name)}")
 					.room-icon(aria-hidden="true")
 					.name(v-html="$emojify(chat.name)")
 					i.bunt-icon.activity-icon.mdi(v-if="chat.users === 'many' || chat.users === 'few'", v-tooltip.bottom.fixed="{text: $t('RoomsSidebar:users-tooltip:' + chat.users)}", :class="{'mdi-account-group': (chat.users === 'many'), 'mdi-account-multiple': (chat.users === 'few')}", :aria-label="$t('RoomsSidebar:users-tooltip:' + chat.users)")
-				router-link.text-chat(v-for="chat of roomsByType.textChat", :to="chat.room === rooms[0] ? {name: 'home'} : {name: 'room', params: {roomId: chat.room.id}}", :class="{unread: hasUnreadMessages(chat.room.modules[0].channel_id), 'starts-with-emoji': startsWithEmoji(chat.room.name)}")
+				router-link.text-chat(v-for="chat of roomsByType.textChat", :key="chat.room.id", :to="chat.room === rooms[0] ? {name: 'home'} : {name: 'room', params: {roomId: chat.room.id}}", :class="{unread: hasUnreadMessages(chat.room.modules[0].channel_id), 'starts-with-emoji': startsWithEmoji(chat.room.name)}")
 					.room-icon(aria-hidden="true")
 					.name(v-html="$emojify(chat.room.name)")
 					.notifications(v-if="chat.notifications") {{ chat.notifications }}
@@ -50,7 +50,7 @@ transition(name="sidebar")
 				span {{ $t('RoomsSidebar:direct-messages-headline:text') }}
 				bunt-icon-button(v-if="hasPermission('world:chat.direct')", tooltip="open a direct message", :tooltipFixed="true", @click="showDMCreationPrompt = true") plus
 			.direct-messages(role="group", aria-describedby="dm-title")
-				router-link.direct-message(v-for="channel of directMessageChannels", :to="{name: 'channel', params: {channelId: channel.id}}", :class="{unread: hasUnreadMessages(channel.id)}")
+				router-link.direct-message(v-for="channel of directMessageChannels", :key="channel.id", :to="{name: 'channel', params: {channelId: channel.id}}", :class="{unread: hasUnreadMessages(channel.id)}")
 					i.bunt-icon.mdi(v-if="call && call.channel === channel.id", aria-hidden="true").mdi-phone
 					.name {{ getDMChannelName(channel) }}
 					.notifications(v-if="channel.notifications") {{ channel.notifications }}

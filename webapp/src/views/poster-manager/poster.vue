@@ -27,7 +27,7 @@
 						.author(v-for="(author, index) of poster.authors.authors")
 							bunt-input.name(v-model="author.name", name="name", :label="$t('poster-manager/poster:authors:input-name:label')")
 							.orgs
-								bunt-checkbox.org(v-for="(org, index) of poster.authors.organizations", name="org", :modelValue="author.orgs.includes(index)", @update:modelValue="toggleAuthorOrg(author, index)")
+								bunt-checkbox.org(v-for="(org, orgIndex) of poster.authors.organizations", :key="orgIndex", name="org", :modelValue="author.orgs.includes(orgIndex)", @update:modelValue="toggleAuthorOrg(author, orgIndex)")
 							bunt-icon-button(@click="poster.authors.authors.splice(index, 1)") delete-outline
 					bunt-button(@click="addAuthor") {{ $t('poster-manager/poster:btn-add-author') }}
 					h3 {{ $t('poster-manager/poster:organizations:headline') }}

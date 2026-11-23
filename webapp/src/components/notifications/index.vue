@@ -1,8 +1,8 @@
 <template lang="pug">
 .c-notifications(:class="{'has-background-media': hasBackgroundMedia}")
 	notification-permission-notification(v-if="showNotificationPermissionPrompt")
-	contact-request-notification(v-for="contactRequest of openContactRequests", :contactRequest="contactRequest")
-	announcement(v-for="announcement of visibleAnnouncements", :announcement="announcement")
+	contact-request-notification(v-for="contactRequest of openContactRequests", :key="contactRequest.id", :contactRequest="contactRequest")
+	announcement(v-for="announcement of visibleAnnouncements", :key="announcement.id", :announcement="announcement")
 </template>
 <script>
 // TODO

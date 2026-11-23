@@ -11,7 +11,7 @@
 				.text text
 				.show-until show until
 			.tbody(v-scrollbar.y="")
-				router-link.announcement.table-row(v-for="announcement of announcements", :to="{name: 'admin:announcements:item', params: {announcementId: announcement.id}}")
+				router-link.announcement.table-row(v-for="announcement of announcements", :key="announcement.id", :to="{name: 'admin:announcements:item', params: {announcementId: announcement.id}}")
 					.state(:class="[announcement.state, {expired: announcement.expired}]")
 					.text {{ announcement.text }}
 					.show-until {{ announcement.show_until ? announcement.show_until.format('LLL') : '' }}

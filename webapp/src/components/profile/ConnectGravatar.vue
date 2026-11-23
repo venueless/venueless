@@ -13,6 +13,7 @@ import { getHash, getProfile, getAvatarUrl } from 'lib/gravatar'
 
 export default {
 	components: {},
+	emits: ['close', 'setGravatar'],
 	data () {
 		return {
 			email: '',
@@ -21,7 +22,6 @@ export default {
 			gravatarError: null
 		}
 	},
-	emit: ['close', 'set-gravatar'],
 	methods: {
 		async connectGravatar () {
 			this.searchingGravatar = true
@@ -48,7 +48,7 @@ export default {
 				request.addEventListener('load', () => {
 					const response = JSON.parse(request.responseText)
 					output.avatar = { url: response.url }
-					this.$emit('set-gravatar', output)
+					this.$emit('setGravatar', output)
 				})
 			} catch (e) {
 				this.gravatarError = e

@@ -1,7 +1,7 @@
 <template lang="pug">
 .c-reactions-bar(:class="{expanded}")
 	.actions(@click="expand")
-		bunt-icon-button(v-for="reaction of availableReactions", @click.stop="react(reaction.emoji)")
+		bunt-icon-button(v-for="reaction of availableReactions", :key="reaction.emoji", @click.stop="react(reaction.emoji)")
 			.emoji(:style="reaction.style")
 </template>
 <script>

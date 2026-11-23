@@ -4,7 +4,7 @@
 	bunt-progress-circular(v-if="!speakers || !schedule", size="huge", :page="true")
 	scrollbars(v-else, y="")
 		.speakers
-			router-link.speaker(v-for="speaker of speakers", :to="speaker.attendee ? {name: '', params: {}} : { name: 'schedule:speaker', params: { speakerId: speaker.code } }")
+			router-link.speaker(v-for="speaker of speakers", :key="speaker.code", :to="speaker.attendee ? {name: '', params: {}} : { name: 'schedule:speaker', params: { speakerId: speaker.code } }")
 				img.avatar(v-if="speaker.avatar || speaker.avatar_url", :src="speaker.avatar || speaker.avatar_url")
 				identicon(v-else, :user="{id: speaker.name, profile: {display_name: speaker.name}}")
 				.content

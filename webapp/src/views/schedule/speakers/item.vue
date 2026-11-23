@@ -12,6 +12,7 @@
 			h2 {{ $t('schedule/speakers/item:sessions:header') }}
 			session(
 				v-for="session of sessions",
+				:key="session.id",
 				:session="session",
 				:now="now",
 				:faved="favs.includes(session.id)",

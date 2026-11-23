@@ -17,7 +17,7 @@
 				.exhibitions(v-if="exhibitors.length > 0")
 					h3 {{ $t('UserListPage:staffed-exhibitions:text') }}
 					.exhibitors
-						router-link.exhibitor(v-for="exhibitor of exhibitors", :to="{name: 'exhibitor', params: {exhibitorId: exhibitor.id}}")
+						router-link.exhibitor(v-for="exhibitor of exhibitors", :key="exhibitor.id", :to="{name: 'exhibitor', params: {exhibitorId: exhibitor.id}}")
 							img.logo(:src="exhibitor.banner_list ? exhibitor.banner_list : exhibitor.logo", :alt="exhibitor.name")
 							.short-text {{ exhibitor.short_text }}
 							.actions
