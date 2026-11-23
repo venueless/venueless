@@ -9,7 +9,7 @@
 				.button-group
 					bunt-button(:class="{enabled: !showPreview}", @click="showPreview = false") edit
 					bunt-button(:class="{enabled: showPreview}", @click="showPreview = true") preview
-				bunt-button.btn-save(:loading="saving", @click="save") {{ $t('Exhibitors:save:label') }}
+				bunt-button.btn-save(:loading="saving", :errorMessage="saveError", tooltipPlacement="left", @click="save") {{ $t('Exhibitors:save:label') }}
 		exhibitor-preview(v-show="showPreview", :exhibitorProp="exhibitor")
 		.main-form(v-show="!showPreview", v-scrollbar.y="")
 			bunt-input(v-model="exhibitor.name", :disabled="!hasPermission('world:rooms.create.exhibition')", :label="$t('Exhibitors:name:label')", name="name", :validation="v$.exhibitor.name")
@@ -132,6 +132,7 @@ import { useVuelidate } from '@vuelidate/core'
 import { required, maxLength } from 'lib/validators'
 import { helpers } from '@vuelidate/validators'
 import api from 'lib/api'
+import errorMessage from 'lib/errorMessage'
 import router from 'router'
 import Avatar from 'components/Avatar'
 import Prompt from 'components/Prompt'
@@ -154,6 +155,7 @@ export default {
 		return {
 			exhibitor: null,
 			saving: false,
+			saveError: null,
 			error: null,
 			showDeletePrompt: false,
 			showStaffPrompt: false,
@@ -387,33 +389,40 @@ export default {
 			this.v$.$touch()
 			if (this.v$.$invalid) return
 			this.saving = true
+			this.saveError = null
 
 			this.exhibitor.profileLinks.forEach((l, i) => l.sorting_priority = i)
 			this.exhibitor.downloadLinks.forEach((l, i) => l.sorting_priority = i)
 			this.exhibitor.links = [...this.exhibitor.downloadLinks, ...this.exhibitor.profileLinks]
 
-			const exhibitor = (await api.call('exhibition.patch', {
-				id: this.exhibitor.id,
-				name: this.exhibitor.name,
-				tagline: this.exhibitor.tagline,
-				short_text: this.exhibitor.short_text,
-				text_legacy: this.exhibitor.text_legacy || null,
-				text_content: this.exhibitor.text_content,
-				logo: this.exhibitor.logo,
-				banner_list: this.exhibitor.banner_list,
-				banner_detail: this.exhibitor.banner_detail,
-				size: this.exhibitor.size,
-				sorting_priority: this.exhibitor.sorting_priority,
-				room_id: this.exhibitor.room_id,
-				highlighted_room_id: this.exhibitor.highlighted_room_id,
-				social_media_links: this.exhibitor.social_media_links,
-				links: this.exhibitor.links,
-				staff: this.exhibitor.staff,
-				contact_enabled: this.exhibitor.contact_enabled,
-			})).exhibitor
+			let exhibitor
+			try {
+				exhibitor = (await api.call('exhibition.patch', {
+					id: this.exhibitor.id,
+					name: this.exhibitor.name,
+					tagline: this.exhibitor.tagline,
+					short_text: this.exhibitor.short_text,
+					text_legacy: this.exhibitor.text_legacy || null,
+					text_content: this.exhibitor.text_content,
+					logo: this.exhibitor.logo,
+					banner_list: this.exhibitor.banner_list,
+					banner_detail: this.exhibitor.banner_detail,
+					size: this.exhibitor.size,
+					sorting_priority: this.exhibitor.sorting_priority,
+					room_id: this.exhibitor.room_id,
+					highlighted_room_id: this.exhibitor.highlighted_room_id,
+					social_media_links: this.exhibitor.social_media_links,
+					links: this.exhibitor.links,
+					staff: this.exhibitor.staff,
+					contact_enabled: this.exhibitor.contact_enabled,
+				})).exhibitor
+			} catch (error) {
+				this.saveError = errorMessage(error)
+				this.saving = false
+				return
+			}
 			if (this.create) await router.push({ name: 'exhibitors:exhibitor', params: { exhibitorId: exhibitor.id } })
 			this.saving = false
-			// TODO error handling
 		},
 		async deleteExhibitor () {
 			this.deleting = true
@@ -422,7 +431,7 @@ export default {
 				await api.call('exhibition.delete', { exhibitor: this.exhibitorId })
 				this.$router.replace({ name: 'exhibitors' })
 			} catch (error) {
-				this.deleteError = this.$t(`error:${error.code}`)
+				this.deleteError = errorMessage(error)
 			}
 			this.deleting = false
 		}
