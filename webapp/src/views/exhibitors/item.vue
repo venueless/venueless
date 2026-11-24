@@ -304,4 +304,6 @@ export default {
 				padding: 16px 0
 		.sidebar
 			width: auto
+:where(.c-exhibitor .social-media-links .mdi)::before
+	content: "\F0339"
 </style>

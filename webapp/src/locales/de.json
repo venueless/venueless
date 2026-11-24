@@ -375,6 +375,7 @@
   "ChatMessage:poll-message:header": "Neue Umfrage:",
   "standalone/NextSession:header": "Nächste Session",
   "standalone/CurrentSession:header": "Aktuelle Session",
+  "standalone/Viewers:header-empty": "Niemand nimmt online teil",
   "standalone/Viewers:header_one": "Eine Person nimmt online teil",
   "standalone/Viewers:header_other": "{{ count }} Personen nehmen online teil",
   "RoomsSidebar:admin-kiosks:label": "Kioske",

@@ -24,7 +24,7 @@
 					.downloads(v-if="poster.links.length > 0")
 						h3 {{ $t("posters/item:downloads-headline:text") }}
 						a.download(v-for="file in poster.links", :href="file.url", target="_blank")
-							.mdi.mdi-file-pdf-outline(v-if="file.url.toLowerCase().endsWith('pdf')")
+							.mdi.mdi-file-pdf-box(v-if="file.url.toLowerCase().endsWith('pdf')")
 							.filename {{ file.display_text }}
 		template(v-if="$mq.above['1200px'] || activeTab === 'poster'")
 			div.poster.no-pdf(v-if="!poster.poster_url")
