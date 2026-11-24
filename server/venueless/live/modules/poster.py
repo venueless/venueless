@@ -21,7 +21,7 @@ class PosterModule(BaseModule):
             user=self.consumer.user, permission=Permission.WORLD_ROOMS_CREATE_POSTER
         ):
             posters = await self.service.get_all_posters(
-                presenter_includes_user=self.consumer.user, list_format=True
+                presenter_includes_user=self.consumer.user
             )
         else:
             posters = await self.service.get_all_posters()
