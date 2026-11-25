@@ -73,5 +73,10 @@
     "vite": "^5.4.19",
     "vite-plugin-pwa": "^2.0.0",
     "vite-plugin-static-copy": "^1.0.1"
+  },
+  "overrides": {
+    "@pretalx/schedule": {
+      "moment-timezone": "$moment-timezone"
+    }
   }
 }
