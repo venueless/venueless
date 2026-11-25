@@ -9,14 +9,14 @@ import BuntpapierStylus from 'buntpapier/stylus.js'
 
 const stylusOptions = {
 	paths: [
-		path.resolve(__dirname, './src/styles'),
-		'node_modules'
+		path.resolve(import.meta.dirname, './src/styles'),
+		'node_modules',
+		BuntpapierStylus.path
 	],
-	use: [BuntpapierStylus({ implicit: false })],
 	imports: [
 		'buntpapier/buntpapier/index.styl',
-		path.resolve(__dirname, 'src/styles/variables.styl'),
-		path.resolve(__dirname, 'src/styles/themed-buntpapier.styl'),
+		path.resolve(import.meta.dirname, 'src/styles/variables.styl'),
+		path.resolve(import.meta.dirname, 'src/styles/themed-buntpapier.styl'),
 	]
 }
 
@@ -42,7 +42,8 @@ export default {
 			targets: [
 				{
 					src: 'node_modules/@twemoji/svg/*.svg',
-					dest: 'emoji'
+					dest: 'emoji',
+					rename: { stripBase: true }
 				}
 			]
 		}),
@@ -98,35 +99,37 @@ export default {
 	},
 	resolve: {
 		extensions: ['.js', '.json', '.vue'],
-		alias: {
-			lodash: 'lodash-es',
-			'~': path.resolve(__dirname, 'src'),
-			config: path.resolve(__dirname, 'config.js'),
-			modernizr$: path.resolve(__dirname, '.modernizrrc'),
-			// vite doesn't have resolve.modules, hardcode all toplevel paths in src
-			assets: path.resolve(__dirname, 'src/assets'),
-			components: path.resolve(__dirname, 'src/components'),
-			lib: path.resolve(__dirname, 'src/lib'),
-			locales: path.resolve(__dirname, 'src/locales'),
-			router: path.resolve(__dirname, 'src/router'),
-			store: path.resolve(__dirname, 'src/store'),
-			styles: path.resolve(__dirname, 'src/styles'),
-			views: path.resolve(__dirname, 'src/views'),
-			features: path.resolve(__dirname, 'src/features'),
-			i18n: path.resolve(__dirname, 'src/i18n'),
-			theme: path.resolve(__dirname, 'src/theme'),
-			'has-emoji': path.resolve(__dirname, 'build/has-emoji/emoji.json')
-		}
+		alias: [
+			// buntpapier's package main is a webpack CJS build, so we gotta use the ESM source.
+			{ find: /^buntpapier$/, replacement: 'buntpapier/src/index.js' },
+			...Object.entries({
+				lodash: 'lodash-es',
+				'~': path.resolve(import.meta.dirname, 'src'),
+				config: path.resolve(import.meta.dirname, 'config.js'),
+				modernizr$: path.resolve(import.meta.dirname, '.modernizrrc'),
+				// vite doesn't have resolve.modules, hardcode all toplevel paths in src
+				assets: path.resolve(import.meta.dirname, 'src/assets'),
+				components: path.resolve(import.meta.dirname, 'src/components'),
+				lib: path.resolve(import.meta.dirname, 'src/lib'),
+				locales: path.resolve(import.meta.dirname, 'src/locales'),
+				router: path.resolve(import.meta.dirname, 'src/router'),
+				store: path.resolve(import.meta.dirname, 'src/store'),
+				styles: path.resolve(import.meta.dirname, 'src/styles'),
+				views: path.resolve(import.meta.dirname, 'src/views'),
+				features: path.resolve(import.meta.dirname, 'src/features'),
+				i18n: path.resolve(import.meta.dirname, 'src/i18n'),
+				theme: path.resolve(import.meta.dirname, 'src/theme'),
+				'has-emoji': path.resolve(import.meta.dirname, 'build/has-emoji/emoji.json')
+			}).map(([find, replacement]) => ({ find, replacement }))
+		]
 	},
-	// optimizeDeps: {
-	// 	exclude: ['buntpapier'],
-	// 	include: ['buntpapier > fuzzysearch']
-	// },
 	optimizeDeps: {
-		exclude: ['pdfjs-dist', '@pretalx/schedule', '@resvg/resvg-js', '@resvg/resvg-wasm'],
-		// include: ['buntpapier'],
-		esbuildOptions: {
-			target: 'esnext'
+		exclude: ['pdfjs-dist', '@pretalx/schedule', '@resvg/resvg-js', '@resvg/resvg-wasm', 'buntpapier'],
+		include: ['buntpapier > fuzzysearch'],
+		rolldownOptions: {
+			transform: {
+				target: 'esnext'
+			}
 		}
 	},
 	build: {
