@@ -219,6 +219,7 @@ class RoomModule(BaseModule):
             "👏",
             "❤️",
             "👍",
+            "✊",
             "🤣",
             "😮",
         ):
